@@ -320,12 +320,19 @@ body.is-sequencing .site-header {
 
 /* Cleanup pass (inner pages only — every body carries a page class except
    index.html, so this whole block leaves the homepage's transparent
-   overlay header untouched).
-   Use Cases is excluded from the background rule: it already swaps its
-   own header from transparent/light-on-dark-hero to solid via JS
-   (.is-past-hero) and a permanent light band here would wash out that
-   white-on-photo nav text before the swap fires. */
+   overlay header untouched. The homepage's own scroll-jacked hero pins
+   itself relative to the header staying fixed/out-of-flow at document
+   y=0 — un-sticking it there blanks the whole animated hero, so it keeps
+   its fixed header regardless of what inner pages do here).
+   Use Cases is excluded from both rules below: it already swaps its own
+   header from transparent/light-on-dark-hero to solid via JS
+   (.is-past-hero), an effect designed to play out slowly while the
+   header stays pinned — un-sticking it would cut that transition short
+   the moment the header scrolls out of view, and a permanent light
+   background would wash out the white-on-photo nav text before the
+   swap fires either way. */
 body[class]:not(.use-cases-page) .site-header {
+  position: relative;
   background: rgba(255, 255, 255, 0.86);
   backdrop-filter: blur(16px) saturate(160%);
   -webkit-backdrop-filter: blur(16px) saturate(160%);
