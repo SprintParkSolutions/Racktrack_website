@@ -1,0 +1,10 @@
+.DS_Store
+.claude/scheduled_tasks.lock
+.worktrees/
+unused/
+RackTrackWebsiteSuggestions 2.docx
+~$ckTrackWebsiteSuggestions 2.docx
+CLAUDE.md
+PROGRESS.md
+docs/
+node_modules/
