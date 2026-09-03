@@ -299,17 +299,6 @@ body.is-sequencing .site-header {
   color: var(--blue);
 }
 
-/* Small symbol next to each dropdown link, in the same monoline-stroke
-   icon language as About Us's fact icons and Trust & Security's action
-   icons — a real per-item mark, not decoration, matching what the user
-   asked for after seeing meter.com's flyout treatment. */
-.nav-dropdown-icon {
-  flex: none;
-  width: 18px;
-  height: 18px;
-  color: var(--blue);
-}
-
 /* Small down-chevron after "Use Cases" / "Resources" — the only two nav
    labels that carry a .nav-dropdown — so a visitor can tell at a glance
    which top-level items open a flyout before they ever hover one. */
@@ -331,12 +320,7 @@ body.is-sequencing .site-header {
 
 /* Cleanup pass (inner pages only — every body carries a page class except
    index.html, so this whole block leaves the homepage's transparent
-   overlay header untouched). Two pieces:
-   1) a soft frosted band under the fixed header, since a floating
-      transparent nav read as unfinished on plain-background pages.
-   2) a two-column mega-menu treatment for Use Cases / Resources, replacing
-      the single tall column that made Resources' 8 articles scroll past
-      the fold on shorter screens.
+   overlay header untouched).
    Use Cases is excluded from the background rule: it already swaps its
    own header from transparent/light-on-dark-hero to solid via JS
    (.is-past-hero) and a permanent light band here would wash out that
@@ -349,22 +333,25 @@ body[class]:not(.use-cases-page) .site-header {
   box-shadow: 0 12px 30px -18px rgba(16, 32, 51, 0.14);
 }
 
+/* Use Cases / Resources flyouts: a single stacked column, no per-item
+   icons — plain text links, sized and weighted like hamina.com's own nav
+   (16px/400 regular sans), not the site's bolder default menu type. */
 body[class] .nav-dropdown {
-  display: grid;
-  grid-template-columns: repeat(2, minmax(230px, 1fr));
-  gap: 2px 8px;
-  min-width: 460px;
-  max-width: 600px;
-  padding: 14px;
-  border-radius: 18px;
+  display: flex;
+  flex-direction: column;
+  width: max-content;
+  min-width: 300px;
+  max-width: 360px;
+  padding: 10px;
+  border-radius: 16px;
   box-shadow: 0 24px 55px -16px rgba(16, 32, 51, 0.24), 0 4px 14px rgba(16, 32, 51, 0.06);
 }
 
 body[class] .nav-item:nth-of-type(1) .nav-dropdown::before,
 body[class] .nav-item:nth-of-type(2) .nav-dropdown::before {
-  grid-column: 1 / -1;
+  display: block;
   padding: 2px 12px 10px;
-  margin-bottom: 6px;
+  margin-bottom: 4px;
   border-bottom: 1px solid rgba(16, 32, 51, 0.08);
   color: var(--muted);
   font: 700 11px var(--font-mono);
@@ -381,22 +368,9 @@ body[class] .nav-item:nth-of-type(2) .nav-dropdown::before {
 }
 
 body[class] .site-nav .nav-item .nav-dropdown a {
-  padding: 10px 12px;
-}
-
-body[class] .nav-dropdown-icon {
-  width: 32px;
-  height: 32px;
-  padding: 7px;
-  border-radius: 9px;
-  background: rgba(36, 87, 214, 0.08);
-  transition: background 150ms ease, color 150ms ease;
-}
-
-body[class] .site-nav .nav-item .nav-dropdown a:hover .nav-dropdown-icon,
-body[class] .site-nav .nav-item .nav-dropdown a:focus-visible .nav-dropdown-icon {
-  background: var(--blue);
-  color: var(--white);
+  padding: 11px 12px;
+  font-size: 15px;
+  font-weight: 400;
 }
 
 .brand {

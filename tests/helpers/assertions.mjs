@@ -48,8 +48,8 @@ export function assertHeaderNav(document, currentLabel) {
     assert.equal(current[0].textContent.trim(), currentLabel);
   }
 
-  // Use Cases / Resources dropdowns: chevron + one icon per link, per the
-  // nav-icons pass — regression guard for that change specifically.
+  // Use Cases / Resources dropdowns: chevron + plain-text links, single
+  // stacked column (no per-item icons — removed per the plain-text pass).
   const dropdownItems = nav.querySelectorAll(".nav-item");
   assert.equal(dropdownItems.length, 2, "expected exactly 2 dropdown-bearing nav items (Use Cases, Resources)");
   for (const item of dropdownItems) {
@@ -59,7 +59,7 @@ export function assertHeaderNav(document, currentLabel) {
     assert.ok(links.length > 0, "dropdown must have at least one link");
     for (const link of links) {
       const icon = link.querySelector("svg.nav-dropdown-icon");
-      assert.ok(icon, `dropdown link "${link.textContent.trim()}" must have a .nav-dropdown-icon`);
+      assert.ok(!icon, `dropdown link "${link.textContent.trim()}" should not have a .nav-dropdown-icon`);
     }
   }
 

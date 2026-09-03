@@ -15,12 +15,12 @@ test(`sitewide: all ${ALL_PAGES.length} pages found on disk`, () => {
   assert.equal(ALL_PAGES.length, 23, `expected 23 total pages, found ${ALL_PAGES.length}`);
 });
 
-test("sitewide: every page's nav dropdowns have exactly 10 icons + 2 chevrons", () => {
+test("sitewide: every page's nav dropdowns are plain text (no per-item icons) with 2 chevrons", () => {
   for (const rel of ALL_PAGES) {
     const { document } = loadPage(rel);
     const icons = document.querySelectorAll("svg.nav-dropdown-icon");
     const chevrons = document.querySelectorAll("svg.nav-chevron");
-    assert.equal(icons.length, 10, `${rel}: expected 10 nav-dropdown-icon, found ${icons.length}`);
+    assert.equal(icons.length, 0, `${rel}: expected 0 nav-dropdown-icon, found ${icons.length}`);
     assert.equal(chevrons.length, 2, `${rel}: expected 2 nav-chevron, found ${chevrons.length}`);
   }
 });
