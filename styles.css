@@ -5975,10 +5975,32 @@ html:not(.solutions-motion) .surface-grid article { opacity: 1; transform: none;
   min-height: 150px;
 }
 
+/* None of the 6 case-page-clear detail pages carry a .case-hero-visual —
+   the base .case-hero grid (grid-template-columns: 1fr 1fr) leaves the
+   second column empty, stranding the copy in the left half of the hero
+   with a large blank gap on the right. Collapse to a single centered
+   column for these text-only heroes instead. */
+.case-page-clear .case-hero {
+  grid-template-columns: 1fr;
+  justify-items: center;
+  text-align: center;
+}
+
+.case-page-clear .case-hero-copy {
+  max-width: 640px;
+}
+
+/* Closing CTA band: the button previously sat in its own wide 1.15fr
+   column, which — combined with justify-self:start — anchored it to the
+   left edge of THAT column rather than the page, so it read as floating
+   in the middle of the band. Sizing both tracks to content and left-
+   justifying the track set keeps the heading and button as one
+   left-aligned group instead. */
 .case-page-clear .case-cta {
   display: grid;
-  grid-template-columns: .85fr 1.15fr;
-  gap: 5vw;
+  grid-template-columns: max-content max-content;
+  justify-content: start;
+  gap: 48px;
   align-items: end;
   margin-top: 86px;
 }
