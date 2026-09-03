@@ -41,9 +41,8 @@ test("article-why-infrastructure-records-are-wrong.html: top-level sections (art
   ]);
 });
 
-test("article-why-infrastructure-records-are-wrong.html: table of contents and scroll-progress bar are present", () => {
+test("article-why-infrastructure-records-are-wrong.html: table of contents is present", () => {
   assert.ok(document.querySelector(".ap-toc"), "article must have a table of contents");
-  assert.ok(document.querySelector(".ap-progress"), "article must have a scroll-progress bar");
 });
 
 test("article-why-infrastructure-records-are-wrong.html: has related-article links", () => {

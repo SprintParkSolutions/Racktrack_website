@@ -6177,7 +6177,7 @@ html:not(.solutions-motion) .surface-grid article { opacity: 1; transform: none;
 .rs-hero-lede { max-width: 58ch; color: var(--muted); font-size: 18px; line-height: 1.55; }
 
 .rs-featured { padding: 0 0 76px; background: var(--cloud); }
-.rs-field-report { position: relative; display: grid; grid-template-columns: 1.5fr 0.9fr; gap: 56px; background: var(--white); border: 1px solid rgba(16, 32, 51, 0.14); padding: 60px clamp(28px, 4vw, 68px) 52px; }
+.rs-field-report { position: relative; display: grid; grid-template-columns: 1.5fr 0.9fr; align-items: center; gap: 56px; background: var(--white); border: 1px solid rgba(16, 32, 51, 0.14); padding: 60px clamp(28px, 4vw, 68px) 52px; }
 .rs-field-report::before {
   content: "";
   position: absolute;
@@ -6285,8 +6285,6 @@ html:not(.solutions-motion) .surface-grid article { opacity: 1; transform: none;
 .article-page .site-nav a.is-current { color: var(--ink); }
 .article-page .site-nav a.is-current::after { transform: scaleX(1); }
 
-.ap-progress { position: fixed; top: 0; left: 0; right: 0; height: 3px; background: transparent; z-index: 500; }
-.ap-progress-fill { height: 100%; width: 0%; background: var(--blue); transition: width 80ms linear; }
 
 .ap-frame { width: min(1100px, calc(100% - 72px)); margin-inline: auto; }
 

@@ -1,6 +1,6 @@
-// Shared behavior for all Resources article pages: reading progress bar,
-// scroll-reveal on content blocks, and active-section highlighting in the
-// on-page table of contents.
+// Shared behavior for all Resources article pages: scroll-reveal on
+// content blocks, and active-section highlighting in the on-page table
+// of contents.
 
 // Signature page-load moment: the headline's words rise into place staggered,
 // instead of the whole block just appearing.
@@ -12,17 +12,6 @@ if (heading && !reduceMotion) {
     .map((w, i) => `<span class="ap-word" style="animation-delay:${i * 55}ms">${w}</span>`)
     .join(" ");
 }
-
-const fill = document.getElementById("ap-progress-fill");
-function updateProgress() {
-  if (!fill) return;
-  const doc = document.documentElement;
-  const scrollable = doc.scrollHeight - doc.clientHeight;
-  const pct = scrollable > 0 ? (doc.scrollTop / scrollable) * 100 : 0;
-  fill.style.width = `${pct}%`;
-}
-document.addEventListener("scroll", updateProgress, { passive: true });
-updateProgress();
 
 if ("IntersectionObserver" in window) {
   const revealObserver = new IntersectionObserver(

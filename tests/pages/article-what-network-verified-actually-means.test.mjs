@@ -41,9 +41,8 @@ test("article-what-network-verified-actually-means.html: top-level sections (art
   ]);
 });
 
-test("article-what-network-verified-actually-means.html: table of contents and scroll-progress bar are present", () => {
+test("article-what-network-verified-actually-means.html: table of contents is present", () => {
   assert.ok(document.querySelector(".ap-toc"), "article must have a table of contents");
-  assert.ok(document.querySelector(".ap-progress"), "article must have a scroll-progress bar");
 });
 
 test("article-what-network-verified-actually-means.html: has related-article links", () => {

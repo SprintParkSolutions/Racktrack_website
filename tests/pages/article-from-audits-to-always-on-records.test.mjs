@@ -41,9 +41,8 @@ test("article-from-audits-to-always-on-records.html: top-level sections (article
   ]);
 });
 
-test("article-from-audits-to-always-on-records.html: table of contents and scroll-progress bar are present", () => {
+test("article-from-audits-to-always-on-records.html: table of contents is present", () => {
   assert.ok(document.querySelector(".ap-toc"), "article must have a table of contents");
-  assert.ok(document.querySelector(".ap-progress"), "article must have a scroll-progress bar");
 });
 
 test("article-from-audits-to-always-on-records.html: has related-article links", () => {

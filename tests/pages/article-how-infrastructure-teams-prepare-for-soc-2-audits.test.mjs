@@ -41,9 +41,8 @@ test("article-how-infrastructure-teams-prepare-for-soc-2-audits.html: top-level 
   ]);
 });
 
-test("article-how-infrastructure-teams-prepare-for-soc-2-audits.html: table of contents and scroll-progress bar are present", () => {
+test("article-how-infrastructure-teams-prepare-for-soc-2-audits.html: table of contents is present", () => {
   assert.ok(document.querySelector(".ap-toc"), "article must have a table of contents");
-  assert.ok(document.querySelector(".ap-progress"), "article must have a scroll-progress bar");
 });
 
 test("article-how-infrastructure-teams-prepare-for-soc-2-audits.html: has related-article links", () => {
