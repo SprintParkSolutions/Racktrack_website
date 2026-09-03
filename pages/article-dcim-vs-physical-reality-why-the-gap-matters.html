@@ -6,7 +6,7 @@
     <meta name="description" content="DCIM tools model what should be there. Knowing where that model and the real rack disagree helps you fix the right problem." />
     <title>Your DCIM platform shows a plan. The rack shows what's real. | RackTrack</title>
     <link rel="icon" href="../assets/logo.jpg" />
-    <link rel="stylesheet" href="../styles.css?v=article-3-navmenubcd-navicons" />
+    <link rel="stylesheet" href="../styles.css?v=article-3-navmenubcd-navicons-cleanup2" />
     <script type="module" src="../js/article.js?v=3"></script>
     <script defer src="../js/cookie-consent.js"></script>
 </head>
@@ -52,7 +52,7 @@
             <p class="ap-lead">A DCIM platform is a floor plan of your infrastructure. A floor plan is not the building. Both are useful, but only one of them is true right now.</p>
               <section id="what-dcim-models" data-reveal>
                 <h2>What DCIM is actually modeling</h2>
-                <p>DCIM (Data Center Infrastructure Management) tracks the intended layout: what's supposed to sit in each rack slot, how power and cooling are supposed to be allocated. As a planning tool, that's genuinely valuable, right up until “supposed to” quietly becomes “used to.”</p>
+                <p>DCIM (Data Center Infrastructure Management) tracks the intended layout: what's supposed to sit in each rack slot, and how power and cooling are supposed to be allocated. That's useful for planning, but it only stays accurate if every change gets recorded — and in practice, not every change does.</p>
               </section>
 
             <blockquote class="ap-pullquote" data-reveal>&ldquo;DCIM tells you what the data center was designed to look like. It doesn't know what actually happened after installation day.&rdquo;</blockquote>
@@ -79,7 +79,7 @@
 
             <div class="ap-plain" data-reveal>
               <p class="ap-plain-label">In plain terms</p>
-              <p>DCIM is the map. The rack is the territory. When they disagree, the territory always wins. The only question is whether you find that out on a calm Tuesday or during an outage.</p>
+              <p>DCIM shows what should be in the rack. The rack shows what's actually there. When the two disagree, trust the rack — and it's better to find that out during a routine check than during an outage.</p>
             </div>
 
               <section id="using-both" data-reveal>
