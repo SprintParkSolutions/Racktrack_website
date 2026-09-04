@@ -4011,25 +4011,6 @@ html:not(.solutions-motion) .surface-grid article { opacity: 1; transform: none;
 .use-cases-page { --uc-ink: #102033; --uc-blue: #2457d6; --uc-paper: #f5f7fa; --uc-line: rgba(16,32,51,.16); background: var(--uc-paper); color: var(--uc-ink); overflow-x: clip; }
 .use-cases-page .site-nav a.is-current::after { transform: scaleX(1); }
 
-/* The hero photo behind the header is dark, so the default ink-colored
-   brand/nav text disappears into it — flip header text to white/near-white
-   just on this page. */
-.use-cases-page .brand-mark { background: var(--white); transition: background 150ms ease; }
-.use-cases-page .brand-name { color: var(--white); transition: color 150ms ease; }
-.use-cases-page .site-nav a { color: rgba(255, 255, 255, 0.78); }
-.use-cases-page .site-nav a:hover,
-.use-cases-page .site-nav a:focus-visible,
-.use-cases-page .site-nav a.is-current { color: var(--white); }
-
-/* Once the hero scrolls past (js/use-cases.js toggles this on <body> via
-   IntersectionObserver), the fixed nav is sitting on the light --uc-paper
-   body instead — flip it back to dark so it doesn't wash out. */
-.use-cases-page.is-past-hero .brand-mark { background: var(--uc-ink); }
-.use-cases-page.is-past-hero .brand-name { color: var(--uc-ink); }
-.use-cases-page.is-past-hero .site-nav a { color: rgba(16, 32, 51, 0.68); }
-.use-cases-page.is-past-hero .site-nav a:hover,
-.use-cases-page.is-past-hero .site-nav a:focus-visible,
-.use-cases-page.is-past-hero .site-nav a.is-current { color: var(--uc-ink); }
 /* Full-bleed photo behind centered text, like the homepage hero — replaces
    the earlier split layout (text pinned left, photo boxed on the right),
    which read as off-balance/"tilted" rather than a deliberate composition. */
@@ -5149,8 +5130,7 @@ html:not(.solutions-motion) .surface-grid article { opacity: 1; transform: none;
 .cd-hero-inner { width: min(900px, calc(100% - 72px)); margin-inline: auto; }
 .cd-back { display: inline-flex; align-items: center; gap: 8px; color: #9dc0ff; font: 700 11px var(--font-mono); letter-spacing: .1em; text-transform: uppercase; text-decoration: none; }
 .cd-back:hover { color: var(--white); }
-.cd-hero-inner .eyebrow { margin: 26px 0 0; color: #9dc0ff; }
-.cd-hero-inner h1 { margin: 18px 0 22px; max-width: 20ch; color: var(--white); font-family: var(--font-display); font-size: clamp(36px, 3.8vw, 48px); line-height: .98; letter-spacing: -.05em; }
+.cd-hero-inner h1 { margin: 26px 0 22px; max-width: 20ch; color: var(--white); font-family: var(--font-display); font-size: clamp(36px, 3.8vw, 48px); line-height: .98; letter-spacing: -.05em; }
 .cd-hero-lede { max-width: 62ch; color: rgba(255, 255, 255, .8); font-size: 18px; line-height: 1.55; }
 
 .cd-article { padding: 90px 0 0; }
@@ -5158,10 +5138,9 @@ html:not(.solutions-motion) .surface-grid article { opacity: 1; transform: none;
 .cd-layout-solo { grid-template-columns: minmax(0, 1fr); }
 .cd-body > * { max-width: 720px; }
 .cd-body p { margin: 14px 0 0; max-width: 66ch; color: var(--copy-strong); font-size: 18px; line-height: 1.7; }
-.cd-body h2 { max-width: 24ch; margin: 12px 0 0; font-family: var(--font-display); font-size: clamp(26px, 2.4vw, 34px); line-height: 1.12; letter-spacing: -.03em; color: var(--ink); }
+.cd-body h2 { max-width: 24ch; margin: 0; font-family: var(--font-display); font-size: clamp(26px, 2.4vw, 34px); line-height: 1.12; letter-spacing: -.03em; color: var(--ink); }
 .cd-block:not(:first-child) { margin-top: 44px; padding-top: 38px; border-top: 1px solid rgba(16, 32, 51, .12); }
 .cd-block:first-child { padding-top: 4px; }
-.cd-block .eyebrow { margin: 0; }
 
 .cd-fig { margin: 38px auto 0; width: min(1180px, calc(100% - 72px)); }
 .cd-fig img { display: block; width: 100%; height: auto; }
@@ -5171,8 +5150,7 @@ html:not(.solutions-motion) .surface-grid article { opacity: 1; transform: none;
 .cd-scenario p { max-width: 60ch; }
 
 .cd-aside { align-self: start; position: sticky; top: 110px; padding-top: 10px; }
-.cd-aside .eyebrow { margin: 0; }
-.cd-aside ul { list-style: none; margin: 14px 0 0; padding: 0; border-top: 1px solid rgba(16, 32, 51, .12); }
+.cd-aside ul { list-style: none; margin: 0; padding: 0; border-top: 1px solid rgba(16, 32, 51, .12); }
 .cd-aside li { border-bottom: 1px solid rgba(16, 32, 51, .12); }
 .cd-aside a { display: block; padding: 13px 0; color: var(--copy-strong); font-size: 15px; line-height: 1.4; text-decoration: none; }
 .cd-aside a:hover { color: var(--blue); }
@@ -5352,8 +5330,7 @@ html:not(.solutions-motion) .surface-grid article { opacity: 1; transform: none;
 .art-hero { padding: 150px 0 50px; background: var(--cloud); }
 .art-back { display: inline-flex; align-items: center; gap: 6px; color: var(--blue); font: 700 11px var(--font-mono); letter-spacing: .08em; text-transform: uppercase; text-decoration: none; }
 .art-back:hover { color: var(--royal); }
-.art-kicker { margin: 26px 0 0; color: var(--blue); font: 700 11px var(--font-mono); letter-spacing: .13em; text-transform: uppercase; }
-.art-title { margin: 14px 0 0; max-width: 20ch; font-family: var(--font-display); font-size: clamp(36px, 3.8vw, 48px); line-height: 1.02; letter-spacing: -.04em; color: var(--ink); }
+.art-title { margin: 22px 0 0; max-width: 20ch; font-family: var(--font-display); font-size: clamp(36px, 3.8vw, 48px); line-height: 1.02; letter-spacing: -.04em; color: var(--ink); }
 .art-standfirst { margin: 22px 0 0; max-width: 62ch; color: var(--muted); font-size: 18px; line-height: 1.5; }
 
 .art-hero-fig { margin: 0; }
@@ -5365,13 +5342,11 @@ html:not(.solutions-motion) .surface-grid article { opacity: 1; transform: none;
 .art-col { width: min(760px, calc(100% - 72px)); margin-inline: auto; }
 .art-lede { margin: 0; color: var(--ink); font-size: 20px; line-height: 1.6; }
 .art-brief { margin: 34px 0 0; padding: 24px 26px; background: var(--mist); border-left: 3px solid var(--blue); }
-.art-label { margin: 0 0 12px; font: 700 11px var(--font-mono); letter-spacing: .08em; text-transform: uppercase; color: var(--blue); }
 .art-brief ul { margin: 0; padding: 0; list-style: none; display: flex; flex-direction: column; gap: 10px; }
 .art-brief li { position: relative; padding-left: 22px; color: var(--copy-strong); font-size: 16px; line-height: 1.5; }
 .art-brief li::before { content: "\2014"; position: absolute; left: 0; color: var(--blue); font-weight: 700; }
 
 .art-sec { margin-top: 44px; }
-.art-sec .art-label { margin-bottom: 12px; }
 .art-h2 { margin: 0 0 14px; font-family: var(--font-display); font-size: clamp(26px, 2.4vw, 32px); line-height: 1.12; letter-spacing: -.03em; color: var(--ink); }
 .art-sec p { margin: 0; color: var(--copy-strong); font-size: 18px; line-height: 1.72; }
 
