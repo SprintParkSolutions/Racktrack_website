@@ -134,6 +134,8 @@ a {
   top: 0;
   left: 0;
   right: 0;
+  background: var(--white);
+  border-bottom: 1px solid rgba(16, 32, 51, 0.08);
   /* ponytail: bumped from 60 -> 600 and forced its own stacking context.
      Why RackTrack's sticky evidence cards (.why-stack-card, z-index 1-5)
      were painting over this header while pinned mid-scroll even though
@@ -430,7 +432,7 @@ body[class] .site-nav .nav-item .nav-dropdown a {
 
 .brand-name {
   color: var(--ink);
-  font-family: var(--font-display);
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
   font-size: 22px;
   font-weight: 700;
   line-height: 1;
@@ -3792,7 +3794,11 @@ h1 span {
   margin-top: 0;
   margin-bottom: 0;
   display: grid;
-  grid-template-columns: minmax(0, 1fr) minmax(280px, 0.72fr);
+  /* Was minmax(0,1fr) for the heading column — since the heading is only
+     two short <br>-separated lines, that greedy 1fr track left a large
+     dead gap before the paragraph/button column. Sizing it to its own
+     content instead keeps the two columns close together. */
+  grid-template-columns: max-content minmax(280px, 1fr);
   align-items: center;
   gap: 48px;
   padding: 120px clamp(28px, 7vw, 112px);
@@ -4945,9 +4951,9 @@ html:not(.solutions-motion) .surface-grid article { opacity: 1; transform: none;
 }
 
 .solutions-page .workflow-heading h2 {
-  max-width: 10.4ch;
-  font-size: clamp(28px, 2.6vw, 36px);
-  line-height: 0.9;
+  max-width: 12ch;
+  font-size: clamp(34px, 3.4vw, 46px);
+  line-height: 0.95;
 }
 
 .solutions-page .workflow-heading::after {
@@ -5087,7 +5093,7 @@ html:not(.solutions-motion) .surface-grid article { opacity: 1; transform: none;
   }
 
   .solutions-page .workflow-heading h2 {
-    font-size: 36px;
+    font-size: 38px;
   }
 
   .solutions-page .surface-grid {
