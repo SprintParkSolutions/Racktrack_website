@@ -782,12 +782,20 @@ h1 span {
 .sequence-note h2 {
   max-width: 15ch;
   margin: 0;
-  color: var(--blue);
+  color: var(--white);
   font-family: var(--font-display);
   font-size: 44px;
   font-weight: 680;
   letter-spacing: 0;
   line-height: 1.05;
+  text-shadow: 0 2px 18px rgba(16, 32, 51, 0.35);
+}
+
+/* Only the first card (Captured) gets the blue accent title — the rest
+   stay white so the eye lands on the entry point of the sequence, not
+   every beat equally. */
+.sequence-note:first-child h2 {
+  color: var(--blue);
   text-shadow: 0 1px 3px rgba(16, 32, 51, 0.4), 0 2px 22px rgba(255, 255, 255, 0.4);
 }
 
@@ -1870,8 +1878,12 @@ h1 span {
   .sequence-note h2 {
     max-width: 18ch;
     font-size: 32px;
-    color: var(--blue);
+    color: var(--ink);
     text-shadow: none;
+  }
+
+  .sequence-note:first-child h2 {
+    color: var(--blue);
   }
 
   .sequence-note > span {
@@ -4827,6 +4839,15 @@ html:not(.solutions-motion) .surface-grid article { opacity: 1; transform: none;
   pointer-events: auto;
   cursor: default;
   box-shadow: 0 46px 100px rgba(16, 32, 51, 0.24);
+}
+
+/* Cards behind the front one were only blurred (filter: blur on the whole
+   card), which isn't enough to stop their copy text from reading through
+   and visually overlapping the front card's own text. Hide the copy on
+   every card except the front one — the stack still shows a blurred photo
+   peeking out behind it, just no more double-exposed text. */
+.why-deck-card:not(.is-front) .why-deck-copy {
+  opacity: 0;
 }
 
 .why-deck-media {
