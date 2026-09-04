@@ -4159,14 +4159,13 @@ html:not(.solutions-motion) .surface-grid article { opacity: 1; transform: none;
 @media (max-width: 640px) { .solutions-page .schematic-section { margin-top: 80px; width: calc(100% - 30px); } .original-schematic { overflow-x: auto; } .original-schematic img { min-width: 720px; } }
 
 /* Original cabinet reader frame and its source-page spacing. */
-.solutions-page #rack-3d { padding-block: 92px 108px; border-top: 1px solid rgba(16,32,51,.18); }
+.solutions-page #rack-3d { padding-block: 112px 108px; border-top: 1px solid rgba(16,32,51,.18); }
 .solutions-page #rack-3d { --blue: #1a3fd4; --ink: #1a1a1a; --muted: #6f7785; }
 /* Was 1760px — the cabinet reader stretched edge-to-edge and looked
    oversized/cramped rather than spacious. Narrowed to match the schematic
    section above it. */
 .solutions-page #rack-3d > .max-w-container-max-width { width: min(1280px, calc(100% - 64px)); margin-inline: auto; }
 .solutions-page #rack-3d > .max-w-container-max-width > .grid { display: grid; grid-template-columns: minmax(0, 5fr) minmax(0, 6fr); gap: clamp(50px, 8vw, 130px); align-items: end; }
-.solutions-page #rack-3d .eyebrow { margin-bottom: 20px; }
 .solutions-page #rack-3d h2 { max-width: 19ch; margin: 0; font-size: clamp(28px, 2.6vw, 36px); font-weight: 700; line-height: .96; letter-spacing: -.05em; }
 .solutions-page #rack-3d .lede { max-width: 42ch; margin: 0; color: var(--copy-strong); font-size: clamp(16px, 1vw, 18px); line-height: 1.45; }
 .solutions-page #rack-3d .rk-panel { margin-top: 38px; }
