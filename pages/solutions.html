@@ -84,20 +84,19 @@
 <!-- the cabinet is the subject; the four readings run down its left -->
 <figure data-reveal class="rk-panel mt-7 md:mt-8">
 <div class="rk-meta">
-<figcaption class="mono text-[11px] tracking-[0.06em] text-outline">Cabinet DC1-R3</figcaption>
-<span class="mono text-[11px] tracking-[0.06em] text-outline">Sweep verified &middot; 42U</span>
+<figcaption>Cabinet DC1-R3</figcaption>
+<span>Sweep verified &middot; 42U</span>
 </div>
 <div class="rk-split">
 <div class="rk-console">
 <p class="rk-hd">Select a reading</p>
 <div class="rk-controls" role="group" aria-label="Choose what the cabinet shows" id="rk-controls">
-<button type="button" class="rk-btn" data-rk="sweep" aria-pressed="true" aria-controls="rk-stage"><span class="rk-btn-t">Rack sweep</span><span class="rk-btn-k" aria-hidden="true">Reading</span><svg class="rk-chev" viewBox="0 0 12 12" width="11" height="11" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M4.2 2.2 8 6l-3.8 3.8"/></svg><span class="rk-btn-d">Scan the full cabinet from top to bottom.</span></button>
-<button type="button" class="rk-btn" data-rk="ports" aria-pressed="false" aria-controls="rk-stage"><span class="rk-btn-t">Port inspection</span><span class="rk-btn-k" aria-hidden="true">Reading</span><svg class="rk-chev" viewBox="0 0 12 12" width="11" height="11" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M4.2 2.2 8 6l-3.8 3.8"/></svg><span class="rk-btn-d">Detect switch ports, patch panels and device rows.</span></button>
-<button type="button" class="rk-btn" data-rk="leds" aria-pressed="false" aria-controls="rk-stage"><span class="rk-btn-t">Live LEDs</span><span class="rk-btn-k" aria-hidden="true">Reading</span><svg class="rk-chev" viewBox="0 0 12 12" width="11" height="11" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M4.2 2.2 8 6l-3.8 3.8"/></svg><span class="rk-btn-d">Read active links, blinking status and availability.</span></button>
-<button type="button" class="rk-btn" data-rk="cables" aria-pressed="false" aria-controls="rk-stage"><span class="rk-btn-t">Cable trace</span><span class="rk-btn-k" aria-hidden="true">Reading</span><svg class="rk-chev" viewBox="0 0 12 12" width="11" height="11" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M4.2 2.2 8 6l-3.8 3.8"/></svg><span class="rk-btn-d">Follow visible cable paths and rack connectivity.</span></button>
+<button type="button" class="rk-btn" data-rk="sweep" aria-pressed="true" aria-controls="rk-stage"><span class="rk-btn-t">Rack sweep</span><span class="rk-btn-k" aria-hidden="true">Reading</span><svg class="rk-chev" viewBox="0 0 12 12" width="11" height="11" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M4.2 2.2 8 6l-3.8 3.8"/></svg></button>
+<button type="button" class="rk-btn" data-rk="ports" aria-pressed="false" aria-controls="rk-stage"><span class="rk-btn-t">Port inspection</span><span class="rk-btn-k" aria-hidden="true">Reading</span><svg class="rk-chev" viewBox="0 0 12 12" width="11" height="11" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M4.2 2.2 8 6l-3.8 3.8"/></svg></button>
+<button type="button" class="rk-btn" data-rk="leds" aria-pressed="false" aria-controls="rk-stage"><span class="rk-btn-t">Live LEDs</span><span class="rk-btn-k" aria-hidden="true">Reading</span><svg class="rk-chev" viewBox="0 0 12 12" width="11" height="11" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M4.2 2.2 8 6l-3.8 3.8"/></svg></button>
+<button type="button" class="rk-btn" data-rk="cables" aria-pressed="false" aria-controls="rk-stage"><span class="rk-btn-t">Cable trace</span><span class="rk-btn-k" aria-hidden="true">Reading</span><svg class="rk-chev" viewBox="0 0 12 12" width="11" height="11" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M4.2 2.2 8 6l-3.8 3.8"/></svg></button>
 </div>
-<div class="rk-band" aria-hidden="true"></div>
-<p class="rk-read mono text-[11px] tracking-[0.06em] text-outline" id="rk-read" role="status">Reading the cabinet top to bottom. Each device registers as the sweep passes it.</p>
+<p class="rk-read" id="rk-read" role="status">Reading the cabinet top to bottom. Each device registers as the sweep passes it.</p>
 </div>
 <div class="rk-stage" id="rk-stage" data-mode="sweep">
 <div class="rk-scene">

@@ -4,6 +4,9 @@
             background: #fff; }
         .rk-meta { display: flex; align-items: baseline; justify-content: space-between;
             gap: 16px; padding: 11px 16px; border-bottom: 1px solid var(--hair); }
+        .rk-meta figcaption { font-size: 14px; font-weight: 600; color: var(--ink); }
+        .rk-meta span { font-family: 'Geist Mono', ui-monospace, SFMono-Regular, Menlo, monospace;
+            font-size: 11px; letter-spacing: .07em; text-transform: uppercase; color: var(--muted); }
         .rk-split { display: grid; grid-template-columns: 40% 60%; }
 
         /* left: the four readings you can ask the cabinet for */
@@ -38,15 +41,12 @@
             font-size: 12px; letter-spacing: .07em; color: var(--muted);
             opacity: 0; transition: opacity .25s ease; }
         .rk-btn[aria-pressed="true"] .rk-btn-k { opacity: 1; color: var(--blue); }
-        /* only the pressed control's description shows, in the band under the stack */
-        .rk-btn-d { position: absolute; left: 0; right: 0; bottom: 66px; height: 60px;
-            display: flex; align-items: center; padding: 0 16px;
-            font-size: 16px; line-height: 1.5; color: var(--muted);
-            opacity: 0; pointer-events: none; transition: opacity .25s ease; }
-        .rk-btn[aria-pressed="true"] .rk-btn-d { opacity: 1; }
-        .rk-band { height: 60px; border-top: 1px solid var(--hair); }
-        .rk-read { display: flex; align-items: center; height: 66px; padding: 0 16px;
-            border-top: 1px solid var(--hair); text-align: left; line-height: 1.55; }
+        /* Single description band, driven by JS per selected reading — used to
+           be duplicated with an identical CSS-toggled .rk-btn-d band underneath
+           each button, which just repeated the same sentence a second time. */
+        .rk-read { display: flex; align-items: center; min-height: 56px; padding: 14px 16px;
+            border-top: 1px solid var(--hair); text-align: left;
+            font-size: 14.5px; line-height: 1.55; color: var(--muted); }
         /* ── the cabinet: a box with real depth, not a tilted picture ───── */
         .rk-stage { --u1: 9px; --D: 92px; --rail: 18px; --proud: 10px;
             position: relative; overflow: hidden;
@@ -354,8 +354,7 @@
             .rk-console { border-right: 0; border-bottom: 1px solid var(--hair); }
             .rk-tilt { transform: none; width: 100%; max-width: 270px; }
             .rk-rack { animation: none; }
-            .rk-band { display: none; }
-            .rk-read { height: auto; min-height: 0; padding: 14px 16px; display: block; }
+            .rk-read { min-height: 0; padding: 14px 16px; display: block; }
             .rk-stage { padding: 14px 12px 20px; --u1: 8px; }
             .rk-scene { perspective: none; padding: 0; }
             .rk-rack { transform: none; }
@@ -363,10 +362,7 @@
             .rk-rail-l::after { display: none; }
             .rk-rail, .rk-slot, .rk-scan, .rk-cables { transform: none; }
             .rk-slot { min-height: 40px; }
-            /* each control carries its own line again */
             .rk-btn { padding: 12px 13px 13px; }
-            .rk-btn-d { position: static; grid-column: 1 / -1; height: auto; display: block;
-                padding: 3px 0 0; opacity: 1; font-size: 16px; }
         }
 
         @media (prefers-reduced-motion: reduce) {
