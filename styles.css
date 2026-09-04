@@ -130,7 +130,7 @@ a {
 }
 
 .site-header {
-  position: fixed;
+  position: relative;
   top: 0;
   left: 0;
   right: 0;
@@ -1682,6 +1682,23 @@ h1 span {
     background: var(--cloud);
     overflow-y: auto;
     pointer-events: auto;
+  }
+
+  /* .site-nav's position:fixed above is supposed to cover the full
+     viewport, but several page-specific rules give .site-header its own
+     backdrop-filter (body[class]:not(.use-cases-page) .site-header) or
+     transform (body.is-sequencing .site-header on the homepage) — both
+     create a new containing block for fixed-position descendants, which
+     collapses the "full-screen" nav panel down to the header's own small
+     box instead of the viewport, letting the page show through beneath
+     it. Strip both back off .site-header while the menu is open so
+     .site-nav always escapes to the true viewport, on every page. */
+  .site-header:has(.nav-toggle-input:checked) {
+    position: fixed !important;
+    opacity: 1 !important;
+    transform: none !important;
+    backdrop-filter: none !important;
+    -webkit-backdrop-filter: none !important;
   }
 
   /* Every top-level row (plain links AND the two dropdown-bearing
@@ -5221,7 +5238,9 @@ html:not(.solutions-motion) .surface-grid article { opacity: 1; transform: none;
 .rs-hero-inner h1 em { color: #9dc0ff; font-style: normal; }
 .rs-hero-lede { max-width: 58ch; color: rgba(255, 255, 255, .78); font-size: 18px; line-height: 1.55; }
 
-.rs-featured { padding: 0 0 76px; background: var(--cloud); }
+.rs-featured { padding: 72px 0 76px; background: var(--cloud); }
+.rs-featured-head h2 { font-family: var(--font-display); font-size: clamp(28px, 2.6vw, 36px); letter-spacing: -0.03em; margin: 0 0 12px; max-width: 20ch; color: var(--ink); }
+.rs-featured-head p { max-width: 60ch; color: var(--muted); font-size: 16px; line-height: 1.5; margin: 0 0 32px; }
 
 /* Full-bleed featured-article card: photo + dark veil behind overlaid copy
    and a stat panel, matching the source project's editorial "feat" card. */
@@ -5253,7 +5272,8 @@ html:not(.solutions-motion) .surface-grid article { opacity: 1; transform: none;
 
 .rs-catalog { padding: 0 0 90px; background: var(--white); }
 .rs-catalog-head h2 { font-family: var(--font-display); font-size: clamp(28px, 2.6vw, 36px); letter-spacing: -0.03em; margin: 0 0 12px; color: var(--ink); }
-.rs-catalog-head p { color: var(--muted); font-size: 16px; margin: 0 0 40px; }
+.rs-catalog-head p { max-width: 60ch; color: var(--muted); font-size: 16px; line-height: 1.5; margin: 0 0 8px; }
+.rs-catalog-head p:last-of-type { margin-bottom: 40px; }
 
 .rs-catalog-controls { display: flex; flex-wrap: wrap; align-items: flex-end; justify-content: space-between; gap: 16px; border-bottom: 1px solid rgba(16, 32, 51, 0.2); }
 .rs-drawer-tabs { display: flex; flex-wrap: wrap; gap: 2px; }
