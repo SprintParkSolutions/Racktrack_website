@@ -63,7 +63,7 @@ test("solutions.html: Six Surfaces workflow deck has 6 cards", () => {
   assert.equal(cards.length, 6, `expected 6 intelligence-surface cards, found ${cards.length}`);
 });
 
-test("solutions.html: hero has its two entry-point actions", () => {
+test("solutions.html: hero has a single entry-point action", () => {
   const actions = document.querySelectorAll(".solutions-hero-actions a");
-  assert.ok(actions.length >= 2, "hero must offer at least 2 ways into the page (process / rack reader)");
+  assert.equal(actions.length, 1, "hero was simplified to one CTA button, per the hamina.com-style redesign");
 });
