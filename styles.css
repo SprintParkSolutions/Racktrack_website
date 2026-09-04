@@ -522,7 +522,7 @@ h1 {
   margin: 0;
   color: var(--ink);
   font-family: var(--font-display);
-  font-size: 68px;
+  font-size: 48px;
   font-weight: 720;
   letter-spacing: 0;
   line-height: 1.02;
@@ -683,36 +683,34 @@ h1 span {
   margin: 0 0 clamp(36px, 6vh, 64px) clamp(18px, 4vw, 64px);
   grid-template-columns: repeat(3, 1fr);
   overflow: hidden;
-  border: 1px solid rgba(217, 231, 246, 0.76);
+  border: 1px solid rgba(16, 32, 51, 0.1);
   border-radius: var(--radius-md);
-  background: rgba(255, 255, 255, 0.58);
-  box-shadow: 0 18px 52px rgba(42, 76, 119, 0.08);
-  backdrop-filter: blur(20px) saturate(160%);
-  -webkit-backdrop-filter: blur(20px) saturate(160%);
+  background: var(--white);
+  box-shadow: 0 8px 24px rgba(16, 32, 51, 0.05);
   opacity: var(--intro-opacity, 1);
   transition: opacity 200ms linear;
 }
 
 .proof-panel div {
-  padding: 16px 18px;
+  padding: 18px 20px;
 }
 
 .proof-panel div + div {
-  border-left: 1px solid rgba(217, 231, 246, 0.78);
+  border-left: 1px solid rgba(16, 32, 51, 0.1);
 }
 
 .proof-panel span {
   display: block;
-  color: var(--ink);
+  color: var(--blue);
   font-family: var(--font-mono);
-  font-size: 18px;
+  font-size: 19px;
   font-weight: 700;
 }
 
 .proof-panel p {
-  margin: 5px 0 0;
-  color: var(--copy-strong);
-  font-size: 13px;
+  margin: 4px 0 0;
+  color: var(--muted);
+  font-size: 12.5px;
   font-weight: 500;
 }
 
@@ -789,22 +787,23 @@ h1 span {
 .sequence-note h2 {
   max-width: 15ch;
   margin: 0;
-  color: var(--white);
+  color: var(--blue);
   font-family: var(--font-display);
-  font-size: 30px;
+  font-size: 36px;
   font-weight: 680;
   letter-spacing: 0;
-  line-height: 1;
-  text-shadow: 0 2px 18px rgba(16, 32, 51, 0.35);
+  line-height: 1.05;
+  text-shadow: 0 1px 3px rgba(16, 32, 51, 0.4), 0 2px 22px rgba(255, 255, 255, 0.4);
 }
 
 .sequence-note > span {
   display: block;
   max-width: 36ch;
   margin-top: 10px;
-  color: rgba(255, 255, 255, 0.82);
-  font-size: 14px;
-  line-height: 1.4;
+  color: rgba(255, 255, 255, 0.9);
+  font-size: 15px;
+  line-height: 1.45;
+  text-shadow: 0 1px 3px rgba(16, 32, 51, 0.35);
 }
 
 .story-bridge {
@@ -1381,6 +1380,42 @@ h1 span {
   display: none;
 }
 
+/* Homepage closing CTA — centered, minimal, sized to sit under the
+   reduced 48px hero scale rather than the old 64px display type. */
+.home-cta {
+  padding: 96px 6vw;
+  background: #dfeafa;
+  color: var(--ink);
+  text-align: center;
+}
+
+.home-cta h2 {
+  margin: 0 auto;
+  max-width: 16ch;
+  font-family: var(--font-display);
+  font-size: clamp(32px, 3.6vw, 44px);
+  font-weight: 720;
+  line-height: 1.08;
+}
+
+.home-cta p {
+  margin: 16px auto 30px;
+  max-width: 46ch;
+  color: var(--muted);
+  font-size: 17px;
+  line-height: 1.5;
+}
+
+@media (max-width: 640px) {
+  .home-cta {
+    padding: 64px 24px;
+  }
+
+  .home-cta p {
+    font-size: 16px;
+  }
+}
+
 @media (prefers-reduced-motion: reduce) {
   *,
   *::before,
@@ -1502,7 +1537,7 @@ h1 span {
 
   h1 {
     max-width: 520px;
-    font-size: 58px;
+    font-size: 44px;
     line-height: 1.04;
   }
 
@@ -1766,7 +1801,7 @@ h1 span {
 
   h1 {
     max-width: 12ch;
-    font-size: 50px;
+    font-size: 40px;
     line-height: 1.02;
   }
 
@@ -1839,14 +1874,14 @@ h1 span {
 
   .sequence-note h2 {
     max-width: 18ch;
-    font-size: 23px;
-    color: var(--ink);
+    font-size: 27px;
+    color: var(--blue);
     text-shadow: none;
   }
 
   .sequence-note > span {
     max-width: 42ch;
-    font-size: 13px;
+    font-size: 14px;
     color: var(--muted);
   }
 
@@ -2053,7 +2088,7 @@ h1 span {
   }
 
   h1 {
-    font-size: 38px;
+    font-size: 34px;
     line-height: 1.04;
   }
 
@@ -2068,11 +2103,11 @@ h1 span {
   }
 
   .sequence-note h2 {
-    font-size: 21px;
+    font-size: 24px;
   }
 
   .sequence-note > span {
-    font-size: 12.5px;
+    font-size: 13px;
   }
 
   .bridge-card-deck {
