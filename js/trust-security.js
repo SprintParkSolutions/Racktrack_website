@@ -19,16 +19,6 @@ const canHover = window.matchMedia("(hover: hover) and (pointer: fine)").matches
 const gsapReady = typeof window.gsap !== "undefined" && typeof window.ScrollTrigger !== "undefined";
 if (gsapReady) window.gsap.registerPlugin(window.ScrollTrigger);
 
-// ---- Console readout: stagger the status lines in on load. ----
-const consoleLines = document.querySelectorAll("[data-console] .tsec-console-lines li");
-if (reduceMotion) {
-  consoleLines.forEach((line) => line.classList.add("is-in"));
-} else {
-  consoleLines.forEach((line, i) => {
-    window.setTimeout(() => line.classList.add("is-in"), 260 + i * 140);
-  });
-}
-
 // ---- Base content reveal: ledger rows, filing entries, flow nodes.
 // IntersectionObserver only — this is the part that must never fail. ----
 const revealTargets = document.querySelectorAll("[data-reveal], .tsec-flow-node");
@@ -116,13 +106,9 @@ if (gsapReady && !reduceMotion) {
   // Hero headline lines rise in on load.
   gsap.from(".tsec-h-line span", { y: "110%", autoAlpha: 0, duration: 0.8, stagger: 0.12, ease: "power3.out" });
 
-  // Hero copy / console drift at slightly different scroll speeds.
+  // Hero copy drifts at a slightly different scroll speed.
   gsap.to(".tsec-hero-copy", {
     y: -34, ease: "none",
-    scrollTrigger: { trigger: ".tsec-hero", start: "top top", end: "bottom top", scrub: true },
-  });
-  gsap.to(".tsec-console", {
-    y: 22, ease: "none",
     scrollTrigger: { trigger: ".tsec-hero", start: "top top", end: "bottom top", scrub: true },
   });
 

@@ -134,8 +134,16 @@ a {
   top: 0;
   left: 0;
   right: 0;
-  background: var(--white);
-  border-bottom: 1px solid rgba(16, 32, 51, 0.08);
+  /* No background here on purpose — the homepage needs this fully
+     transparent to overlay its hero animation, and Use Cases needs it
+     transparent for its own dark-hero-then-scroll effect. Every other
+     page gets a real (frosted) background from the body[class] rule
+     below, which — because index.html's <body> carries no class and
+     Use Cases is explicitly excluded — never touches either of them.
+     A background was added directly here once before and silently
+     turned both of those pages' headers solid white, which on the
+     homepage covered the hero and on Use Cases made the white nav text
+     unreadable against a white bar. */
   /* ponytail: bumped from 60 -> 600 and forced its own stacking context.
      Why RackTrack's sticky evidence cards (.why-stack-card, z-index 1-5)
      were painting over this header while pinned mid-scroll even though
@@ -3785,11 +3793,14 @@ h1 span {
   margin-top: 0;
   margin-bottom: 0;
   display: grid;
-  /* Was minmax(0,1fr) for the heading column — since the heading is only
-     two short <br>-separated lines, that greedy 1fr track left a large
-     dead gap before the paragraph/button column. Sizing it to its own
-     content instead keeps the two columns close together. */
-  grid-template-columns: max-content minmax(280px, 1fr);
+  /* Same fr-based ratio as .why-cta (was max-content + 1fr, which let the
+     short 2-line heading shrink its own track while the paragraph's 1fr
+     track claimed 100% of the leftover width — even though the paragraph
+     itself is capped at max-width:510px, leaving a huge dead void after
+     it). Both tracks sharing the row as fr fractions, like .why-cta,
+     means the pair always spans the full width together instead of one
+     side ballooning past what its content needs. */
+  grid-template-columns: minmax(0, 1fr) minmax(280px, 0.72fr);
   align-items: center;
   gap: 48px;
   padding: 90px clamp(28px, 7vw, 112px);
@@ -3811,6 +3822,7 @@ h1 span {
 }
 .solutions-cta::before { /* ponytail: grid overlay removed — item 10 */ display: none; }
 .solutions-cta > * { position: relative; }
+.solutions-cta > div:first-child { margin-left: clamp(24px, 4vw, 64px); }
 .solutions-cta > div:last-child { max-width: 510px; }
 .solutions-cta .eyebrow { color: var(--blue); }
 .solutions-cta h2 { color: var(--ink); }
@@ -5778,37 +5790,25 @@ html:not(.solutions-motion) .surface-grid article { opacity: 1; transform: none;
 .tsec-frame { width: min(1240px, calc(100% - 72px)); margin: 0 auto; }
 
 /* --- Hero: headline + a live "posture readout" console panel --- */
-.tsec-hero { padding: 156px 0 96px; }
-.tsec-hero-grid { display: grid; grid-template-columns: 1.15fr 0.85fr; gap: 7vw; align-items: center; }
-.tsec-hero-copy h1 { margin: 18px 0 22px; font-family: var(--font-display); font-size: clamp(36px, 3.8vw, 48px); line-height: 1.04; letter-spacing: -0.03em; color: var(--ink); }
+.tsec-hero { padding: 156px 0 130px; }
+/* Single centered column, matching .solutions-hero's composition. */
+.tsec-hero-grid { display: block; }
+.tsec-hero-copy { max-width: 1100px; margin: 0 auto; text-align: center; }
+/* Same scale/weight as .solutions-hero h1 for visual parity between the two heroes. */
+.tsec-hero-copy h1 { margin: 0 auto 34px; max-width: 850px; font-family: var(--font-display); font-size: clamp(40px, 5vw, 72px); font-weight: 700; line-height: .95; letter-spacing: -0.02em; color: var(--ink); }
 .tsec-hero-copy h1 em { font-style: normal; color: var(--blue); }
 .tsec-h-line { display: block; overflow: hidden; }
 .tsec-h-line span { display: block; will-change: transform; }
 .tsec-hero-ctas .button-primary, .tsec-cta-actions .button-primary { display: inline-flex; }
-.tsec-hero-lede { max-width: 52ch; color: var(--muted); font-size: 18px; line-height: 1.6; }
-.tsec-hero-ctas { display: flex; align-items: center; gap: 26px; margin: 30px 0 34px; flex-wrap: wrap; }
-.tsec-link { color: var(--blue); font-weight: 600; font-size: 14px; text-decoration: none; }
-.tsec-link:hover { color: var(--royal); }
-
+.tsec-hero-lede { max-width: 100%; margin: 0 auto; color: var(--muted); font-size: 18px; line-height: 1.6; }
+.tsec-hero-ctas { display: flex; align-items: center; justify-content: center; gap: 26px; margin: 30px 0 0; flex-wrap: wrap; }
 .tsec-pills { display: flex; flex-wrap: wrap; gap: 10px 24px; list-style: none; margin: 0; padding: 0; }
 .tsec-pills li { position: relative; padding-left: 16px; color: var(--copy-strong); font-size: 13.5px; font-weight: 550; }
 .tsec-pills li::before { content: ""; position: absolute; left: 0; top: 7px; width: 6px; height: 6px; border-radius: 50%; background: var(--blue); }
 .tsec-pills-inline { margin: 22px 0 0; }
 
-.tsec-console { border: 1px solid rgba(16, 32, 51, 0.12); border-radius: var(--radius-md); background: var(--white); padding: 22px 22px 18px; box-shadow: var(--shadow-soft); }
-.tsec-console-head { margin: 0 0 14px; font: 700 11px var(--font-mono); letter-spacing: 0.1em; color: var(--muted); }
-.tsec-console-lines { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 11px; }
-.tsec-console-lines li { display: flex; align-items: baseline; justify-content: space-between; gap: 18px; padding-bottom: 11px; border-bottom: 1px solid rgba(16, 32, 51, 0.08); font-family: var(--font-mono); font-size: 12.5px; opacity: 0; transform: translateX(-8px); }
-.tsec-console-lines li.is-in { transition: opacity 420ms ease, transform 420ms ease; }
-.tsec-console-lines li.is-in { opacity: 1; transform: translateX(0); }
-.tsec-console-lines li:last-child { border-bottom: none; padding-bottom: 0; }
-.tsec-console-lines span { color: var(--copy-strong); letter-spacing: 0.01em; }
-.tsec-console-lines b { font-weight: 700; letter-spacing: 0.04em; }
-.tsec-console-lines b.is-ok { color: var(--verified); }
-.tsec-console-lines b.is-pending { color: var(--amber); }
-
 /* --- Body: sticky numbered rail (left) + document sections (right) --- */
-.tsec-body { display: grid; grid-template-columns: 200px 1fr; gap: 64px; padding-bottom: 30px; }
+.tsec-body { display: grid; grid-template-columns: 200px 1fr; gap: 80px; padding-bottom: 30px; }
 
 .tsec-index { position: sticky; top: 150px; align-self: start; }
 .tsec-index ol { position: relative; list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 34px; }
@@ -5821,11 +5821,10 @@ html:not(.solutions-motion) .surface-grid article { opacity: 1; transform: none;
 .tsec-index li a.is-active .tsec-index-dot { background: var(--blue); border-color: var(--blue); color: var(--white); }
 .tsec-index li a.is-active .tsec-index-label { color: var(--ink); opacity: 1; }
 
-.tsec-sections { display: flex; flex-direction: column; gap: 128px; padding-top: 10px; }
+.tsec-sections { display: flex; flex-direction: column; gap: 160px; padding-top: 10px; }
 .tsec-section { scroll-margin-top: 130px; }
-.tsec-kicker { margin: 0 0 14px; color: var(--blue); font: 700 11px var(--font-mono); letter-spacing: 0.13em; text-transform: uppercase; }
-.tsec-section h2 { margin: 0 0 16px; max-width: 22ch; font-family: var(--font-display); font-size: clamp(28px, 2.6vw, 36px); line-height: 1.1; letter-spacing: -0.02em; color: var(--ink); }
-.tsec-section-lede { max-width: 62ch; color: var(--muted); font-size: 16.5px; line-height: 1.6; margin: 0 0 40px; }
+.tsec-section h2 { margin: 0 0 20px; max-width: 22ch; font-family: var(--font-display); font-size: clamp(28px, 2.6vw, 36px); line-height: 1.1; letter-spacing: -0.02em; color: var(--ink); }
+.tsec-section-lede { max-width: 62ch; color: var(--muted); font-size: 16.5px; line-height: 1.6; margin: 0 0 48px; }
 
 /* Security Posture — control ledger rows, no boxes/shadows. Each row is
    physically covered by a solid bar that sweeps away on scroll, like a
@@ -5909,7 +5908,7 @@ html:not(.solutions-motion) .surface-grid article { opacity: 1; transform: none;
    the page's document/ledger language. Real rack photography, since the
    page was otherwise 100% typographic and the user asked for images to
    reinforce trust. */
-.tsec-figure { margin: 56px 0 0; opacity: 0; transform: translateY(26px); transition: opacity 750ms cubic-bezier(.16,1,.3,1), transform 750ms cubic-bezier(.16,1,.3,1); }
+.tsec-figure { margin: 80px 0 100px; opacity: 0; transform: translateY(26px); transition: opacity 750ms cubic-bezier(.16,1,.3,1), transform 750ms cubic-bezier(.16,1,.3,1); }
 .tsec-figure.is-in { opacity: 1; transform: translateY(0); }
 .tsec-figure img { display: block; width: 100%; aspect-ratio: 16 / 9; object-fit: cover; border-radius: var(--radius-sm); }
 .tsec-figure figcaption { display: flex; align-items: baseline; gap: 10px; margin-top: 14px; }
@@ -5919,20 +5918,19 @@ html:not(.solutions-motion) .surface-grid article { opacity: 1; transform: none;
 .tsec-hero-figure img { aspect-ratio: 21 / 8; }
 
 /* Final CTA — asymmetric band, not the centered pattern other pages use */
-.tsec-cta { margin-top: 40px; padding: 90px 0; background: #dfeafa; }
+.tsec-cta { margin-top: 64px; padding: 120px 0; background: #dfeafa; }
 .tsec-cta-inner { display: flex; align-items: center; justify-content: space-between; gap: 40px; flex-wrap: wrap; }
 .tsec-cta-inner h2 { margin: 14px 0 0; max-width: 14ch; font-family: var(--font-display); font-size: clamp(28px, 2.6vw, 36px); line-height: 1.08; letter-spacing: -0.025em; color: var(--ink); }
 .tsec-cta-actions { display: flex; align-items: center; gap: 26px; flex-wrap: wrap; }
 
 @media (max-width: 980px) {
   .tsec-hero { padding: 130px 0 60px; }
-  .tsec-hero-grid { grid-template-columns: 1fr; gap: 40px; }
   .tsec-body { grid-template-columns: 1fr; gap: 40px; }
   .tsec-index { position: static; padding-bottom: 20px; border-bottom: 1px solid rgba(16, 32, 51, 0.14); }
   .tsec-index ol { flex-direction: row; flex-wrap: wrap; gap: 18px 26px; }
   .tsec-index-rail { display: none; }
   .tsec-index-dot { width: 26px; height: 26px; font-size: 10.5px; }
-  .tsec-sections { gap: 80px; }
+  .tsec-sections { gap: 100px; }
   .tsec-flow { grid-template-columns: 1fr 1fr; gap: 28px 0; }
   .tsec-flow-svg { display: none; }
   .tsec-actions { grid-template-columns: 1fr; }
