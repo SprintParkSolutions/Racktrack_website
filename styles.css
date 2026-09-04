@@ -2821,8 +2821,8 @@ h1 span {
 /* Hero composition: the message leads, while the rack evidence is treated
    as a live reconciliation field instead of a full-bleed background. */
 .why-page .why-hero {
-  min-height: 100dvh;
-  align-items: end;
+  min-height: 90dvh;
+  align-items: center;
   padding: 148px clamp(28px, 7vw, 112px) 72px;
   background: #f4f8fc;
 }
@@ -2880,14 +2880,14 @@ h1 span {
 }
 
 .why-page .why-hero h1 {
-  max-width: 10.5ch;
+  max-width: 22ch;
   color: var(--ink);
-  font-size: clamp(36px, 3.8vw, 48px);
+  font-size: clamp(40px, 4.6vw, 56px);
   text-wrap: balance;
 }
 
 .why-page .why-hero-lede {
-  max-width: 600px;
+  max-width: 720px;
 }
 
 
@@ -3184,8 +3184,8 @@ h1 span {
 }
 
 .why-page .why-hero h1 {
-  max-width: 12ch;
-  font-size: clamp(36px, 3.8vw, 48px);
+  max-width: 22ch;
+  font-size: clamp(40px, 4.6vw, 56px);
 }
 
 @media (max-width: 780px) {
@@ -4712,6 +4712,7 @@ html:not(.solutions-motion) .surface-grid article { opacity: 1; transform: none;
 .why-steps-intro {
   width: min(760px, 100%);
   margin: 0 auto 56px;
+  text-align: center;
 }
 
 .why-steps-intro h2 {
@@ -4983,6 +4984,7 @@ html:not(.solutions-motion) .surface-grid article { opacity: 1; transform: none;
   width: min(760px, 100%);
   margin: 0 auto 44px;
   padding: 0 clamp(24px, 6vw, 112px);
+  text-align: center;
 }
 
 .why-evidence-intro h2 {
@@ -5624,6 +5626,12 @@ html:not(.solutions-motion) .surface-grid article { opacity: 1; transform: none;
 .uc-opening-copy > p:not(.eyebrow) {
   max-width: 42ch;
   line-height: 1.45;
+}
+
+/* Wider than the shared 42ch above so the hero lede reads in ~2 lines
+   instead of 3, matching the widened h1 column. */
+.why-page .why-hero-lede {
+  max-width: 68ch;
 }
 
 .solutions-page .principle-copy p,
