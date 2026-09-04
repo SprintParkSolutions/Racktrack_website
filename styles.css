@@ -1951,6 +1951,15 @@ h1 span {
   h1 {
     font-size: 34px;
     line-height: 1.04;
+    overflow-wrap: anywhere;
+  }
+
+  .sequence-intro {
+    /* min(620px, 48vw) leaves only ~187px on a 390px phone — too narrow
+       for a long word like "Infrastructure" combined with text-wrap:balance,
+       which was dropping characters instead of wrapping. Give it real
+       room instead of a viewport-scaled sliver. */
+    width: calc(100% - 48px);
   }
 
   .hero-copy {
@@ -3889,9 +3898,7 @@ h1 span {
   border-top: 1px solid var(--why-line);
 }
 .solutions-page .footer-top {
-  grid-template-columns: 1.6fr 1fr 1fr 1.2fr;
   align-items: start;
-  gap: 40px;
 }
 .solutions-page .footer-brand p,
 .solutions-page .footer-col a,
@@ -3947,8 +3954,6 @@ html:not(.solutions-motion) .surface-grid article { opacity: 1; transform: none;
   .schematic-section { margin-top: 100px; } .schematic-section > * { padding-inline: 26px; } .schematic-heading { display: block; } .drawing-meta { text-align: left; margin-top: 25px; } .schematic-labels { display: none; } .schematic-grid { grid-template-columns: 1fr; gap: 16px; } .source-stack, .record-stack { gap: 12px; } .source-stack { grid-template-columns: 1fr 30px 1fr; align-items: center; } .source-stack .flow-arrow { display: grid; justify-items: center; gap: 0; } .source-stack .flow-arrow b { transform: rotate(90deg); } .source-stack .flow-arrow:last-child { display: none; } .engine-node { margin: 10px 0; } .record-stack { grid-template-columns: repeat(3, 1fr); margin-left: 0; } .record-node { min-height: 100px; padding: 14px; } .record-node span { font-size: 9px; }
   .cabinet-section { grid-template-columns: 1fr; gap: 60px; padding-block: 120px 90px; } .cabinet-reader { grid-template-columns: 1fr; } .reader-panel { min-height: auto; } .reader-explanation { display: none; } .rack-stage { min-height: 600px; }
   .surface-grid { grid-template-columns: 1fr; }
-  .solutions-page .footer-top { grid-template-columns: 1fr; gap: 36px; }
-  .solutions-page .footer-links { margin-top: 0; }
 }
 @media (max-width: 640px) {
   .solutions-page .section-frame { width: calc(100% - 30px); } .solutions-hero h1 { font-size: clamp(36px, 10vw, 56px); } .solutions-hero .hero-lede { font-size: 18px; } .solutions-hero-actions { gap: 20px; } .process-intro h2, .workflow-heading h2 { font-size: 36px; }
