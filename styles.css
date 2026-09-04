@@ -3713,15 +3713,6 @@ h1 span {
   .process-station-media {
     height: 200px;
   }
-
-  .solutions-cta {
-    grid-template-columns: 1fr;
-    gap: 28px;
-  }
-
-  .solutions-cta > div:last-child {
-    max-width: none;
-  }
 }
 
 .schematic-section {
@@ -3801,10 +3792,22 @@ h1 span {
   grid-template-columns: max-content minmax(280px, 1fr);
   align-items: center;
   gap: 48px;
-  padding: 120px clamp(28px, 7vw, 112px);
+  padding: 90px clamp(28px, 7vw, 112px);
   background: #dfeafa;
+  /* --why-line is scoped to .why-page and isn't defined on .solutions-page —
+     using its literal value here to match .why-cta's border exactly. */
+  border-top: 1px solid rgba(16, 32, 51, 0.15);
   position: relative;
   overflow: hidden;
+}
+
+/* Same stacking breakpoint and gap as .why-cta (no gap override on stack) —
+   keeps both pages' CTA sections behaving identically on tablet/mobile. */
+@media (max-width: 780px) {
+  .solutions-cta {
+    grid-template-columns: 1fr;
+    padding: 78px 24px 88px;
+  }
 }
 .solutions-cta::before { /* ponytail: grid overlay removed — item 10 */ display: none; }
 .solutions-cta > * { position: relative; }
@@ -3888,7 +3891,7 @@ html:not(.solutions-motion) .surface-grid article { opacity: 1; transform: none;
   .principle-row, .principle-row-reverse { grid-template-columns: 1fr; } .principle-row img { grid-column: auto; height: 150px; } .principle-copy p { font-size: 16px; } .row-tag { font-size: 9px; line-height: 1.5; display: block; }
   .schematic-section { padding-top: 28px; } .schematic-section > * { padding-inline: 17px; } .schematic-heading h2 { font-size: 45px; } .source-stack { grid-template-columns: 1fr; } .source-stack .flow-arrow { justify-content: flex-start; } .source-stack .flow-arrow b { transform: none; } .record-stack { grid-template-columns: 1fr; } .record-node { min-height: 78px; } .schematic-key { display: grid; gap: 15px; padding-top: 22px; } .schematic-key strong { margin-left: 0; }
   .reader-label, .reader-tabs { padding-left: 17px; padding-right: 17px; } .reader-tabs button { min-height: 55px; font-size: 16px; } .rack-stage { min-height: 480px; } .cabinet { width: 74%; min-height: 410px; height: 82%; } .rack-slot { padding: 8px; } .rack-slot strong { font-size: 10px; } .rack-slot span, .rack-slot em { font-size: 8px; } .scan-beam { animation-name: rack-scan-mobile; } @keyframes rack-scan-mobile { 0%,100% { transform: translateY(0); } 50% { transform: translateY(300px); } }
-  .surface-grid article { min-height: 220px; padding: 24px 20px; } .surface-grid h3 { margin-top: 40px; } .solutions-cta { padding: 70px 24px; } .solutions-cta h2 { font-size: 36px; }
+  .surface-grid article { min-height: 220px; padding: 24px 20px; } .surface-grid h3 { margin-top: 40px; }
 }
 @media (prefers-reduced-motion: reduce) { .solutions-page *, .solutions-page *::before, .solutions-page *::after { animation-duration: .001ms !important; transition-duration: .001ms !important; } }
 
