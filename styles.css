@@ -802,14 +802,6 @@ h1 span {
   text-shadow: 0 2px 18px rgba(16, 32, 51, 0.35);
 }
 
-/* Only the first card (Captured) gets the blue accent title — the rest
-   stay white so the eye lands on the entry point of the sequence, not
-   every beat equally. */
-.sequence-note:first-child h2 {
-  color: var(--blue);
-  text-shadow: 0 1px 3px rgba(16, 32, 51, 0.4), 0 2px 22px rgba(255, 255, 255, 0.4);
-}
-
 .sequence-note > span {
   display: block;
   max-width: 36ch;
