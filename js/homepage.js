@@ -18,7 +18,6 @@ const sequenceNotes = sequence
   : [];
 const storyBridge = document.querySelector("[data-story-bridge]");
 const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)");
-const desktopHero = window.matchMedia("(min-width: 981px)");
 
 const totalFrames = 240;
 const startFrame = 5;
@@ -226,7 +225,7 @@ function updateHeroMediaState() {
     return;
   }
 
-  if (reduceMotion.matches || !desktopHero.matches) {
+  if (reduceMotion.matches) {
     sequence.style.setProperty("--handoff-visibility", "1");
     return;
   }
