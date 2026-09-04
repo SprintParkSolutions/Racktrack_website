@@ -175,6 +175,24 @@ body.is-sequencing .site-header {
   transition: color 150ms ease, opacity 150ms ease;
 }
 
+/* Tablet-landscape gap: just above the 980px hamburger cutoff, the full
+   desktop nav (6 links + dropdown chevrons + CTA, gap:30px, 14px type)
+   doesn't quite fit at iPad-landscape width (1024px) and wraps each
+   label onto two lines ("Why" / "RackTrack"). Tightening gap and type
+   slightly in this narrow band keeps it on one line without moving the
+   hamburger breakpoint itself or any of the page-content rules keyed to
+   it elsewhere in this file. */
+@media (min-width: 981px) and (max-width: 1150px) {
+  .site-nav {
+    gap: 18px;
+  }
+
+  .site-nav a,
+  .site-nav .nav-item > a {
+    font-size: 13.5px;
+  }
+}
+
 .site-nav a::after {
   content: "";
   position: absolute;
@@ -2445,7 +2463,13 @@ h1 span {
 @media (max-width: 640px) {
   .site-header {
     width: 100%;
-    padding: 11px 11px;
+    /* padding-right stays wide enough to clear the 40px absolutely-
+       positioned toggle button pinned to the header's own right edge —
+       the plain "11px 11px" shorthand this used to be reset ALL sides
+       including right, which let the Sign In pill's grid column extend
+       under the toggle and visually collide with it on every real phone
+       (this breakpoint covers ~360-412px, i.e. most of them). */
+    padding: 11px 48px 11px 11px;
   }
 
   .brand span:last-child {
