@@ -51,12 +51,15 @@ test("sitewide: every page loads styles.css from the repo root with a cache-bust
   }
 });
 
-test("sitewide: no page links to the old #sign-in placeholder with different label text", () => {
+// Sign In leaves the marketing site for the customer portal — it is no longer
+// the "#sign-in" placeholder it shipped as, and every page must agree on the
+// destination so the header behaves the same wherever a visitor lands.
+test("sitewide: every page's Sign In goes to the customer portal", () => {
   for (const rel of ALL_PAGES) {
     const { document } = loadPage(rel);
     const cta = document.querySelector("a.nav-cta");
-    assert.equal(cta.getAttribute("href"), "#sign-in");
-    assert.equal(cta.textContent.trim(), "Sign In");
+    assert.equal(cta.getAttribute("href"), "https://portal.racktrack.ai", `${rel}: wrong Sign In href`);
+    assert.equal(cta.textContent.trim(), "Sign In", `${rel}: wrong Sign In label`);
   }
 });
 

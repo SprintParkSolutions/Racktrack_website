@@ -682,6 +682,77 @@ h1 span {
   margin-top: 28px;
 }
 
+.button-watch {
+  display: inline-flex;
+  min-height: 48px;
+  align-items: center;
+  gap: 10px;
+  border: 1px solid rgba(16, 32, 51, 0.18);
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.7);
+  backdrop-filter: blur(6px);
+  color: var(--ink);
+  padding: 0 22px 0 24px;
+  font: 650 15px var(--font-ui);
+  cursor: pointer;
+  transition: transform 180ms ease, border-color 180ms ease, background-color 180ms ease;
+}
+.button-watch:hover { transform: translateY(-1px); border-color: rgba(16, 32, 51, 0.32); background: rgba(255, 255, 255, 0.92); }
+.button-watch:active { transform: translateY(1px) scale(0.99); }
+.button-watch svg { flex: none; }
+
+/* Video modal: dark scrim + centered player, opened from the hero's
+   Watch video button. Hidden via the [hidden] attribute rather than
+   display:none in CSS so JS only has one thing to toggle. */
+.video-modal {
+  position: fixed;
+  inset: 0;
+  z-index: 200;
+  display: grid;
+  place-items: center;
+  padding: 32px;
+  background: rgba(6, 12, 24, 0.86);
+}
+.video-modal[hidden] { display: none; }
+.video-modal-panel {
+  width: min(960px, 100%);
+  max-height: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+.video-modal-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  color: var(--white);
+}
+.video-modal-head p {
+  margin: 0;
+  font: 650 15px var(--font-ui);
+}
+.video-modal-close {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 34px;
+  height: 34px;
+  border: 0;
+  border-radius: 999px;
+  background: transparent;
+  color: var(--white);
+  cursor: pointer;
+  transition: background-color 150ms ease;
+}
+.video-modal-close:hover { background: rgba(255, 255, 255, 0.14); }
+.video-modal-player {
+  width: 100%;
+  max-height: 80vh;
+  border-radius: 14px;
+  background: #000;
+  box-shadow: 0 40px 100px rgba(0, 0, 0, 0.5);
+}
+
 .proof-panel {
   grid-area: 1 / 1;
   z-index: 5;
@@ -4859,31 +4930,14 @@ html:not(.solutions-motion) .surface-grid article { opacity: 1; transform: none;
 
 /* Restored Solutions pinned workflow carousel */
 .solutions-page .workflow-section {
-  position: relative;
-  height: 640dvh;
-  min-height: 4200px;
-  padding-top: 0;
-  padding-bottom: 0;
-  overflow: clip;
-}
-
-.solutions-page .workflow-sticky {
-  position: sticky;
-  top: 0;
-  z-index: 2;
-  display: flex;
-  min-height: 100dvh;
-  flex-direction: column;
-  justify-content: flex-start;
-  overflow: hidden;
-  padding-top: clamp(82px, 8dvh, 104px);
-  padding-bottom: 0;
+  padding-block: 110px;
 }
 
 .solutions-page .workflow-heading {
-  width: min(1180px, calc(100% - 128px));
+  width: min(720px, calc(100% - 48px));
   display: block;
-  margin: 0 auto clamp(18px, 2.4dvh, 32px);
+  margin: 0 auto clamp(40px, 5dvh, 60px);
+  text-align: center;
 }
 
 .solutions-page .workflow-heading .eyebrow {
@@ -4891,72 +4945,65 @@ html:not(.solutions-motion) .surface-grid article { opacity: 1; transform: none;
 }
 
 .solutions-page .workflow-heading h2 {
-  max-width: 12ch;
+  max-width: none;
+  margin-inline: auto;
   font-size: clamp(34px, 3.4vw, 46px);
   line-height: 0.95;
+}
+
+.solutions-page .workflow-heading .section-lede {
+  margin-inline: auto;
+  max-width: 52ch;
 }
 
 .solutions-page .workflow-heading::after {
   content: none;
 }
 
-.solutions-page .workflow-sticky .surface-grid,
-.solutions-page .surface-grid {
-  --card-width: clamp(300px, 23vw, 382px);
-  --card-height: clamp(510px, 52dvh, 680px);
+/* Cards side by side in a horizontally-scrolling row, snapped to each
+   card's edge, advanced with the prev/next arrows below — replaces the
+   previous scroll-jacked 3D stack (a ~4200px pinned section computing
+   per-frame transforms) with a plain, static card row. */
+.solutions-page .surface-carousel {
   position: relative;
-  display: block;
-  width: 100%;
-  height: min(76dvh, 760px);
-  margin-top: 0;
-  border: 0;
-  perspective: 1400px;
-  overflow: visible;
+  width: min(1180px, calc(100% - 64px));
+  margin: 0 auto;
 }
 
-.solutions-page .surface-grid article,
-.solutions-page .surface-grid article:nth-child(1),
-.solutions-page .surface-grid article:nth-child(2),
-.solutions-page .surface-grid article:nth-child(3),
-.solutions-page .surface-grid article:nth-child(4),
-.solutions-page .surface-grid article:nth-child(5),
-.solutions-page .surface-grid article:nth-child(6) {
-  position: absolute;
-  top: auto;
-  bottom: clamp(86px, 9dvh, 116px);
-  left: 50%;
-  width: var(--card-width);
-  height: var(--card-height);
-  min-height: 0;
+.solutions-page .surface-grid {
+  --card-width: clamp(260px, 26vw, 330px);
+  display: flex;
+  gap: 20px;
+  overflow-x: auto;
+  scroll-snap-type: x mandatory;
+  scroll-behavior: smooth;
+  padding: 4px 4px 12px;
+  margin: -4px -4px 0;
+  scrollbar-width: none;
+}
+
+.solutions-page .surface-grid::-webkit-scrollbar {
+  display: none;
+}
+
+.solutions-page .surface-grid article {
+  flex: 0 0 var(--card-width);
+  scroll-snap-align: start;
+  display: flex;
+  flex-direction: column;
   padding: clamp(20px, 1.55vw, 26px);
-  border: 8px solid rgba(255, 255, 255, 0.72);
-  border-radius: 20px;
-  background: rgba(255, 255, 255, 0.94);
-  box-shadow: 0 24px 60px rgba(36, 72, 118, 0.14);
-  opacity: 0;
-  cursor: default;
-  pointer-events: auto;
-  transform-origin: center bottom;
-  animation: none !important;
-  transition:
-    transform 760ms cubic-bezier(.2, .82, .18, 1),
-    opacity 480ms ease,
-    filter 420ms ease,
-    box-shadow 220ms ease;
-  will-change: transform, opacity;
-}
-
-.solutions-page .surface-grid[data-scroll-mode="true"] article[data-active="true"],
-.solutions-page .surface-grid article[data-active="true"] {
-  box-shadow: 0 40px 92px rgba(36, 72, 118, 0.24);
+  border: 1px solid rgba(16, 32, 51, 0.12);
+  border-radius: 16px;
+  background: var(--white);
+  box-shadow: 0 20px 50px -30px rgba(36, 72, 118, 0.18);
 }
 
 .solutions-page .surface-visual {
-  position: absolute;
-  inset: clamp(20px, 1.55vw, 26px) clamp(20px, 1.55vw, 26px) auto;
-  height: 46%;
+  position: relative;
+  height: 160px;
+  margin: 0 0 20px;
   overflow: hidden;
-  border-radius: 13px;
+  border-radius: 10px;
   background: #dfe8f4;
 }
 
@@ -4968,39 +5015,53 @@ html:not(.solutions-motion) .surface-grid article { opacity: 1; transform: none;
   filter: saturate(0.82) contrast(0.94);
 }
 
-/* Cards now default to opacity:0 (see the reveal-timing fix above) and
-   rely on the rAF scroll loop in solutions.js to bring them in — but
-   that loop is intentionally skipped under reduced motion, so without
-   this they'd stay invisible forever. Fall back to the same static,
-   non-overlapping stack the mobile breakpoint already uses. */
-@media (prefers-reduced-motion: reduce) {
-  .solutions-page .surface-grid { display: block; height: auto; }
-  .solutions-page .surface-grid article {
-    position: relative !important;
-    inset: auto !important;
-    left: auto !important;
-    width: 100% !important;
-    max-width: 520px;
-    margin: 0 0 24px;
-    opacity: 1 !important;
-    filter: none !important;
-    transform: none !important;
-  }
+.solutions-page .surface-controls {
+  display: flex;
+  justify-content: center;
+  gap: 12px;
+  margin-top: 28px;
+}
+
+.solutions-page .surface-arrow {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 48px;
+  height: 48px;
+  border-radius: 999px;
+  border: 1px solid rgba(16, 32, 51, 0.16);
+  background: var(--white);
+  color: var(--ink);
+  cursor: pointer;
+  transition: background-color 0.2s ease, border-color 0.2s ease, color 0.2s ease, transform 0.2s ease;
+}
+
+.solutions-page .surface-arrow:hover:not(:disabled) {
+  background: var(--blue);
+  border-color: var(--blue);
+  color: var(--white);
+  transform: translateY(-2px);
+}
+
+.solutions-page .surface-arrow:disabled {
+  opacity: 0.35;
+  cursor: default;
 }
 
 .solutions-page .surface-grid article > span {
   display: block;
+  margin-top: 4px;
   color: var(--blue);
   font-size: 9px;
   font-weight: 700;
 }
 
 .solutions-page .surface-grid h3 {
-  max-width: 12ch;
-  margin-top: calc(var(--card-height) * 0.52);
-  margin-bottom: 14px;
-  font-size: clamp(22px, 2vw, 28px);
-  line-height: 0.98;
+  max-width: 16ch;
+  margin-top: 14px;
+  margin-bottom: 10px;
+  font-size: clamp(20px, 1.7vw, 24px);
+  line-height: 1.05;
   letter-spacing: 0;
 }
 
@@ -5011,69 +5072,18 @@ html:not(.solutions-motion) .surface-grid article { opacity: 1; transform: none;
   line-height: 1.5;
 }
 
-@media (max-width: 980px) {
-  .solutions-page .workflow-section {
-    height: auto;
-    min-height: 0;
-    padding-top: clamp(70px, 12vw, 100px);
-    padding-bottom: clamp(70px, 12vw, 100px);
-    overflow: visible;
-  }
-
-  .solutions-page .workflow-sticky {
-    position: relative;
-    top: auto;
-    min-height: 0;
-    padding-block: 0;
-    overflow: visible;
-  }
-
-  .solutions-page .workflow-heading {
-    width: auto;
-  }
-
+@media (max-width: 640px) {
   .solutions-page .workflow-heading h2 {
-    font-size: 38px;
+    font-size: 32px;
+  }
+
+  .solutions-page .surface-carousel {
+    width: 100%;
   }
 
   .solutions-page .surface-grid {
-    display: grid;
-    grid-template-columns: 1fr;
-    height: auto;
-    border-top: 1px solid rgba(16, 32, 51, .18);
-    border-left: 1px solid rgba(16, 32, 51, .18);
-  }
-
-  .solutions-page .surface-grid article,
-  .solutions-page .surface-grid article:nth-child(1),
-  .solutions-page .surface-grid article:nth-child(2),
-  .solutions-page .surface-grid article:nth-child(3),
-  .solutions-page .surface-grid article:nth-child(4),
-  .solutions-page .surface-grid article:nth-child(5),
-  .solutions-page .surface-grid article:nth-child(6) {
-    position: relative;
-    inset: auto;
-    width: auto;
-    height: auto;
-    min-height: 320px;
-    border: 0;
-    border-right: 1px solid rgba(16, 32, 51, .18);
-    border-bottom: 1px solid rgba(16, 32, 51, .18);
-    border-radius: 0;
-    opacity: 1 !important;
-    filter: none !important;
-    transform: none !important;
-  }
-
-  .solutions-page .surface-visual {
-    position: relative;
-    inset: auto;
-    height: 160px;
-    margin-bottom: 24px;
-  }
-
-  .solutions-page .surface-grid h3 {
-    margin-top: 40px;
+    padding-inline: 24px;
+    margin-inline: -24px;
   }
 }
 

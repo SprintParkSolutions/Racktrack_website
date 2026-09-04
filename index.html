@@ -9,8 +9,8 @@
       content="RackTrack turns one phone sweep of a data center rack into verified inventory, topology, ports, cables, and audit evidence."
     >
     <link rel="icon" href="assets/logo.jpg">
-    <link rel="stylesheet" href="styles.css?v=world-redesign-85-hero-visibility-fix">
-    <script type="module" src="js/homepage.js?v=world-redesign-85-hero-visibility-fix"></script>
+    <link rel="stylesheet" href="styles.css?v=world-redesign-86-hero-watch-video">
+    <script type="module" src="js/homepage.js?v=world-redesign-86-hero-watch-video"></script>
     <script defer src="js/cookie-consent.js"></script>
 </head>
   <body>
@@ -29,7 +29,7 @@
         <div class="nav-item"><a href="pages/use-cases.html">Use Cases<svg class="nav-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg></a><input type="checkbox" id="nav-sub-usecases" class="nav-sub-toggle" autocomplete="off" /><label for="nav-sub-usecases" class="nav-sub-toggle-btn" aria-label="Expand Use Cases submenu"></label><div class="nav-dropdown"><a href="pages/use-case-infrastructure-data-center-leaders.html">Infrastructure &amp; Data Center Leaders</a><a href="pages/use-case-network-architects-engineers.html">Network Architects &amp; Engineers</a><a href="pages/use-case-security-vulnerability-teams.html">Security &amp; Vulnerability Teams</a><a href="pages/use-case-compliance-audit-owners.html">Compliance &amp; Audit Owners</a><a href="pages/use-case-incident-responders-on-call.html">Incident Responders &amp; On-Call</a><a href="pages/use-case-m-a-migration-teams.html">M&amp;A &amp; Migration Teams</a></div></div>
         <div class="nav-item"><a href="pages/resources.html">Resources<svg class="nav-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg></a><input type="checkbox" id="nav-sub-resources" class="nav-sub-toggle" autocomplete="off" /><label for="nav-sub-resources" class="nav-sub-toggle-btn" aria-label="Expand Resources submenu"></label><div class="nav-dropdown"><a href="pages/resources.html">All articles</a><a href="pages/article-why-infrastructure-records-are-wrong.html">Why every CMDB is 40% wrong</a><a href="pages/article-what-network-verified-actually-means.html">What "network-verified" means</a><a href="pages/article-how-infrastructure-teams-prepare-for-soc-2-audits.html">Preparing for SOC 2</a><a href="pages/article-free-port-discovery-and-rack-capacity-planning.html">Free port discovery</a></div></div><a href="pages/trust-security.html">Trust &amp; Security</a> <a href="pages/contact.html">Contact Us</a>
       </nav>
-      <a class="nav-cta" href="#sign-in">Sign In</a>
+      <a class="nav-cta" href="https://portal.racktrack.ai">Sign In</a>
     </header>
 
     <main id="main">
@@ -63,6 +63,14 @@
             </p>
             <div class="hero-actions" aria-label="Primary actions">
               <a class="button-primary" href="pages/contact.html">Get a demo</a>
+              <button type="button" class="button-watch" data-video-trigger aria-haspopup="dialog">
+                Watch video
+                <svg viewBox="0 0 24 24" width="18" height="18" fill="none" aria-hidden="true">
+                  <rect x="1.5" y="4" width="16" height="16" rx="3.2" stroke="currentColor" stroke-width="1.6" />
+                  <path d="M7.6 8.9v6.2c0 .5.53.8.97.55l5.4-3.1a.63.63 0 0 0 0-1.1l-5.4-3.1c-.44-.25-.97.05-.97.55Z" fill="currentColor" />
+                  <path d="M17.5 9.5l5-2.7v10.4l-5-2.7" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round" />
+                </svg>
+              </button>
             </div>
           </div>
 
@@ -286,6 +294,20 @@
         </div>
       </div>
     </footer>
+
+    <div class="video-modal" data-video-modal hidden>
+      <div class="video-modal-panel" role="dialog" aria-modal="true" aria-labelledby="video-modal-title">
+        <div class="video-modal-head">
+          <p id="video-modal-title">Video</p>
+          <button type="button" class="video-modal-close" data-video-close aria-label="Close video">
+            <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18" stroke-linecap="round" /></svg>
+          </button>
+        </div>
+        <video class="video-modal-player" data-video-player controls playsinline preload="none">
+          <source src="assets/homepage/RACKTRACK.mp4" type="video/mp4">
+        </video>
+      </div>
+    </div>
 
   </body>
 </html>

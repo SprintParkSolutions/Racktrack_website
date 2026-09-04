@@ -760,3 +760,36 @@ if (sequence && canvas) {
 }
 
 updateStoryBridge();
+
+// Watch video modal: pauses on close/backdrop/Escape so the video never
+// keeps playing silently behind a hidden overlay.
+const videoModal = document.querySelector("[data-video-modal]");
+const videoTrigger = document.querySelector("[data-video-trigger]");
+const videoPlayer = document.querySelector("[data-video-player]");
+
+if (videoModal && videoTrigger && videoPlayer) {
+  const closeButton = videoModal.querySelector("[data-video-close]");
+
+  function openVideoModal() {
+    videoModal.hidden = false;
+    videoPlayer.play().catch(() => {});
+  }
+
+  function closeVideoModal() {
+    videoModal.hidden = true;
+    videoPlayer.pause();
+  }
+
+  videoTrigger.addEventListener("click", openVideoModal);
+  closeButton.addEventListener("click", closeVideoModal);
+  videoModal.addEventListener("click", (event) => {
+    if (event.target === videoModal) {
+      closeVideoModal();
+    }
+  });
+  window.addEventListener("keydown", (event) => {
+    if (event.key === "Escape" && !videoModal.hidden) {
+      closeVideoModal();
+    }
+  });
+}

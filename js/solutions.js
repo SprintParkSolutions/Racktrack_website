@@ -102,125 +102,35 @@ if (processRail) {
   }
 }
 
-const surfaceGrid = document.querySelector('.surface-grid');
-const workflowSection = surfaceGrid?.closest('.workflow-section');
-const reducedMotion = window.matchMedia?.('(prefers-reduced-motion: reduce)');
-const wideWorkflow = window.matchMedia?.('(min-width: 981px)');
-if (surfaceGrid && workflowSection) {
-  const surfaceCards = [...surfaceGrid.querySelectorAll('article')];
-  let surfaceIndex = 0;
-  const surfaceCount = surfaceCards.length;
-  let surfaceRaf = 0;
-  let surfaceLoopActive = false;
-
-  surfaceGrid.dataset.scrollMode = 'true';
-
-  const updateSurfaceRail = () => {
-    surfaceGrid.dataset.carouselIndex = String(surfaceIndex);
-    surfaceCards.forEach((card, index) => {
-      const slot = index - surfaceIndex;
-      card.dataset.slot = String(slot);
-      card.dataset.active = index === surfaceIndex ? 'true' : 'false';
-      card.tabIndex = index === surfaceIndex ? 0 : -1;
-    });
+// Six surface cards sit side by side in a horizontally-scrolling, snapped
+// row; the prev/next arrows just step the scroll position by one card
+// width instead of driving a scroll-jacked stack animation.
+const surfaceGrid = document.querySelector('[data-surface-grid]');
+const surfacePrev = document.querySelector('[data-surface-prev]');
+const surfaceNext = document.querySelector('[data-surface-next]');
+if (surfaceGrid && (surfacePrev || surfaceNext)) {
+  const cardStep = () => {
+    const card = surfaceGrid.querySelector('article');
+    if (!card) return surfaceGrid.clientWidth;
+    const style = getComputedStyle(surfaceGrid);
+    const gap = parseFloat(style.columnGap || style.gap || '0') || 0;
+    return card.getBoundingClientRect().width + gap;
   };
 
-  const clamp = (min, value, max) => Math.max(min, Math.min(max, value));
-
-  const renderSurfaceScroll = () => {
-    surfaceRaf = 0;
-
-    if (!surfaceLoopActive || reducedMotion?.matches || wideWorkflow?.matches === false) {
-      updateSurfaceRail();
-      return;
-    }
-
-    const sectionBounds = workflowSection.getBoundingClientRect();
-    const travel = Math.max(1, workflowSection.offsetHeight - window.innerHeight);
-    const progress = clamp(0, -sectionBounds.top / travel, 1);
-    const focus = progress * Math.max(0, surfaceCount - 1);
-    const nextIndex = clamp(0, Math.round(focus), surfaceCount - 1);
-
-    if (nextIndex !== surfaceIndex) {
-      surfaceIndex = nextIndex;
-      surfaceGrid.dataset.carouselIndex = String(surfaceIndex);
-    }
-
-    surfaceCards.forEach((card, index) => {
-      const slot = index - focus;
-      const absSlot = Math.abs(slot);
-      const limited = clamp(-5, slot, 5);
-      const absLimited = Math.abs(limited);
-      const x = limited * 17.6;
-      const rotation = clamp(-18, limited * 4.5, 18);
-      const scale = clamp(0.58, 1.04 - absLimited * 0.105, 1.04);
-      const opacity = clamp(0.05, 1 - absSlot * 0.24, 1);
-      const blur = absSlot > 3 ? Math.min(1.2, (absSlot - 3) * 0.6) : 0;
-      const saturation = clamp(0.82, 1 - absSlot * 0.035, 1);
-      const zIndex = String(Math.max(1, 10 - Math.round(absSlot * 2)));
-      const isActive = index === nextIndex;
-
-      card.dataset.slot = String(Math.round(index - nextIndex));
-      card.dataset.active = isActive ? 'true' : 'false';
-      card.tabIndex = isActive ? 0 : -1;
-      card.style.zIndex = zIndex;
-      card.style.opacity = opacity.toFixed(3);
-      card.style.filter = blur ? `blur(${blur.toFixed(2)}px) saturate(${saturation.toFixed(2)})` : `saturate(${saturation.toFixed(2)})`;
-      card.style.transform = `translateX(-50%) translateX(${x.toFixed(3)}vw) rotate(${rotation.toFixed(3)}deg) scale(${scale.toFixed(3)})`;
-    });
-
-    surfaceRaf = requestAnimationFrame(renderSurfaceScroll);
+  const updateArrowState = () => {
+    const max = surfaceGrid.scrollWidth - surfaceGrid.clientWidth;
+    if (surfacePrev) surfacePrev.disabled = surfaceGrid.scrollLeft <= 1;
+    if (surfaceNext) surfaceNext.disabled = surfaceGrid.scrollLeft >= max - 1;
   };
 
-  const startSurfaceLoop = () => {
-    if (surfaceLoopActive) return;
-    surfaceLoopActive = true;
-    surfaceRaf = requestAnimationFrame(renderSurfaceScroll);
-  };
+  surfacePrev?.addEventListener('click', () => {
+    surfaceGrid.scrollBy({ left: -cardStep(), behavior: 'smooth' });
+  });
+  surfaceNext?.addEventListener('click', () => {
+    surfaceGrid.scrollBy({ left: cardStep(), behavior: 'smooth' });
+  });
 
-  const stopSurfaceLoop = () => {
-    surfaceLoopActive = false;
-    if (surfaceRaf) {
-      cancelAnimationFrame(surfaceRaf);
-      surfaceRaf = 0;
-    }
-  };
-
-  // `.workflow-section` is ~4200px tall, so an intersection-ratio threshold
-  // is the wrong tool for "start a bit after the heading" — 0.18 of a
-  // 4200px box needs ~750px of simultaneous overlap, which this sticky
-  // layout may rarely or never reach, and the loop silently never starts.
-  // Use the original lenient trigger (reliable) and instead delay just the
-  // FIRST activation by a fixed beat, so the heading's own 700ms fade has
-  // a head start before cards begin easing in from opacity 0.
-  let hasActivatedOnce = false;
-  const activateSurfaceLoop = () => {
-    if (hasActivatedOnce) {
-      startSurfaceLoop();
-      return;
-    }
-    hasActivatedOnce = true;
-    window.setTimeout(startSurfaceLoop, 350);
-  };
-
-  if ('IntersectionObserver' in window) {
-    const workflowObserver = new IntersectionObserver((entries) => {
-      entries.forEach((entry) => {
-        if (entry.isIntersecting) {
-          activateSurfaceLoop();
-        } else {
-          stopSurfaceLoop();
-        }
-      });
-    }, {
-      rootMargin: '10% 0px 10% 0px',
-      threshold: 0,
-    });
-
-    workflowObserver.observe(workflowSection);
-  } else {
-    startSurfaceLoop();
-  }
-
-  updateSurfaceRail();
+  surfaceGrid.addEventListener('scroll', updateArrowState, { passive: true });
+  window.addEventListener('resize', updateArrowState);
+  updateArrowState();
 }
