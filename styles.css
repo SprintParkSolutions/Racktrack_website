@@ -5022,7 +5022,7 @@ html:not(.solutions-motion) .surface-grid article { opacity: 1; transform: none;
    just blank space here once the redundant proof-strip was removed. */
 .why-compare-caption {
   max-width: 46ch;
-  margin: 48px auto 0;
+  margin: 76px auto 0;
   color: var(--ink);
   font-family: var(--font-display);
   font-size: clamp(20px, 2.4vw, 27px);
