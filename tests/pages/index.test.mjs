@@ -39,12 +39,13 @@ test("index.html: stylesheet is cache-busted", () => {
 // (verified via jsdom), not the older 5-chapter framing some project docs
 // still describe — see AGENTS.md's note that only world-timeline.js's own
 // section is authoritative for Ch4-8, everything else there is historical.
-test("index.html: top-level sections (scan sequence, bridge, world story, proof tour, cta)", () => {
+// The proof-tour floor-plan walkthrough section was removed per request —
+// only 4 top-level sections remain.
+test("index.html: top-level sections (scan sequence, bridge, world story, cta)", () => {
   assertTopLevelSections(document, [
     "section.sequence-story",
     "section.story-bridge",
     "section.world-story",
-    "section.proof-tour",
     "section.home-cta",
   ]);
 });
@@ -54,9 +55,9 @@ test("index.html: continuous world-story has all 5 narrative beats", () => {
   assert.equal(beats.length, 5, `expected 5 world-story beats, found ${beats.length}`);
 });
 
-test("index.html: proof tour has all 6 floor-plan views", () => {
-  const views = document.querySelectorAll(".tour-view");
-  assert.equal(views.length, 6, `expected 6 proof-tour views, found ${views.length}`);
+test("index.html: no leftover proof-tour markup/CSS hooks", () => {
+  assert.equal(document.querySelector(".proof-tour, [data-proof-tour], .tour-view"), null,
+    "proof-tour section was removed and must not be reintroduced without being asked for again");
 });
 
 test("index.html: loads js/homepage.js, which imports world-timeline.js as a sibling", () => {
