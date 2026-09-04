@@ -382,26 +382,6 @@ body[class] .nav-dropdown {
   box-shadow: 0 24px 55px -16px rgba(16, 32, 51, 0.24), 0 4px 14px rgba(16, 32, 51, 0.06);
 }
 
-body[class] .nav-item:nth-of-type(1) .nav-dropdown::before,
-body[class] .nav-item:nth-of-type(2) .nav-dropdown::before {
-  display: block;
-  padding: 2px 12px 10px;
-  margin-bottom: 4px;
-  border-bottom: 1px solid rgba(16, 32, 51, 0.08);
-  color: var(--muted);
-  font: 700 11px var(--font-mono);
-  letter-spacing: 0.1em;
-  text-transform: uppercase;
-}
-
-body[class] .nav-item:nth-of-type(1) .nav-dropdown::before {
-  content: "Browse by role";
-}
-
-body[class] .nav-item:nth-of-type(2) .nav-dropdown::before {
-  content: "Latest articles";
-}
-
 body[class] .site-nav .nav-item .nav-dropdown a {
   padding: 11px 12px;
   font-size: 15px;
