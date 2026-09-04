@@ -1111,6 +1111,27 @@ h1 span {
   -webkit-backdrop-filter: blur(16px) saturate(150%);
 }
 
+/* .bridge-pin's grid-template-columns has hard desktop minimums
+   (minmax(330px,...) + minmax(520px,...) = ~850px combined, before gap/
+   padding) — below roughly 980px viewport width that minimum simply can't
+   be satisfied, so the grid overflows the viewport horizontally and the
+   evidence-card-deck spills off the right edge. Stack to a single column
+   below that width instead; the scroll-driven card reveal (opacity/
+   transform via the same --bridge-* custom properties) keeps working
+   unchanged, this only fixes the layout that was physically too wide. */
+@media (max-width: 980px) {
+  .bridge-pin {
+    grid-template-columns: 1fr;
+    min-height: auto;
+    padding-top: 90px;
+    padding-bottom: 48px;
+  }
+
+  .bridge-card-deck {
+    min-height: min(460px, 56dvh);
+  }
+}
+
 /* Split-layout pinned chapters (Chapter 4 onward): text column + a
    contained animation column at ~50% width, instead of full-bleed canvas
    with an overlay caption. Frame sequences are sparse here (crossfade-
@@ -1907,6 +1928,16 @@ h1 span {
     max-width: 42ch;
     font-size: 14px;
   }
+
+  /* .bridge-pin's desktop grid has hard column minimums (330px + 520px),
+     so between roughly 640-980px it no longer fits the viewport and the
+     evidence-card deck gets clipped by an ancestor's overflow — collapse
+     to a single stacked column here, matching .split-pin's approach. */
+  .bridge-pin {
+    grid-template-columns: 1fr;
+    grid-template-rows: auto auto;
+    gap: 40px;
+  }
 }
 
 @media (max-width: 640px) {
@@ -1960,6 +1991,30 @@ h1 span {
        which was dropping characters instead of wrapping. Give it real
        room instead of a viewport-scaled sliver. */
     width: calc(100% - 48px);
+  }
+
+  /* The canvas draws its own contain-fit crop in JS (see the `contain`
+     branch in drawCover(), homepage.js) so the whole rack is always in
+     frame on phones instead of cover-fit cropping most of it away. The
+     canvas context is created with {alpha:false} (opaque) — if its own
+     CSS box stayed 100dvh tall while the contained image only fills a
+     16:9 slice of it, the leftover space would clearRect() to solid
+     black, not transparent. Sizing the box itself to the source frames'
+     16:9 ratio leaves nothing left over to fill in the first place. The
+     poster <img> gets the equivalent native object-fit:contain, since it
+     doesn't go through the JS draw path at all. Both anchor to the top
+     of the still-100dvh pin so empty space lands below the image, next
+     to the text, instead of splitting evenly above and below it. */
+  .sequence-poster,
+  .sequence-canvas {
+    align-self: start;
+    height: auto;
+    aspect-ratio: 16 / 9;
+    max-height: 78dvh;
+  }
+
+  .sequence-poster {
+    object-fit: contain;
   }
 
   .hero-copy {
@@ -3322,6 +3377,10 @@ h1 span {
   grid-template-columns: minmax(0, 0.72fr) minmax(0, 1fr);
   gap: clamp(48px, 10vw, 150px);
   align-items: start;
+}
+
+.contact-request-inner > * {
+  min-width: 0;
 }
 
 .contact-request h2,
@@ -4741,6 +4800,14 @@ html:not(.solutions-motion) .surface-grid article { opacity: 1; transform: none;
 
   .why-deck-controls {
     display: none;
+  }
+
+  /* Cards stack sequentially in normal flow here instead of overlapping
+     absolutely, so the anti-double-exposure rule that hides non-front
+     copy (needed only when cards are stacked on top of each other) would
+     otherwise leave a blank gap under every card but the first. */
+  .why-deck-card:not(.is-front) .why-deck-copy {
+    opacity: 1;
   }
 }
 

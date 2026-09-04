@@ -181,7 +181,17 @@ function drawCover(targetContext, targetWidth, targetHeight, image) {
   let drawX = 0;
   let drawY = 0;
 
-  if (imageRatio > canvasRatio) {
+  // Below 640px, cover-fit crops this landscape rack photo down to a
+  // narrow vertical sliver (scale = boxHeight / imageHeight, cropping most
+  // of the width) — the rack itself only ever fills a fraction of that
+  // sliver, reading as "the rack isn't fully visible." Switching to
+  // contain-fit math (the same branch condition, inverted) shows the
+  // entire source frame at once instead, letterboxed left/right, so the
+  // whole rack is always in frame. Desktop keeps the original cover crop.
+  const contain = window.innerWidth <= 640;
+  const fitToHeight = contain ? imageRatio <= canvasRatio : imageRatio > canvasRatio;
+
+  if (fitToHeight) {
     drawHeight = targetHeight;
     drawWidth = drawHeight * imageRatio;
     drawX = (targetWidth - drawWidth) / 2;
