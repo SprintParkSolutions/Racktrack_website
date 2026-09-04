@@ -2036,35 +2036,26 @@ h1 span {
   }
 
   .bridge-card-deck {
-    min-height: 640px;
+    min-height: auto;
   }
 
+  /* Plain stacked cards, one below the next, instead of the desktop
+     fanned/cascading overlap — the partial overlap read as cards
+     covering each other's text on narrow phones. */
   .evidence-card {
-    width: min(292px, calc(100vw - 58px));
-    min-height: 260px;
+    position: static;
+    width: 100%;
+    min-height: auto;
+    margin: 0 0 20px;
+    transform: none;
+  }
+
+  .evidence-card:last-child {
+    margin-bottom: 0;
   }
 
   .evidence-card h3 {
     font-size: 25px;
-  }
-
-  .evidence-card-scan {
-    left: 0;
-    top: 0;
-    transform: none;
-  }
-
-  .evidence-card-model {
-    left: 22px;
-    top: 178px;
-    transform: none;
-  }
-
-  .evidence-card-proof {
-    left: 0;
-    right: auto;
-    top: 356px;
-    transform: none;
   }
 
   .evidence-visual {
