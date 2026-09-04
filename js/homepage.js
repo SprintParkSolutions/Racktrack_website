@@ -230,8 +230,15 @@ function updateHeroMediaState() {
     return;
   }
 
+  // rect.top is measured from the viewport edge, but the header sits in
+  // normal document flow above the hero, so on load (before any scroll)
+  // rect.top already equals the header's own height, not 0. Without
+  // subtracting that out, this reads as "already scrolled past" and the
+  // hero starts fully faded out until the user scrolls roughly a header's
+  // height down.
+  const headerHeight = document.querySelector(".site-header")?.getBoundingClientRect().height || 0;
   const rect = sequence.getBoundingClientRect();
-  const reveal = 1 - clamp(rect.top / 80);
+  const reveal = 1 - clamp((rect.top - headerHeight) / 80);
   sequence.style.setProperty("--handoff-visibility", reveal.toFixed(3));
 }
 

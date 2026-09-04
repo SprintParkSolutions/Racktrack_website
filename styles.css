@@ -630,10 +630,12 @@ h1 span {
   opacity: 1;
 }
 
-.sequence-story.is-ready .sequence-poster {
-  opacity: 0;
-  transition: opacity 260ms ease;
-}
+/* The canvas (opaque, alpha:false) sits above the poster and fully covers
+   it once frames are drawn, so the poster no longer needs to fade out to
+   hand off visually — leaving it at full opacity underneath means a real
+   photo is always showing even in the rare case the canvas fails to paint
+   (a stalled decode, a dropped compositor frame), instead of the page
+   falling through to the section's plain background gradient. */
 
 .sequence-scrim {
   grid-area: 1 / 1;
