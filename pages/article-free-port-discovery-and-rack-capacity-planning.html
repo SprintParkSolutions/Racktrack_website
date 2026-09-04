@@ -3,103 +3,92 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <meta name="description" content="Teams plan capacity better when they can see which ports are actually open, not which ones a spreadsheet says should be." />
-    <title>Planning your next rack without guessing at free ports | RackTrack</title>
+    <meta name="description" content="Teams plan capacity better when they can see which switch ports are truly available instead of relying on outdated assumptions." />
+    <title>Free Port Discovery and Rack Capacity Planning | RackTrack</title>
     <link rel="icon" href="../assets/logo.jpg" />
-    <link rel="stylesheet" href="../styles.css?v=article-3-navmenubcd-navicons-cleanup2" />
+    <link rel="stylesheet" href="../styles.css?v=article-4-source-port" />
     <script type="module" src="../js/article.js?v=3"></script>
     <script defer src="../js/cookie-consent.js"></script>
 </head>
   <body class="article-page">
     <a class="skip-link" href="#main-content">Skip to content</a>
-    
     <header class="site-header">
       <a class="brand" href="../index.html" aria-label="RackTrack home"><span class="brand-mark"><img src="../assets/logo.jpg" alt="" /></span><span class="brand-name">RackTrack</span></a>
       <input type="checkbox" id="nav-toggle" class="nav-toggle-input" autocomplete="off" /><label for="nav-toggle" class="nav-toggle-btn" aria-label="Menu"><span></span></label><nav class="site-nav" aria-label="Primary navigation">
         <a href="why-racktrack.html">Why RackTrack</a>
         <a href="solutions.html">Solutions</a>
         <div class="nav-item"><a href="use-cases.html">Use Cases<svg class="nav-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg></a><input type="checkbox" id="nav-sub-usecases" class="nav-sub-toggle" autocomplete="off" /><label for="nav-sub-usecases" class="nav-sub-toggle-btn" aria-label="Expand Use Cases submenu"></label><div class="nav-dropdown"><a href="use-case-infrastructure-data-center-leaders.html">Infrastructure &amp; Data Center Leaders</a><a href="use-case-network-architects-engineers.html">Network Architects &amp; Engineers</a><a href="use-case-security-vulnerability-teams.html">Security &amp; Vulnerability Teams</a><a href="use-case-compliance-audit-owners.html">Compliance &amp; Audit Owners</a><a href="use-case-incident-responders-on-call.html">Incident Responders &amp; On-Call</a><a href="use-case-m-a-migration-teams.html">M&amp;A &amp; Migration Teams</a></div></div>
-        <div class="nav-item"><a class="is-current" href="resources.html" aria-current="page">Resources<svg class="nav-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg></a><input type="checkbox" id="nav-sub-resources" class="nav-sub-toggle" autocomplete="off" /><label for="nav-sub-resources" class="nav-sub-toggle-btn" aria-label="Expand Resources submenu"></label><div class="nav-dropdown"><a href="article-why-infrastructure-records-are-wrong.html">Why your infrastructure records are wrong more often than you think</a><a href="article-what-it-costs-when-nobody-checks-the-rack.html">What it actually costs when nobody checks the rack</a><a href="article-what-network-verified-actually-means.html">What we mean when we say a record is "verified"</a><a href="article-how-infrastructure-teams-prepare-for-soc-2-audits.html">Getting ready for a SOC 2 audit without the scramble</a></div></div>
+        <div class="nav-item"><a class="is-current" href="resources.html" aria-current="page">Resources<svg class="nav-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg></a><input type="checkbox" id="nav-sub-resources" class="nav-sub-toggle" autocomplete="off" /><label for="nav-sub-resources" class="nav-sub-toggle-btn" aria-label="Expand Resources submenu"></label><div class="nav-dropdown"><a href="article-why-infrastructure-records-are-wrong.html">Why every enterprise CMDB is 40% wrong &mdash; and the architecture that closes the gap</a><a href="article-what-it-costs-when-nobody-checks-the-rack.html">The hidden cost of unreconciled infrastructure: quantifying topology debt</a><a href="article-what-network-verified-actually-means.html">What "Network-Verified" actually means</a><a href="article-how-infrastructure-teams-prepare-for-soc-2-audits.html">How Infrastructure Teams Prepare for SOC 2 Audits</a></div></div>
         <a href="trust-security.html">Trust &amp; Security</a> <a href="contact.html">Contact Us</a>
       </nav>
       <a class="nav-cta" href="#sign-in">Sign In</a>
     </header>
 
     <main id="main-content">
-      <article class="ap-article">
-        <header class="ap-header">
-          <div class="ap-frame">
-            <a class="ap-back" href="resources.html">&larr; Back to Resources</a>
-            <p class="ap-kicker"><span>INF·03</span><span>Infrastructure</span><span>4 min read</span></p>
-            <h1>Planning your next rack without guessing at free ports</h1>
-            <p class="ap-dek">Teams plan capacity better when they can see which ports are actually open, not which ones a spreadsheet says should be.</p>
-          </div>
-        </header>
+      <section class="art-hero">
+        <div class="rs-frame">
+          <a class="art-back" href="resources.html">&larr; All articles</a>
+          <p class="art-kicker">Infrastructure</p>
+          <h1 class="art-title">Free Port Discovery and Rack Capacity Planning</h1>
+          <p class="art-standfirst">Teams plan capacity better when they can see which switch ports are truly available instead of relying on outdated assumptions.</p>
+        </div>
+      </section>
 
-        <figure class="ap-hero-shot rs-treat-b"><img src="../assets/resources/media-server-ports-free.jpg" alt="" loading="lazy" decoding="async" /></figure>
+      <figure class="art-hero-fig">
+        <img src="../assets/articles/media-art-ports-faceplate.jpg" alt="A switch faceplate with ports numbered sixteen to thirty-three, some carrying link indicators" loading="eager" decoding="async" />
+        <div class="art-capcol"><figcaption>Ports 16 to 33 on a single switch face. Which of them is genuinely free is a question the faceplate answers and the spreadsheet often does not.</figcaption></div>
+      </figure>
 
-        <div class="ap-frame ap-layout">
-          <aside class="ap-toc" aria-label="On this page">
-            <p class="ap-toc-label">On this page</p>
-            <nav>
-              <a href="#guessing-game">The guessing game</a>
-              <a href="#spreadsheet-lies">Why the spreadsheet quietly goes wrong</a>
-              <a href="#real-cost">What guessing wrong costs</a>
-              <a href="#planning-from-real">Planning from what's actually open</a>
-            </nav>
-          </aside>
-          <div class="ap-body">
-            <p class="ap-lead">Capacity planning usually starts with a spreadsheet's confident answer to a question nobody actually walked over and checked: how many ports are really free?</p>
-              <section id="guessing-game" data-reveal>
-                <h2>The guessing game most teams play</h2>
-                <p>Planners trust the record because checking every port physically takes too long to do for every project. That's a reasonable trade-off, right up until the record turns out to be wrong on install day.</p>
-              </section>
-
-            <blockquote class="ap-pullquote" data-reveal>&ldquo;A free port on paper and a free port in the rack are two different claims, and only one of them will actually take a cable.&rdquo;</blockquote>
-
-              <section id="spreadsheet-lies" data-reveal>
-                <h2>Why the spreadsheet quietly goes wrong</h2>
-                <p>The record goes wrong in both directions, quietly:</p>
-                <ul class="ap-beats" data-reveal>
-                  <li>A port freed up months ago is still marked in-use.</li>
-                  <li>A port marked free already has something plugged into it, unlogged.</li>
-                  <li>Neither mistake gets caught until someone shows up with a cable.</li>
-                </ul>
-              </section>
-
-            <div class="rs-field-stat" data-reveal>
-              <span class="rs-stat-num">1 in 4</span>
-              <p>ports flagged “available” in a sample sweep turned out to already be occupied.</p>
+      <article>
+        <div class="art-body">
+          <div class="art-col">
+            <p class="art-lede">Free port discovery sounds simple, but it becomes difficult when rack documentation, switch usage, and physical cabling no longer tell the same story. Good capacity planning starts by resolving that gap. This article explains why visually verified port availability helps infrastructure teams plan growth, reduce wasted time, and avoid avoidable deployment delays.</p>
+            <div class="art-brief">
+              <p class="art-label">Key takeaways</p>
+              <ul>
+                <li>Available switch capacity is often overstated or understated in static records.</li>
+                <li>Physical port visibility helps teams plan adds, moves, and expansions faster.</li>
+                <li>Capacity conversations improve when port availability is verified, not guessed.</li>
+              </ul>
             </div>
-
-              <section id="real-cost" data-reveal>
-                <h2>What guessing wrong actually costs</h2>
-                <p>It's a failed install day. It's an emergency reshuffle nobody planned for. It's a rollout that slips because the port everyone was counting on wasn't actually there.</p>
-              </section>
-
-            <div class="ap-plain" data-reveal>
-              <p class="ap-plain-label">In plain terms</p>
-              <p>It's the difference between reserving a parking spot from a map and actually driving up to find a car already sitting in it.</p>
-            </div>
-
-              <section id="planning-from-real" data-reveal>
-                <h2>Planning from what's actually open</h2>
-                <p>Use a current physical sweep as the starting point for the next rack plan, instead of trusting a spreadsheet that hasn't been checked against reality since it was written.</p>
-              </section>
+            <section class="art-sec" data-reveal>
+              <p class="art-label">The planning problem</p>
+              <h2 class="art-h2">Port availability is rarely as clear as it looks in the spreadsheet.</h2>
+              <p>Many teams assume they know how much switch capacity is available because a diagram, spreadsheet, or DCIM record says a set of ports is still open. In reality, field changes, patch updates, temporary links, and incomplete documentation can make those records unreliable. A port that looks available in the system may already be in use, while a port that appears occupied may no longer serve a production workload.</p>
+            </section>
+            <figure class="art-fig" data-reveal>
+              <img src="../assets/articles/media-art-ports-panel.jpg" alt="Yellow single-mode fibre patched across labelled green distribution panels in a cabinet" loading="lazy" decoding="async" />
+              <figcaption>Patched, labelled, and in use &mdash; or patched, labelled, and abandoned in place. Only the rack shows which.</figcaption>
+            </figure>
+            <section class="art-sec" data-reveal>
+              <h2 class="art-h2">Capacity planning depends on the physical truth of the rack.</h2>
+              <p>Free port discovery affects more than cable work. It impacts deployment speed, expansion planning, migration readiness, and refresh timelines. When teams cannot confidently identify spare switch capacity, every new project starts with extra validation effort. That slows down implementation and creates avoidable uncertainty during change windows.</p>
+            </section>
+            <blockquote class="art-quote" data-reveal><p>A port that looks available in the system may already be in use, while a port that appears occupied may no longer serve a production workload.</p></blockquote>
+            <section class="art-sec" data-reveal>
+              <p class="art-label">What strong teams do</p>
+              <h2 class="art-h2">They verify physical port state before they promise capacity.</h2>
+              <p>The most effective infrastructure teams compare logical switch data with visible rack conditions. They confirm which ports are patched, which are unused, and whether cabling matches the expected topology before committing new capacity to a project. This approach reduces surprises and turns port planning into a faster, more defensible workflow.</p>
+            </section>
           </div>
         </div>
-
-        <div class="ap-frame ap-related">
-          <p class="ap-related-label">Keep reading</p>
-          <div class="ap-related-grid">
-          <a class="ap-related-card" href="article-dcim-vs-physical-reality-why-the-gap-matters.html">
-            <figure class="ap-related-shot rs-treat-b"><img src="../assets/resources/media-crash-cart-racks.jpg" alt="" loading="lazy" decoding="async" /></figure>
-            <h3>Your DCIM platform shows a plan. The rack shows what's real.</h3>
-          </a>
-          <a class="ap-related-card" href="article-what-network-verified-actually-means.html">
-            <figure class="ap-related-shot rs-treat-a"><img src="../assets/resources/media-port-link-led.jpg" alt="" loading="lazy" decoding="async" /></figure>
-            <h3>What we mean when we say a record is “verified”</h3>
-          </a>
+        <figure class="art-fig art-bleed" data-reveal>
+          <img src="../assets/articles/media-art-ports-field.jpg" alt="A high-density fibre patch field with rows of LC couplers and teal patch cords" loading="lazy" decoding="async" />
+          <div class="art-capcol"><figcaption>At this density, capacity questions cannot be settled from memory.</figcaption></div>
+        </figure>
+        <div class="art-body">
+          <div class="art-col">
+            <section class="art-sec" data-reveal>
+              <p class="art-label">Operational impact</p>
+              <h2 class="art-h2">Accurate port visibility saves time across every rack change.</h2>
+              <p>When port availability is clear, engineers spend less time tracing cables, second-guessing diagrams, or reopening change plans. New installs move faster because the team starts from a verified view of the rack instead of a debated one. That creates smoother provisioning, cleaner rack layouts, and more reliable infrastructure planning over time.</p>
+            </section>
+            <div class="art-more">
+              <p class="art-label">Other articles</p>
+              <a class="art-more-item" href="article-what-network-verified-actually-means.html"><span class="art-more-kicker">Infrastructure</span><span class="art-more-title">What "Network-Verified" Actually Means</span></a>
+              <a class="art-more-item" href="article-the-hidden-cost-of-wrong-rack-inventory.html"><span class="art-more-kicker">Finance</span><span class="art-more-title">The Hidden Cost of Wrong Rack Inventory</span></a>
+              <a class="art-more-item" href="article-dcim-vs-physical-reality-why-the-gap-matters.html"><span class="art-more-kicker">Operations</span><span class="art-more-title">DCIM vs. Physical Reality: Why the Gap Matters</span></a>
+            </div>
           </div>
         </div>
       </article>
@@ -107,8 +96,7 @@
       <section class="rs-cta">
         <div class="rs-frame rs-cta-inner">
           <div>
-            <p class="eyebrow">PUT IT INTO PRACTICE</p>
-            <h2>Read the theory.<br /><em>Then verify your own rack.</em></h2>
+            <h2>Read the theory.<br /><em>Then run it on your rack.</em></h2>
           </div>
           <a class="button-primary" href="contact.html">Request a platform brief <span aria-hidden="true">&rarr;</span></a>
         </div>

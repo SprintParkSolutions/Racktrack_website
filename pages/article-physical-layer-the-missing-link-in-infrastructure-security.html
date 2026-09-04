@@ -3,103 +3,80 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <meta name="description" content="Network monitoring only shows what's active on the network, not what's actually sitting in the rack. That blind spot is where risk builds up." />
-    <title>The security gap your network tools can't see | RackTrack</title>
+    <meta name="description" content="Network tools see what is active on the network, not what is physically in the rack. That gap is where risk accumulates." />
+    <title>Physical Layer: The Missing Link in Infrastructure Security | RackTrack</title>
     <link rel="icon" href="../assets/logo.jpg" />
-    <link rel="stylesheet" href="../styles.css?v=article-3-navmenubcd-navicons-cleanup2" />
+    <link rel="stylesheet" href="../styles.css?v=article-4-source-port" />
     <script type="module" src="../js/article.js?v=3"></script>
     <script defer src="../js/cookie-consent.js"></script>
 </head>
   <body class="article-page">
     <a class="skip-link" href="#main-content">Skip to content</a>
-    
     <header class="site-header">
       <a class="brand" href="../index.html" aria-label="RackTrack home"><span class="brand-mark"><img src="../assets/logo.jpg" alt="" /></span><span class="brand-name">RackTrack</span></a>
       <input type="checkbox" id="nav-toggle" class="nav-toggle-input" autocomplete="off" /><label for="nav-toggle" class="nav-toggle-btn" aria-label="Menu"><span></span></label><nav class="site-nav" aria-label="Primary navigation">
         <a href="why-racktrack.html">Why RackTrack</a>
         <a href="solutions.html">Solutions</a>
         <div class="nav-item"><a href="use-cases.html">Use Cases<svg class="nav-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg></a><input type="checkbox" id="nav-sub-usecases" class="nav-sub-toggle" autocomplete="off" /><label for="nav-sub-usecases" class="nav-sub-toggle-btn" aria-label="Expand Use Cases submenu"></label><div class="nav-dropdown"><a href="use-case-infrastructure-data-center-leaders.html">Infrastructure &amp; Data Center Leaders</a><a href="use-case-network-architects-engineers.html">Network Architects &amp; Engineers</a><a href="use-case-security-vulnerability-teams.html">Security &amp; Vulnerability Teams</a><a href="use-case-compliance-audit-owners.html">Compliance &amp; Audit Owners</a><a href="use-case-incident-responders-on-call.html">Incident Responders &amp; On-Call</a><a href="use-case-m-a-migration-teams.html">M&amp;A &amp; Migration Teams</a></div></div>
-        <div class="nav-item"><a class="is-current" href="resources.html" aria-current="page">Resources<svg class="nav-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg></a><input type="checkbox" id="nav-sub-resources" class="nav-sub-toggle" autocomplete="off" /><label for="nav-sub-resources" class="nav-sub-toggle-btn" aria-label="Expand Resources submenu"></label><div class="nav-dropdown"><a href="article-why-infrastructure-records-are-wrong.html">Why your infrastructure records are wrong more often than you think</a><a href="article-what-it-costs-when-nobody-checks-the-rack.html">What it actually costs when nobody checks the rack</a><a href="article-what-network-verified-actually-means.html">What we mean when we say a record is "verified"</a><a href="article-how-infrastructure-teams-prepare-for-soc-2-audits.html">Getting ready for a SOC 2 audit without the scramble</a></div></div>
+        <div class="nav-item"><a class="is-current" href="resources.html" aria-current="page">Resources<svg class="nav-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg></a><input type="checkbox" id="nav-sub-resources" class="nav-sub-toggle" autocomplete="off" /><label for="nav-sub-resources" class="nav-sub-toggle-btn" aria-label="Expand Resources submenu"></label><div class="nav-dropdown"><a href="article-why-infrastructure-records-are-wrong.html">Why every enterprise CMDB is 40% wrong &mdash; and the architecture that closes the gap</a><a href="article-what-it-costs-when-nobody-checks-the-rack.html">The hidden cost of unreconciled infrastructure: quantifying topology debt</a><a href="article-what-network-verified-actually-means.html">What "Network-Verified" actually means</a><a href="article-how-infrastructure-teams-prepare-for-soc-2-audits.html">How Infrastructure Teams Prepare for SOC 2 Audits</a></div></div>
         <a href="trust-security.html">Trust &amp; Security</a> <a href="contact.html">Contact Us</a>
       </nav>
       <a class="nav-cta" href="#sign-in">Sign In</a>
     </header>
 
     <main id="main-content">
-      <article class="ap-article">
-        <header class="ap-header">
-          <div class="ap-frame">
-            <a class="ap-back" href="resources.html">&larr; Back to Resources</a>
-            <p class="ap-kicker"><span>SEC·01</span><span>Security</span><span>5 min read</span></p>
-            <h1>The security gap your network tools can't see</h1>
-            <p class="ap-dek">Network monitoring only shows what's active on the network, not what's actually sitting in the rack. That blind spot is where risk builds up.</p>
-          </div>
-        </header>
-
-        <figure class="ap-hero-shot rs-treat-c"><img src="../assets/resources/media-access-badge.jpg" alt="" loading="lazy" decoding="async" /></figure>
-
-        <div class="ap-frame ap-layout">
-          <aside class="ap-toc" aria-label="On this page">
-            <p class="ap-toc-label">On this page</p>
-            <nav>
-              <a href="#what-tools-see">What your tools see</a>
-              <a href="#blind-spot">Where the blind spot comes from</a>
-              <a href="#why-it-matters">Why it matters</a>
-              <a href="#closing-it">Closing the blind spot</a>
-            </nav>
-          </aside>
-          <div class="ap-body">
-            <p class="ap-lead">Ask a security team to list every device physically installed across their racks, and most will hand you a network report instead: a list of what's talking, not what's there.</p>
-              <section id="what-tools-see" data-reveal>
-                <h2>What your monitoring stack actually sees</h2>
-                <p>Network monitoring is built to watch traffic and addressable devices, and it does that well. But anything dormant, misconfigured, or simply not yet plugged into the network falls outside that view by design, not by accident.</p>
-              </section>
-
-            <blockquote class="ap-pullquote" data-reveal>&ldquo;A device sitting quietly in a rack, powered but not talking, is invisible to almost every tool your security team already owns.&rdquo;</blockquote>
-
-              <section id="blind-spot" data-reveal>
-                <h2>Where the blind spot comes from</h2>
-                <p>It's rarely dramatic. It's usually:</p>
-                <ul class="ap-beats" data-reveal>
-                  <li>Leftover hardware from a migration that was never physically removed.</li>
-                  <li>Vendor equipment installed during a maintenance window, with no ticket filed.</li>
-                  <li>Decommissioned gear unplugged from the network, but never taken out of the rack.</li>
-                </ul>
-              </section>
-
-            <div class="rs-field-stat" data-reveal>
-              <span class="rs-stat-num">1 in 5</span>
-              <p>racks reviewed in a physical sweep turns up at least one device nobody on the security team knew was there.</p>
-            </div>
-
-              <section id="why-it-matters" data-reveal>
-                <h2>Why this actually matters</h2>
-                <p>An unmonitored device is unpatched, uncontrolled, and absent from every dashboard your team relies on, which means nobody's job is currently to worry about it, even though it's real, powered, and sitting a few feet away.</p>
-              </section>
-
-            <div class="ap-plain" data-reveal>
-              <p class="ap-plain-label">In plain terms</p>
-              <p>Your firewall and your inventory system can both be completely accurate about what they can see, and still both be wrong about what's actually in the room.</p>
-            </div>
-
-              <section id="closing-it" data-reveal>
-                <h2>Closing the physical blind spot</h2>
-                <p>Closing that gap means pairing what a physical sweep finds with what the network already reports, and reconciling the two lists against each other, so anything present but silent gets flagged, instead of quietly forgotten.</p>
-              </section>
-          </div>
+      <section class="art-hero">
+        <div class="rs-frame">
+          <a class="art-back" href="resources.html">&larr; All articles</a>
+          <p class="art-kicker">Security</p>
+          <h1 class="art-title">Physical Layer: The Missing Link in Infrastructure Security</h1>
+          <p class="art-standfirst">Network tools see what is active on the network, not what is physically in the rack. That gap is where risk accumulates.</p>
         </div>
+      </section>
 
-        <div class="ap-frame ap-related">
-          <p class="ap-related-label">Keep reading</p>
-          <div class="ap-related-grid">
-          <a class="ap-related-card" href="article-how-infrastructure-teams-prepare-for-soc-2-audits.html">
-            <figure class="ap-related-shot rs-treat-a"><img src="../assets/resources/media-audit-magnifier.jpg" alt="" loading="lazy" decoding="async" /></figure>
-            <h3>Getting ready for a SOC 2 audit without the scramble</h3>
-          </a>
-          <a class="ap-related-card" href="article-why-infrastructure-records-are-wrong.html">
-            <figure class="ap-related-shot rs-treat-a"><img src="../assets/resources/media-resources-band.jpg" alt="" loading="lazy" decoding="async" /></figure>
-            <h3>Why your infrastructure records are wrong more often than you think</h3>
-          </a>
+      <figure class="art-hero-fig">
+        <img src="../assets/articles/media-art-physical-plates.jpg" alt="Manufacturer nameplates on the bezels of three rack-mounted storage chassis under low blue light" loading="eager" decoding="async" />
+        <div class="art-capcol"><figcaption>A nameplate on a bezel is often the only thing in the room that says what a chassis actually is.</figcaption></div>
+      </figure>
+
+      <article>
+        <div class="art-body">
+          <div class="art-col">
+            <p class="art-lede">Security programs often assume inventory starts from the network, but many infrastructure risks begin before a device is properly classified or monitored there. This article looks at the blind spots created when security teams cannot reliably connect physical presence to logical visibility.</p>
+            <div class="art-brief">
+              <p class="art-label">Key takeaways</p>
+              <ul>
+                <li>Network visibility does not equal physical completeness.</li>
+                <li>Untracked physical devices create real security exposure.</li>
+                <li>Security posture improves when rack-level truth is part of inventory.</li>
+              </ul>
+            </div>
+            <section class="art-sec" data-reveal>
+              <p class="art-label">The security gap</p>
+              <h2 class="art-h2">If it is not in inventory, it is hard to govern.</h2>
+              <p>Switches, appliances, patch equipment, out-of-band systems, and legacy devices can all fall outside traditional endpoint-centered tooling. If a security team cannot confirm what is physically present, vulnerability prioritization starts on an incomplete foundation.</p>
+            </section>
+            <section class="art-sec" data-reveal>
+              <p class="art-label">Why teams miss it</p>
+              <h2 class="art-h2">Logical tools answer a different question.</h2>
+              <p>Most security tooling is excellent at showing what is reachable, active, scanned, or authenticated. It is not designed to prove what is physically installed in each rack location. That distinction matters whenever ownership, firmware posture, or unauthorized hardware is in question.</p>
+            </section>
+            <blockquote class="art-quote" data-reveal><p>If a security team cannot confirm what is physically present, vulnerability prioritization starts on an incomplete foundation.</p></blockquote>
+            <figure class="art-fig" data-reveal>
+              <img src="../assets/articles/media-art-physical-array.jpg" alt="A densely populated equipment rack in near-darkness, lit only by red and green status indicators" loading="lazy" decoding="async" />
+              <figcaption>Everything here is physically present. Only some of it is reachable, scanned or authenticated.</figcaption>
+            </figure>
+            <section class="art-sec" data-reveal>
+              <p class="art-label">What improves</p>
+              <h2 class="art-h2">Physical awareness strengthens security operations.</h2>
+              <p>When security teams can reconcile physical presence with network state, they gain a cleaner inventory baseline for remediation programs, exception handling, and audit preparation. The outcome is not just more data. It is better scoping.</p>
+            </section>
+            <div class="art-more">
+              <p class="art-label">Other articles</p>
+              <a class="art-more-item" href="article-what-network-verified-actually-means.html"><span class="art-more-kicker">Infrastructure</span><span class="art-more-title">What "Network-Verified" Actually Means</span></a>
+              <a class="art-more-item" href="article-how-infrastructure-teams-prepare-for-soc-2-audits.html"><span class="art-more-kicker">Compliance</span><span class="art-more-title">How Infrastructure Teams Prepare for SOC 2 Audits</span></a>
+              <a class="art-more-item" href="article-why-infrastructure-records-are-wrong.html"><span class="art-more-kicker">Operations</span><span class="art-more-title">Why every enterprise CMDB is 40% wrong &mdash; and the architecture that closes the gap</span></a>
+            </div>
           </div>
         </div>
       </article>
@@ -107,8 +84,7 @@
       <section class="rs-cta">
         <div class="rs-frame rs-cta-inner">
           <div>
-            <p class="eyebrow">PUT IT INTO PRACTICE</p>
-            <h2>Read the theory.<br /><em>Then verify your own rack.</em></h2>
+            <h2>Read the theory.<br /><em>Then run it on your rack.</em></h2>
           </div>
           <a class="button-primary" href="contact.html">Request a platform brief <span aria-hidden="true">&rarr;</span></a>
         </div>

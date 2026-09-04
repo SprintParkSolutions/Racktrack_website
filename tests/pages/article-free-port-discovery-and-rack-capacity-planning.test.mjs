@@ -34,18 +34,22 @@ test("article-free-port-discovery-and-rack-capacity-planning.html: stylesheet is
   assertCacheBustedStylesheet(document);
 });
 
-test("article-free-port-discovery-and-rack-capacity-planning.html: top-level sections (article body, cta)", () => {
+test("article-free-port-discovery-and-rack-capacity-planning.html: top-level sections (hero, hero photo, article body, cta)", () => {
   assertTopLevelSections(document, [
-    "article.ap-article",
+    "section.art-hero",
+    "figure.art-hero-fig",
+    "article",
     "section.rs-cta",
   ]);
 });
 
-test("article-free-port-discovery-and-rack-capacity-planning.html: table of contents is present", () => {
-  assert.ok(document.querySelector(".ap-toc"), "article must have a table of contents");
+test("article-free-port-discovery-and-rack-capacity-planning.html: has an all-articles back link to the Resources hub", () => {
+  const back = document.querySelector(".art-back");
+  assert.ok(back, "article must have a back link to Resources");
+  assert.equal(back.getAttribute("href"), "resources.html");
 });
 
 test("article-free-port-discovery-and-rack-capacity-planning.html: has related-article links", () => {
-  const related = document.querySelectorAll(".ap-related-grid a");
+  const related = document.querySelectorAll(".art-more-item");
   assert.ok(related.length > 0, "article must link to at least one related piece");
 });

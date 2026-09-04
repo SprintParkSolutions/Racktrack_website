@@ -34,18 +34,22 @@ test("article-the-hidden-cost-of-wrong-rack-inventory.html: stylesheet is cache-
   assertCacheBustedStylesheet(document);
 });
 
-test("article-the-hidden-cost-of-wrong-rack-inventory.html: top-level sections (article body, cta)", () => {
+test("article-the-hidden-cost-of-wrong-rack-inventory.html: top-level sections (hero, hero photo, article body, cta)", () => {
   assertTopLevelSections(document, [
-    "article.ap-article",
+    "section.art-hero",
+    "figure.art-hero-fig",
+    "article",
     "section.rs-cta",
   ]);
 });
 
-test("article-the-hidden-cost-of-wrong-rack-inventory.html: table of contents is present", () => {
-  assert.ok(document.querySelector(".ap-toc"), "article must have a table of contents");
+test("article-the-hidden-cost-of-wrong-rack-inventory.html: has an all-articles back link to the Resources hub", () => {
+  const back = document.querySelector(".art-back");
+  assert.ok(back, "article must have a back link to Resources");
+  assert.equal(back.getAttribute("href"), "resources.html");
 });
 
 test("article-the-hidden-cost-of-wrong-rack-inventory.html: has related-article links", () => {
-  const related = document.querySelectorAll(".ap-related-grid a");
+  const related = document.querySelectorAll(".art-more-item");
   assert.ok(related.length > 0, "article must link to at least one related piece");
 });

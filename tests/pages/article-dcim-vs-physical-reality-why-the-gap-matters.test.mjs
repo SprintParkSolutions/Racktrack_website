@@ -34,18 +34,22 @@ test("article-dcim-vs-physical-reality-why-the-gap-matters.html: stylesheet is c
   assertCacheBustedStylesheet(document);
 });
 
-test("article-dcim-vs-physical-reality-why-the-gap-matters.html: top-level sections (article body, cta)", () => {
+test("article-dcim-vs-physical-reality-why-the-gap-matters.html: top-level sections (hero, hero photo, article body, cta)", () => {
   assertTopLevelSections(document, [
-    "article.ap-article",
+    "section.art-hero",
+    "figure.art-hero-fig",
+    "article",
     "section.rs-cta",
   ]);
 });
 
-test("article-dcim-vs-physical-reality-why-the-gap-matters.html: table of contents is present", () => {
-  assert.ok(document.querySelector(".ap-toc"), "article must have a table of contents");
+test("article-dcim-vs-physical-reality-why-the-gap-matters.html: has an all-articles back link to the Resources hub", () => {
+  const back = document.querySelector(".art-back");
+  assert.ok(back, "article must have a back link to Resources");
+  assert.equal(back.getAttribute("href"), "resources.html");
 });
 
 test("article-dcim-vs-physical-reality-why-the-gap-matters.html: has related-article links", () => {
-  const related = document.querySelectorAll(".ap-related-grid a");
+  const related = document.querySelectorAll(".art-more-item");
   assert.ok(related.length > 0, "article must link to at least one related piece");
 });

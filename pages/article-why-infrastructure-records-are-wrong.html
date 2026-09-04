@@ -3,105 +3,84 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <meta name="description" content="When the system of record drifts from what's actually installed, every decision built on it gets a little less safe, and the gap is more common than most teams assume." />
-    <title>Why your infrastructure records are wrong more often than you think | RackTrack</title>
+    <meta name="description" content="When the CMDB drifts from physical reality, every downstream decision built on it becomes less reliable - and the cost compounds across every operational workflow." />
+    <title>Why Every Enterprise CMDB Is 40% Wrong &mdash; and the Architecture That Closes the Gap | RackTrack</title>
     <link rel="icon" href="../assets/logo.jpg" />
-    <link rel="stylesheet" href="../styles.css?v=article-3-navmenubcd-navicons-cleanup2" />
+    <link rel="stylesheet" href="../styles.css?v=article-4-source-port" />
     <script type="module" src="../js/article.js?v=3"></script>
     <script defer src="../js/cookie-consent.js"></script>
 </head>
   <body class="article-page">
     <a class="skip-link" href="#main-content">Skip to content</a>
-    
     <header class="site-header">
       <a class="brand" href="../index.html" aria-label="RackTrack home"><span class="brand-mark"><img src="../assets/logo.jpg" alt="" /></span><span class="brand-name">RackTrack</span></a>
       <input type="checkbox" id="nav-toggle" class="nav-toggle-input" autocomplete="off" /><label for="nav-toggle" class="nav-toggle-btn" aria-label="Menu"><span></span></label><nav class="site-nav" aria-label="Primary navigation">
         <a href="why-racktrack.html">Why RackTrack</a>
         <a href="solutions.html">Solutions</a>
         <div class="nav-item"><a href="use-cases.html">Use Cases<svg class="nav-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg></a><input type="checkbox" id="nav-sub-usecases" class="nav-sub-toggle" autocomplete="off" /><label for="nav-sub-usecases" class="nav-sub-toggle-btn" aria-label="Expand Use Cases submenu"></label><div class="nav-dropdown"><a href="use-case-infrastructure-data-center-leaders.html">Infrastructure &amp; Data Center Leaders</a><a href="use-case-network-architects-engineers.html">Network Architects &amp; Engineers</a><a href="use-case-security-vulnerability-teams.html">Security &amp; Vulnerability Teams</a><a href="use-case-compliance-audit-owners.html">Compliance &amp; Audit Owners</a><a href="use-case-incident-responders-on-call.html">Incident Responders &amp; On-Call</a><a href="use-case-m-a-migration-teams.html">M&amp;A &amp; Migration Teams</a></div></div>
-        <div class="nav-item"><a class="is-current" href="resources.html" aria-current="page">Resources<svg class="nav-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg></a><input type="checkbox" id="nav-sub-resources" class="nav-sub-toggle" autocomplete="off" /><label for="nav-sub-resources" class="nav-sub-toggle-btn" aria-label="Expand Resources submenu"></label><div class="nav-dropdown"><a href="article-why-infrastructure-records-are-wrong.html">Why your infrastructure records are wrong more often than you think</a><a href="article-what-it-costs-when-nobody-checks-the-rack.html">What it actually costs when nobody checks the rack</a><a href="article-what-network-verified-actually-means.html">What we mean when we say a record is "verified"</a><a href="article-how-infrastructure-teams-prepare-for-soc-2-audits.html">Getting ready for a SOC 2 audit without the scramble</a></div></div>
+        <div class="nav-item"><a class="is-current" href="resources.html" aria-current="page">Resources<svg class="nav-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg></a><input type="checkbox" id="nav-sub-resources" class="nav-sub-toggle" autocomplete="off" /><label for="nav-sub-resources" class="nav-sub-toggle-btn" aria-label="Expand Resources submenu"></label><div class="nav-dropdown"><a href="article-why-infrastructure-records-are-wrong.html">Why every enterprise CMDB is 40% wrong &mdash; and the architecture that closes the gap</a><a href="article-what-it-costs-when-nobody-checks-the-rack.html">The hidden cost of unreconciled infrastructure: quantifying topology debt</a><a href="article-what-network-verified-actually-means.html">What "Network-Verified" actually means</a><a href="article-how-infrastructure-teams-prepare-for-soc-2-audits.html">How Infrastructure Teams Prepare for SOC 2 Audits</a></div></div>
         <a href="trust-security.html">Trust &amp; Security</a> <a href="contact.html">Contact Us</a>
       </nav>
       <a class="nav-cta" href="#sign-in">Sign In</a>
     </header>
 
     <main id="main-content">
-      <article class="ap-article">
-        <header class="ap-header">
-          <div class="ap-frame">
-            <a class="ap-back" href="resources.html">&larr; Back to Resources</a>
-            <p class="ap-kicker"><span>File No. 001</span><span>Operations</span><span>6 min read</span></p>
-            <h1>Why your infrastructure records are wrong more often than you think</h1>
-            <p class="ap-dek">When the system of record drifts from what's actually installed, every decision built on it gets a little less safe, and the gap is more common than most teams assume.</p>
-          </div>
-        </header>
+      <section class="art-hero">
+        <div class="rs-frame">
+          <a class="art-back" href="resources.html">&larr; All articles</a>
+          <p class="art-kicker">Operations</p>
+          <h1 class="art-title">Why Every Enterprise CMDB Is 40% Wrong &mdash; and the Architecture That Closes the Gap</h1>
+          <p class="art-standfirst">When the CMDB drifts from physical reality, every downstream decision built on it becomes less reliable &mdash; and the cost compounds across every operational workflow.</p>
+        </div>
+      </section>
 
-        <figure class="ap-hero-shot rs-treat-a"><img src="../assets/resources/media-resources-band.jpg" alt="" loading="lazy" decoding="async" /></figure>
+      <figure class="art-hero-fig">
+        <img src="../assets/articles/media-art-cmdb-rack.jpg" alt="A rack elevation photographed straight on, with equipment, patch fields and cabling across every unit" loading="eager" decoding="async" />
+        <div class="art-capcol"><figcaption>The rack as found. Every unit here is either in the record, wrong in the record, or absent from it.</figcaption></div>
+      </figure>
 
-        <div class="ap-frame ap-layout">
-          <aside class="ap-toc" aria-label="On this page">
-            <p class="ap-toc-label">On this page</p>
-            <nav>
-              <a href="#what-it-is">What a system of record is</a>
-              <a href="#why-it-drifts">Why it drifts</a>
-              <a href="#the-cost">The real cost</a>
-              <a href="#closing-it">Closing the gap</a>
-            </nav>
-          </aside>
-          <div class="ap-body">
-            <p class="ap-lead">Ask five people on an infrastructure team what's actually installed in Rack 14, and you'll get five different, confident answers. All five will be wrong in some small way, and none of them will know it.</p>
-              <section id="what-it-is" data-reveal>
-                <h2>What a system of record is</h2>
-                <p>A system of record (a CMDB, a spreadsheet, a DCIM platform, whatever your team calls it) is supposed to be the one place everyone trusts for the same answer: what do we actually have, and where is it. Budgets get built on it. Incidents get triaged against it. Auditors ask for it by name.</p>
-                <p>It only works if it stays true. And nothing about a spreadsheet keeps it that way on its own.</p>
-              </section>
-
-            <blockquote class="ap-pullquote" data-reveal>&ldquo;The list only tells you what someone typed in, not what's actually bolted into the rack.&rdquo;</blockquote>
-
-              <section id="why-it-drifts" data-reveal>
-                <h2>Why it drifts from reality</h2>
-                <p>Drift isn't one dramatic failure. It's dozens of small, reasonable ones, stacking quietly for months:</p>
-                <ul class="ap-beats" data-reveal>
-                  <li>A vendor does emergency maintenance and skips the paperwork.</li>
-                  <li>A migration ships on deadline and the record gets updated “later.”</li>
-                  <li>A device moves racks during a cleanup, and nobody edits the row that describes it.</li>
-                </ul>
-                <p>None of that is negligence. It's just what happens when a record depends on someone remembering to update it, every time, forever.</p>
-              </section>
-
-            <div class="rs-field-stat" data-reveal>
-              <span class="rs-stat-num">40%</span>
-              <p>of enterprise infrastructure records no longer match what's physically in the rack.</p>
+      <article>
+        <div class="art-body">
+          <div class="art-col">
+            <p class="art-lede">CMDB drift is not just a documentation problem. It quietly degrades planning, troubleshooting, security reviews, and investment decisions across the infrastructure team. This article explains why physical verification matters when the system of record no longer matches what is really installed in the rack.</p>
+            <div class="art-brief">
+              <p class="art-label">Key takeaways</p>
+              <ul>
+                <li>Configuration systems decay faster than most teams expect.</li>
+                <li>Operational risk compounds when asset records are assumed to be correct.</li>
+                <li>Visual verification gives teams a defensible way to close the gap.</li>
+              </ul>
             </div>
-
-              <section id="the-cost" data-reveal>
-                <h2>What that gap actually costs</h2>
-                <p>When the record is wrong, everything built on top of it inherits the error. Capacity planning assumes space that isn't free. Incident response starts from a floor plan that doesn't match the building. Audits stall while someone quietly reconciles the story by hand.</p>
-              </section>
-
-            <div class="ap-plain" data-reveal>
-              <p class="ap-plain-label">In plain terms</p>
-              <p>Picture a store's inventory system claiming 50 units on the shelf when there are really 30. Every decision built on that number (what to reorder, what to promise a customer) is a little bit wrong, and nobody finds out until it's expensive.</p>
-            </div>
-
-              <section id="closing-it" data-reveal>
-                <h2>Closing the gap without a full rebuild</h2>
-                <p>You don't need to rip out your CMDB or DCIM platform to fix this. You need a fast way to check what's physically there against what the record claims, on a normal week, not once a year. That's the entire idea behind a RackTrack sweep: walk the aisle with a phone, and let the comparison happen automatically instead of by memory.</p>
-              </section>
+            <section class="art-sec" data-reveal>
+              <p class="art-label">Why drift happens</p>
+              <h2 class="art-h2">Change moves faster than documentation.</h2>
+              <p>Rack environments are dynamic. Hardware gets replaced, labels change, uplinks move, and temporary fixes often become permanent. In many teams, those changes are documented later, if they are documented at all. The result is a CMDB that still looks complete on paper while slowly diverging from what engineers would find if they walked the room today.</p>
+            </section>
+            <section class="art-sec" data-reveal>
+              <p class="art-label">Why it matters</p>
+              <h2 class="art-h2">Bad inventory creates expensive decisions.</h2>
+              <p>Capacity planning, incident response, refresh forecasting, compliance reviews, and vulnerability scoping all depend on accurate infrastructure records. Once the source of truth drifts, every downstream workflow inherits uncertainty. That uncertainty turns into wasted time, avoidable hardware purchases, longer outages, and difficult audit conversations.</p>
+            </section>
+            <blockquote class="art-quote" data-reveal><p>The result is a CMDB that still looks complete on paper while slowly diverging from what engineers would find if they walked the room today.</p></blockquote>
           </div>
         </div>
-
-        <div class="ap-frame ap-related">
-          <p class="ap-related-label">Keep reading</p>
-          <div class="ap-related-grid">
-          <a class="ap-related-card" href="article-what-it-costs-when-nobody-checks-the-rack.html">
-            <figure class="ap-related-shot rs-treat-a"><img src="../assets/resources/media-tangled-cabling.jpg" alt="" loading="lazy" decoding="async" /></figure>
-            <h3>What it actually costs when nobody checks the rack</h3>
-          </a>
-          <a class="ap-related-card" href="article-dcim-vs-physical-reality-why-the-gap-matters.html">
-            <figure class="ap-related-shot rs-treat-b"><img src="../assets/resources/media-crash-cart-racks.jpg" alt="" loading="lazy" decoding="async" /></figure>
-            <h3>Your DCIM platform shows a plan. The rack shows what's real.</h3>
-          </a>
+        <figure class="art-fig art-bleed" data-reveal>
+          <img src="../assets/articles/media-art-cmdb-room.jpg" alt="Teal and black patch cords running behind equipment in a cabinet, several bundles deep" loading="lazy" decoding="async" />
+          <div class="art-capcol"><figcaption>What an engineer would find walking the room today.</figcaption></div>
+        </figure>
+        <div class="art-body">
+          <div class="art-col">
+            <section class="art-sec" data-reveal>
+              <p class="art-label">What good teams do differently</p>
+              <h2 class="art-h2">They verify the rack, not just the record.</h2>
+              <p>High-trust infrastructure programs treat physical verification as part of operational hygiene. They compare what is documented against what is visible in the rack and use that evidence to reconcile the system of record. This approach turns the CMDB from a best-effort spreadsheet into something teams can rely on under pressure.</p>
+            </section>
+            <div class="art-more">
+              <p class="art-label">Other articles</p>
+              <a class="art-more-item" href="article-dcim-vs-physical-reality-why-the-gap-matters.html"><span class="art-more-kicker">Operations</span><span class="art-more-title">DCIM vs. Physical Reality: Why the Gap Matters</span></a>
+              <a class="art-more-item" href="article-what-it-costs-when-nobody-checks-the-rack.html"><span class="art-more-kicker">Infrastructure</span><span class="art-more-title">The hidden cost of unreconciled infrastructure: A framework for quantifying topology debt</span></a>
+              <a class="art-more-item" href="article-from-audits-to-always-on-records.html"><span class="art-more-kicker">Strategy</span><span class="art-more-title">From audit to autonomy: How continuous reconciliation reshapes data center operations</span></a>
+            </div>
           </div>
         </div>
       </article>
@@ -109,8 +88,7 @@
       <section class="rs-cta">
         <div class="rs-frame rs-cta-inner">
           <div>
-            <p class="eyebrow">PUT IT INTO PRACTICE</p>
-            <h2>Read the theory.<br /><em>Then verify your own rack.</em></h2>
+            <h2>Read the theory.<br /><em>Then run it on your rack.</em></h2>
           </div>
           <a class="button-primary" href="contact.html">Request a platform brief <span aria-hidden="true">&rarr;</span></a>
         </div>

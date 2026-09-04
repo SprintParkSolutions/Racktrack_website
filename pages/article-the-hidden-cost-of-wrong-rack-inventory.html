@@ -3,103 +3,80 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <meta name="description" content="Misidentified hardware and early refresh cycles quietly waste budget. Most teams never measure it until it's already expensive." />
-    <title>What a wrong inventory actually costs you | RackTrack</title>
+    <meta name="description" content="Misidentified hardware, premature refreshes, and wasted capacity often go unmeasured until they become costly." />
+    <title>The Hidden Cost of Wrong Rack Inventory | RackTrack</title>
     <link rel="icon" href="../assets/logo.jpg" />
-    <link rel="stylesheet" href="../styles.css?v=article-3-navmenubcd-navicons-cleanup2" />
+    <link rel="stylesheet" href="../styles.css?v=article-4-source-port" />
     <script type="module" src="../js/article.js?v=3"></script>
     <script defer src="../js/cookie-consent.js"></script>
 </head>
   <body class="article-page">
     <a class="skip-link" href="#main-content">Skip to content</a>
-    
     <header class="site-header">
       <a class="brand" href="../index.html" aria-label="RackTrack home"><span class="brand-mark"><img src="../assets/logo.jpg" alt="" /></span><span class="brand-name">RackTrack</span></a>
       <input type="checkbox" id="nav-toggle" class="nav-toggle-input" autocomplete="off" /><label for="nav-toggle" class="nav-toggle-btn" aria-label="Menu"><span></span></label><nav class="site-nav" aria-label="Primary navigation">
         <a href="why-racktrack.html">Why RackTrack</a>
         <a href="solutions.html">Solutions</a>
         <div class="nav-item"><a href="use-cases.html">Use Cases<svg class="nav-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg></a><input type="checkbox" id="nav-sub-usecases" class="nav-sub-toggle" autocomplete="off" /><label for="nav-sub-usecases" class="nav-sub-toggle-btn" aria-label="Expand Use Cases submenu"></label><div class="nav-dropdown"><a href="use-case-infrastructure-data-center-leaders.html">Infrastructure &amp; Data Center Leaders</a><a href="use-case-network-architects-engineers.html">Network Architects &amp; Engineers</a><a href="use-case-security-vulnerability-teams.html">Security &amp; Vulnerability Teams</a><a href="use-case-compliance-audit-owners.html">Compliance &amp; Audit Owners</a><a href="use-case-incident-responders-on-call.html">Incident Responders &amp; On-Call</a><a href="use-case-m-a-migration-teams.html">M&amp;A &amp; Migration Teams</a></div></div>
-        <div class="nav-item"><a class="is-current" href="resources.html" aria-current="page">Resources<svg class="nav-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg></a><input type="checkbox" id="nav-sub-resources" class="nav-sub-toggle" autocomplete="off" /><label for="nav-sub-resources" class="nav-sub-toggle-btn" aria-label="Expand Resources submenu"></label><div class="nav-dropdown"><a href="article-why-infrastructure-records-are-wrong.html">Why your infrastructure records are wrong more often than you think</a><a href="article-what-it-costs-when-nobody-checks-the-rack.html">What it actually costs when nobody checks the rack</a><a href="article-what-network-verified-actually-means.html">What we mean when we say a record is "verified"</a><a href="article-how-infrastructure-teams-prepare-for-soc-2-audits.html">Getting ready for a SOC 2 audit without the scramble</a></div></div>
+        <div class="nav-item"><a class="is-current" href="resources.html" aria-current="page">Resources<svg class="nav-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg></a><input type="checkbox" id="nav-sub-resources" class="nav-sub-toggle" autocomplete="off" /><label for="nav-sub-resources" class="nav-sub-toggle-btn" aria-label="Expand Resources submenu"></label><div class="nav-dropdown"><a href="article-why-infrastructure-records-are-wrong.html">Why every enterprise CMDB is 40% wrong &mdash; and the architecture that closes the gap</a><a href="article-what-it-costs-when-nobody-checks-the-rack.html">The hidden cost of unreconciled infrastructure: quantifying topology debt</a><a href="article-what-network-verified-actually-means.html">What "Network-Verified" actually means</a><a href="article-how-infrastructure-teams-prepare-for-soc-2-audits.html">How Infrastructure Teams Prepare for SOC 2 Audits</a></div></div>
         <a href="trust-security.html">Trust &amp; Security</a> <a href="contact.html">Contact Us</a>
       </nav>
       <a class="nav-cta" href="#sign-in">Sign In</a>
     </header>
 
     <main id="main-content">
-      <article class="ap-article">
-        <header class="ap-header">
-          <div class="ap-frame">
-            <a class="ap-back" href="resources.html">&larr; Back to Resources</a>
-            <p class="ap-kicker"><span>FIN·01</span><span>Finance</span><span>4 min read</span></p>
-            <h1>What a wrong inventory actually costs you</h1>
-            <p class="ap-dek">Misidentified hardware and early refresh cycles quietly waste budget. Most teams never measure it until it's already expensive.</p>
-          </div>
-        </header>
-
-        <figure class="ap-hero-shot rs-treat-c"><img src="../assets/resources/media-stock-scan.jpg" alt="" loading="lazy" decoding="async" /></figure>
-
-        <div class="ap-frame ap-layout">
-          <aside class="ap-toc" aria-label="On this page">
-            <p class="ap-toc-label">On this page</p>
-            <nav>
-              <a href="#hidden-line-item">The hidden line item</a>
-              <a href="#where-waste-hides">Where the waste hides</a>
-              <a href="#real-example">What this looks like in practice</a>
-              <a href="#catching-early">Catching it early</a>
-            </nav>
-          </aside>
-          <div class="ap-body">
-            <p class="ap-lead">Finance rarely finds out about a bad inventory number from the inventory system. They find out from a purchase order that shouldn't have been necessary.</p>
-              <section id="hidden-line-item" data-reveal>
-                <h2>The cost nobody puts a line item on</h2>
-                <p>It shows up as three quiet habits:</p>
-                <ul class="ap-beats" data-reveal>
-                  <li>Hardware refreshed earlier than it actually needed to be.</li>
-                  <li>Purchases that duplicate gear already sitting somewhere, unused.</li>
-                  <li>Capacity budgeted around because the record said it wasn't free.</li>
-                </ul>
-              </section>
-
-            <blockquote class="ap-pullquote" data-reveal>&ldquo;Nobody approves a budget line called “hardware we already owned.” It just quietly shows up as next quarter's spend.&rdquo;</blockquote>
-
-              <section id="where-waste-hides" data-reveal>
-                <h2>Where the waste actually hides</h2>
-                <p>It's hardware logged under the wrong model or spec. It's an asset marked retired that's quietly still drawing power. It's a rack the record calls full, sitting two-thirds empty.</p>
-              </section>
-
-            <div class="rs-field-stat" data-reveal>
-              <span class="rs-stat-num">60%</span>
-              <p>utilization is a common real number teams find in racks logged as “full” on paper.</p>
-            </div>
-
-              <section id="real-example" data-reveal>
-                <h2>What this looks like in practice</h2>
-                <p>A team requests new servers because the record shows every rack at capacity. A physical sweep turns up open slots the record never accounted for, and the purchase order that was about to go out gets quietly rewritten.</p>
-              </section>
-
-            <div class="ap-plain" data-reveal>
-              <p class="ap-plain-label">In plain terms</p>
-              <p>Picture a warehouse ordering more stock because the shelf looks full on a screen, when a walk down the actual aisle would have shown open space.</p>
-            </div>
-
-              <section id="catching-early" data-reveal>
-                <h2>Catching it before it hits the budget</h2>
-                <p>Routine sweeps keep the capacity numbers honest before the purchase order gets written, which is the only point in the process where catching the gap actually saves the money.</p>
-              </section>
-          </div>
+      <section class="art-hero">
+        <div class="rs-frame">
+          <a class="art-back" href="resources.html">&larr; All articles</a>
+          <p class="art-kicker">Finance</p>
+          <h1 class="art-title">The Hidden Cost of Wrong Rack Inventory</h1>
+          <p class="art-standfirst">Misidentified hardware, premature refreshes, and wasted capacity often go unmeasured until they become costly.</p>
         </div>
+      </section>
 
-        <div class="ap-frame ap-related">
-          <p class="ap-related-label">Keep reading</p>
-          <div class="ap-related-grid">
-          <a class="ap-related-card" href="article-free-port-discovery-and-rack-capacity-planning.html">
-            <figure class="ap-related-shot rs-treat-b"><img src="../assets/resources/media-server-ports-free.jpg" alt="" loading="lazy" decoding="async" /></figure>
-            <h3>Planning your next rack without guessing at free ports</h3>
-          </a>
-          <a class="ap-related-card" href="article-dcim-vs-physical-reality-why-the-gap-matters.html">
-            <figure class="ap-related-shot rs-treat-b"><img src="../assets/resources/media-crash-cart-racks.jpg" alt="" loading="lazy" decoding="async" /></figure>
-            <h3>Your DCIM platform shows a plan. The rack shows what's real.</h3>
-          </a>
+      <figure class="art-hero-fig">
+        <img src="../assets/articles/media-art-cost-spares.jpg" alt="Spare optical transceivers and cables on a storeroom shelf beside a nameplate reading Storage Engineer" loading="eager" decoding="async" />
+        <div class="art-capcol"><figcaption>Spares bought against uncertainty. Some of them duplicate hardware already installed a few rows away.</figcaption></div>
+      </figure>
+
+      <article>
+        <div class="art-body">
+          <div class="art-col">
+            <p class="art-lede">Inventory inaccuracy creates financial waste in quiet ways. Teams often feel the cost long before they measure it directly. Better rack visibility improves budget quality by reducing avoidable purchases, bad assumptions, and preventable rework.</p>
+            <div class="art-brief">
+              <p class="art-label">Key takeaways</p>
+              <ul>
+                <li>Wrong inventory distorts investment decisions.</li>
+                <li>Overbuying often starts as an accuracy problem.</li>
+                <li>Verified rack data makes business cases easier to defend.</li>
+              </ul>
+            </div>
+            <section class="art-sec" data-reveal>
+              <p class="art-label">Where the cost hides</p>
+              <h2 class="art-h2">Waste usually looks like uncertainty.</h2>
+              <p>When teams cannot trust what is already installed, they buy defensively. They reserve extra hardware, overestimate risk, or accelerate refresh decisions before they are necessary. That caution may feel responsible, but it increases spend.</p>
+            </section>
+            <section class="art-sec" data-reveal>
+              <p class="art-label">Operational fallout</p>
+              <h2 class="art-h2">Bad inventory also burns labor.</h2>
+              <p>Finance impact is not limited to equipment purchases. Engineers lose time validating rack state during planning, migrations, and incident response. That hidden labor cost compounds across every major infrastructure project.</p>
+            </section>
+            <blockquote class="art-quote" data-reveal><p>When teams cannot trust what is already installed, they buy defensively.</p></blockquote>
+            <figure class="art-fig" data-reveal>
+              <img src="../assets/articles/media-art-cost-labour.jpg" alt="An engineer in a lab coat working at an open equipment rack of labelled modules, driver in hand" loading="lazy" decoding="async" />
+              <figcaption>The equipment line is visible in the budget. The hours spent establishing what is already installed are not.</figcaption>
+            </figure>
+            <section class="art-sec" data-reveal>
+              <p class="art-label">What changes with better visibility</p>
+              <h2 class="art-h2">Confidence improves the quality of spend.</h2>
+              <p>When teams can confirm what exists, what is available, and what has changed, budgets become more precise. Capacity conversations shift from assumption to evidence. That makes both finance and engineering teams more effective.</p>
+            </section>
+            <div class="art-more">
+              <p class="art-label">Other articles</p>
+              <a class="art-more-item" href="article-what-it-costs-when-nobody-checks-the-rack.html"><span class="art-more-kicker">Infrastructure</span><span class="art-more-title">The hidden cost of unreconciled infrastructure: A framework for quantifying topology debt</span></a>
+              <a class="art-more-item" href="article-free-port-discovery-and-rack-capacity-planning.html"><span class="art-more-kicker">Infrastructure</span><span class="art-more-title">Free Port Discovery and Rack Capacity Planning</span></a>
+              <a class="art-more-item" href="article-dcim-vs-physical-reality-why-the-gap-matters.html"><span class="art-more-kicker">Operations</span><span class="art-more-title">DCIM vs. Physical Reality: Why the Gap Matters</span></a>
+            </div>
           </div>
         </div>
       </article>
@@ -107,8 +84,7 @@
       <section class="rs-cta">
         <div class="rs-frame rs-cta-inner">
           <div>
-            <p class="eyebrow">PUT IT INTO PRACTICE</p>
-            <h2>Read the theory.<br /><em>Then verify your own rack.</em></h2>
+            <h2>Read the theory.<br /><em>Then run it on your rack.</em></h2>
           </div>
           <a class="button-primary" href="contact.html">Request a platform brief <span aria-hidden="true">&rarr;</span></a>
         </div>

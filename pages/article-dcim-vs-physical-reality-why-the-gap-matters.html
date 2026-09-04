@@ -3,103 +3,84 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <meta name="description" content="DCIM tools model what should be there. Knowing where that model and the real rack disagree helps you fix the right problem." />
-    <title>Your DCIM platform shows a plan. The rack shows what's real. | RackTrack</title>
+    <meta name="description" content="DCIM platforms model intent. Understanding the gap between model and reality helps teams solve the right problem." />
+    <title>DCIM vs. Physical Reality: Why the Gap Matters | RackTrack</title>
     <link rel="icon" href="../assets/logo.jpg" />
-    <link rel="stylesheet" href="../styles.css?v=article-3-navmenubcd-navicons-cleanup2" />
+    <link rel="stylesheet" href="../styles.css?v=article-4-source-port" />
     <script type="module" src="../js/article.js?v=3"></script>
     <script defer src="../js/cookie-consent.js"></script>
 </head>
   <body class="article-page">
     <a class="skip-link" href="#main-content">Skip to content</a>
-    
     <header class="site-header">
       <a class="brand" href="../index.html" aria-label="RackTrack home"><span class="brand-mark"><img src="../assets/logo.jpg" alt="" /></span><span class="brand-name">RackTrack</span></a>
       <input type="checkbox" id="nav-toggle" class="nav-toggle-input" autocomplete="off" /><label for="nav-toggle" class="nav-toggle-btn" aria-label="Menu"><span></span></label><nav class="site-nav" aria-label="Primary navigation">
         <a href="why-racktrack.html">Why RackTrack</a>
         <a href="solutions.html">Solutions</a>
         <div class="nav-item"><a href="use-cases.html">Use Cases<svg class="nav-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg></a><input type="checkbox" id="nav-sub-usecases" class="nav-sub-toggle" autocomplete="off" /><label for="nav-sub-usecases" class="nav-sub-toggle-btn" aria-label="Expand Use Cases submenu"></label><div class="nav-dropdown"><a href="use-case-infrastructure-data-center-leaders.html">Infrastructure &amp; Data Center Leaders</a><a href="use-case-network-architects-engineers.html">Network Architects &amp; Engineers</a><a href="use-case-security-vulnerability-teams.html">Security &amp; Vulnerability Teams</a><a href="use-case-compliance-audit-owners.html">Compliance &amp; Audit Owners</a><a href="use-case-incident-responders-on-call.html">Incident Responders &amp; On-Call</a><a href="use-case-m-a-migration-teams.html">M&amp;A &amp; Migration Teams</a></div></div>
-        <div class="nav-item"><a class="is-current" href="resources.html" aria-current="page">Resources<svg class="nav-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg></a><input type="checkbox" id="nav-sub-resources" class="nav-sub-toggle" autocomplete="off" /><label for="nav-sub-resources" class="nav-sub-toggle-btn" aria-label="Expand Resources submenu"></label><div class="nav-dropdown"><a href="article-why-infrastructure-records-are-wrong.html">Why your infrastructure records are wrong more often than you think</a><a href="article-what-it-costs-when-nobody-checks-the-rack.html">What it actually costs when nobody checks the rack</a><a href="article-what-network-verified-actually-means.html">What we mean when we say a record is "verified"</a><a href="article-how-infrastructure-teams-prepare-for-soc-2-audits.html">Getting ready for a SOC 2 audit without the scramble</a></div></div>
+        <div class="nav-item"><a class="is-current" href="resources.html" aria-current="page">Resources<svg class="nav-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg></a><input type="checkbox" id="nav-sub-resources" class="nav-sub-toggle" autocomplete="off" /><label for="nav-sub-resources" class="nav-sub-toggle-btn" aria-label="Expand Resources submenu"></label><div class="nav-dropdown"><a href="article-why-infrastructure-records-are-wrong.html">Why every enterprise CMDB is 40% wrong &mdash; and the architecture that closes the gap</a><a href="article-what-it-costs-when-nobody-checks-the-rack.html">The hidden cost of unreconciled infrastructure: quantifying topology debt</a><a href="article-what-network-verified-actually-means.html">What "Network-Verified" actually means</a><a href="article-how-infrastructure-teams-prepare-for-soc-2-audits.html">How Infrastructure Teams Prepare for SOC 2 Audits</a></div></div>
         <a href="trust-security.html">Trust &amp; Security</a> <a href="contact.html">Contact Us</a>
       </nav>
       <a class="nav-cta" href="#sign-in">Sign In</a>
     </header>
 
     <main id="main-content">
-      <article class="ap-article">
-        <header class="ap-header">
-          <div class="ap-frame">
-            <a class="ap-back" href="resources.html">&larr; Back to Resources</a>
-            <p class="ap-kicker"><span>OPS·02</span><span>Operations</span><span>5 min read</span></p>
-            <h1>Your DCIM platform shows a plan. The rack shows what's real.</h1>
-            <p class="ap-dek">DCIM tools model what should be there. Knowing where that model and the real rack disagree helps you fix the right problem.</p>
-          </div>
-        </header>
+      <section class="art-hero">
+        <div class="rs-frame">
+          <a class="art-back" href="resources.html">&larr; All articles</a>
+          <p class="art-kicker">Operations</p>
+          <h1 class="art-title">DCIM vs. Physical Reality: Why the Gap Matters</h1>
+          <p class="art-standfirst">DCIM platforms model intent. Understanding the gap between model and reality helps teams solve the right problem.</p>
+        </div>
+      </section>
 
-        <figure class="ap-hero-shot rs-treat-b"><img src="../assets/resources/media-crash-cart-racks.jpg" alt="" loading="lazy" decoding="async" /></figure>
+      <figure class="art-hero-fig">
+        <img src="../assets/articles/media-art-dcim-hall.jpg" alt="Cabinet rows on a raised floor in a production data hall, photographed down the cold aisle" loading="eager" decoding="async" />
+        <div class="art-capcol"><figcaption>A planned layout, realised. The model holds until the room starts changing.</figcaption></div>
+      </figure>
 
-        <div class="ap-frame ap-layout">
-          <aside class="ap-toc" aria-label="On this page">
-            <p class="ap-toc-label">On this page</p>
-            <nav>
-              <a href="#what-dcim-models">What DCIM actually models</a>
-              <a href="#why-it-drifts">Why the model and the room disagree</a>
-              <a href="#cost-of-trusting">The cost of trusting it blindly</a>
-              <a href="#using-both">Using both together</a>
-            </nav>
-          </aside>
-          <div class="ap-body">
-            <p class="ap-lead">A DCIM platform is a floor plan of your infrastructure. A floor plan is not the building. Both are useful, but only one of them is true right now.</p>
-              <section id="what-dcim-models" data-reveal>
-                <h2>What DCIM is actually modeling</h2>
-                <p>DCIM (Data Center Infrastructure Management) tracks the intended layout: what's supposed to sit in each rack slot, and how power and cooling are supposed to be allocated. That's useful for planning, but it only stays accurate if every change gets recorded — and in practice, not every change does.</p>
-              </section>
-
-            <blockquote class="ap-pullquote" data-reveal>&ldquo;DCIM tells you what the data center was designed to look like. It doesn't know what actually happened after installation day.&rdquo;</blockquote>
-
-              <section id="why-it-drifts" data-reveal>
-                <h2>Why the model and the room disagree</h2>
-                <p>None of it is malicious:</p>
-                <ul class="ap-beats" data-reveal>
-                  <li>A swap happens off-ticket during an emergency fix at 2 a.m.</li>
-                  <li>A vendor technician makes a change and doesn't touch the plan.</li>
-                  <li>A “temporary” cable run becomes permanent, and nobody circles back.</li>
-                </ul>
-              </section>
-
-            <div class="rs-field-stat" data-reveal>
-              <span class="rs-stat-num">2x</span>
-              <p>is a commonly reported gap between planned and actual rack utilization once teams check physically.</p>
+      <article>
+        <div class="art-body">
+          <div class="art-col">
+            <p class="art-lede">DCIM is valuable, but only when teams understand where the model ends and physical verification must begin. This article explains why the difference between planned infrastructure and installed infrastructure is operationally important.</p>
+            <div class="art-brief">
+              <p class="art-label">Key takeaways</p>
+              <ul>
+                <li>DCIM often reflects expected state, not confirmed state.</li>
+                <li>Reality gaps distort capacity, dependency, and risk analysis.</li>
+                <li>Verification should complement DCIM, not replace it.</li>
+              </ul>
             </div>
-
-              <section id="cost-of-trusting" data-reveal>
-                <h2>What it costs to trust the model blindly</h2>
-                <p>Capacity planning built on the plan instead of the room tends to end one of two ways: buying more racks than necessary, or running out of power and space at the exact moment there's no time left to fix it.</p>
-              </section>
-
-            <div class="ap-plain" data-reveal>
-              <p class="ap-plain-label">In plain terms</p>
-              <p>DCIM shows what should be in the rack. The rack shows what's actually there. When the two disagree, trust the rack — and it's better to find that out during a routine check than during an outage.</p>
-            </div>
-
-              <section id="using-both" data-reveal>
-                <h2>Using the model and the room together</h2>
-                <p>The fix isn't replacing DCIM. It's treating a physical sweep as the regular reconciliation step that keeps the map honest, instead of assuming it's accurate simply because nobody's said otherwise.</p>
-              </section>
+            <section class="art-sec" data-reveal>
+              <p class="art-label">The model</p>
+              <h2 class="art-h2">DCIM is strongest when it captures intent.</h2>
+              <p>Planning systems help teams document expected layouts, power relationships, rack occupancy, and deployment standards. That structure is useful and necessary. The problem begins when teams assume the model is automatically true in the room.</p>
+            </section>
+            <blockquote class="art-quote" data-reveal><p>When teams ignore that difference, they troubleshoot and plan against fiction.</p></blockquote>
+            <section class="art-sec" data-reveal>
+              <p class="art-label">The gap</p>
+              <h2 class="art-h2">Physical environments drift from planned layouts.</h2>
+              <p>Moves, additions, emergency swaps, patch changes, and label decay all create divergence. Over time, the planned state and the installed state are no longer the same thing. When teams ignore that difference, they troubleshoot and plan against fiction.</p>
+            </section>
           </div>
         </div>
-
-        <div class="ap-frame ap-related">
-          <p class="ap-related-label">Keep reading</p>
-          <div class="ap-related-grid">
-          <a class="ap-related-card" href="article-what-it-costs-when-nobody-checks-the-rack.html">
-            <figure class="ap-related-shot rs-treat-a"><img src="../assets/resources/media-tangled-cabling.jpg" alt="" loading="lazy" decoding="async" /></figure>
-            <h3>What it actually costs when nobody checks the rack</h3>
-          </a>
-          <a class="ap-related-card" href="article-what-network-verified-actually-means.html">
-            <figure class="ap-related-shot rs-treat-a"><img src="../assets/resources/media-port-link-led.jpg" alt="" loading="lazy" decoding="async" /></figure>
-            <h3>What we mean when we say a record is “verified”</h3>
-          </a>
+        <figure class="art-fig art-bleed" data-reveal>
+          <img src="../assets/articles/media-art-dcim-room.jpg" alt="An open equipment rack packed with wiring and control modules in an industrial plant room" loading="lazy" decoding="async" />
+          <div class="art-capcol"><figcaption>Moves, swaps and patch changes accumulate in the rack long before they reach the record.</figcaption></div>
+        </figure>
+        <div class="art-body">
+          <div class="art-col">
+            <section class="art-sec" data-reveal>
+              <p class="art-label">The right approach</p>
+              <h2 class="art-h2">Use DCIM as structure and verification as proof.</h2>
+              <p>The most effective programs combine planning systems with physical validation. DCIM holds the operating model. Verification confirms whether the environment still matches it. That combination creates a stronger source of truth than either system alone.</p>
+            </section>
+            <div class="art-more">
+              <p class="art-label">Other articles</p>
+              <a class="art-more-item" href="article-why-infrastructure-records-are-wrong.html"><span class="art-more-kicker">Operations</span><span class="art-more-title">Why every enterprise CMDB is 40% wrong &mdash; and the architecture that closes the gap</span></a>
+              <a class="art-more-item" href="article-what-network-verified-actually-means.html"><span class="art-more-kicker">Infrastructure</span><span class="art-more-title">What "Network-Verified" Actually Means</span></a>
+              <a class="art-more-item" href="article-what-it-costs-when-nobody-checks-the-rack.html"><span class="art-more-kicker">Infrastructure</span><span class="art-more-title">The hidden cost of unreconciled infrastructure: A framework for quantifying topology debt</span></a>
+            </div>
           </div>
         </div>
       </article>
@@ -107,8 +88,7 @@
       <section class="rs-cta">
         <div class="rs-frame rs-cta-inner">
           <div>
-            <p class="eyebrow">PUT IT INTO PRACTICE</p>
-            <h2>Read the theory.<br /><em>Then verify your own rack.</em></h2>
+            <h2>Read the theory.<br /><em>Then run it on your rack.</em></h2>
           </div>
           <a class="button-primary" href="contact.html">Request a platform brief <span aria-hidden="true">&rarr;</span></a>
         </div>
