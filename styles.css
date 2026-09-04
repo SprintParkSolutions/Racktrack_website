@@ -3314,7 +3314,9 @@ h1 span {
 }
 
 .contact-form-panel {
-  padding: clamp(26px, 4vw, 48px);
+  max-width: 440px;
+  margin-left: clamp(40px, 10vw, 160px);
+  padding: clamp(60px, 3vw, 32px);
   border-radius: var(--radius-md);
   background: rgba(255, 255, 255, 0.92);
   box-shadow: 0 22px 60px rgba(49, 93, 148, 0.08);
@@ -3344,7 +3346,7 @@ h1 span {
 .contact-form-grid {
   display: grid;
   grid-template-columns: 1fr;
-  gap: 23px;
+  gap: 16px;
 }
 
 .contact-form-panel label {
@@ -3353,7 +3355,7 @@ h1 span {
 
 .contact-form-panel label > span {
   display: block;
-  margin-bottom: 9px;
+  margin-bottom: 6px;
   color: var(--copy-strong);
   font-size: 11px;
   letter-spacing: 0.06em;
@@ -3380,12 +3382,12 @@ h1 span {
   background: #ffffff;
   color: var(--ink);
   font: inherit;
-  font-size: 15px;
-  padding: 13px 14px;
+  font-size: 14px;
+  padding: 10px 12px;
 }
 
 .contact-form-panel textarea {
-  min-height: 132px;
+  min-height: 90px;
   resize: vertical;
 }
 
@@ -4164,6 +4166,10 @@ html:not(.solutions-motion) .surface-grid article { opacity: 1; transform: none;
 
   .contact-request-inner {
     gap: 60px;
+  }
+
+  .contact-form-panel {
+    margin-left: 100px;
   }
 
   .contact-faq {
@@ -5565,30 +5571,29 @@ html:not(.solutions-motion) .surface-grid article { opacity: 1; transform: none;
 .rs-hero-lede { max-width: 58ch; color: rgba(255, 255, 255, .78); font-size: 18px; line-height: 1.55; }
 
 .rs-featured { padding: 0 0 76px; background: var(--cloud); }
-.rs-field-report { position: relative; display: grid; grid-template-columns: 1.5fr 0.9fr; align-items: center; gap: 56px; background: var(--white); border: 1px solid rgba(16, 32, 51, 0.14); padding: 60px clamp(28px, 4vw, 68px) 52px; }
-.rs-field-report::before {
-  content: "";
-  position: absolute;
-  top: -1px;
-  left: 0;
-  right: 0;
-  height: 15px;
-  background-image: radial-gradient(circle at 10px 7px, var(--cloud) 6px, transparent 7px);
-  background-size: 22px 15px;
-  background-repeat: repeat-x;
-}
-.rs-field-stamp { display: flex; flex-wrap: wrap; gap: 0; margin: 0 0 24px; font: 700 11px var(--font-mono); letter-spacing: 0.08em; text-transform: uppercase; color: var(--muted); }
-.rs-field-stamp span:not(:last-child)::after { content: "\00b7"; margin: 0 12px; color: var(--steel); }
-.rs-field-copy h2 { margin: 0 0 18px; font-family: var(--font-display); font-size: clamp(28px, 2.6vw, 36px); line-height: 1.08; letter-spacing: -0.03em; }
-.rs-field-copy h2 a { color: var(--ink); text-decoration: none; }
-.rs-field-copy h2 a:hover { color: var(--blue); }
-.rs-field-copy > p { max-width: 56ch; color: var(--copy-strong); font-size: 17px; line-height: 1.55; margin-bottom: 26px; }
-.rs-field-read { display: inline-flex; align-items: center; gap: 8px; font: 700 14px var(--font-ui); color: var(--blue); text-decoration: none; }
-.rs-field-read:hover { color: var(--royal); }
-.rs-field-side { display: flex; flex-direction: column; gap: 22px; }
-.rs-field-visual { position: relative; margin: 0; aspect-ratio: 16 / 10; overflow: hidden; border: 1px solid rgba(16, 32, 51, 0.14); }
-.rs-field-visual img { width: 100%; height: 100%; object-fit: cover; filter: grayscale(0.2) contrast(1.05); }
-.rs-field-visual::after { content: ""; position: absolute; inset: 0; background: var(--blue); opacity: 0.16; mix-blend-mode: multiply; }
+
+/* Full-bleed featured-article card: photo + dark veil behind overlaid copy
+   and a stat panel, matching the source project's editorial "feat" card. */
+.rs-feat { position: relative; overflow: hidden; border-radius: 14px; background: #061127; box-shadow: 0 30px 60px -34px rgba(2, 9, 22, .6); }
+.rs-feat > img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; opacity: .34; }
+.rs-feat-veil { position: absolute; inset: 0; background: linear-gradient(100deg, rgba(6,17,39,.97) 0%, rgba(6,17,39,.9) 44%, rgba(6,17,39,.6) 100%); }
+.rs-feat-in { position: relative; z-index: 1; padding: 32px 26px 34px; display: grid; gap: 30px; }
+.rs-feat-chip { display: inline-flex; align-items: center; gap: 8px; padding: 6px 13px; margin: 0; border-radius: 999px; border: 1px solid rgba(138, 180, 255, .32); background: rgba(10, 26, 58, .5); font: 700 12px var(--font-mono); letter-spacing: .15em; text-transform: uppercase; color: #cfe0ff; }
+.rs-feat-h { font-family: var(--font-display); font-size: clamp(27px, 3vw, 42px); line-height: 1.08; letter-spacing: -.03em; font-weight: 600; color: var(--white); margin: 20px 0 0; max-width: 20ch; }
+.rs-feat-h a { color: inherit; text-decoration: none; transition: color .2s ease; }
+.rs-feat-h a:hover { color: #8ab4ff; }
+.rs-feat-p { font-size: 18px; line-height: 1.6; color: #c3d2e8; margin: 18px 0 0; max-width: 54ch; }
+.rs-feat-cta { display: inline-flex; align-items: center; gap: 10px; margin-top: 26px; padding: 13px 22px; border-radius: 999px; background: var(--white); color: #061127; font: 500 16px var(--font-ui); text-decoration: none; transition: background-color .2s ease, transform .2s ease; }
+.rs-feat-cta span { transition: transform .32s cubic-bezier(.2,.7,.3,1); display: inline-block; }
+.rs-feat-cta:hover { background: #dbe6f5; transform: translateY(-2px); }
+.rs-feat-cta:hover span { transform: translateX(5px); }
+.rs-feat .rs-field-stat { border-color: rgba(138, 180, 255, .26); background: rgba(9, 23, 52, .62); }
+.rs-feat .rs-stat-num { color: var(--white); font-size: clamp(52px, 5vw, 68px); font-weight: 700; }
+.rs-feat .rs-field-stat p { color: #9fb0c9; }
+.rs-feat .rs-field-stat hr { border-top-color: rgba(138, 180, 255, .2); }
+.rs-feat .rs-stat-src { color: #7d93b5; }
+@media (min-width: 920px) { .rs-feat-in { grid-template-columns: 1fr 300px; gap: 54px; align-items: center; padding: 56px 54px; } }
+
 .rs-field-stat { align-self: start; border: 1px solid rgba(16, 32, 51, 0.15); padding: 26px 28px; display: flex; flex-direction: column; gap: 8px; }
 .rs-stat-num { font-family: var(--font-display); font-size: 46px; font-weight: 800; letter-spacing: -0.03em; color: var(--blue); }
 .rs-field-stat p { font-size: 13.5px; line-height: 1.4; color: var(--muted); }
@@ -5652,7 +5657,6 @@ html:not(.solutions-motion) .surface-grid article { opacity: 1; transform: none;
 
 @media (max-width: 900px) {
   .rs-hero { padding: 120px 0 50px; }
-  .rs-field-report { grid-template-columns: 1fr; gap: 32px; padding: 44px 22px 40px; }
   .rs-index-card { grid-template-columns: 72px 1fr; grid-template-rows: auto auto auto; gap: 8px 16px; }
   .rs-index-shot { grid-column: 1; grid-row: 1 / 4; width: 72px; height: 54px; }
   .rs-index-code { grid-column: 2; grid-row: 1; justify-self: start; }
