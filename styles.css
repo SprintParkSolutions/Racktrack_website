@@ -771,12 +771,13 @@ h1 span {
 
 .sequence-note p {
   margin: 0 0 12px;
-  color: var(--scan);
+  color: var(--blue);
   font-family: var(--font-mono);
   font-size: 13px;
   font-weight: 700;
   letter-spacing: 0.1em;
   text-transform: uppercase;
+  text-shadow: 0 1px 3px rgba(16, 32, 51, 0.35), 0 2px 16px rgba(255, 255, 255, 0.35);
 }
 
 .sequence-note h2 {
@@ -5021,7 +5022,7 @@ html:not(.solutions-motion) .surface-grid article { opacity: 1; transform: none;
    just blank space here once the redundant proof-strip was removed. */
 .why-compare-caption {
   max-width: 46ch;
-  margin: 28px auto 0;
+  margin: 48px auto 0;
   color: var(--ink);
   font-family: var(--font-display);
   font-size: clamp(20px, 2.4vw, 27px);
