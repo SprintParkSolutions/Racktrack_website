@@ -4958,18 +4958,23 @@ html:not(.solutions-motion) .surface-grid article { opacity: 1; transform: none;
 }
 
 /* Cards side by side in a horizontally-scrolling row, snapped to each
-   card's edge, advanced with the prev/next arrows below — replaces the
-   previous scroll-jacked 3D stack (a ~4200px pinned section computing
-   per-frame transforms) with a plain, static card row. */
+   card's edge, with the prev/next arrows flanking the row on either
+   side — replaces the previous scroll-jacked 3D stack (a ~4200px pinned
+   section computing per-frame transforms) with a plain, static card row. */
 .solutions-page .surface-carousel {
   position: relative;
-  width: min(1180px, calc(100% - 64px));
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  width: min(1260px, calc(100% - 64px));
   margin: 0 auto;
 }
 
 .solutions-page .surface-grid {
   --card-width: clamp(260px, 26vw, 330px);
   display: flex;
+  flex: 1 1 auto;
+  min-width: 0;
   gap: 20px;
   overflow-x: auto;
   scroll-snap-type: x mandatory;
@@ -5012,14 +5017,8 @@ html:not(.solutions-motion) .surface-grid article { opacity: 1; transform: none;
   filter: saturate(0.82) contrast(0.94);
 }
 
-.solutions-page .surface-controls {
-  display: flex;
-  justify-content: center;
-  gap: 12px;
-  margin-top: 28px;
-}
-
 .solutions-page .surface-arrow {
+  flex: 0 0 auto;
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -5076,11 +5075,16 @@ html:not(.solutions-motion) .surface-grid article { opacity: 1; transform: none;
 
   .solutions-page .surface-carousel {
     width: 100%;
+    gap: 8px;
+  }
+
+  .solutions-page .surface-arrow {
+    width: 36px;
+    height: 36px;
   }
 
   .solutions-page .surface-grid {
-    padding-inline: 24px;
-    margin-inline: -24px;
+    padding-block: 4px 12px;
   }
 }
 
