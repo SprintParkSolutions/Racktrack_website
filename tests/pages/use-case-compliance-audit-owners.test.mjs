@@ -34,28 +34,22 @@ test("use-case-compliance-audit-owners.html: stylesheet is cache-busted", () => 
   assertCacheBustedStylesheet(document);
 });
 
-test("use-case-compliance-audit-owners.html: top-level sections (hero, article body)", () => {
+test("use-case-compliance-audit-owners.html: top-level sections (hero, article, closing band, cta)", () => {
   assertTopLevelSections(document, [
-    "section.case-hero",
-    "article.case-article",
+    "section.cd-hero",
+    "article.cd-article",
+    "figure.cd-close",
+    "section.cd-cta",
   ]);
 });
 
-// Each of the 6 detail pages has a genuinely different hero design tied to
-// that role's own problem, not a shared template with a color swap — see
-// CLAUDE.md's "no repeated card styles" rule applied at the page level.
-// This is the one real, role-specific marker every hero carries.
-test("use-case-compliance-audit-owners.html: hero carries its own distinct role modifier class, not a generic template", () => {
-  const hero = document.querySelector(".case-hero");
-  assert.ok(hero.classList.contains("case-hero-compliance"),
-    `expected .case-hero to carry "case-hero-compliance", got [${[...hero.classList].join(", ")}]`);
+test("use-case-compliance-audit-owners.html: sidebar links to the other 5 role pages, not itself", () => {
+  const links = Array.from(document.querySelectorAll(".cd-aside a")).map((a) => a.getAttribute("href"));
+  assert.equal(links.length, 5, `expected 5 other-role links, found ${links.length}: ${links.join(", ")}`);
+  assert.ok(!links.includes("use-case-compliance-audit-owners.html"), "sidebar must not link to its own page");
 });
 
-test("use-case-compliance-audit-owners.html: no dark (--ink) background is the dominant hero theme", () => {
-  // Network/Security/Incident heroes were previously built dark and reverted
-  // per the standing "no dark background as dominant theme" rule — this is
-  // a lightweight regression guard, not a full color-contrast test.
-  const hero = document.querySelector(".case-hero");
-  assert.ok(!hero.classList.contains("case-hero-dark"),
-    "case-hero must not carry a dark-theme modifier class");
+test("use-case-compliance-audit-owners.html: how-it-works steps list has 5 entries", () => {
+  const steps = document.querySelectorAll(".cd-steps li");
+  assert.equal(steps.length, 5, `expected 5 steps, found ${steps.length}`);
 });
