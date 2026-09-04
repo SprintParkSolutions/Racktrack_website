@@ -3018,15 +3018,6 @@ h1 span {
   text-transform: uppercase;
 }
 
-.contact-kicker {
-  margin: 0 0 20px;
-  color: var(--blue);
-  /* ponytail: item 11 — converged to the site's dominant kicker spec (case-kicker) */
-  font: 700 11px var(--font-mono);
-  letter-spacing: 0.13em;
-  text-transform: uppercase;
-}
-
 .contact-hero {
   position: relative;
   min-height: min(780px, 94dvh);
@@ -3080,6 +3071,11 @@ h1 span {
   letter-spacing: -0.04em;
   line-height: 0.98;
   text-wrap: balance;
+}
+
+/* Bigger than the other section headings on this page — this is the hero. */
+.contact-hero h1 {
+  font-size: clamp(40px, 4.6vw, 64px);
 }
 
 .contact-hero-copy > p:not(.contact-kicker) {
@@ -3186,14 +3182,8 @@ h1 span {
 }
 
 .contact-details {
-  padding: 0 clamp(28px, 7vw, 112px);
+  padding: 28px clamp(28px, 7vw, 112px) 0;
   background: var(--contact-surface);
-}
-
-.contact-details > .contact-kicker {
-  width: min(1280px, 100%);
-  margin: 0 auto;
-  padding-top: 28px;
 }
 
 .contact-details dl {
@@ -3325,9 +3315,9 @@ h1 span {
 
 .contact-form-panel {
   padding: clamp(26px, 4vw, 48px);
-  border: 1px solid var(--contact-line);
+  border-radius: var(--radius-md);
   background: rgba(255, 255, 255, 0.92);
-  box-shadow: 0 22px 60px rgba(49, 93, 148, 0.1);
+  box-shadow: 0 22px 60px rgba(49, 93, 148, 0.08);
 }
 
 .contact-form-panel fieldset {
@@ -3336,14 +3326,25 @@ h1 span {
   border: 0;
 }
 
+/* Visually hidden, not removed — the fieldset still needs an accessible
+   name for screen readers, it just no longer reads as a small kicker label
+   on screen. */
 .contact-form-panel legend {
-  margin-bottom: 26px;
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
 }
 
 .contact-form-grid {
   display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 23px 18px;
+  grid-template-columns: 1fr;
+  gap: 23px;
 }
 
 .contact-form-panel label {
@@ -3374,7 +3375,7 @@ h1 span {
 .contact-form-panel textarea {
   width: 100%;
   border: 1px solid var(--contact-line);
-  border-radius: 0;
+  border-radius: var(--radius-sm);
   outline: 0;
   background: #ffffff;
   color: var(--ink);
@@ -3413,7 +3414,7 @@ h1 span {
 }
 
 .contact-field-wide {
-  grid-column: 1 / -1;
+  grid-column: auto;
 }
 
 .contact-phone-field {
@@ -4040,63 +4041,39 @@ html:not(.solutions-motion) .surface-grid article { opacity: 1; transform: none;
 .uc-opening-tag:nth-child(6)::before { animation-delay: 1.5s; }
 @keyframes uc-tag-ping { 0% { box-shadow: 0 0 0 0 rgba(125,189,255,.55); } 70% { box-shadow: 0 0 0 8px rgba(125,189,255,0); } 100% { box-shadow: 0 0 0 0 rgba(125,189,255,0); } }
 
-/* Replaces .uc-brief + .uc-simple-flow (the old text intro + a Capture/
-   Verify/Use 3-box grid that duplicated Solutions' hero-rail). One diagram
-   now shows the actual point of this page: one sweep, six divergent
-   questions — feeding directly into the six cards in the filmstrip below. */
-.uc-fanout { display: grid; grid-template-columns: minmax(320px, .85fr) minmax(0, 1.15fr); gap: clamp(40px, 6vw, 90px); align-items: center; width: min(1440px, calc(100% - 128px)); margin: 0 auto; padding: 150px 0 110px; border-top: 1px solid var(--uc-line); }
-.uc-fanout-copy h2 { margin: 22px 0 24px; max-width: 13ch; font-size: clamp(28px, 2.6vw, 36px); line-height: .96; letter-spacing: -.055em; }
-.uc-fanout-copy > p:last-child { max-width: 42ch; margin: 0; color: var(--muted); font-size: clamp(16px, 1.1vw, 18px); line-height: 1.5; }
-.uc-fanout-diagram { width: 100%; height: auto; overflow: visible; }
-.uc-fanout-source { fill: var(--blue); }
-.uc-fanout-source-label { fill: var(--blue); font: 700 11px var(--font-mono); letter-spacing: .1em; }
-.uc-fanout-line { fill: none; stroke: rgba(125, 189, 255, .55); stroke-width: 1.4; stroke-dasharray: 480; stroke-dashoffset: 480; animation: uc-fanout-draw 1.1s ease forwards; animation-delay: .1s; }
-.uc-fanout-line:nth-child(3) { animation-delay: .18s; }
-.uc-fanout-line:nth-child(4) { animation-delay: .26s; }
-.uc-fanout-line:nth-child(5) { animation-delay: .34s; }
-.uc-fanout-line:nth-child(6) { animation-delay: .42s; }
-.uc-fanout-line:nth-child(7) { animation-delay: .5s; }
-@keyframes uc-fanout-draw { to { stroke-dashoffset: 0; } }
-.uc-fanout-node circle { fill: var(--white); stroke: var(--blue); stroke-width: 1.6; }
-.uc-fanout-node text { fill: var(--ink); font: 700 13px var(--font-ui); letter-spacing: -.01em; dominant-baseline: middle; }
-@media (prefers-reduced-motion: reduce) { .uc-fanout-line { animation: none; stroke-dashoffset: 0; } .uc-opening-tag::before { animation: none; } }
-@media (max-width: 980px) { .uc-fanout { grid-template-columns: 1fr; width: calc(100% - 60px); padding: 100px 0 80px; gap: 40px; } }
-@media (max-width: 640px) { .uc-opening-tags { display: none; } }
-/* Role navigator rebuilt as a horizontal drag filmstrip (see use-cases.js).
-   The old version was a 660dvh sticky-pin tab switcher with a dense
-   Physical-question/Evidence-returned definition list per role — technically
-   accurate but jargon-dense and disconnected from the photography. This
-   version leads with a real photo and one plain first-person sentence per
-   role, and is draggable/scrollable rather than click-to-jump. */
-.uc-filmstrip { padding: 130px 0 150px; }
-.uc-filmstrip-head { width: min(1440px, calc(100% - 128px)); margin: 0 auto 50px; }
-.uc-filmstrip-head h2 { margin: 18px 0 20px; max-width: 14ch; font-size: clamp(28px, 2.6vw, 36px); line-height: .95; letter-spacing: -.055em; }
-.uc-filmstrip-head > p:last-child { max-width: 56ch; margin: 0; color: var(--muted); font-size: clamp(16px, 1.1vw, 18px); line-height: 1.5; }
-.uc-team-list {
-  display: flex;
-  flex-direction: column;
-  width: min(1440px, calc(100% - 128px));
-  margin: 0 auto;
+/* By-role card grid — one photo, one metric, one line of what changes for
+   that role, linking straight to that role's case page. Replaces the old
+   fan-out SVG diagram + horizontal team filmstrip with a single scannable
+   grid (same 6 destinations). */
+.uc-roles { padding: 130px 0 110px; border-top: 1px solid var(--uc-line); width: min(1440px, calc(100% - 128px)); margin: 0 auto; }
+.uc-roles-intro { max-width: 620px; margin: 0 0 50px; }
+.uc-roles-intro h2 { margin: 0 0 16px; max-width: 13ch; font-size: clamp(28px, 2.6vw, 36px); line-height: .96; letter-spacing: -.055em; }
+.uc-roles-intro p { margin: 0; max-width: 46ch; color: var(--muted); font-size: clamp(16px, 1.1vw, 18px); line-height: 1.5; }
+
+.uc-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 28px; }
+
+.uc-card { display: flex; flex-direction: column; border: 1px solid var(--uc-line); border-radius: var(--radius-md); overflow: hidden; background: var(--white); color: inherit; transition: transform 220ms ease, box-shadow 220ms ease, border-color 220ms ease; }
+.uc-card:hover { transform: translateY(-4px); box-shadow: 0 24px 50px -20px rgba(16, 32, 51, .25); border-color: rgba(36, 87, 214, .3); }
+
+.uc-media { position: relative; margin: 0; aspect-ratio: 4 / 3; overflow: hidden; }
+.uc-media img { display: block; width: 100%; height: 100%; object-fit: cover; }
+.uc-metric { position: absolute; left: 14px; bottom: 14px; padding: 6px 11px; border-radius: 999px; background: rgba(6, 17, 39, .72); backdrop-filter: blur(6px); -webkit-backdrop-filter: blur(6px); color: var(--white); font: 700 11px var(--font-mono); letter-spacing: .04em; }
+
+.uc-card-title { display: block; margin: 22px 20px 0; font-family: var(--font-display); font-size: 18px; font-weight: 600; line-height: 1.25; letter-spacing: -.01em; color: var(--ink); }
+.uc-card-desc { display: block; margin: 10px 20px 0; color: var(--muted); font-size: 14.5px; line-height: 1.5; }
+.uc-card-go { display: flex; align-items: center; gap: 8px; margin: 16px 20px 20px; color: var(--blue); font: 700 13px var(--font-ui); }
+.uc-card-go span { transition: transform 200ms ease; }
+.uc-card:hover .uc-card-go span { transform: translateX(4px); }
+
+@media (max-width: 980px) {
+  .uc-roles { padding: 100px 0 80px; width: calc(100% - 60px); }
+  .uc-grid { grid-template-columns: 1fr 1fr; gap: 20px; }
 }
-.uc-team-row {
-  display: flex;
-  align-items: center;
-  gap: min(96px, 6vw);
-  padding: 72px 0;
-  border-top: 1px solid var(--uc-line);
+@media (max-width: 640px) {
+  .uc-opening-tags { display: none; }
+  .uc-grid { grid-template-columns: 1fr; }
 }
-.uc-team-row:first-child { border-top: none; }
-.uc-team-row:nth-child(even) { flex-direction: row-reverse; }
-.uc-team-row figure { flex: 0 0 34%; max-width: 380px; margin: 0; aspect-ratio: 1 / 1; overflow: hidden; border-radius: var(--radius-md); }
-.uc-team-row figure img { display: block; width: 100%; height: 100%; object-fit: cover; }
-.uc-team-row .uc-reel-copy { flex: 1; }
-.uc-reel-copy { display: grid; gap: 14px; }
-.uc-reel-role { margin: 0; color: var(--blue); font: 700 11px var(--font-mono); letter-spacing: .1em; text-transform: uppercase; }
-.uc-reel-quote { margin: 0; color: var(--ink); font-family: var(--font-display); font-size: clamp(22px, 2vw, 28px); font-weight: 600; line-height: 1.15; letter-spacing: -.02em; }
-.uc-reel-plain { margin: 0; max-width: 42ch; color: var(--muted); font-size: 17px; line-height: 1.6; }
-.uc-reel-copy a { display: inline-flex; align-items: center; gap: 8px; margin-top: 6px; color: var(--ink); font: 700 13px var(--font-ui); text-decoration: none; }
-.uc-reel-copy a span { color: var(--blue); font-size: 16px; transition: transform .2s ease; }
-.uc-reel-copy a:hover span { transform: translateX(4px); }
+@media (prefers-reduced-motion: reduce) { .uc-opening-tag::before { animation: none; } }
 .uc-close {
   /* ponytail: matches the why-cta/solutions-cta grid recipe (item 08/23) —
      heading | copy+button side by side, instead of one flat stacked
@@ -4248,14 +4225,6 @@ html:not(.solutions-motion) .surface-grid article { opacity: 1; transform: none;
 
   .contact-form-panel {
     padding: 24px 20px;
-  }
-
-  .contact-form-grid {
-    grid-template-columns: 1fr;
-  }
-
-  .contact-field-wide {
-    grid-column: auto;
   }
 
   .contact-form-foot {
@@ -5580,13 +5549,20 @@ html:not(.solutions-motion) .surface-grid article { opacity: 1; transform: none;
    ============================================================ */
 .resources-page .site-nav a.is-current { color: var(--ink); }
 .resources-page .site-nav a.is-current::after { transform: scaleX(1); }
+.resources-page .site-header {
+  background: rgba(247, 250, 255, .84);
+  border-bottom-color: rgba(16, 32, 51, .1);
+}
 
 .rs-frame { width: min(1200px, calc(100% - 72px)); margin-inline: auto; }
 
-.rs-hero { padding: 150px 0 70px; background: var(--cloud); }
-.rs-hero-inner h1 { margin: 20px 0 22px; max-width: 16ch; font-family: var(--font-display); font-size: clamp(36px, 3.8vw, 48px); line-height: 0.95; letter-spacing: -0.05em; color: var(--ink); }
-.rs-hero-inner h1 em { color: var(--blue); font-style: normal; }
-.rs-hero-lede { max-width: 58ch; color: var(--muted); font-size: 18px; line-height: 1.55; }
+.rs-hero { position: relative; padding: 150px 0 70px; overflow: hidden; isolation: isolate; }
+.rs-hero-media { position: absolute; inset: 0; z-index: -2; }
+.rs-hero-media img { width: 100%; height: 100%; object-fit: cover; }
+.rs-hero-scrim { position: absolute; inset: 0; z-index: -1; background: rgba(6, 17, 39, .72); }
+.rs-hero-inner h1 { margin: 20px 0 22px; max-width: 22ch; font-family: var(--font-display); font-size: clamp(36px, 3.8vw, 48px); line-height: 0.98; letter-spacing: -0.05em; color: var(--white); }
+.rs-hero-inner h1 em { color: #9dc0ff; font-style: normal; }
+.rs-hero-lede { max-width: 58ch; color: rgba(255, 255, 255, .78); font-size: 18px; line-height: 1.55; }
 
 .rs-featured { padding: 0 0 76px; background: var(--cloud); }
 .rs-field-report { position: relative; display: grid; grid-template-columns: 1.5fr 0.9fr; align-items: center; gap: 56px; background: var(--white); border: 1px solid rgba(16, 32, 51, 0.14); padding: 60px clamp(28px, 4vw, 68px) 52px; }
@@ -5908,13 +5884,13 @@ html:not(.solutions-motion) .surface-grid article { opacity: 1; transform: none;
    the page's document/ledger language. Real rack photography, since the
    page was otherwise 100% typographic and the user asked for images to
    reinforce trust. */
-.tsec-figure { margin: 80px 0 100px; opacity: 0; transform: translateY(26px); transition: opacity 750ms cubic-bezier(.16,1,.3,1), transform 750ms cubic-bezier(.16,1,.3,1); }
+.tsec-figure { margin: 80px 0 0; opacity: 0; transform: translateY(26px); transition: opacity 750ms cubic-bezier(.16,1,.3,1), transform 750ms cubic-bezier(.16,1,.3,1); }
 .tsec-figure.is-in { opacity: 1; transform: translateY(0); }
 .tsec-figure img { display: block; width: 100%; aspect-ratio: 16 / 9; object-fit: cover; border-radius: var(--radius-sm); }
 .tsec-figure figcaption { display: flex; align-items: baseline; gap: 10px; margin-top: 14px; }
 .tsec-figure-tag { flex: none; color: var(--blue); font: 700 11px var(--font-mono); letter-spacing: 0.06em; }
 .tsec-figure-caption { margin: 0; color: var(--muted); font-size: 13.5px; line-height: 1.5; }
-.tsec-hero-figure { margin: 0 auto; }
+.tsec-hero-figure { margin: 0 auto 100px; }
 .tsec-hero-figure img { aspect-ratio: 21 / 8; }
 
 /* Final CTA — asymmetric band, not the centered pattern other pages use */

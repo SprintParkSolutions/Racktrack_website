@@ -34,23 +34,17 @@ test("use-cases.html: stylesheet is cache-busted", () => {
   assertCacheBustedStylesheet(document);
 });
 
-test("use-cases.html: top-level sections (opening, fanout, filmstrip, close)", () => {
+test("use-cases.html: top-level sections (opening, roles, close)", () => {
   assertTopLevelSections(document, [
     "section.uc-opening",
-    "section.uc-fanout",
-    "section.uc-filmstrip",
+    "section.uc-roles",
     "section.uc-close",
   ]);
 });
 
-test("use-cases.html: fanout diagram branches to all 6 roles", () => {
-  const branches = document.querySelectorAll(".uc-fanout-diagram path, .uc-fanout-diagram line");
-  assert.ok(branches.length >= 6, `expected at least 6 branch lines, found ${branches.length}`);
-});
-
-test("use-cases.html: filmstrip links to all 6 role detail pages", () => {
+test("use-cases.html: role grid links to all 6 role detail pages", () => {
   const links = new Set(
-    Array.from(document.querySelectorAll('.uc-filmstrip a[href^="use-case-"]')).map((a) => a.getAttribute("href"))
+    Array.from(document.querySelectorAll('.uc-grid a[href^="use-case-"]')).map((a) => a.getAttribute("href"))
   );
   assert.equal(links.size, 6, `expected 6 role detail links, found ${links.size}: ${[...links].join(", ")}`);
 });
