@@ -682,21 +682,16 @@ h1 span {
   width: min(620px, calc(100% - 36px));
   margin: 0 0 clamp(36px, 6vh, 64px) clamp(18px, 4vw, 64px);
   grid-template-columns: repeat(3, 1fr);
-  overflow: hidden;
-  border: 1px solid rgba(16, 32, 51, 0.1);
-  border-radius: var(--radius-md);
-  background: var(--white);
-  box-shadow: 0 8px 24px rgba(16, 32, 51, 0.05);
+  gap: 10px;
   opacity: var(--intro-opacity, 1);
   transition: opacity 200ms linear;
 }
 
 .proof-panel div {
-  padding: 18px 20px;
-}
-
-.proof-panel div + div {
-  border-left: 1px solid rgba(16, 32, 51, 0.1);
+  padding: 18px 16px;
+  border-radius: 14px;
+  border: 1px solid rgba(36, 87, 214, 0.14);
+  background: var(--cloud);
 }
 
 .proof-panel span {
@@ -765,7 +760,7 @@ h1 span {
   width: 100%;
   opacity: 0;
   transform: translate3d(0, 10px, 0);
-  transition: opacity 360ms ease, transform 420ms ease;
+  transition: opacity 140ms ease, transform 180ms ease;
   pointer-events: none;
 }
 
@@ -775,10 +770,10 @@ h1 span {
 }
 
 .sequence-note p {
-  margin: 0 0 10px;
+  margin: 0 0 12px;
   color: var(--scan);
   font-family: var(--font-mono);
-  font-size: 11px;
+  font-size: 13px;
   font-weight: 700;
   letter-spacing: 0.1em;
   text-transform: uppercase;
@@ -789,7 +784,7 @@ h1 span {
   margin: 0;
   color: var(--blue);
   font-family: var(--font-display);
-  font-size: 36px;
+  font-size: 44px;
   font-weight: 680;
   letter-spacing: 0;
   line-height: 1.05;
@@ -799,9 +794,9 @@ h1 span {
 .sequence-note > span {
   display: block;
   max-width: 36ch;
-  margin-top: 10px;
+  margin-top: 12px;
   color: rgba(255, 255, 255, 0.9);
-  font-size: 15px;
+  font-size: 17px;
   line-height: 1.45;
   text-shadow: 0 1px 3px rgba(16, 32, 51, 0.35);
 }
@@ -1356,9 +1351,9 @@ h1 span {
   margin: 0;
   color: var(--ink);
   font-family: var(--font-display);
-  font-size: 82px;
+  font-size: 56px;
   font-weight: 720;
-  line-height: 0.98;
+  line-height: 1;
   letter-spacing: 0;
   text-wrap: balance;
 }
@@ -1874,14 +1869,14 @@ h1 span {
 
   .sequence-note h2 {
     max-width: 18ch;
-    font-size: 27px;
+    font-size: 32px;
     color: var(--blue);
     text-shadow: none;
   }
 
   .sequence-note > span {
     max-width: 42ch;
-    font-size: 14px;
+    font-size: 15px;
     color: var(--muted);
   }
 
@@ -2103,11 +2098,11 @@ h1 span {
   }
 
   .sequence-note h2 {
-    font-size: 24px;
+    font-size: 27px;
   }
 
   .sequence-note > span {
-    font-size: 13px;
+    font-size: 14px;
   }
 
   .bridge-card-deck {
@@ -4802,14 +4797,6 @@ html:not(.solutions-motion) .surface-grid article { opacity: 1; transform: none;
   margin: 78px auto 0;
 }
 
-.why-deck-hint {
-  margin: 0 0 22px;
-  font-family: var(--font-mono);
-  font-size: 12px;
-  letter-spacing: 0.04em;
-  color: var(--muted);
-}
-
 .why-deck-stage {
   position: relative;
   height: 460px;
@@ -4946,8 +4933,7 @@ html:not(.solutions-motion) .surface-grid article { opacity: 1; transform: none;
     height: 220px;
   }
 
-  .why-deck-controls,
-  .why-deck-hint {
+  .why-deck-controls {
     display: none;
   }
 }
