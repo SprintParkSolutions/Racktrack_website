@@ -515,12 +515,6 @@ body[class] .site-nav .nav-item .nav-dropdown a {
   text-transform: uppercase;
 }
 
-.sequence-intro .eyebrow {
-  font-size: 14px;
-  line-height: 1.25;
-  text-shadow: 0 1px 18px rgba(255, 255, 255, 0.58);
-}
-
 h1,
 h2,
 p {
