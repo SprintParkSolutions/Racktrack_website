@@ -3818,8 +3818,7 @@ h1 span {
    line that fills as you scroll past them (see the rail script). Replaces
    the old plain alternating image/text rows. */
 .process-section {
-  padding-block: 150px 130px;
-  border-top: 1px solid rgba(16, 32, 51, 0.18);
+  padding-block: 120px;
 }
 
 .process-intro {
@@ -3955,9 +3954,8 @@ h1 span {
 
 .schematic-section {
   margin-top: 0;
-  padding: 130px 0 140px;
+  padding: 120px 0;
   background: var(--mist);
-  border-top: 1px solid rgba(16, 32, 51, 0.18);
 }
 
 /* Narrower than the standard 1440px .section-frame — at full width the
@@ -4012,7 +4010,7 @@ h1 span {
 .rack-units { height: 100%; display: grid; grid-template-rows: 1fr 1fr .45fr 1.45fr 1.55fr 1fr; gap: 8px; } .rack-slot { position: relative; background: linear-gradient(180deg,#202b3b,#0c121b); border: 2px solid #586d8b; box-shadow: inset 0 0 20px #060b12; color: white; padding: 12px 14px; display: flex; flex-direction: column; justify-content: center; } .rack-slot::after { content: ''; position: absolute; left: 7px; right: 7px; bottom: 7px; height: 2px; background: var(--blue); opacity: .7; } .rack-slot.blank { border-color: #394657; background: repeating-linear-gradient(90deg,#232e3b 0 16px,#111923 16px 19px); } .rack-slot span, .rack-slot em { font: 10px 'Geist Mono', monospace; color: #a9c2f8; } .rack-slot strong { font: 14px 'Satoshi', sans-serif; margin: 4px 0; } .rack-slot em { color: #78d3a6; font-style: normal; } .rack-slot.storage { border-color: #6285c8; } .rack-slot.capacity { border-color: #4d5969; }
 .scan-beam { position: absolute; z-index: 4; left: 19%; right: 23%; top: 17%; height: 3px; background: #b9d2ff; box-shadow: 0 0 18px 7px rgba(95,150,255,.65); animation: rack-scan 5s ease-in-out infinite; } @keyframes rack-scan { 0%, 100% { transform: translateY(0); opacity: .25; } 50% { transform: translateY(440px); opacity: .9; } }
 .rack-caption { position: absolute; z-index: 5; bottom: 16px; left: 16px; right: 16px; display: flex; justify-content: space-between; color: #aac7ff; font-size: 10px; } .rack-caption strong { color: #72d19f; font-weight: 700; }
-.workflow-section { padding-block: 140px 120px; border-top: 1px solid rgba(16,32,51,.18); } .workflow-heading { display: grid; grid-template-columns: 1fr 1fr; gap: 8vw; align-items: end; margin-bottom: 62px; } .workflow-heading h2 { margin-bottom: 0; } .workflow-heading .section-lede { margin-bottom: 4px; }
+.workflow-section { padding-block: 120px; } .workflow-heading { display: grid; grid-template-columns: 1fr 1fr; gap: 8vw; align-items: end; margin-bottom: 62px; } .workflow-heading h2 { margin-bottom: 0; } .workflow-heading .section-lede { margin-bottom: 4px; }
 .surface-grid { display: grid; grid-template-columns: repeat(2, 1fr); border-top: 1px solid rgba(16,32,51,.18); border-left: 1px solid rgba(16,32,51,.18); } .surface-grid article { min-height: 260px; padding: 30px 34px; border-right: 1px solid rgba(16,32,51,.18); border-bottom: 1px solid rgba(16,32,51,.18); opacity: 0; transform: translateY(20px); transition: opacity .55s ease, transform .55s ease; } .surface-grid article.is-visible { opacity: 1; transform: none; } .surface-grid article:nth-child(even) { transition-delay: .08s; } .surface-grid article > span { color: var(--blue); font-size: 11px; font-weight: 700; } .surface-grid h3 { font-size: clamp(22px, 2.2vw, 28px); letter-spacing: -.04em; line-height: 1; margin: 54px 0 14px; } .surface-grid p { color: var(--copy-strong); font-size: 16px; line-height: 1.45; max-width: 510px; margin: 0; }
 /* Was a dark (--ink) full-bleed panel — broke the site's "no dark dominant
    background" rule. Rebuilt light, matching the rest of the site's CTAs. */
@@ -4027,9 +4025,8 @@ h1 span {
   grid-template-columns: minmax(0, 1fr) minmax(280px, 0.72fr);
   align-items: center;
   gap: 48px;
-  padding: 90px clamp(28px, 7vw, 112px);
+  padding: 120px clamp(28px, 7vw, 112px);
   background: #dfeafa;
-  border-top: 1px solid rgba(16, 32, 51, 0.18);
   position: relative;
   overflow: hidden;
 }
@@ -4125,7 +4122,7 @@ html:not(.solutions-motion) .surface-grid article { opacity: 1; transform: none;
      (#rack-3d container) — matches the page's standard section scale
      instead of being its own one-off width. */
   width: min(1360px, calc(100% - 96px));
-  margin: 108px auto 0;
+  margin: 120px auto 0;
   padding: 0;
   background: transparent;
   border: 0;
@@ -4159,7 +4156,7 @@ html:not(.solutions-motion) .surface-grid article { opacity: 1; transform: none;
 @media (max-width: 640px) { .solutions-page .schematic-section { margin-top: 80px; width: calc(100% - 30px); } .original-schematic { overflow-x: auto; } .original-schematic img { min-width: 720px; } }
 
 /* Original cabinet reader frame and its source-page spacing. */
-.solutions-page #rack-3d { padding-block: 112px 108px; border-top: 1px solid rgba(16,32,51,.18); }
+.solutions-page #rack-3d { padding-block: 120px; }
 .solutions-page #rack-3d { --blue: #1a3fd4; --ink: #1a1a1a; --muted: #6f7785; }
 /* Was 1760px — the cabinet reader stretched edge-to-edge and looked
    oversized/cramped rather than spacious. Narrowed to match the schematic
