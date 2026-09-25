@@ -4,9 +4,11 @@
   "type": "module",
   "scripts": {
     "start": "python -m http.server 8080",
+    "build": "node build.mjs",
     "test": "node --test"
   },
   "devDependencies": {
-    "jsdom": "^30.0.1"
+    "jsdom": "^30.0.1",
+    "playwright": "^1.62.1"
   }
 }

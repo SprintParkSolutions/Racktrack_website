@@ -8,3 +8,8 @@ CLAUDE.md
 PROGRESS.md
 docs/
 node_modules/
+dist/
+racktrack-dist.zip
+
+# Local Jira API token — never commit
+.jira-token

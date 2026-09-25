@@ -4,9 +4,38 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <meta name="description" content="DCIM platforms model intent. Understanding the gap between model and reality helps teams solve the right problem." />
+    <link rel="canonical" href="https://racktrack.ai/pages/article-dcim-vs-physical-reality-why-the-gap-matters.html">
+    <meta property="og:type" content="article">
+    <meta property="og:site_name" content="RackTrack">
+    <meta property="og:title" content="DCIM vs. Physical Reality: Why the Gap Matters | RackTrack">
+    <meta property="og:description" content="DCIM platforms model intent. Understanding the gap between model and reality helps teams solve the right problem.">
+    <meta property="og:url" content="https://racktrack.ai/pages/article-dcim-vs-physical-reality-why-the-gap-matters.html">
+    <meta property="og:image" content="https://racktrack.ai/assets/logo.jpg">
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="DCIM vs. Physical Reality: Why the Gap Matters | RackTrack">
+    <meta name="twitter:description" content="DCIM platforms model intent. Understanding the gap between model and reality helps teams solve the right problem.">
+    <meta name="twitter:image" content="https://racktrack.ai/assets/logo.jpg">
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "Article",
+      "headline": "DCIM vs. Physical Reality: Why the Gap Matters",
+      "description": "DCIM platforms model intent. Understanding the gap between model and reality helps teams solve the right problem.",
+      "url": "https://racktrack.ai/pages/article-dcim-vs-physical-reality-why-the-gap-matters.html",
+      "publisher": {
+        "@type": "Organization",
+        "name": "RackTrack",
+        "logo": {
+          "@type": "ImageObject",
+          "url": "https://racktrack.ai/assets/logo.jpg"
+        }
+      }
+    }
+    </script>
+
     <title>DCIM vs. Physical Reality: Why the Gap Matters | RackTrack</title>
     <link rel="icon" href="../assets/logo.jpg" />
-    <link rel="stylesheet" href="../styles.css?v=article-4-source-port" />
+    <link rel="stylesheet" href="../styles.css?v=article-4-source-port-sticky-glass-nav-hero-gap-inter-navsm2-btngap-margin-fixbcdefg-audit1b" />
     <script type="module" src="../js/article.js?v=3"></script>
     <script defer src="../js/cookie-consent.js"></script>
 </head>
@@ -18,7 +47,7 @@
         <a href="why-racktrack.html">Why RackTrack</a>
         <a href="solutions.html">Solutions</a>
         <div class="nav-item"><a href="use-cases.html">Use Cases<svg class="nav-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg></a><input type="checkbox" id="nav-sub-usecases" class="nav-sub-toggle" autocomplete="off" /><label for="nav-sub-usecases" class="nav-sub-toggle-btn" aria-label="Expand Use Cases submenu"></label><div class="nav-dropdown"><a href="use-case-infrastructure-data-center-leaders.html">Infrastructure &amp; Data Center Leaders</a><a href="use-case-network-architects-engineers.html">Network Architects &amp; Engineers</a><a href="use-case-security-vulnerability-teams.html">Security &amp; Vulnerability Teams</a><a href="use-case-compliance-audit-owners.html">Compliance &amp; Audit Owners</a><a href="use-case-incident-responders-on-call.html">Incident Responders &amp; On-Call</a><a href="use-case-m-a-migration-teams.html">M&amp;A &amp; Migration Teams</a></div></div>
-        <div class="nav-item"><a class="is-current" href="resources.html" aria-current="page">Resources<svg class="nav-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg></a><input type="checkbox" id="nav-sub-resources" class="nav-sub-toggle" autocomplete="off" /><label for="nav-sub-resources" class="nav-sub-toggle-btn" aria-label="Expand Resources submenu"></label><div class="nav-dropdown"><a href="resources.html">All articles</a><a href="article-why-infrastructure-records-are-wrong.html">Why every CMDB is 40% wrong</a><a href="article-what-network-verified-actually-means.html">What "network-verified" means</a><a href="article-how-infrastructure-teams-prepare-for-soc-2-audits.html">Preparing for SOC 2</a><a href="article-free-port-discovery-and-rack-capacity-planning.html">Free port discovery</a></div></div>
+        <div class="nav-item"><a class="is-current" href="resources.html" aria-current="page">Resources<svg class="nav-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg></a><input type="checkbox" id="nav-sub-resources" class="nav-sub-toggle" autocomplete="off" /><label for="nav-sub-resources" class="nav-sub-toggle-btn" aria-label="Expand Resources submenu"></label><div class="nav-dropdown"><a href="resources.html">All articles</a><a href="racktrack-guide.html">Knowledgebase</a><a href="article-why-infrastructure-records-are-wrong.html">Why every CMDB is 40% wrong</a><a href="article-what-network-verified-actually-means.html">What "network-verified" means</a><a href="article-how-infrastructure-teams-prepare-for-soc-2-audits.html">Preparing for SOC 2</a><a href="article-free-port-discovery-and-rack-capacity-planning.html">Free port discovery</a></div></div>
         <a href="trust-security.html">Trust &amp; Security</a> <a href="contact.html">Contact Us</a>
       </nav>
       <a class="nav-cta" href="https://portal.racktrack.ai">Sign In</a>
@@ -58,12 +87,12 @@
               <h2 class="art-h2">Physical environments drift from planned layouts.</h2>
               <p>Moves, additions, emergency swaps, patch changes, and label decay all create divergence. Over time, the planned state and the installed state are no longer the same thing. When teams ignore that difference, they troubleshoot and plan against fiction.</p>
             </section>
+            <figure class="art-fig" data-reveal>
+              <img src="../assets/articles/media-art-dcim-room.jpg" alt="An open equipment rack packed with wiring and control modules in an industrial plant room" loading="lazy" decoding="async" />
+              <figcaption>Moves, swaps and patch changes accumulate in the rack long before they reach the record.</figcaption>
+            </figure>
           </div>
         </div>
-        <figure class="art-fig art-bleed" data-reveal>
-          <img src="../assets/articles/media-art-dcim-room.jpg" alt="An open equipment rack packed with wiring and control modules in an industrial plant room" loading="lazy" decoding="async" />
-          <div class="art-capcol"><figcaption>Moves, swaps and patch changes accumulate in the rack long before they reach the record.</figcaption></div>
-        </figure>
         <div class="art-body">
           <div class="art-col">
             <section class="art-sec" data-reveal>
@@ -84,7 +113,7 @@
           <div>
             <h2>Read the theory.<br /><em>Then run it on your rack.</em></h2>
           </div>
-          <a class="button-primary" href="contact.html">Request a platform brief <span aria-hidden="true">&rarr;</span></a>
+          <a class="button-primary" href="contact.html">Request Platform Brief <span aria-hidden="true">&rarr;</span></a>
         </div>
       </section>
     </main>

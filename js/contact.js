@@ -21,7 +21,7 @@ if (form) {
     const mobile = form.elements.mobile.value.trim();
     const validName = setError(
       "fullName",
-      !name ? "Full name is required." : !/^[A-Za-z][A-Za-z\s'.-]*$/.test(name) ? "Enter a valid name." : ""
+      !name ? "Full name is required." : !/^[\p{L}][\p{L}\s'.-]*$/u.test(name) ? "Enter a valid name." : ""
     );
     const validEmail = setError(
       "email",
@@ -29,7 +29,7 @@ if (form) {
     );
     const validMobile = setError(
       "mobile",
-      !mobile ? "Mobile number is required." : !/^\d{10}$/.test(mobile) ? "Enter exactly 10 digits." : ""
+      !mobile ? "Mobile number is required." : !/^\d{6,14}$/.test(mobile) ? "Enter a valid mobile number." : ""
     );
 
     if (!validName || !validEmail || !validMobile) return;

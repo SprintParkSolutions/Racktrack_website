@@ -1,6 +1,8 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import { loadPage } from "../helpers/dom.mjs";
+import fs from "node:fs";
+import path from "node:path";
+import { loadPage, ROOT } from "../helpers/dom.mjs";
 import {
   assertBasicMeta, assertHeaderNav, assertFooter,
   assertImagesHaveAlt, assertLocalLinksResolve,
@@ -43,13 +45,19 @@ test("contact.html: top-level sections (hero, details, request form, faq)", () =
   ]);
 });
 
-test("contact.html: hero shows a real photo, not the old canvas HUD scene", () => {
-  const figure = document.querySelector(".contact-hero-panel .contact-hero-image");
-  assert.ok(figure, "hero panel must have .contact-hero-image");
-  const img = figure.querySelector("img");
-  assert.ok(img && img.getAttribute("src")?.includes("media-contact-run.jpg"));
+test("contact.html: hero shows the client-supplied visual as a background, not the old canvas HUD scene", () => {
+  const field = document.querySelector(".contact-hero-field");
+  assert.ok(field, "hero must have .contact-hero-field");
+  assert.equal(field.getAttribute("role"), "img", ".contact-hero-field must be exposed as an image to assistive tech");
+  assert.ok(field.getAttribute("aria-label")?.length > 0, "hero background must have a descriptive aria-label");
   assert.equal(document.querySelector("[data-network-scene]"), null,
     "the old animated canvas reconciliation scene must not be present");
+
+  // jsdom doesn't compute background-image from the linked stylesheet, so
+  // check the declaration directly in the source CSS instead.
+  const css = fs.readFileSync(path.join(ROOT, "styles.css"), "utf8");
+  assert.match(css, /\.contact-hero-field\s*\{[^}]*media-contact-hologram\.jpg/,
+    "styles.css must set the hologram image as .contact-hero-field's background");
 });
 
 test("contact.html: platform brief form has required fields wired up", () => {

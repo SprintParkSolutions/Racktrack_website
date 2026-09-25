@@ -1,5 +1,23 @@
 import { resolveWorld, buildBoundaries } from "./world-timeline.js";
 
+// Always reload the homepage at the top. Browsers default
+// history.scrollRestoration to "auto", which puts a refresh back at the exact
+// offset you left — fine on an ordinary page, wrong here: this homepage is
+// ~18,000px of scroll-jacked animation, so refreshing mid-page dropped you
+// into the middle of a pinned sequence with the header faded out (it hides
+// while a section is pinned), leaving no visible nav and no obvious way back.
+// It read as "refresh does nothing".
+// "manual" alone covers the normal case; the explicit scroll on load is the
+// belt-and-braces for browsers that restore before this module runs, and it
+// must be behavior:"instant" because html has scroll-behavior:smooth, which
+// would otherwise animate an 18,000px scroll back to the top in full view.
+if ("scrollRestoration" in history) {
+  history.scrollRestoration = "manual";
+  window.addEventListener("load", () => {
+    if (window.scrollY) window.scrollTo({ top: 0, left: 0, behavior: "instant" });
+  });
+}
+
 const WORLD_BEATS = [
   { key: "perceive",   frames: 131, dir: "rack-open-frames-webp" },
   { key: "connect",    frames: 76,  dir: "cable-truth-frames-webp" },
@@ -18,6 +36,20 @@ const sequenceNotes = sequence
   : [];
 const storyBridge = document.querySelector("[data-story-bridge]");
 const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)");
+
+// Phones and tablets render the homepage as stacked static content
+// rather than three scroll-pinned canvas animations — see the matching
+// "Static homepage layout" @media block in styles.css, which shares this
+// 980px breakpoint. Gating here as well as in CSS is what actually saves
+// the ~1000 animation frames from being downloaded and scrubbed for a
+// canvas that is display:none; the still poster <img>s already in the
+// markup carry the visual instead.
+//
+// Read once at load rather than tracked live: a real phone or tablet
+// never crosses this boundary, and re-initialising pinned canvas
+// sequences mid-session on a desktop resize is a far worse trade than
+// leaving the layout static until the next reload.
+const staticLayout = window.innerWidth <= 980;
 
 const totalFrames = 240;
 const startFrame = 5;
@@ -181,17 +213,10 @@ function drawCover(targetContext, targetWidth, targetHeight, image) {
   let drawX = 0;
   let drawY = 0;
 
-  // Below 640px, cover-fit crops this landscape rack photo down to a
-  // narrow vertical sliver (scale = boxHeight / imageHeight, cropping most
-  // of the width) — the rack itself only ever fills a fraction of that
-  // sliver, reading as "the rack isn't fully visible." Switching to
-  // contain-fit math (the same branch condition, inverted) shows the
-  // entire source frame at once instead, letterboxed left/right, so the
-  // whole rack is always in frame. Desktop keeps the original cover crop.
-  const contain = window.innerWidth <= 640;
-  const fitToHeight = contain ? imageRatio <= canvasRatio : imageRatio > canvasRatio;
-
-  if (fitToHeight) {
+  // Plain cover-fit. This only ever runs above 980px now (see
+  // staticLayout) — narrow viewports never reach the canvas at all, so
+  // there is no longer a contain-fit branch for them to take.
+  if (imageRatio > canvasRatio) {
     drawHeight = targetHeight;
     drawWidth = drawHeight * imageRatio;
     drawX = (targetWidth - drawWidth) / 2;
@@ -691,7 +716,7 @@ function createWorld() {
   return { root, update, markNeedsResize: () => { needsWorldResize = true; } };
 }
 
-const world = createWorld();
+const world = staticLayout ? null : createWorld();
 const worldSequences = [world].filter(Boolean);
 
 // Ambient particle field across the world stage — fills the space with life,
@@ -754,7 +779,7 @@ function renderLoop() {
   window.requestAnimationFrame(renderLoop);
 }
 
-if (sequence && canvas) {
+if (sequence && canvas && !staticLayout) {
   context = canvas.getContext("2d", { alpha: false });
   resizeCanvas();
   renderLoop();
@@ -769,7 +794,14 @@ if (sequence && canvas) {
   }, { passive: true });
 }
 
-updateStoryBridge();
+// Skipped in static layout: this writes inline custom properties that
+// would override the settled end-state values styles.css declares for
+// the stacked layout, and with renderLoop() never running they would be
+// frozen at whatever the scroll position happened to be at load —
+// leaving the evidence cards stuck at opacity 0.
+if (!staticLayout) {
+  updateStoryBridge();
+}
 
 // Watch video modal: pauses on close/backdrop/Escape so the video never
 // keeps playing silently behind a hidden overlay.
@@ -779,15 +811,23 @@ const videoPlayer = document.querySelector("[data-video-player]");
 
 if (videoModal && videoTrigger && videoPlayer) {
   const closeButton = videoModal.querySelector("[data-video-close]");
+  // Only two focusable elements inside: the close button and the native
+  // <video controls> (a single tab stop from the page's perspective, even
+  // though it has its own internal control surface once focused).
+  const focusable = [closeButton, videoPlayer];
+  let lastFocused = null;
 
   function openVideoModal() {
+    lastFocused = document.activeElement;
     videoModal.hidden = false;
     videoPlayer.play().catch(() => {});
+    closeButton.focus();
   }
 
   function closeVideoModal() {
     videoModal.hidden = true;
     videoPlayer.pause();
+    if (lastFocused) lastFocused.focus();
   }
 
   videoTrigger.addEventListener("click", openVideoModal);
@@ -798,8 +838,23 @@ if (videoModal && videoTrigger && videoPlayer) {
     }
   });
   window.addEventListener("keydown", (event) => {
-    if (event.key === "Escape" && !videoModal.hidden) {
+    if (videoModal.hidden) return;
+    if (event.key === "Escape") {
       closeVideoModal();
+      return;
+    }
+    // Trap Tab between the two focusable elements so keyboard focus can't
+    // escape into the page hidden behind the modal.
+    if (event.key === "Tab") {
+      const first = focusable[0];
+      const last = focusable[focusable.length - 1];
+      if (event.shiftKey && document.activeElement === first) {
+        event.preventDefault();
+        last.focus();
+      } else if (!event.shiftKey && document.activeElement === last) {
+        event.preventDefault();
+        first.focus();
+      }
     }
   });
 }

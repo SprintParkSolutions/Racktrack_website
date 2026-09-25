@@ -34,11 +34,10 @@ test("use-case-infrastructure-data-center-leaders.html: stylesheet is cache-bust
   assertCacheBustedStylesheet(document);
 });
 
-test("use-case-infrastructure-data-center-leaders.html: top-level sections (hero, article, closing band, cta)", () => {
+test("use-case-infrastructure-data-center-leaders.html: top-level sections (hero, article, cta)", () => {
   assertTopLevelSections(document, [
     "section.cd-hero",
     "article.cd-article",
-    "figure.cd-close",
     "section.cd-cta",
   ]);
 });

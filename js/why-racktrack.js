@@ -1,75 +1,10 @@
-// Pointer-tilt: gives flat cards a physical, handled-object feel by rotating
-// them toward the cursor. Off for touch pointers (no hover) and for
-// prefers-reduced-motion, so it's a purely decorative enhancement, never a
-// dependency for reading the page. ponytail: no gesture/inertia physics,
-// plain angle-follows-pointer is enough for the effect this page needs.
-const wantsTilt = window.matchMedia("(hover: hover) and (pointer: fine)").matches
-  && !window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-
-if (wantsTilt) {
-  document.querySelectorAll("[data-tilt]").forEach((el) => {
-    const max = 7;
-
-    el.addEventListener("pointermove", (event) => {
-      const rect = el.getBoundingClientRect();
-      const px = (event.clientX - rect.left) / rect.width - 0.5;
-      const py = (event.clientY - rect.top) / rect.height - 0.5;
-      el.style.transform = `perspective(900px) rotateX(${(-py * max).toFixed(2)}deg) rotateY(${(px * max).toFixed(2)}deg)`;
-    });
-
-    el.addEventListener("pointerleave", () => {
-      el.style.transform = "";
-    });
-  });
-}
-
-// Evidence deck: cards held in a physical stack, front card raised and
-// legible, the rest fanned out behind it in real depth (translateZ).
-// Card count is read from the DOM (querySelectorAll), not hardcoded, so
-// trimming or adding a card here needs no change to this file.
-const deck = document.querySelector("[data-deck]");
-
-if (deck) {
-  const cards = [...deck.querySelectorAll("[data-deck-card]")];
-  const prev = deck.querySelector("[data-deck-prev]");
-  const next = deck.querySelector("[data-deck-next]");
-  const countEl = deck.querySelector("[data-deck-count]");
-  let active = 0;
-
-  function layout() {
-    const total = cards.length;
-
-    cards.forEach((card, index) => {
-      let offset = index - active;
-      if (offset > total / 2) offset -= total;
-      if (offset < -total / 2) offset += total;
-
-      card.style.setProperty("--pos", offset);
-      card.style.setProperty("--depth", Math.abs(offset));
-      card.classList.toggle("is-front", offset === 0);
-      card.setAttribute("aria-hidden", offset === 0 ? "false" : "true");
-    });
-
-    countEl.textContent = String(active + 1).padStart(2, "0");
-  }
-
-  function go(delta) {
-    active = (active + delta + cards.length) % cards.length;
-    layout();
-  }
-
-  prev.addEventListener("click", () => go(-1));
-  next.addEventListener("click", () => go(1));
-  cards.forEach((card, index) => {
-    card.addEventListener("click", () => {
-      if (index === active) return;
-      active = index;
-      layout();
-    });
-  });
-
-  layout();
-}
+// The step cards used to tilt toward the cursor (a [data-tilt] handler that
+// wrote an inline rotateX/rotateY transform on every pointermove). It was
+// removed in favour of the plain CSS lift on .why-step-card:hover — an
+// inline transform beats the [data-reveal] rule's own transform, so hovering
+// a card while it was still animating in snapped it straight to its resting
+// position mid-reveal, and the per-pixel rotation read as wobble rather than
+// polish. The CSS hover needs no JS and can't collide with the reveal.
 
 // Evidence compare slider: one photo, drag to reveal "unverified" (desaturated
 // overlay) vs "verified" (the base photo showing through). A native range

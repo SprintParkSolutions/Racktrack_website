@@ -40,12 +40,15 @@ test("index.html: stylesheet is cache-busted", () => {
 // still describe — see AGENTS.md's note that only world-timeline.js's own
 // section is authoritative for Ch4-8, everything else there is historical.
 // The proof-tour floor-plan walkthrough section was removed per request —
-// only 4 top-level sections remain.
-test("index.html: top-level sections (scan sequence, bridge, world story, cta)", () => {
+// only 5 top-level sections remain. .world-simple is a mobile/tablet-only
+// stand-in for .world-story (CSS-gated at max-width: 980px, see styles.css)
+// — both sit in the DOM but only one is visible at a given viewport width.
+test("index.html: top-level sections (scan sequence, bridge, world story, world-simple, cta)", () => {
   assertTopLevelSections(document, [
     "section.sequence-story",
     "section.story-bridge",
     "section.world-story",
+    "section.world-simple",
     "section.home-cta",
   ]);
 });
@@ -53,6 +56,11 @@ test("index.html: top-level sections (scan sequence, bridge, world story, cta)",
 test("index.html: continuous world-story has all 5 narrative beats", () => {
   const beats = document.querySelectorAll(".world-beat");
   assert.equal(beats.length, 5, `expected 5 world-story beats, found ${beats.length}`);
+});
+
+test("index.html: mobile world-simple fallback has exactly 4 static cards", () => {
+  const cards = document.querySelectorAll(".world-simple-card");
+  assert.equal(cards.length, 4, `expected 4 world-simple cards, found ${cards.length}`);
 });
 
 test("index.html: no leftover proof-tour markup/CSS hooks", () => {

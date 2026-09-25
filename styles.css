@@ -8,14 +8,22 @@
   --royal: #143f9f;
   --copy-strong: #263a52;
   --scan: #7dbdff;
-  --verified: #43b883;
+  --verified: #1f6b46;
   --amber: #d99a2b;
   --white: #ffffff;
   --radius-sm: 10px;
   --radius-md: 18px;
   --shadow-soft: 0 28px 90px rgba(49, 93, 148, 0.18);
-  --font-display: "Geist", "Satoshi", "Aptos", "Segoe UI", system-ui, sans-serif;
-  --font-ui: "Satoshi", "Geist", "Aptos", "Segoe UI", system-ui, sans-serif;
+  /* Both roles resolve to Inter — headings and body copy are one typeface
+     across every section of every page. They stay as two separate tokens
+     because ~53 heading rules and ~10 body rules reference them by name;
+     keeping the split means a future display/text divergence is a
+     one-line change here rather than a sweep. Only --font-mono still
+     differs: it dresses the small uppercase accent labels (eyebrows,
+     "← ALL ARTICLES", counters), whose letter-spacing is drawn for a
+     monospace face. No font-size anywhere was touched. */
+  --font-display: "Inter", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --font-ui: "Inter", system-ui, -apple-system, "Segoe UI", sans-serif;
   --font-mono: "Geist Mono", "SFMono-Regular", Consolas, monospace;
 
   /* Site-wide typography/spacing/layout scale (design-consistency pass) —
@@ -39,7 +47,15 @@
   --container-pad: 72px;
   --container: min(var(--container-max), calc(100% - var(--container-pad)));
 
-  --hero-pad-top: 150px;
+  /* Top padding on every page's hero section, i.e. the gap between the
+     header and the first line of content. The header sits in normal flow
+     (sticky, not fixed/overlaid), so none of this is clearance for the bar
+     — it is all deliberate whitespace, and at 150px it read as an empty
+     band on the text heroes. Shared by all nine hero blocks so they stay
+     in step; the full-height centred heroes (Solutions, Why, Use Cases)
+     barely move, since their content is vertically centred rather than
+     pinned to this padding. */
+  --hero-pad-top: 56px;
   --hero-pad-bottom: 100px;
 }
 
@@ -102,12 +118,51 @@
   font-display: swap;
 }
 
+/* Inter — now the single family behind both --font-display and --font-ui,
+   so headings and body share one typeface. Self-hosted like the others
+   rather than pulled from the Google Fonts CDN: a webfont <link> to a
+   third-party host is a request on every page load that the cookie/consent
+   banner doesn't cover, and it would leave text swapping late on slow
+   connections. Latin subset only (the same cut the CDN serves for
+   U+0000-00FF plus latin-ext) — this site ships no Cyrillic or Greek copy.
+   Variable 100-900, so every weight already in the stylesheet resolves
+   from this one 48KB file with no synthetic bolding. */
+@font-face {
+  font-family: "Inter";
+  src: url("assets/fonts/Inter-Variable.woff2") format("woff2");
+  font-weight: 100 900;
+  font-style: normal;
+  font-display: swap;
+}
+
 * {
   box-sizing: border-box;
 }
 
+/* Form controls don't inherit font-family from their ancestors — the UA
+   stylesheet sets its own, so every <button> on the site (and anything
+   nested in one) rendered in Arial no matter what the page font was. It
+   showed as the same class in two different faces depending on the tag:
+   <a class="button-primary"> picked up the body font while
+   <button class="button-primary"> on the contact page did not, and the
+   Solutions rack controls' .rk-btn-t labels inherited Arial from their
+   button parent.
+   font-family only, deliberately NOT the `font: inherit` shorthand —
+   that would also overwrite each control's own font-size and weight. */
+button,
+input,
+select,
+textarea {
+  font-family: inherit;
+}
+
 html {
   scroll-behavior: smooth;
+  /* Now that .site-header is sticky it covers the top of the viewport, so
+     an in-page #anchor jump would land its target underneath the bar.
+     Clears the tallest bar (82px on desktop) plus a little breathing
+     room. */
+  scroll-padding-top: 100px;
 }
 
 body {
@@ -154,20 +209,32 @@ a {
 }
 
 .site-header {
-  position: relative;
+  /* Sticky, not fixed: sticky stays in flow, so it reserves its own space
+     at the top of every page and nothing has to be padded down to clear
+     it — a fixed header would slide under each page's first section and
+     need a per-page offset. It sticks on every page from this one rule;
+     no page-specific position override should reintroduce `relative`
+     (that silently un-sticks it). Requires that no ancestor scroll
+     container clips it — see the `overflow-x: clip` (never `hidden`) on
+     .solutions-page / .use-cases-page for why those use clip. */
+  position: sticky;
   top: 0;
   left: 0;
   right: 0;
-  /* No background here on purpose — the homepage needs this fully
-     transparent to overlay its hero animation, and Use Cases needs it
-     transparent for its own dark-hero-then-scroll effect. Every other
-     page gets a real (frosted) background from the body[class] rule
-     below, which — because index.html's <body> carries no class and
-     Use Cases is explicitly excluded — never touches either of them.
-     A background was added directly here once before and silently
-     turned both of those pages' headers solid white, which on the
-     homepage covered the hero and on Use Cases made the white nav text
-     unreadable against a white bar. */
+  /* Glass, deliberately NOT a solid white bar: a low-alpha tint plus a
+     backdrop blur, so page content stays visible (blurred) as it scrolls
+     underneath. The tint is kept just high enough that the dark nav text
+     still clears 4.5:1 when the bar is over a dark hero (case-detail,
+     resources feature band) — dropping it to fully transparent makes the
+     links unreadable there, and raising it back toward 0.85 turns it into
+     the opaque white bar this replaced. Every page inherits this; the
+     per-page header background overrides that used to exist (solutions,
+     case-detail, resources, and the body[class] frosted rule) were
+     removed so a single bar style holds sitewide. */
+  background: rgba(255, 255, 255, 0.4);
+  backdrop-filter: blur(20px) saturate(170%);
+  -webkit-backdrop-filter: blur(20px) saturate(170%);
+  border-bottom: 1px solid rgba(16, 32, 51, 0.07);
   /* ponytail: bumped from 60 -> 600 and forced its own stacking context.
      Why RackTrack's sticky evidence cards (.why-stack-card, z-index 1-5)
      were painting over this header while pinned mid-scroll even though
@@ -181,15 +248,74 @@ a {
   grid-template-columns: auto minmax(0, 1fr) auto;
   align-items: center;
   gap: 18px;
-  padding: 24px 36px;
+  /* Desktop only — the 980px and 640px breakpoints below override this
+     padding entirely and separately hardcode --header-h from the
+     (untouched) .nav-cta pill height, so shrinking this desktop value
+     doesn't affect the mobile hamburger bar's height math. */
+  padding: 14px 36px;
   margin: 0 auto;
   pointer-events: none;
   transition: opacity 320ms ease, transform 320ms ease;
 }
 
+/* Homepage only: the bar fades out while one of the scroll-jacked sections
+   is pinned (the `is-sequencing` class homepage.js toggles for the hero
+   scan, the story bridge, and the world pin), and fades back in over every
+   ordinary section between them. Those pinned stretches are the immersive
+   full-viewport moments — the nav is deliberately out of the way there and
+   sticky everywhere else. */
 body.is-sequencing .site-header {
   opacity: 0;
   transform: translateY(-12px);
+}
+
+/* An opacity-0 element still takes clicks and hover. That was harmless
+   when this header was position:relative — by the time a section pinned,
+   the bar had already scrolled out of the viewport, so there was nothing
+   left to click. A sticky bar never leaves: without this it would park an
+   invisible, fully interactive strip across the top of every animation,
+   swallowing pointer events meant for the canvas and firing nav hover
+   flyouts nobody can see. .site-header itself is already pointer-events:
+   none, so only the three descendants that opt back in need silencing. */
+body.is-sequencing .site-nav,
+body.is-sequencing .nav-cta,
+body.is-sequencing .nav-toggle-btn {
+  pointer-events: none;
+}
+
+/* Stand-in for the main nav while it's faded out above — without this
+   there's no way to reach Contact/Sign In from the middle of the pinned
+   scroll story (nearly the whole page on desktop) without scrolling all
+   the way back to one end. */
+.floating-demo-cta {
+  position: fixed;
+  right: 24px;
+  bottom: 24px;
+  z-index: 550;
+  display: inline-flex;
+  align-items: center;
+  border-radius: 999px;
+  background: var(--blue);
+  box-shadow: 0 18px 46px rgba(36, 87, 214, 0.28);
+  color: var(--white);
+  padding: 13px 22px;
+  font: 650 14px var(--font-ui);
+  opacity: 0;
+  transform: translateY(12px);
+  pointer-events: none;
+  transition: opacity 220ms ease, transform 220ms ease;
+}
+
+body.is-sequencing .floating-demo-cta {
+  opacity: 1;
+  transform: translateY(0);
+  pointer-events: auto;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .floating-demo-cta {
+    transition: none;
+  }
 }
 
 .site-nav {
@@ -370,27 +496,9 @@ body.is-sequencing .site-header {
   opacity: 0.9;
 }
 
-/* Cleanup pass (inner pages only — every body carries a page class except
-   index.html, so this whole block leaves the homepage's transparent
-   overlay header untouched. The homepage's own scroll-jacked hero pins
-   itself relative to the header staying fixed/out-of-flow at document
-   y=0 — un-sticking it there blanks the whole animated hero, so it keeps
-   its fixed header regardless of what inner pages do here).
-   Use Cases is excluded from both rules below: it already swaps its own
-   header from transparent/light-on-dark-hero to solid via JS
-   (.is-past-hero), an effect designed to play out slowly while the
-   header stays pinned — un-sticking it would cut that transition short
-   the moment the header scrolls out of view, and a permanent light
-   background would wash out the white-on-photo nav text before the
-   swap fires either way. */
-body[class]:not(.use-cases-page) .site-header {
-  position: relative;
-  background: rgba(255, 255, 255, 0.86);
-  backdrop-filter: blur(16px) saturate(160%);
-  -webkit-backdrop-filter: blur(16px) saturate(160%);
-  border-bottom: 1px solid rgba(16, 32, 51, 0.08);
-  box-shadow: 0 12px 30px -18px rgba(16, 32, 51, 0.14);
-}
+/* (The inner-page frosted/opaque header block that used to live here was
+   removed — .site-header above now carries one sticky glass bar for every
+   page, including the homepage and Use Cases.) */
 
 /* Use Cases / Resources flyouts: a single stacked column, no per-item
    icons — plain text links, sized and weighted like hamina.com's own nav
@@ -423,8 +531,8 @@ body[class] .site-nav .nav-item .nav-dropdown a {
 
 .brand-mark {
   display: block;
-  width: 34px;
-  height: 34px;
+  width: 28px;
+  height: 28px;
   background: var(--ink);
   -webkit-mask-image: url("assets/logo.jpg");
   -webkit-mask-position: center;
@@ -444,8 +552,12 @@ body[class] .site-nav .nav-item .nav-dropdown a {
 
 .brand-name {
   color: var(--ink);
-  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-  font-size: 22px;
+  /* Was a hardcoded system stack that bypassed the font tokens entirely,
+     so the "RackTrack" wordmark rendered in a different face from the nav
+     links beside it — and on Windows vs macOS in different faces again.
+     Now on the same token as the rest of the header. */
+  font-family: var(--font-ui);
+  font-size: 19px;
   font-weight: 700;
   line-height: 1;
   letter-spacing: 0;
@@ -578,6 +690,12 @@ h1 span {
   min-height: 48px;
   align-items: center;
   justify-content: center;
+  /* Flexbox collapses a whitespace-only text node between flex items —
+     unlike normal inline flow, the space in "Label <span>&rarr;</span>"
+     disappears here without an explicit gap, jamming the arrow against
+     the last word. Affects every button-primary that appends an arrow
+     span (~20 pages), not just one. */
+  gap: 8px;
   border-radius: 999px;
   background: var(--blue);
   box-shadow: 0 18px 46px rgba(36, 87, 214, 0.24);
@@ -678,6 +796,7 @@ h1 span {
 .hero-actions {
   display: flex;
   align-items: center;
+  flex-wrap: wrap;
   gap: 12px;
   margin-top: 28px;
 }
@@ -1308,6 +1427,13 @@ h1 span {
   --world-progress: 0;
 }
 
+/* Plain 4-card fallback shown only at <=980px (see the matching
+   @media block below) — hidden here so it never renders on desktop,
+   which keeps the pinned .world-story canvas above untouched. */
+.world-simple {
+  display: none;
+}
+
 .world-pin {
   position: sticky;
   top: 0;
@@ -1645,7 +1771,22 @@ h1 span {
 
 @media (max-width: 980px) {
   .site-header {
-    width: calc(100% - 36px);
+    /* Full-bleed, not the old inset calc(100% - 36px): now that the bar is
+       sticky, an inset bar leaves an 18px gutter down each side through
+       which the page visibly scrolls past the bar's edge. Edge-to-edge
+       keeps one clean line across the top; the inset look is preserved by
+       padding instead. */
+    width: 100%;
+    padding: 16px 56px 16px 20px;
+    /* Measured height of the bar at this breakpoint: the 16px block
+       padding above, twice, plus the tallest grid item. That's the 42px
+       .nav-cta pill — NOT the 34px .brand-mark, which is what this was
+       first (wrongly) derived from. The open menu panel is offset by
+       exactly this so it starts below the bar instead of under it — see
+       .site-nav's `top`. Re-measure if the pill's height or the header's
+       block padding changes; too small and the panel's links slide up
+       under the logo, too large and a gap opens between bar and panel. */
+    --header-h: 74px;
     /* Back to the original 2-column layout (brand | cta) — the toggle
        button is pulled OUT of grid flow below (position: absolute) and
        pinned to the header's own right edge instead of sharing a grid
@@ -1657,7 +1798,6 @@ h1 span {
        the room the absolute toggle needs so it never overlaps the CTA
        pill. */
     grid-template-columns: 1fr auto;
-    padding-right: 52px;
   }
 
   .brand {
@@ -1674,7 +1814,11 @@ h1 span {
   .nav-toggle-btn {
     position: absolute;
     top: 50%;
-    right: 0;
+    /* Inset from the header's padding-box edge rather than flush to it —
+       the bar is full-bleed now, so right:0 put the burger (and the X it
+       becomes) hard against the screen edge. The header's padding-right
+       is sized to clear this 40px button plus this offset. */
+    right: 12px;
     transform: translateY(-50%);
     display: flex;
     flex-direction: column;
@@ -1749,16 +1893,46 @@ h1 span {
 
   .nav-toggle-input:checked ~ .site-nav {
     display: flex;
+    /* Starts BELOW the header bar, not at inset:0. The panel is a
+       descendant of .site-header, which is a stacking context (z-index
+       600 + isolation), so the panel's z-index 65 paints above the brand
+       and the Sign In pill no matter how high the header's own z-index
+       is — with inset:0 the panel covered the logo, and once the list was
+       long enough to scroll its links slid up through that top strip and
+       collided with the X. Offsetting by the bar's own height keeps the
+       header a real, untouched bar and gives the panel its own scroll
+       box beneath it. */
     position: fixed;
-    inset: 0;
+    top: var(--header-h);
+    right: 0;
+    bottom: 0;
+    left: 0;
     z-index: 65;
     flex-direction: column;
     align-items: flex-start;
+    justify-content: flex-start;
     gap: 4px;
-    padding: 100px 32px 40px;
-    background: var(--cloud);
+    padding: 20px 24px 48px;
+    background: rgba(247, 250, 255, 0.94);
+    backdrop-filter: blur(28px) saturate(150%);
+    -webkit-backdrop-filter: blur(28px) saturate(150%);
     overflow-y: auto;
+    overscroll-behavior: contain;
     pointer-events: auto;
+  }
+
+  /* THE fix for the panel's overlapping-rows bug. This is a column flex
+     container with a fixed height (inset: 0 == full viewport), so its
+     children are flex-shrinkable by default. Expand either accordion and
+     the rows' combined content exceeds the viewport, so every row gets
+     squashed BELOW its content height instead of the panel scrolling —
+     each row's text then spills out of its own squashed box and paints on
+     top of the rows beneath it (the "Infrastructure & Data Center Leaders"
+     over "Resources" collision). Locking every row to its natural height
+     lets the total overflow the panel, which is what hands the scrolling
+     to overflow-y: auto above. */
+  .nav-toggle-input:checked ~ .site-nav > * {
+    flex: 0 0 auto;
   }
 
   /* .site-nav's position:fixed above is supposed to cover the full
@@ -1776,6 +1950,20 @@ h1 span {
     transform: none !important;
     backdrop-filter: none !important;
     -webkit-backdrop-filter: none !important;
+    /* Same surface colour as the panel directly beneath it, so bar and
+       panel read as one sheet. It can't reuse the bar's usual 40% glass:
+       backdrop-filter is off here (see above), so a 40% tint would show
+       the page behind it crisply and unblurred while the panel below is
+       near-opaque — an obvious seam across the top. */
+    background: rgba(247, 250, 255, 0.94) !important;
+    border-bottom-color: transparent !important;
+  }
+
+  /* Freeze the page behind the open panel. Without this the document keeps
+     scrolling under the fixed panel, so closing the menu drops you at a
+     different scroll position than where you opened it. */
+  body:has(.nav-toggle-input:checked) {
+    overflow: hidden;
   }
 
   /* Every top-level row (plain links AND the two dropdown-bearing
@@ -1797,7 +1985,14 @@ h1 span {
     padding-right: 44px;
   }
 
+  /* height: auto undoes the desktop `.nav-item > a { height: 100% }` rule,
+     which is there to stretch the trigger across the desktop nav row. In
+     the panel the .nav-item also contains the expanded accordion list, so
+     a full-height trigger becomes a tall invisible tap target lying over
+     every sub-link in it — tapping "Compliance & Audit Owners" would fire
+     the "Use Cases" parent link instead. */
   .nav-toggle-input:checked ~ .site-nav .nav-item > a {
+    height: auto;
     padding: 0;
     border-bottom: none;
   }
@@ -1833,6 +2028,12 @@ h1 span {
     position: static;
     display: none;
     width: 100%;
+    /* min-width must be reset too, not just max-width: `body[class]
+       .nav-dropdown` sets min-width: 300px for the desktop flyout, and at
+       320-380px viewports that plus the panel's side padding and the 16px
+       accordion indent pushes the list wider than the panel and triggers
+       horizontal overflow. */
+    min-width: 0;
     max-width: none;
     margin: 0 0 8px;
     padding: 0 0 0 16px;
@@ -1868,11 +2069,16 @@ h1 span {
 
   /* Chevron toggle button, one per dropdown-bearing nav item. Sits to the
      right of the parent link (Use Cases / Resources), same row. */
+  /* Pinned to the top of the .nav-item, not vertically centred in it: once
+     the accordion is open the .nav-item grows to include the whole
+     sub-link list, so a top:50% chevron drifts down into the middle of
+     the expanded list and reads as belonging to some random sub-link
+     rather than to its own parent row. 7px centres the 40px button on the
+     ~27px parent-link row that starts at the item's 14px top padding. */
   .nav-toggle-input:checked ~ .site-nav .nav-sub-toggle-btn {
     position: absolute;
-    top: 50%;
+    top: 7px;
     right: 0;
-    transform: translateY(-50%);
     display: flex;
     align-items: center;
     justify-content: center;
@@ -1940,6 +2146,216 @@ h1 span {
   }
 }
 
+/* ===================================================================
+   Static homepage layout for phones and tablets (<= 980px)
+
+   The homepage's three headline sections (hero, story-bridge, world-
+   story) are all scroll-pinned canvas animations on desktop: a tall
+   section holds a sticky 100dvh stage while scroll position scrubs
+   through a frame sequence and cross-fades absolutely-positioned notes
+   on top of it. That design depends on two things a phone or tablet
+   doesn't have — enough width for a full-bleed landscape frame to fill
+   a tall stage without cropping most of itself away, and enough
+   bandwidth headroom to make a ~1000-frame download worth it.
+
+   Below 980px (the breakpoint the hamburger nav already switches on)
+   all three sections drop the animation and render the same content as
+   ordinary stacked blocks: still poster image, then heading, then the
+   notes that used to cross-fade, all visible at once. No content is
+   removed — only the motion and the pinning. Desktop above 980px keeps
+   every animation exactly as it is.
+
+   homepage.js has a matching `staticLayout` gate so the frame
+   sequences are never downloaded or drawn here. Because that JS never
+   runs, it never writes the inline custom properties these sections
+   animate through, so each section below re-declares those properties
+   at their settled end-state values rather than their from-zero
+   starting values (which would render as invisible content).
+   =================================================================== */
+@media (max-width: 980px) {
+  /* --- Hero -------------------------------------------------------- */
+  .sequence-story {
+    min-height: auto;
+    /* The narrative/progress properties this section also animates are
+       not restated here: both elements they drive are display:none in
+       the static layout. */
+    --handoff-visibility: 1;
+    --intro-opacity: 1;
+  }
+
+  .sequence-pin {
+    position: relative;
+    display: block;
+    min-height: auto;
+    overflow: visible;
+    padding-bottom: 56px;
+  }
+
+  /* Source frames are 1280x720, so a 16/9 box crops nothing — the whole
+     rack is in view, which is the reason the text moves below the image
+     instead of staying overlaid on it. */
+  .sequence-poster {
+    position: static;
+    width: 100%;
+    height: auto;
+    aspect-ratio: 16 / 9;
+    object-fit: cover;
+  }
+
+  /* The canvas has no frames to draw here, and the scrim and progress
+     bar only exist to serve the scrubbed animation. */
+  .sequence-canvas,
+  .sequence-scrim,
+  .sequence-progress {
+    display: none;
+  }
+
+  .sequence-intro {
+    /* min(620px, 48vw) leaves too narrow a column on tablets and phones
+       alike for a long word like "Infrastructure" combined with
+       text-wrap:balance, which was dropping characters instead of
+       wrapping. Give it real room instead of a viewport-scaled sliver. */
+    width: calc(100% - 48px);
+    margin: 28px auto 0;
+  }
+
+  /* The headline is painted as a gradient clipped to the glyphs so a
+     one-shot highlight can sweep across it. Static layout means no
+     sweep, and a half-swept gradient reads as ghosted text — so drop
+     the gradient machinery and paint the headline as plain ink. */
+  .sequence-intro h1 {
+    animation: none;
+    background: none;
+    -webkit-text-fill-color: var(--ink);
+    color: var(--ink);
+  }
+
+  /* The four hero notes (Captured / Extracted / Structured / Ready)
+     exist to be revealed one at a time as the pinned canvas scrubs, each
+     captioning the frame behind it. Without the animation they lose that
+     anchor and just repeat the story-bridge section directly below, so
+     the static layout drops them and lets the hero end on the CTAs.
+     Kept in the markup because desktop still animates them. */
+  .sequence-narrative {
+    display: none;
+  }
+
+  /* --- Story bridge ------------------------------------------------ */
+  .story-bridge {
+    min-height: auto;
+    --bridge-progress: 1;
+    --bridge-copy-y: 0px;
+    --bridge-copy-opacity: 1;
+    --bridge-source-opacity: 1;
+    --bridge-thread-scale: 1;
+    --bridge-thread-opacity: 1;
+    --bridge-layer-opacity: 1;
+    --bridge-source-x: 0px;
+    --bridge-output-x: 0px;
+    --bridge-layers-y: 0px;
+  }
+
+  .bridge-pin {
+    position: relative;
+    min-height: auto;
+  }
+
+  /* The three evidence cards fan out as an overlapping absolute cascade
+     on desktop, which reads as cards covering each other's text once the
+     deck is this narrow. Stack them plainly instead. */
+  .bridge-card-deck {
+    min-height: auto;
+    perspective: none;
+  }
+
+  .bridge-card-deck::before {
+    display: none;
+  }
+
+  .evidence-card {
+    position: static;
+    width: 100%;
+    min-height: auto;
+    margin: 0 0 20px;
+    opacity: 1;
+    transform: none;
+  }
+
+  .evidence-card:last-child {
+    margin-bottom: 0;
+  }
+
+  /* --- World story ---------------------------------------------------
+     Below the breakpoint the pinned canvas story is replaced outright by
+     a plain 4-card grid (.world-simple) rather than a flattened stack of
+     all 5 beats/15 notes — simpler to read on a phone. The canvas/JS side
+     already skips initialization here (see staticLayout in homepage.js),
+     so hiding .world-story is purely visual cleanup. */
+  .world-story {
+    display: none;
+  }
+
+  .world-simple {
+    display: block;
+    padding: 72px clamp(24px, 6vw, 48px);
+    background:
+      radial-gradient(120% 90% at 88% 16%, rgba(125, 189, 255, 0.14), transparent 60%),
+      linear-gradient(118deg, var(--cloud) 0%, var(--mist) 44%, #dcebfb 100%);
+  }
+
+  .world-simple-grid {
+    width: min(1240px, 100%);
+    margin: 0 auto;
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 20px;
+  }
+
+  .world-simple-card {
+    border: 1px solid rgba(217, 231, 246, 0.88);
+    border-radius: 18px;
+    background: rgba(255, 255, 255, 0.7);
+    padding: 16px;
+  }
+
+  .world-simple-card img {
+    display: block;
+    width: 100%;
+    height: 120px;
+    object-fit: cover;
+    border-radius: 12px;
+    margin-bottom: 14px;
+  }
+
+  .world-simple-card p {
+    margin: 0 0 8px;
+    color: var(--blue);
+    font-family: var(--font-mono);
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+  }
+
+  .world-simple-card h2 {
+    margin: 0;
+    color: var(--ink);
+    font-family: var(--font-display);
+    font-size: clamp(16px, 3.6vw, 19px);
+    font-weight: 700;
+    line-height: 1.15;
+    letter-spacing: -0.01em;
+  }
+
+  .world-simple-card span {
+    display: block;
+    margin-top: 8px;
+    color: var(--muted);
+    font-size: 13px;
+    line-height: 1.45;
+  }
+}
+
 @media (max-width: 640px) {
   .site-header {
     width: 100%;
@@ -1949,7 +2365,10 @@ h1 span {
        including right, which let the Sign In pill's grid column extend
        under the toggle and visually collide with it on every real phone
        (this breakpoint covers ~360-412px, i.e. most of them). */
-    padding: 11px 48px 11px 11px;
+    padding: 12px 58px 12px 14px;
+    /* 12px block padding x2 + the 42px .nav-cta pill (still the tallest
+       item here — .brand-mark drops to 24px at this breakpoint). */
+    --header-h: 66px;
   }
 
   .brand span:last-child {
@@ -1961,8 +2380,8 @@ h1 span {
   }
 
   .brand-mark {
-    width: 29px;
-    height: 29px;
+    width: 24px;
+    height: 24px;
   }
 
   .nav-cta {
@@ -1977,6 +2396,14 @@ h1 span {
 
   .button-primary {
     width: 100%;
+  }
+
+  /* .hero-actions holds two buttons side by side (Get a demo + Watch
+     video) — the global width:100% above was making "Get a demo" claim
+     the full row, squeezing "Watch video" (and its icon) into whatever
+     sliver was left instead of leaving both to size to their own content. */
+  .hero-actions .button-primary {
+    width: auto;
   }
 
   h1 {
@@ -2021,20 +2448,6 @@ h1 span {
     font-size: 16.5px;
   }
 
-  .sequence-narrative {
-    width: min(320px, calc(100vw - 24px));
-    min-height: 150px;
-    margin-bottom: 14px;
-  }
-
-  .sequence-note h2 {
-    font-size: 27px;
-  }
-
-  .sequence-note > span {
-    font-size: 14px;
-  }
-
   .bridge-card-deck {
     min-height: auto;
   }
@@ -2069,10 +2482,6 @@ h1 span {
   .bridge-layers span {
     font-size: 9.5px;
     padding: 8px 9px;
-  }
-
-  .world-note h2 {
-    font-size: 30px;
   }
 
   .bridge-copy h2 {
@@ -2176,7 +2585,7 @@ h1 span {
   font-family: var(--font-mono);
   font-size: 11.5px;
   letter-spacing: 0.02em;
-  color: rgba(48, 68, 93, 0.65);
+  color: #4a5b72;
 }
 
 .footer-social {
@@ -2290,7 +2699,6 @@ h1 span {
   max-width: 760px;
 }
 
-.why-card-label,
 .why-card-index,
 .why-hero-note span {
   font-family: var(--font-mono);
@@ -2477,10 +2885,6 @@ h1 span {
   flex-direction: column;
   justify-content: center;
   padding: clamp(32px, 5vw, 76px);
-}
-
-.why-card-label {
-  color: var(--blue);
 }
 
 .why-card-copy h3 {
@@ -3102,7 +3506,8 @@ h1 span {
 @media (max-width: 780px) {
   .why-page .why-hero {
     min-height: auto;
-    padding-top: 132px;
+    /* Same fix as .art-hero's mobile override — stale pre-token value. */
+    padding-top: 44px;
     padding-bottom: 64px;
   }
 
@@ -3123,6 +3528,49 @@ h1 span {
   color: var(--ink);
 }
 
+/* The brief form and the FAQ are two independent top-level <section>s (kept
+   that way deliberately — a shared test asserts main's direct children),
+   but the reference design shows them as one shared row, not two stacked
+   full-width bands. Grid-placing them into the same row on <main> gets the
+   side-by-side look without merging the sections or adding a wrapper. */
+.contact-page main#main {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+}
+
+.contact-page .contact-hero,
+.contact-page .contact-details {
+  grid-column: 1 / -1;
+}
+
+.contact-page .contact-request {
+  grid-column: 1;
+  background: var(--contact-surface);
+}
+
+.contact-page .contact-faq {
+  grid-column: 2;
+  padding-left: clamp(28px, 6vw, 90px);
+  border-left: 1px solid var(--contact-line);
+}
+
+@media (max-width: 900px) {
+  .contact-page main#main {
+    grid-template-columns: 1fr;
+  }
+
+  .contact-page .contact-request,
+  .contact-page .contact-faq {
+    grid-column: 1;
+  }
+
+  .contact-page .contact-faq {
+    padding-left: clamp(28px, 7vw, 112px);
+    border-left: 0;
+    border-top: 1px solid var(--contact-line);
+  }
+}
+
 
 .contact-page .site-nav a[aria-current="page"] {
   color: var(--ink);
@@ -3130,9 +3578,7 @@ h1 span {
 
 .contact-details dt,
 .contact-form-panel legend,
-.contact-form-panel label span,
-.contact-hero-image > span,
-.contact-hero-readout span {
+.contact-form-panel label span {
   color: var(--blue);
   font-family: var(--font-mono);
   font-size: 10px;
@@ -3143,7 +3589,12 @@ h1 span {
 
 .contact-hero {
   position: relative;
-  min-height: min(780px, 94dvh);
+  /* Taller than the usual 780px cap — the hologram background's aspect
+     ratio is much narrower than this section's, so at cover it renders
+     far taller than 780px and needs real room or it crops hard into
+     either the icon ring (top) or the hand (bottom). This still doesn't
+     eliminate the crop entirely, just shrinks it a lot. */
+  min-height: min(960px, 94dvh);
   display: grid;
   align-items: center;
   overflow: clip;
@@ -3151,36 +3602,39 @@ h1 span {
   isolation: isolate;
 }
 
+/* The client-supplied visual is the whole hero's background now, not a
+   boxed photo in a side column — it has a wide blank band built into its
+   left half specifically so copy can sit over it with no scrim needed.
+   background-size: cover matches the full-bleed treatment every other
+   hero photo on the site uses (.rs-hero-media img, .art-hero-fig img) —
+   the image fills the section edge-to-edge, cropping the excess instead
+   of leaving letterboxed space around it. */
 .contact-hero-field {
-  /* ponytail: grid-image removed — item 10. Not display:none: ::after below needs this in the box tree. */
   position: absolute;
   inset: 0;
   z-index: -1;
   background-color: var(--contact-surface);
-}
-
-.contact-hero-field::after {
-  content: "";
-  position: absolute;
-  right: 7%;
-  bottom: 9%;
-  width: 34%;
-  height: 58%;
-  border: 1px solid rgba(36, 87, 214, 0.17);
-  transform: rotate(7deg);
+  background-image: url("../assets/contact/media-contact-hologram.jpg");
+  background-repeat: no-repeat;
+  /* cover, not a smaller percentage — anything under 100% leaves visible
+     gaps of plain background around the image instead of a seamless
+     full-bleed photo. With the section now much taller (see .contact-hero),
+     the remaining crop is small enough that a near-centered position works
+     for both ends — full "top" was only needed at the old 780px height,
+     where it saved the icon ring by sacrificing the whole hand instead.
+     Horizontal stays pulled in from true "right" so the rightmost icons
+     keep clearance from the viewport edge instead of sitting flush against it. */
+  background-size: cover;
+  background-position: 94% 30%;
 }
 
 .contact-hero-inner {
   width: min(var(--container-max), 100%);
-  margin: 0 auto;
-  display: grid;
-  grid-template-columns: minmax(0, 1fr) minmax(360px, 0.76fr);
-  align-items: center;
-  gap: clamp(54px, 9vw, 140px);
+  margin: 0;
 }
 
 .contact-hero-copy {
-  max-width: 720px;
+  max-width: 480px;
 }
 
 .contact-request h2,
@@ -3218,123 +3672,38 @@ h1 span {
   margin-top: 32px;
 }
 
-.contact-hero-panel {
-  position: relative;
-  padding: 22px 0 0 26px;
-  border-left: 1px solid var(--contact-line);
-}
-
-.contact-hero-panel::before {
-  content: "";
-  position: absolute;
-  top: 0;
-  right: 0;
-  left: 26px;
-  height: 1px;
-  background: var(--contact-line);
-}
-
-.contact-hero-image {
-  position: relative;
-  height: 276px;
-  overflow: hidden;
-  border: 9px solid var(--white);
-  background: var(--ink);
-  box-shadow: 0 26px 60px rgba(49, 93, 148, 0.16);
-}
-
-.contact-hero-image img {
-  width: 100%;
-  height: 100%;
-  display: block;
-  object-fit: cover;
-  object-position: 42% center;
-  filter: saturate(0.82) contrast(1.04);
-}
-
-.contact-hero-image::after {
-  content: "";
-  position: absolute;
-  top: 0;
-  left: 0;
-  z-index: 2;
-  width: 100%;
-  height: 2px;
-  background: #a8d2ff;
-  box-shadow: 0 0 18px rgba(125, 189, 255, 0.9);
-  animation: contact-image-scan 5.2s ease-in-out infinite;
-}
-
-.contact-hero-image > span {
-  position: absolute;
-  right: 14px;
-  bottom: 12px;
-  color: #b8d7ff;
-  text-shadow: 0 1px 12px rgba(0, 0, 0, 0.5);
-}
-
-.contact-hero-readout {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  border-right: 1px solid var(--contact-line);
-  border-bottom: 1px solid var(--contact-line);
-  border-left: 1px solid var(--contact-line);
-}
-
-.contact-hero-readout > div {
-  min-height: 94px;
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  gap: 12px;
-  padding: 16px 18px;
-}
-
-.contact-hero-readout > div + div {
-  border-left: 1px solid var(--contact-line);
-}
-
-.contact-hero-readout strong {
-  color: var(--ink);
-  font-family: var(--font-mono);
-  font-size: 17px;
-  font-weight: 700;
-}
-
-.contact-hero-panel > p {
-  max-width: 340px;
-  margin: 19px 0 0;
-  color: var(--contact-copy);
-  font-size: 14px;
-  line-height: 1.5;
-}
-
 .contact-details {
-  padding: 28px clamp(28px, 7vw, 112px) 0;
+  padding: 56px clamp(28px, 7vw, 112px) 0;
   background: var(--contact-surface);
 }
 
+/* Four independent bordered cards, not the old full-bleed ledger row —
+   each stands on its own so the icon + label + value + description reads
+   as a distinct fact rather than a column in a shared table. */
 .contact-details dl {
   width: min(var(--container-max), 100%);
   margin: 0 auto;
   display: grid;
   grid-template-columns: repeat(4, 1fr);
-  border-top: 1px solid var(--contact-line);
-  border-bottom: 1px solid var(--contact-line);
+  gap: 18px;
 }
 
 .contact-details dl > div {
-  min-height: 190px;
-  padding: 24px 24px 24px 0;
+  min-height: 170px;
+  padding: 24px 22px;
+  border: 1px solid var(--contact-line);
+  border-radius: var(--radius-md);
+  background: var(--white);
 }
 
-.contact-details dl > div + div {
-  padding-left: 24px;
-  border-left: 1px solid var(--contact-line);
+.contact-card-icon {
+  display: inline-flex;
+  margin-bottom: 16px;
+  color: var(--ink);
 }
 
 .contact-details dd {
-  margin: 18px 0 0;
+  margin: 10px 0 0;
   color: var(--contact-copy);
   font-size: 15px;
   line-height: 1.5;
@@ -3357,16 +3726,16 @@ h1 span {
 }
 
 .contact-request {
-  padding: 124px clamp(28px, 7vw, 112px);
+  padding: 64px clamp(28px, 6vw, 90px) 90px;
   background: var(--contact-mist);
 }
 
 .contact-request-inner {
-  width: min(var(--container-max), 100%);
+  width: 100%;
   margin: 0 auto;
   display: grid;
-  grid-template-columns: minmax(0, 0.72fr) minmax(0, 1fr);
-  gap: clamp(48px, 10vw, 150px);
+  grid-template-columns: 1fr;
+  gap: 32px;
   align-items: start;
 }
 
@@ -3388,70 +3757,12 @@ h1 span {
   line-height: var(--lede-leading);
 }
 
-.contact-next {
-  margin-top: 58px;
-  padding-top: 20px;
-  border-top: 1px solid var(--contact-line);
-}
-
-.contact-next ol {
-  margin: 22px 0 0;
-  padding: 0;
-  list-style: none;
-  counter-reset: next-step;
-}
-
-.contact-next li {
-  position: relative;
-  padding: 0 0 22px 36px;
-  counter-increment: next-step;
-}
-
-.contact-next li::before {
-  content: "0" counter(next-step);
-  position: absolute;
-  top: 1px;
-  left: 0;
-  color: var(--blue);
-  font-family: var(--font-mono);
-  font-size: 10px;
-  font-weight: 700;
-}
-
-.contact-next li:not(:last-child)::after {
-  content: "";
-  position: absolute;
-  top: 21px;
-  bottom: 0;
-  left: 4px;
-  width: 1px;
-  background: var(--contact-line);
-}
-
-.contact-next li strong,
-.contact-next li span {
-  display: block;
-}
-
-.contact-next li strong {
-  color: var(--ink);
-  font-size: 15px;
-}
-
-.contact-next li span {
-  margin-top: 6px;
-  color: var(--contact-copy);
-  font-size: 14px;
-  line-height: 1.45;
-}
 
 .contact-form-panel {
-  max-width: 440px;
-  margin-left: clamp(40px, 10vw, 160px);
-  padding: clamp(60px, 3vw, 32px);
-  border-radius: var(--radius-md);
-  background: rgba(255, 255, 255, 0.92);
-  box-shadow: 0 22px 60px rgba(49, 93, 148, 0.08);
+  max-width: 560px;
+  padding: 0;
+  background: none;
+  box-shadow: none;
 }
 
 .contact-form-panel fieldset {
@@ -3591,12 +3902,12 @@ h1 span {
 }
 
 .contact-faq {
-  width: min(var(--container-max), 100%);
+  width: 100%;
   margin: 0 auto;
   display: grid;
-  grid-template-columns: minmax(250px, 0.6fr) minmax(0, 1fr);
-  gap: clamp(48px, 10vw, 150px);
-  padding: 122px clamp(28px, 7vw, 112px) 128px;
+  grid-template-columns: 1fr;
+  gap: 32px;
+  padding: 64px clamp(28px, 6vw, 90px) 90px;
 }
 
 .contact-faq-intro {
@@ -3648,12 +3959,6 @@ h1 span {
   line-height: 1.55;
 }
 
-@keyframes contact-image-scan {
-  0%, 14% { transform: translateY(0); opacity: 0; }
-  25% { opacity: 1; }
-  82% { opacity: 1; }
-  100% { transform: translateY(274px); opacity: 0; }
-}
 
 .contact-page .site-footer {
   background: var(--contact-surface);
@@ -3667,11 +3972,11 @@ h1 span {
   --hair-2: #d8dee9;
   background: var(--cloud);
   color: var(--ink);
-  overflow-x: hidden;
-}
-.solutions-page .site-header {
-  background: rgba(247, 250, 255, .84);
-  border-bottom-color: rgba(16, 32, 51, .1);
+  /* clip, not hidden: `overflow-x: hidden` on the page root turns <body>
+     into a scroll container, which stops .site-header's position:sticky
+     from ever sticking. `clip` suppresses the same horizontal overflow
+     without creating that scroll container. */
+  overflow-x: clip;
 }
 .solutions-page .site-nav a.is-current { color: var(--ink); }
 .solutions-page .site-nav a.is-current::after { transform: scaleX(1); }
@@ -3705,7 +4010,13 @@ h1 span {
 .solutions-page .section-lede { color: var(--copy-strong); font-size: var(--lede-size); line-height: var(--lede-leading); max-width: 39rem; }
 .solutions-page .button-primary { display: inline-flex; align-items: center; gap: 18px; }
 .solutions-page .button-primary span { font-size: 18px; }
-.solutions-hero { min-height: calc(100dvh - 80px); display: grid; grid-template-columns: 1fr; align-items: center; padding-block: var(--hero-pad-top) var(--hero-pad-bottom); position: relative; }
+/* Was calc(100dvh - 80px) — on a typical desktop viewport that's ~1000px,
+   far taller than the short centered headline/lede/button need. With
+   align-items:center that left a large empty band below the button before
+   the section even ended, on top of the section's own bottom padding and
+   .process-section's top padding — reading as one huge gap. Sized like
+   the site's other hero sections instead. */
+.solutions-hero { min-height: min(720px, 92dvh); display: grid; grid-template-columns: 1fr; align-items: center; padding-block: var(--hero-pad-top) var(--hero-pad-bottom); position: relative; }
 .solutions-hero::before { /* ponytail: grid overlay removed — item 10 */ display: none; }
 .solutions-hero-copy { max-width: 800px; margin: 0 auto; text-align: center; }
 .solutions-hero h1 { margin: 0 auto 34px; max-width: 850px; font-size: var(--h1-size); font-weight: var(--h1-weight); line-height: var(--h1-leading); letter-spacing: var(--h1-tracking); }
@@ -3732,7 +4043,7 @@ h1 span {
    line that fills as you scroll past them (see the rail script). Replaces
    the old plain alternating image/text rows. */
 .process-section {
-  padding-block: 120px;
+  padding-block: 90px;
 }
 
 .process-intro {
@@ -3915,7 +4226,14 @@ h1 span {
   grid-template-columns: minmax(0, 1fr) minmax(280px, 0.72fr);
   align-items: center;
   gap: 48px;
-  padding: 90px clamp(28px, 7vw, 112px);
+  /* Was clamp(28px, 7vw, 112px), copied from .why-cta on a different page.
+     Every other section on THIS page aligns via .section-frame (centered
+     at var(--container)) — the clamp value doesn't match that formula at
+     most viewport widths, so this CTA's content sat at a different left
+     margin than the hero/body content above it. Same formula as
+     .section-frame instead, applied as padding since this section has no
+     inner frame wrapper to center. */
+  padding: 90px calc((100% - var(--container)) / 2);
   background: #dfeafa;
   /* --why-line is scoped to .why-page and isn't defined on .solutions-page —
      using its literal value here to match .why-cta's border exactly. */
@@ -3929,12 +4247,14 @@ h1 span {
 @media (max-width: 780px) {
   .solutions-cta {
     grid-template-columns: 1fr;
-    padding: 78px 24px 88px;
+    /* Same width formula .solutions-page .section-frame uses at this
+       range (min(100% - 42px, 720px)), so the CTA's left edge keeps
+       matching the frame's instead of the plain 24px this used to be. */
+    padding: 78px calc((100% - min(100% - 42px, 720px)) / 2) 88px;
   }
 }
 .solutions-cta::before { /* ponytail: grid overlay removed — item 10 */ display: none; }
 .solutions-cta > * { position: relative; }
-.solutions-cta > div:first-child { margin-left: clamp(24px, 4vw, 64px); }
 .solutions-cta > div:last-child { max-width: 510px; }
 .solutions-cta h2 { color: var(--ink); }
 .solutions-cta h2 em { color: var(--blue); font-style: normal; }
@@ -4019,7 +4339,7 @@ html:not(.solutions-motion) .surface-grid article { opacity: 1; transform: none;
   /* Matches .section-frame's shared container width (--container) instead
      of its own one-off scale. */
   width: var(--container);
-  margin: 120px auto 0;
+  margin: 80px auto 0;
   padding: 0;
   background: transparent;
   border: 0;
@@ -4050,7 +4370,7 @@ html:not(.solutions-motion) .surface-grid article { opacity: 1; transform: none;
   .solutions-page .schematic-section,
   .solutions-page #system { width: calc(100% - 30px); margin-top: 100px; }
 }
-@media (max-width: 640px) { .solutions-page .schematic-section { margin-top: 80px; width: calc(100% - 30px); } .original-schematic { overflow-x: auto; } .original-schematic img { min-width: 720px; } }
+@media (max-width: 640px) { .solutions-page .schematic-section { margin-top: 56px; width: calc(100% - 30px); } .original-schematic { overflow-x: auto; } .original-schematic img { min-width: 720px; } }
 
 /* Original cabinet reader frame and its source-page spacing. */
 .solutions-page #rack-3d { padding-block: 120px; }
@@ -4167,7 +4487,11 @@ html:not(.solutions-motion) .surface-grid article { opacity: 1; transform: none;
   grid-template-columns: minmax(0, 1fr) minmax(280px, 0.72fr);
   align-items: center;
   gap: 48px;
-  padding: 90px clamp(28px, 7vw, 112px);
+  /* Was clamp(28px, 7vw, 112px), borrowed from .why-cta on a different
+     page. This page's own content (.uc-roles) aligns via width:
+     var(--container); margin:auto instead — same formula here so the CTA
+     shares that same left margin rather than why-racktrack's. */
+  padding: 90px calc((100% - var(--container)) / 2);
   background: #dfeafa;
   border-top: 1px solid rgba(16, 32, 51, 0.15);
 }
@@ -4188,8 +4512,8 @@ html:not(.solutions-motion) .surface-grid article { opacity: 1; transform: none;
 .uc-close > div:last-child { max-width: 510px; }
 .uc-close > div:last-child > p { margin: 0 0 26px; max-width: 45ch; color: var(--muted); font-size: var(--lede-size); line-height: var(--lede-leading); }
 .use-cases-page .site-footer { margin-top:0; }
-@media (max-width: 980px) { .uc-opening { padding:130px 24px 66px; } .uc-opening h1 { max-width:13ch; } .uc-close { width:calc(100% - 60px); } .uc-filmstrip-head { width: calc(100% - 60px); } .uc-close { padding:100px 0 118px; } .uc-team-list { width: calc(100% - 60px); } .uc-team-row { gap: 48px; padding: 56px 0; } }
-@media (max-width:640px) { .uc-opening h1 { font-size:clamp(36px,10vw,48px); } .uc-opening-credit { font-size: 8px; left: 16px; right: 16px; } .uc-close { grid-template-columns: 1fr; gap: 28px; padding: 70px 24px; } .uc-close > div:last-child { max-width: none; } .uc-filmstrip-head { width: calc(100% - 44px); } .uc-close h2 { font-size:36px; } .uc-team-list { width: calc(100% - 44px); } .uc-team-row, .uc-team-row:nth-child(even) { flex-direction: column; align-items: flex-start; gap: 24px; padding: 40px 0; } .uc-team-row figure { flex-basis: auto; max-width: 220px; width: 100%; } }
+@media (max-width: 980px) { .uc-opening { padding:44px 24px 66px; } /* stale pre--hero-pad-top-token value, see .art-hero */ .uc-opening h1 { max-width:13ch; } .uc-close { width:calc(100% - 60px); margin: 0 auto; } /* .uc-roles keeps margin:auto from its base rule at this width; .uc-close had no base margin at all, so it sat flush-left instead of centered like the rest of the page */ .uc-filmstrip-head { width: calc(100% - 60px); } .uc-close { padding:100px 0 118px; } .uc-team-list { width: calc(100% - 60px); } .uc-team-row { gap: 48px; padding: 56px 0; } }
+@media (max-width:640px) { .uc-opening h1 { font-size:clamp(36px,10vw,48px); } .uc-opening-credit { font-size: 8px; left: 16px; right: 16px; } .uc-close { grid-template-columns: 1fr; gap: 28px; padding: 70px 0; } /* horizontal was 24px, double-insetting on top of the already-centered width:calc(100%-60px) box from the 980px rule — .uc-roles has zero horizontal padding at every width and relies on width+margin alone, same here now */ .uc-close > div:last-child { max-width: none; } .uc-filmstrip-head { width: calc(100% - 44px); } .uc-close h2 { font-size:36px; } .uc-team-list { width: calc(100% - 44px); } .uc-team-row, .uc-team-row:nth-child(even) { flex-direction: column; align-items: flex-start; gap: 24px; padding: 40px 0; } .uc-team-row figure { flex-basis: auto; max-width: 220px; width: 100%; } }
 
 .contact-page .footer-brand p,
 .contact-page .footer-col a,
@@ -4212,88 +4536,42 @@ html:not(.solutions-motion) .surface-grid article { opacity: 1; transform: none;
 }
 
 @media (max-width: 900px) {
-  .contact-hero-inner,
-  .contact-request-inner,
-  .contact-faq {
-    grid-template-columns: 1fr;
-  }
-
-  .contact-hero-panel {
-    width: min(620px, 100%);
-  }
-
   .contact-details dl {
     grid-template-columns: 1fr 1fr;
-  }
-
-  .contact-details dl > div:nth-child(3) {
-    border-left: 0;
-    border-top: 1px solid var(--contact-line);
-  }
-
-  .contact-details dl > div:nth-child(4) {
-    border-top: 1px solid var(--contact-line);
-  }
-
-  .contact-request-inner {
-    gap: 60px;
-  }
-
-  .contact-form-panel {
-    margin-left: 100px;
-  }
-
-  .contact-faq {
-    gap: 54px;
   }
 }
 
 @media (max-width: 620px) {
   .contact-hero {
     min-height: auto;
-    padding: 132px 22px 66px;
+    /* Same fix as .art-hero's mobile override: this predates the desktop
+       --hero-pad-top token dropping 150px -> 56px and never got trimmed
+       to match, leaving it the biggest nav-to-hero gap on the site. */
+    padding: 44px 22px 66px;
   }
 
-  .contact-hero-inner {
-    gap: 50px;
+  /* Full-bleed background photo has much less blank space to work with at
+     this width — a plain surface-colored backdrop reads more reliably
+     than a busy crop of the hologram graphic behind small body text. */
+  .contact-hero-field {
+    background-image: none;
   }
 
   .contact-hero h1 {
     font-size: 48px;
   }
 
-  .contact-hero-panel {
-    padding-left: 16px;
-  }
-
-  .contact-hero-panel::before {
-    left: 16px;
-  }
-
-  .contact-hero-image {
-    height: 220px;
-  }
-
   .contact-details {
-    padding: 0 22px;
+    padding: 40px 22px 0;
   }
 
   .contact-details dl {
     grid-template-columns: 1fr;
   }
 
-  .contact-details dl > div,
-  .contact-details dl > div + div,
-  .contact-details dl > div:nth-child(3),
-  .contact-details dl > div:nth-child(4) {
+  .contact-details dl > div {
     min-height: auto;
-    padding: 22px 0;
-    border-top: 1px solid var(--contact-line);
-    border-left: 0;
-  }
-
-  .contact-details dl > div:first-child {
-    border-top: 0;
+    padding: 20px 22px;
   }
 
   .contact-request {
@@ -4314,11 +4592,6 @@ html:not(.solutions-motion) .surface-grid article { opacity: 1; transform: none;
   }
 }
 
-@media (prefers-reduced-motion: reduce) {
-  .contact-hero-image::after {
-    animation: none;
-  }
-}
 
 
 /* Give the short investor copy a little pacing when the page opens. */
@@ -4356,27 +4629,13 @@ html:not(.solutions-motion) .surface-grid article { opacity: 1; transform: none;
 
 @media (min-width: 781px) {
   .contact-page .contact-hero,
-  .contact-page .contact-details,
-  .contact-page .contact-request {
+  .contact-page .contact-details {
     padding-right: clamp(44px, 8vw, 160px);
     padding-left: clamp(44px, 8vw, 160px);
   }
 
-  .contact-page .contact-hero-inner {
+  .contact-page .contact-details dl {
     width: 100%;
-    grid-template-columns: minmax(0, 1.05fr) minmax(520px, 0.75fr);
-    gap: clamp(70px, 9vw, 190px);
-  }
-
-  .contact-page .contact-details dl,
-  .contact-page .contact-request-inner {
-    width: 100%;
-  }
-
-  .contact-page .contact-faq {
-    width: 100%;
-    padding-right: clamp(44px, 8vw, 160px);
-    padding-left: clamp(44px, 8vw, 160px);
   }
 }
 
@@ -4580,7 +4839,6 @@ html:not(.solutions-motion) .surface-grid article { opacity: 1; transform: none;
   display: grid;
   grid-template-columns: repeat(3, 1fr);
   gap: clamp(20px, 3vw, 32px);
-  perspective: 1600px;
 }
 
 .why-step-card {
@@ -4590,22 +4848,31 @@ html:not(.solutions-motion) .surface-grid article { opacity: 1; transform: none;
   border: 1px solid var(--why-line, rgba(16, 32, 51, 0.15));
   border-radius: var(--radius-md);
   box-shadow: 0 20px 46px rgba(16, 32, 51, 0.1);
-  transform-style: preserve-3d;
-  transition: transform 0.35s cubic-bezier(0.2, 0.8, 0.2, 1), box-shadow 0.35s ease;
-  will-change: transform;
+  transition: transform 0.35s cubic-bezier(0.2, 0.8, 0.2, 1), box-shadow 0.35s ease,
+    border-color 0.35s ease;
 }
 
 .why-step-card:hover {
+  border-color: var(--why-line-strong, rgba(16, 32, 51, 0.28));
   box-shadow: 0 34px 70px rgba(16, 32, 51, 0.16);
 }
 
-.why-step-number {
-  display: block;
-  font-family: var(--font-mono);
-  font-size: 12px;
-  font-weight: 700;
-  letter-spacing: 0.1em;
-  color: var(--blue);
+/* The lift that replaced the old cursor-following 3D tilt: one fixed end
+   state instead of a rotation recomputed on every pointermove, so the card
+   settles instead of wobbling under the cursor. The whole 3D rig the tilt
+   needed went with it — .why-steps' perspective, and the card's
+   transform-style/will-change.
+
+   Split out of the :hover rule above and fully qualified because the scroll
+   reveal at the bottom of this section owns these cards' transform too:
+   `.why-page [data-reveal].is-visible { transform: none }` is (0,3,0) and
+   sits later in the file, so a plain `.why-step-card:hover` (0,2,0) loses
+   both tiebreaks and the lift silently never renders. Matching on
+   .is-visible also scopes the lift to cards that have finished arriving —
+   one still animating in keeps the reveal's own translateY(28px) instead
+   of being yanked to its resting position by a hover. */
+.why-page [data-reveal].is-visible.why-step-card:hover {
+  transform: translateY(-6px);
 }
 
 .why-step-media {
@@ -4637,173 +4904,8 @@ html:not(.solutions-motion) .surface-grid article { opacity: 1; transform: none;
   line-height: 1.55;
 }
 
-/* Evidence deck: five cards held as a real stack in 3D space — front card
-   raised and legible, the rest fanned out and faded behind it. */
-.why-deck {
-  width: min(1120px, 100%);
-  margin: 78px auto 0;
-}
-
-.why-deck-stage {
-  position: relative;
-  height: 460px;
-  perspective: 1800px;
-}
-
-.why-deck-card {
-  position: absolute;
-  inset: 0;
-  display: grid;
-  grid-template-columns: 1.05fr 1fr;
-  align-items: stretch;
-  background: var(--why-panel, #fff);
-  border: 1px solid var(--why-line, rgba(16, 32, 51, 0.15));
-  border-radius: var(--radius-md);
-  overflow: hidden;
-  cursor: pointer;
-  transform: translate3d(calc(var(--pos, 0) * 44px), calc(var(--depth, 0) * 14px), calc(var(--depth, 0) * -110px)) rotate(calc(var(--pos, 0) * 3.4deg));
-  filter: blur(calc(var(--depth, 0) * 1.6px));
-  opacity: calc(1 - var(--depth, 0) * 0.24);
-  z-index: calc(10 - var(--depth, 0));
-  box-shadow: 0 30px 60px rgba(16, 32, 51, 0.14);
-  transition: transform 0.55s cubic-bezier(0.2, 0.8, 0.2, 1), opacity 0.4s ease, filter 0.4s ease, box-shadow 0.4s ease;
-  pointer-events: none;
-}
-
-.why-deck-card.is-front {
-  pointer-events: auto;
-  cursor: default;
-  box-shadow: 0 46px 100px rgba(16, 32, 51, 0.24);
-}
-
-/* Cards behind the front one were only blurred (filter: blur on the whole
-   card), which isn't enough to stop their copy text from reading through
-   and visually overlapping the front card's own text. Hide the copy on
-   every card except the front one — the stack still shows a blurred photo
-   peeking out behind it, just no more double-exposed text. */
-.why-deck-card:not(.is-front) .why-deck-copy {
-  opacity: 0;
-}
-
-.why-deck-media {
-  margin: 0;
-  height: 100%;
-  min-height: 0;
-}
-
-.why-deck-media img {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-  display: block;
-}
-
-.why-deck-copy {
-  padding: clamp(28px, 3vw, 48px);
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  gap: 14px;
-}
-
-.why-deck-copy h3 {
-  margin: 0;
-  font-family: var(--font-display);
-  font-weight: 600;
-  font-size: clamp(22px, 2vw, 28px);
-  line-height: 1.15;
-  letter-spacing: -0.015em;
-  color: var(--ink);
-}
-
-.why-deck-copy p {
-  margin: 0;
-  color: var(--muted);
-  font-size: 16px;
-  line-height: 1.55;
-}
-
-.why-deck-controls {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 20px;
-  margin-top: 30px;
-}
-
-.why-deck-controls button {
-  width: 44px;
-  height: 44px;
-  border-radius: 50%;
-  border: 1px solid var(--why-line-strong, rgba(16, 32, 51, 0.28));
-  background: #fff;
-  color: var(--ink);
-  font-size: 16px;
-  cursor: pointer;
-  transition: background 0.2s ease, color 0.2s ease, border-color 0.2s ease;
-}
-
-.why-deck-controls button:hover,
-.why-deck-controls button:focus-visible {
-  background: var(--blue);
-  border-color: var(--blue);
-  color: #fff;
-}
-
-.why-deck-counter {
-  font-family: var(--font-mono);
-  font-size: 13px;
-  letter-spacing: 0.06em;
-  color: var(--muted);
-}
-
 @media (max-width: 980px) {
   .why-steps {
-    grid-template-columns: 1fr;
-  }
-
-  .why-step-card {
-    transform: none !important;
-  }
-
-  /* Established mobile pattern: plain stacked static cards instead of
-     compressing the 3D depth-stack. */
-  .why-deck-stage {
-    height: auto;
-    perspective: none;
-  }
-
-  .why-deck-card {
-    position: static;
-    display: block;
-    transform: none !important;
-    filter: none !important;
-    opacity: 1 !important;
-    box-shadow: 0 16px 40px rgba(16, 32, 51, 0.12) !important;
-    margin-bottom: 20px;
-    pointer-events: auto !important;
-    cursor: default;
-  }
-
-  .why-deck-media {
-    height: 220px;
-  }
-
-  .why-deck-controls {
-    display: none;
-  }
-
-  /* Cards stack sequentially in normal flow here instead of overlapping
-     absolutely, so the anti-double-exposure rule that hides non-front
-     copy (needed only when cards are stacked on top of each other) would
-     otherwise leave a blank gap under every card but the first. */
-  .why-deck-card:not(.is-front) .why-deck-copy {
-    opacity: 1;
-  }
-}
-
-@media (max-width: 640px) {
-  .why-deck-card {
     grid-template-columns: 1fr;
   }
 }
@@ -4990,7 +5092,7 @@ html:not(.solutions-motion) .surface-grid article { opacity: 1; transform: none;
 }
 
 .solutions-page .workflow-section {
-  padding-block: 110px;
+  padding-block: 80px;
 }
 
 .solutions-page .workflow-heading {
@@ -5159,10 +5261,6 @@ html:not(.solutions-motion) .surface-grid article { opacity: 1; transform: none;
    ============================================================ */
 .case-detail-page { background: var(--cloud); color: var(--ink); }
 .case-detail-page .site-nav a.is-current { color: var(--ink); }
-.case-detail-page .site-header {
-  background: rgba(247, 250, 255, .84);
-  border-bottom-color: rgba(16, 32, 51, .1);
-}
 
 .cd-hero { position: relative; overflow: hidden; isolation: isolate; padding: var(--hero-pad-top) 0 var(--hero-pad-bottom); }
 .cd-hero-media { position: absolute; inset: 0; z-index: -2; }
@@ -5174,16 +5272,26 @@ html:not(.solutions-motion) .surface-grid article { opacity: 1; transform: none;
 .cd-hero-inner h1 { margin: 26px 0 22px; max-width: 20ch; color: var(--white); font-family: var(--font-display); font-weight: var(--h1-weight); font-size: var(--h1-size); line-height: var(--h1-leading); letter-spacing: var(--h1-tracking); }
 .cd-hero-lede { max-width: 62ch; color: rgba(255, 255, 255, .8); font-size: 18px; line-height: 1.55; }
 
-.cd-article { padding: 90px 0 0; }
+/* Bottom padding restores the gap before .cd-cta that the removed .cd-close
+   figure used to provide — without it, the "Business impact" text butts
+   straight into the CTA band's colored background. */
+.cd-article { padding: 90px 0 72px; }
 .cd-layout { width: var(--container); margin: 0 auto; display: grid; grid-template-columns: minmax(0, 1fr) 260px; gap: 64px; }
-.cd-layout-solo { grid-template-columns: minmax(0, 1fr); }
+/* Was implicitly separated from the layout above it by the .cd-band figure
+   (90px top margin) that used to sit between them; now that it's gone,
+   this needs its own top spacing so it doesn't butt against the previous
+   layout's last section. */
+.cd-layout-solo { grid-template-columns: minmax(0, 1fr); margin-top: 72px; }
 .cd-body > * { max-width: 720px; }
 .cd-body p { margin: 14px 0 0; max-width: 66ch; color: var(--copy-strong); font-size: 18px; line-height: 1.7; }
 .cd-body h2 { max-width: 24ch; margin: 0; font-family: var(--font-display); font-size: clamp(26px, 2.4vw, 34px); line-height: 1.12; letter-spacing: -.03em; color: var(--ink); }
 .cd-block:not(:first-child) { margin-top: 44px; padding-top: 38px; border-top: 1px solid rgba(16, 32, 51, .12); }
 .cd-block:first-child { padding-top: 4px; }
 
-.cd-fig { margin: 38px auto 0; width: var(--container); }
+/* margin-left was auto (centering), but .cd-body's text has no such
+   centering — both share the same 720px max-width from .cd-body > *, so
+   the figure floated right of the flush-left paragraphs above/below it. */
+.cd-fig { margin: 38px 0 0; width: var(--container); }
 .cd-fig img { display: block; width: 100%; height: auto; }
 .cd-fig figcaption { margin-top: 12px; padding-top: 11px; border-top: 1px solid rgba(16, 32, 51, .12); max-width: 720px; color: var(--muted); font-size: 14px; line-height: 1.55; }
 
@@ -5207,26 +5315,17 @@ html:not(.solutions-motion) .surface-grid article { opacity: 1; transform: none;
 .cd-more span { display: inline-block; transition: transform .2s ease; }
 .cd-more:hover span { transform: translateX(4px); }
 
-.cd-band { position: relative; width: 100%; height: 320px; overflow: hidden; margin: 90px 0 0; }
-.cd-band img { width: 100%; height: 100%; object-fit: cover; display: block; }
-.cd-band-veil { position: absolute; inset: 0; background: linear-gradient(to top, rgba(6, 17, 39, .82) 0%, rgba(6, 17, 39, .55) 55%, rgba(6, 17, 39, .22) 100%); }
-.cd-band-cap { position: absolute; inset: 0; display: flex; align-items: flex-end; padding-bottom: 40px; }
-.cd-band-cap p { margin: 0; width: min(1180px, calc(100% - 72px)); margin-inline: auto; max-width: 26ch; color: var(--white); font-family: var(--font-display); font-size: clamp(24px, 2.4vw, 32px); line-height: 1.16; letter-spacing: -.02em; }
-
-.cd-close { position: relative; width: 100%; height: 320px; overflow: hidden; margin: 0; }
-.cd-close img { width: 100%; height: 100%; object-fit: cover; display: block; }
-.cd-close figcaption { position: absolute; inset: 0; display: flex; align-items: flex-end; background: linear-gradient(to top, rgba(6, 17, 39, .6), transparent 55%); }
-.cd-close figcaption p { margin: 0 0 40px; width: min(1180px, calc(100% - 72px)); margin-inline: auto; max-width: 24ch; color: var(--white); font-family: var(--font-display); font-size: clamp(24px, 2.4vw, 32px); line-height: 1.16; letter-spacing: -.02em; }
-
 .cd-cta { padding: 96px 0; background: #dfeafa; }
-.cd-cta-inner { width: min(1180px, calc(100% - 72px)); margin: 0 auto; display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 28px; }
+/* Was capped at 1180px while .cd-layout (the article column above it) uses
+   --container (1240px) — both centered, so the narrower cap put the CTA
+   heading 30px right of where the article's own left margin sits. */
+.cd-cta-inner { width: var(--container); margin: 0 auto; display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 28px; }
 .cd-cta-inner h2 { margin: 0; max-width: 15ch; font-family: var(--font-display); font-size: clamp(28px, 2.6vw, 36px); line-height: 1.05; letter-spacing: -.04em; color: var(--ink); }
 
 @media (max-width: 980px) {
-  .cd-hero { padding: 120px 0 50px; }
+  .cd-hero { padding: 44px 0 50px; } /* stale pre--hero-pad-top-token value, see .art-hero */
   .cd-layout { grid-template-columns: 1fr; gap: 40px; }
   .cd-aside { position: static; }
-  .cd-band, .cd-close { height: 240px; }
 }
 @media (max-width: 640px) {
   .cd-scenario { padding: 24px 20px 26px; }
@@ -5242,10 +5341,6 @@ html:not(.solutions-motion) .surface-grid article { opacity: 1; transform: none;
    ============================================================ */
 .resources-page .site-nav a.is-current { color: var(--ink); }
 .resources-page .site-nav a.is-current::after { transform: scaleX(1); }
-.resources-page .site-header {
-  background: rgba(247, 250, 255, .84);
-  border-bottom-color: rgba(16, 32, 51, .1);
-}
 
 .rs-frame { width: var(--container); margin-inline: auto; }
 
@@ -5366,7 +5461,8 @@ html:not(.solutions-motion) .surface-grid article { opacity: 1; transform: none;
 }
 .rs-empty { padding: 40px 0; color: var(--muted); }
 
-.rs-cta { margin-top: 0; padding: 96px 0; background: #dfeafa; }
+
+.rs-cta { margin-top: 64px; padding: 96px 0; background: #dfeafa; }
 .rs-cta-inner { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 28px; }
 .rs-cta-inner .eyebrow { margin: 0; color: var(--blue); }
 .rs-cta-inner h2 { margin: 16px 0 0; max-width: 18ch; font-family: var(--font-display); font-weight: var(--h2-weight); font-size: var(--h2-size); line-height: var(--h2-leading); letter-spacing: var(--h2-tracking); color: var(--ink); }
@@ -5374,7 +5470,7 @@ html:not(.solutions-motion) .surface-grid article { opacity: 1; transform: none;
 .rs-cta-inner .button-primary { background: var(--blue); color: var(--white); flex: 0 0 auto; }
 
 @media (max-width: 900px) {
-  .rs-hero { padding: 120px 0 50px; }
+  .rs-hero { padding: 44px 0 50px; } /* stale pre--hero-pad-top-token value, see .art-hero */
   .rs-catalog-controls { align-items: flex-start; }
   .rs-cta { padding: 64px 0; }
   .rs-cta-inner { flex-direction: column; align-items: flex-start; }
@@ -5393,16 +5489,35 @@ html:not(.solutions-motion) .surface-grid article { opacity: 1; transform: none;
 .art-hero { padding: var(--hero-pad-top) 0 var(--hero-pad-bottom); background: var(--cloud); }
 .art-back { display: inline-flex; align-items: center; gap: 6px; color: var(--blue); font: 700 11px var(--font-mono); letter-spacing: .08em; text-transform: uppercase; text-decoration: none; }
 .art-back:hover { color: var(--royal); }
-.art-title { margin: 22px 0 0; max-width: 20ch; font-family: var(--font-display); font-weight: var(--h1-weight); font-size: var(--h1-size); line-height: var(--h1-leading); letter-spacing: var(--h1-tracking); color: var(--ink); }
+/* Article titles are full descriptive sentences, much longer than the
+   marketing taglines --h1-size (up to 72px) was tuned for — at that size
+   they wrap to 3-4 lines and swamp the hero. Own, smaller scale instead
+   of the shared token. */
+.art-title { margin: 22px 0 0; max-width: 26ch; font-family: var(--font-display); font-weight: var(--h1-weight); font-size: clamp(30px, 3.4vw, 44px); line-height: 1.15; letter-spacing: var(--h1-tracking); color: var(--ink); }
 .art-standfirst { margin: 22px 0 0; max-width: 62ch; color: var(--muted); font-size: 18px; line-height: 1.5; }
 
-.art-hero-fig { margin: 0; }
-.art-hero-fig img { display: block; width: 100%; aspect-ratio: 2400 / 1080; object-fit: cover; }
-.art-capcol { width: min(760px, calc(100% - 72px)); margin-inline: auto; padding: 16px 0 0; }
+/* Was full-bleed (implicit 100vw via the plain block flow) — now matches
+   the same --container width/left-right margin as the title, body text,
+   and CTA, so it no longer touches the browser edges on its own. */
+.art-hero-fig { margin: 0 auto; width: var(--container); }
+/* aspect-ratio 2400/1080 (2.2:1) made this fill nearly the full viewport
+   height at typical desktop widths. Shorter ratio plus a hard max-height
+   keeps it a banner, not a second hero. */
+.art-hero-fig img { display: block; width: 100%; max-height: 480px; aspect-ratio: 2400 / 760; object-fit: cover; }
+/* The reading column caps at 760px but must not re-center itself — .rs-frame
+   (used by .art-hero and .rs-cta) centers at the wider --container instead,
+   and independently centering two different widths gives them different
+   left edges. Anchoring this column's left margin to the same formula
+   .rs-frame uses keeps every element's left edge identical top to bottom,
+   with the narrower column just carrying extra whitespace on its right. */
+/* .art-hero-fig (its only remaining parent) is now itself width: var(--container)
+   and correctly positioned, so "100%" here already means the right thing —
+   no separate frame-offset math needed, unlike when the parent was full-bleed. */
+.art-capcol { width: min(760px, 100%); margin: 0; padding: 16px 0 0; }
 .art-capcol figcaption { color: var(--muted); font-size: 14px; line-height: 1.5; }
 
 .art-body { padding: 56px 0 0; }
-.art-col { width: min(760px, calc(100% - 72px)); margin-inline: auto; }
+.art-col { width: min(760px, var(--container)); margin: 0 auto 0 calc((100% - var(--container)) / 2); }
 .art-lede { margin: 0; color: var(--ink); font-size: 20px; line-height: 1.6; }
 .art-brief { margin: 34px 0 0; padding: 24px 26px; background: var(--mist); border-left: 3px solid var(--blue); }
 .art-brief ul { margin: 0; padding: 0; list-style: none; display: flex; flex-direction: column; gap: 10px; }
@@ -5416,15 +5531,19 @@ html:not(.solutions-motion) .surface-grid article { opacity: 1; transform: none;
 .art-quote { margin: 44px auto 0; padding: 4px 0 4px 26px; border-left: 3px solid var(--blue); font-family: var(--font-display); font-size: clamp(22px, 2.4vw, 28px); line-height: 1.32; letter-spacing: -.01em; color: var(--ink); }
 .art-quote p { margin: 0; }
 
-.art-fig { margin: 44px auto 0; width: min(760px, calc(100% - 72px)); }
-.art-fig img { display: block; width: 100%; height: auto; }
+/* Always a child of .art-col (never a standalone full-bleed image anymore),
+   so it just fills the column's own width — no independent frame margin
+   needed, unlike .art-col/.art-capcol which sit directly under .art-body
+   with no width-constraining ancestor of their own. */
+.art-fig { margin: 44px 0 0; width: 100%; }
+/* Same max-height cap as .art-hero-fig img, so in-body photos read at a
+   consistent size with the hero photo instead of whatever height their
+   own natural aspect ratio happens to produce at column width. */
+.art-fig img { display: block; width: 100%; height: auto; max-height: 480px; object-fit: cover; }
 .art-fig > figcaption { margin-top: 12px; padding-top: 11px; border-top: 1px solid rgba(16, 32, 51, .12); color: var(--muted); font-size: 14px; line-height: 1.5; }
-.art-fig.art-bleed { width: 100vw; margin-left: calc(50% - 50vw); margin-right: calc(50% - 50vw); }
-.art-fig.art-bleed img { max-height: 460px; object-fit: cover; }
-.art-fig.art-bleed .art-capcol { padding-top: 12px; }
-.art-fig.art-bleed .art-capcol figcaption { padding-top: 11px; border-top: 1px solid rgba(16, 32, 51, .12); }
 
-.art-more { margin: 60px auto 0; width: min(760px, calc(100% - 72px)); padding-top: 40px; border-top: 1px solid rgba(16, 32, 51, .14); }
+/* Always a child of .art-col — same reasoning as .art-fig above. */
+.art-more { margin: 60px 0 0; width: 100%; padding-top: 40px; border-top: 1px solid rgba(16, 32, 51, .14); }
 .art-more-item { display: block; padding: 16px 0; border-bottom: 1px solid rgba(16, 32, 51, .12); text-decoration: none; }
 .art-more-item:first-child { padding-top: 0; }
 .art-more-kicker { display: block; margin-bottom: 6px; color: var(--blue); font: 700 11px var(--font-mono); letter-spacing: .08em; text-transform: uppercase; }
@@ -5438,8 +5557,10 @@ html:not(.solutions-motion) .surface-grid article { opacity: 1; transform: none;
 }
 
 @media (max-width: 700px) {
-  .art-hero { padding: 120px 0 40px; }
-  .art-fig.art-bleed img { max-height: 320px; }
+  /* Was 120px on top, a phone-specific bump over the old 150px desktop
+     value. With the token down to 56px that override became the largest
+     gap on the site instead of the smallest — trimmed to match. */
+  .art-hero { padding: 40px 0 40px; }
 }
 
 /* ============================================================
@@ -5503,7 +5624,7 @@ html:not(.solutions-motion) .surface-grid article { opacity: 1; transform: none;
 .tsec-ledger-row { position: relative; overflow: hidden; display: grid; grid-template-columns: 44px 1fr auto; align-items: center; gap: 22px; padding: 20px 0; border-bottom: 1px solid rgba(16, 32, 51, 0.12); opacity: 0; transform: translateY(22px); transition: opacity 700ms cubic-bezier(.16,1,.3,1), transform 700ms cubic-bezier(.16,1,.3,1); }
 .tsec-ledger-row.is-in { opacity: 1; transform: translateY(0); }
 .tsec-reveal-bar { transition: transform 700ms cubic-bezier(.65,0,.35,1); }
-.tsec-ledger-row.is-in .tsec-reveal-bar, .tsec-filings li.is-in .tsec-reveal-bar { transform: scaleX(0); }
+.tsec-ledger-row.is-in .tsec-reveal-bar { transform: scaleX(0); }
 .tsec-reveal-bar { position: absolute; inset: 0; background: var(--ink); transform-origin: right center; pointer-events: none; }
 .tsec-ledger-num { font: 700 13px var(--font-mono); color: var(--muted); }
 .tsec-ledger-name { margin: 0 0 4px; font-family: var(--font-display); font-size: 17px; font-weight: 600; color: var(--ink); }
@@ -5562,15 +5683,25 @@ html:not(.solutions-motion) .surface-grid article { opacity: 1; transform: none;
 .tsec-banner a { flex: none; color: var(--blue); font-weight: 700; font-size: 14px; text-decoration: none; }
 .tsec-banner a:hover { color: var(--royal); }
 
-/* Defensible Innovation — plain numbered filings */
-.tsec-filings { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 0; }
-.tsec-filings li { position: relative; overflow: hidden; display: grid; grid-template-columns: 40px 1fr; gap: 22px; padding: 24px 0; border-top: 1px solid rgba(16, 32, 51, 0.12); opacity: 0; transform: translateY(22px); transition: opacity 700ms cubic-bezier(.16,1,.3,1), transform 700ms cubic-bezier(.16,1,.3,1); }
-.tsec-filings li:last-child { border-bottom: 1px solid rgba(16, 32, 51, 0.12); }
-.tsec-filings li.is-in { opacity: 1; transform: translateY(0); }
-.tsec-filing-num { font-family: var(--font-display); font-style: italic; font-size: 20px; font-weight: 700; color: var(--blue); }
-.tsec-filing-name { margin: 0 0 6px; font-family: var(--font-display); font-size: 17px; font-weight: 700; color: var(--ink); }
-.tsec-filing-desc { margin: 0; max-width: 66ch; color: var(--muted); font-size: 14.5px; line-height: 1.55; }
-.tsec-filing-ref { margin: 18px 0 0; color: var(--muted); font: 600 12px var(--font-mono); letter-spacing: 0.02em; }
+/* Defensible Innovation — three filing cards, flat light-blue tiles rather
+   than the ledger-row language the rest of this page uses, so the patents
+   read as distinct claims sitting side by side instead of one continuous list. */
+.tsec-patent-cards { display: grid; grid-template-columns: repeat(3, 1fr); gap: 24px; margin-top: 64px; }
+.tsec-patent-card {
+  display: flex;
+  flex-direction: column;
+  padding: 32px 28px;
+  border-radius: var(--radius-md);
+  background: var(--mist);
+  opacity: 0;
+  transform: translateY(22px);
+  transition: opacity 700ms cubic-bezier(.16,1,.3,1), transform 700ms cubic-bezier(.16,1,.3,1);
+}
+.tsec-patent-card.is-in { opacity: 1; transform: translateY(0); }
+.tsec-patent-tag { margin: 0 0 18px; color: var(--royal); font: 700 12px var(--font-mono); letter-spacing: 0.04em; }
+.tsec-patent-card h3 { margin: 0 0 14px; font-family: var(--font-display); font-size: 20px; font-weight: 700; line-height: 1.3; color: var(--ink); }
+.tsec-patent-desc { margin: 0 0 24px; color: var(--muted); font-size: 14.5px; line-height: 1.55; }
+.tsec-patent-ref { margin: auto 0 0; color: var(--muted); font: 600 12px var(--font-mono); letter-spacing: 0.02em; }
 
 /* Photographic exhibits — plain captioned figures like a formal report's
    evidence photos, not a card (no border/shadow/frame), consistent with
@@ -5593,7 +5724,7 @@ html:not(.solutions-motion) .surface-grid article { opacity: 1; transform: none;
 .tsec-cta-actions { display: flex; align-items: center; gap: 26px; flex-wrap: wrap; }
 
 @media (max-width: 980px) {
-  .tsec-hero { padding: 130px 0 60px; }
+  .tsec-hero { padding: 44px 0 60px; } /* stale pre--hero-pad-top-token value, see .art-hero */
   .tsec-body { grid-template-columns: 1fr; gap: 40px; }
   .tsec-index { position: static; padding-bottom: 20px; border-bottom: 1px solid rgba(16, 32, 51, 0.14); }
   .tsec-index ol { flex-direction: row; flex-wrap: wrap; gap: 18px 26px; }
@@ -5608,6 +5739,7 @@ html:not(.solutions-motion) .surface-grid article { opacity: 1; transform: none;
   .tsec-spectrum-track { grid-template-columns: repeat(2, 1fr); row-gap: 30px; }
   .tsec-spectrum-track::before, .tsec-spectrum-fill { display: none; }
   .tsec-cta-inner { flex-direction: column; align-items: flex-start; }
+  .tsec-patent-cards { grid-template-columns: 1fr; }
 }
 
 /* ============================================================
@@ -5714,7 +5846,7 @@ html:not(.solutions-motion) .surface-grid article { opacity: 1; transform: none;
 .ab-mission-meta { margin: 30px 0 0; color: var(--muted); font: 600 12px var(--font-mono); letter-spacing: 0.02em; }
 
 @media (max-width: 980px) {
-  .ab-hero { padding: 130px 0 60px; }
+  .ab-hero { padding: 44px 0 60px; } /* stale pre--hero-pad-top-token value, see .art-hero */
   .ab-hero-grid { grid-template-columns: 1fr; gap: 40px; }
   .ab-hero-figure { order: -1; }
   .ab-process { grid-template-columns: 1fr; }
@@ -5732,16 +5864,18 @@ html:not(.solutions-motion) .surface-grid article { opacity: 1; transform: none;
 
 /* ============================================================
    Cookie consent — site-wide, injected by js/cookie-consent.js.
-   Floating card near the top, matching every other page's card/
-   shadow language rather than a full-width bottom bar.
+   Floating card, matching every other page's card/shadow language
+   rather than a full-width bar. Anchored to the bottom-left, not the
+   top-center — top-center sat directly over the sticky nav (desktop)
+   and the H1 (mobile) on every page until dismissed.
    ============================================================ */
 .cookie-consent {
   position: fixed;
-  top: 20px;
-  left: 50%;
+  bottom: 20px;
+  left: 20px;
   z-index: 700;
-  width: min(480px, calc(100% - 32px));
-  transform: translate(-50%, -12px);
+  width: min(420px, calc(100% - 40px));
+  transform: translateY(12px);
   opacity: 0;
   padding: 20px 22px 18px;
   border-radius: var(--radius-md);
@@ -5754,7 +5888,7 @@ html:not(.solutions-motion) .surface-grid article { opacity: 1; transform: none;
 
 .cookie-consent.is-visible {
   opacity: 1;
-  transform: translate(-50%, 0);
+  transform: translateY(0);
   pointer-events: auto;
 }
 
@@ -5823,7 +5957,12 @@ html:not(.solutions-motion) .surface-grid article { opacity: 1; transform: none;
 
 @media (max-width: 560px) {
   .cookie-consent {
-    top: 12px;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    width: 100%;
+    border-radius: var(--radius-md) var(--radius-md) 0 0;
+    border-width: 1px 0 0;
     padding: 18px 18px 16px;
   }
 

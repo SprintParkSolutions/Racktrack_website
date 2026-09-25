@@ -153,9 +153,11 @@ if (gsapReady && !reduceMotion) {
     });
   }
 
-  // Magnetic primary CTAs, pointer-fine devices only.
+  // Magnetic primary CTA, pointer-fine devices only. Hero CTA is excluded —
+  // it sits above the fold and the drift read as the button "moving" rather
+  // than a deliberate flourish.
   if (canHover) {
-    document.querySelectorAll(".tsec-hero-ctas .button-primary, .tsec-cta-actions .button-primary").forEach((btn) => {
+    document.querySelectorAll(".tsec-cta-actions .button-primary").forEach((btn) => {
       const moveX = gsap.quickTo(btn, "x", { duration: 0.5, ease: "power3.out" });
       const moveY = gsap.quickTo(btn, "y", { duration: 0.5, ease: "power3.out" });
       btn.addEventListener("mousemove", (e) => {

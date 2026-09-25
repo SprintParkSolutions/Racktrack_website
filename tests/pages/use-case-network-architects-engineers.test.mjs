@@ -34,11 +34,10 @@ test("use-case-network-architects-engineers.html: stylesheet is cache-busted", (
   assertCacheBustedStylesheet(document);
 });
 
-test("use-case-network-architects-engineers.html: top-level sections (hero, article, closing band, cta)", () => {
+test("use-case-network-architects-engineers.html: top-level sections (hero, article, cta)", () => {
   assertTopLevelSections(document, [
     "section.cd-hero",
     "article.cd-article",
-    "figure.cd-close",
     "section.cd-cta",
   ]);
 });

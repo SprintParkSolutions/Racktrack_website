@@ -6,8 +6,12 @@ import fs from "node:fs";
 import path from "node:path";
 import { loadPage, ROOT } from "./helpers/dom.mjs";
 
+// racktrack-guide.html is a self-contained standalone document (an
+// exported knowledgebase guide), not a page built from this site's own
+// template — it correctly has none of the shared header/nav/footer/
+// styles.css these sitewide checks assume every *site* page carries.
 const ALL_PAGES = fs.readdirSync(path.join(ROOT, "pages"))
-  .filter((f) => f.endsWith(".html"))
+  .filter((f) => f.endsWith(".html") && f !== "racktrack-guide.html")
   .map((f) => "pages/" + f)
   .concat(["index.html"]);
 

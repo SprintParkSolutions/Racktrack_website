@@ -4,9 +4,38 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <meta name="description" content="Reconciling physical presence with live network state is what makes infrastructure inventory trustworthy." />
+    <link rel="canonical" href="https://racktrack.ai/pages/article-what-network-verified-actually-means.html">
+    <meta property="og:type" content="article">
+    <meta property="og:site_name" content="RackTrack">
+    <meta property="og:title" content="What "Network-Verified" Actually Means | RackTrack">
+    <meta property="og:description" content="Reconciling physical presence with live network state is what makes infrastructure inventory trustworthy.">
+    <meta property="og:url" content="https://racktrack.ai/pages/article-what-network-verified-actually-means.html">
+    <meta property="og:image" content="https://racktrack.ai/assets/logo.jpg">
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="What "Network-Verified" Actually Means | RackTrack">
+    <meta name="twitter:description" content="Reconciling physical presence with live network state is what makes infrastructure inventory trustworthy.">
+    <meta name="twitter:image" content="https://racktrack.ai/assets/logo.jpg">
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "Article",
+      "headline": "What \"Network-Verified\" Actually Means",
+      "description": "Reconciling physical presence with live network state is what makes infrastructure inventory trustworthy.",
+      "url": "https://racktrack.ai/pages/article-what-network-verified-actually-means.html",
+      "publisher": {
+        "@type": "Organization",
+        "name": "RackTrack",
+        "logo": {
+          "@type": "ImageObject",
+          "url": "https://racktrack.ai/assets/logo.jpg"
+        }
+      }
+    }
+    </script>
+
     <title>What "Network-Verified" Actually Means | RackTrack</title>
     <link rel="icon" href="../assets/logo.jpg" />
-    <link rel="stylesheet" href="../styles.css?v=article-4-source-port" />
+    <link rel="stylesheet" href="../styles.css?v=article-4-source-port-sticky-glass-nav-hero-gap-inter-img-navsm2-btngap-margin-fixbcdefg-audit1b" />
     <script type="module" src="../js/article.js?v=3"></script>
     <script defer src="../js/cookie-consent.js"></script>
 </head>
@@ -18,7 +47,7 @@
         <a href="why-racktrack.html">Why RackTrack</a>
         <a href="solutions.html">Solutions</a>
         <div class="nav-item"><a href="use-cases.html">Use Cases<svg class="nav-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg></a><input type="checkbox" id="nav-sub-usecases" class="nav-sub-toggle" autocomplete="off" /><label for="nav-sub-usecases" class="nav-sub-toggle-btn" aria-label="Expand Use Cases submenu"></label><div class="nav-dropdown"><a href="use-case-infrastructure-data-center-leaders.html">Infrastructure &amp; Data Center Leaders</a><a href="use-case-network-architects-engineers.html">Network Architects &amp; Engineers</a><a href="use-case-security-vulnerability-teams.html">Security &amp; Vulnerability Teams</a><a href="use-case-compliance-audit-owners.html">Compliance &amp; Audit Owners</a><a href="use-case-incident-responders-on-call.html">Incident Responders &amp; On-Call</a><a href="use-case-m-a-migration-teams.html">M&amp;A &amp; Migration Teams</a></div></div>
-        <div class="nav-item"><a class="is-current" href="resources.html" aria-current="page">Resources<svg class="nav-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg></a><input type="checkbox" id="nav-sub-resources" class="nav-sub-toggle" autocomplete="off" /><label for="nav-sub-resources" class="nav-sub-toggle-btn" aria-label="Expand Resources submenu"></label><div class="nav-dropdown"><a href="resources.html">All articles</a><a href="article-why-infrastructure-records-are-wrong.html">Why every CMDB is 40% wrong</a><a href="article-what-network-verified-actually-means.html">What "network-verified" means</a><a href="article-how-infrastructure-teams-prepare-for-soc-2-audits.html">Preparing for SOC 2</a><a href="article-free-port-discovery-and-rack-capacity-planning.html">Free port discovery</a></div></div>
+        <div class="nav-item"><a class="is-current" href="resources.html" aria-current="page">Resources<svg class="nav-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg></a><input type="checkbox" id="nav-sub-resources" class="nav-sub-toggle" autocomplete="off" /><label for="nav-sub-resources" class="nav-sub-toggle-btn" aria-label="Expand Resources submenu"></label><div class="nav-dropdown"><a href="resources.html">All articles</a><a href="racktrack-guide.html">Knowledgebase</a><a href="article-why-infrastructure-records-are-wrong.html">Why every CMDB is 40% wrong</a><a href="article-what-network-verified-actually-means.html">What "network-verified" means</a><a href="article-how-infrastructure-teams-prepare-for-soc-2-audits.html">Preparing for SOC 2</a><a href="article-free-port-discovery-and-rack-capacity-planning.html">Free port discovery</a></div></div>
         <a href="trust-security.html">Trust &amp; Security</a> <a href="contact.html">Contact Us</a>
       </nav>
       <a class="nav-cta" href="https://portal.racktrack.ai">Sign In</a>
@@ -34,7 +63,7 @@
       </section>
 
       <figure class="art-hero-fig">
-        <img src="../assets/articles/media-art-verified-links.jpg" alt="Link indicators lit green across the ports of stacked switch line cards" loading="eager" decoding="async" />
+        <img src="../assets/articles/media-art-verified-links.png" alt="An engineer checking a tablet against a live rack of cabled switches in a data center aisle" loading="eager" decoding="async" />
         <div class="art-capcol"><figcaption>Green means a link is up. It does not mean the rack record is right.</figcaption></div>
       </figure>
 
@@ -50,7 +79,7 @@
               </ul>
             </div>
             <section class="art-sec" data-reveal>
-              <h2 class="art-h2">Network-verified should mean reconciled, not assumed.</h2>
+              <h2 class="art-h2">Network-verified should mean reconciled, not assumed</h2>
               <p>Many tools claim network verification when they discover active devices and collect telemetry. That is useful, but it does not confirm that the physical rack inventory is complete or correctly labeled. Verification is stronger when network data is matched against what is physically visible and installed.</p>
             </section>
             <figure class="art-fig" data-reveal>
@@ -58,12 +87,12 @@
               <figcaption>The physical half of the same fact: a connector, in a port, in a chassis, in a rack.</figcaption>
             </figure>
             <section class="art-sec" data-reveal>
-              <h2 class="art-h2">Telemetry alone cannot resolve every ambiguity.</h2>
+              <h2 class="art-h2">Telemetry alone cannot resolve every ambiguity</h2>
               <p>A live network can tell you what is speaking. It cannot always tell you what is missing from the rack record, what was swapped without documentation, or how the physical layout has changed. That is why physical context still matters.</p>
             </section>
             <blockquote class="art-quote" data-reveal><p>When they disagree, the gap becomes a clear action item instead of a hidden risk.</p></blockquote>
             <section class="art-sec" data-reveal>
-              <h2 class="art-h2">One inventory story from two evidence sources.</h2>
+              <h2 class="art-h2">One inventory story from two evidence sources</h2>
               <p>When physical capture and network discovery agree, teams can trust the output more deeply. When they disagree, the gap becomes a clear action item instead of a hidden risk. That is the real value of network-verified infrastructure intelligence.</p>
             </section>
             <div class="art-more">
@@ -78,9 +107,9 @@
       <section class="rs-cta">
         <div class="rs-frame rs-cta-inner">
           <div>
-            <h2>Read the theory.<br /><em>Then run it on your rack.</em></h2>
+            <h2>Read the theory.<br /><em>Then run it on your rack</em></h2>
           </div>
-          <a class="button-primary" href="contact.html">Request a platform brief <span aria-hidden="true">&rarr;</span></a>
+          <a class="button-primary" href="contact.html">Request Platform Brief <span aria-hidden="true">&rarr;</span></a>
         </div>
       </section>
     </main>

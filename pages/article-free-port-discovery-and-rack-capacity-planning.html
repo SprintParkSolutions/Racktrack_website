@@ -4,9 +4,38 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <meta name="description" content="Teams plan capacity better when they can see which switch ports are truly available instead of relying on outdated assumptions." />
+    <link rel="canonical" href="https://racktrack.ai/pages/article-free-port-discovery-and-rack-capacity-planning.html">
+    <meta property="og:type" content="article">
+    <meta property="og:site_name" content="RackTrack">
+    <meta property="og:title" content="Free Port Discovery and Rack Capacity Planning | RackTrack">
+    <meta property="og:description" content="Teams plan capacity better when they can see which switch ports are truly available instead of relying on outdated assumptions.">
+    <meta property="og:url" content="https://racktrack.ai/pages/article-free-port-discovery-and-rack-capacity-planning.html">
+    <meta property="og:image" content="https://racktrack.ai/assets/logo.jpg">
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="Free Port Discovery and Rack Capacity Planning | RackTrack">
+    <meta name="twitter:description" content="Teams plan capacity better when they can see which switch ports are truly available instead of relying on outdated assumptions.">
+    <meta name="twitter:image" content="https://racktrack.ai/assets/logo.jpg">
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "Article",
+      "headline": "Free Port Discovery and Rack Capacity Planning",
+      "description": "Teams plan capacity better when they can see which switch ports are truly available instead of relying on outdated assumptions.",
+      "url": "https://racktrack.ai/pages/article-free-port-discovery-and-rack-capacity-planning.html",
+      "publisher": {
+        "@type": "Organization",
+        "name": "RackTrack",
+        "logo": {
+          "@type": "ImageObject",
+          "url": "https://racktrack.ai/assets/logo.jpg"
+        }
+      }
+    }
+    </script>
+
     <title>Free Port Discovery and Rack Capacity Planning | RackTrack</title>
     <link rel="icon" href="../assets/logo.jpg" />
-    <link rel="stylesheet" href="../styles.css?v=article-4-source-port" />
+    <link rel="stylesheet" href="../styles.css?v=article-4-source-port-sticky-glass-nav-hero-gap-inter-navsm2-btngap-margin-fixbcdefg-audit1b" />
     <script type="module" src="../js/article.js?v=3"></script>
     <script defer src="../js/cookie-consent.js"></script>
 </head>
@@ -18,7 +47,7 @@
         <a href="why-racktrack.html">Why RackTrack</a>
         <a href="solutions.html">Solutions</a>
         <div class="nav-item"><a href="use-cases.html">Use Cases<svg class="nav-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg></a><input type="checkbox" id="nav-sub-usecases" class="nav-sub-toggle" autocomplete="off" /><label for="nav-sub-usecases" class="nav-sub-toggle-btn" aria-label="Expand Use Cases submenu"></label><div class="nav-dropdown"><a href="use-case-infrastructure-data-center-leaders.html">Infrastructure &amp; Data Center Leaders</a><a href="use-case-network-architects-engineers.html">Network Architects &amp; Engineers</a><a href="use-case-security-vulnerability-teams.html">Security &amp; Vulnerability Teams</a><a href="use-case-compliance-audit-owners.html">Compliance &amp; Audit Owners</a><a href="use-case-incident-responders-on-call.html">Incident Responders &amp; On-Call</a><a href="use-case-m-a-migration-teams.html">M&amp;A &amp; Migration Teams</a></div></div>
-        <div class="nav-item"><a class="is-current" href="resources.html" aria-current="page">Resources<svg class="nav-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg></a><input type="checkbox" id="nav-sub-resources" class="nav-sub-toggle" autocomplete="off" /><label for="nav-sub-resources" class="nav-sub-toggle-btn" aria-label="Expand Resources submenu"></label><div class="nav-dropdown"><a href="resources.html">All articles</a><a href="article-why-infrastructure-records-are-wrong.html">Why every CMDB is 40% wrong</a><a href="article-what-network-verified-actually-means.html">What "network-verified" means</a><a href="article-how-infrastructure-teams-prepare-for-soc-2-audits.html">Preparing for SOC 2</a><a href="article-free-port-discovery-and-rack-capacity-planning.html">Free port discovery</a></div></div>
+        <div class="nav-item"><a class="is-current" href="resources.html" aria-current="page">Resources<svg class="nav-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg></a><input type="checkbox" id="nav-sub-resources" class="nav-sub-toggle" autocomplete="off" /><label for="nav-sub-resources" class="nav-sub-toggle-btn" aria-label="Expand Resources submenu"></label><div class="nav-dropdown"><a href="resources.html">All articles</a><a href="racktrack-guide.html">Knowledgebase</a><a href="article-why-infrastructure-records-are-wrong.html">Why every CMDB is 40% wrong</a><a href="article-what-network-verified-actually-means.html">What "network-verified" means</a><a href="article-how-infrastructure-teams-prepare-for-soc-2-audits.html">Preparing for SOC 2</a><a href="article-free-port-discovery-and-rack-capacity-planning.html">Free port discovery</a></div></div>
         <a href="trust-security.html">Trust &amp; Security</a> <a href="contact.html">Contact Us</a>
       </nav>
       <a class="nav-cta" href="https://portal.racktrack.ai">Sign In</a>
@@ -50,7 +79,7 @@
               </ul>
             </div>
             <section class="art-sec" data-reveal>
-              <h2 class="art-h2">Port availability is rarely as clear as it looks in the spreadsheet.</h2>
+              <h2 class="art-h2">Port availability is rarely as clear as it looks in the spreadsheet</h2>
               <p>Many teams assume they know how much switch capacity is available because a diagram, spreadsheet, or DCIM record says a set of ports is still open. In reality, field changes, patch updates, temporary links, and incomplete documentation can make those records unreliable. A port that looks available in the system may already be in use, while a port that appears occupied may no longer serve a production workload.</p>
             </section>
             <figure class="art-fig" data-reveal>
@@ -58,24 +87,24 @@
               <figcaption>Patched, labelled, and in use, or patched, labelled, and abandoned in place. Only the rack shows which.</figcaption>
             </figure>
             <section class="art-sec" data-reveal>
-              <h2 class="art-h2">Capacity planning depends on the physical truth of the rack.</h2>
+              <h2 class="art-h2">Capacity planning depends on the physical truth of the rack</h2>
               <p>Free port discovery affects more than cable work. It impacts deployment speed, expansion planning, migration readiness, and refresh timelines. When teams cannot confidently identify spare switch capacity, every new project starts with extra validation effort. That slows down implementation and creates avoidable uncertainty during change windows.</p>
             </section>
             <blockquote class="art-quote" data-reveal><p>A port that looks available in the system may already be in use, while a port that appears occupied may no longer serve a production workload.</p></blockquote>
             <section class="art-sec" data-reveal>
-              <h2 class="art-h2">They verify physical port state before they promise capacity.</h2>
+              <h2 class="art-h2">They verify physical port state before they promise capacity</h2>
               <p>The most effective infrastructure teams compare logical switch data with visible rack conditions. They confirm which ports are patched, which are unused, and whether cabling matches the expected topology before committing new capacity to a project. This approach reduces surprises and turns port planning into a faster, more defensible workflow.</p>
             </section>
+            <figure class="art-fig" data-reveal>
+              <img src="../assets/articles/media-art-ports-field.jpg" alt="A high-density fibre patch field with rows of LC couplers and teal patch cords" loading="lazy" decoding="async" />
+              <figcaption>At this density, capacity questions cannot be settled from memory.</figcaption>
+            </figure>
           </div>
         </div>
-        <figure class="art-fig art-bleed" data-reveal>
-          <img src="../assets/articles/media-art-ports-field.jpg" alt="A high-density fibre patch field with rows of LC couplers and teal patch cords" loading="lazy" decoding="async" />
-          <div class="art-capcol"><figcaption>At this density, capacity questions cannot be settled from memory.</figcaption></div>
-        </figure>
         <div class="art-body">
           <div class="art-col">
             <section class="art-sec" data-reveal>
-              <h2 class="art-h2">Accurate port visibility saves time across every rack change.</h2>
+              <h2 class="art-h2">Accurate port visibility saves time across every rack change</h2>
               <p>When port availability is clear, engineers spend less time tracing cables, second-guessing diagrams, or reopening change plans. New installs move faster because the team starts from a verified view of the rack instead of a debated one. That creates smoother provisioning, cleaner rack layouts, and more reliable infrastructure planning over time.</p>
             </section>
             <div class="art-more">
@@ -90,9 +119,9 @@
       <section class="rs-cta">
         <div class="rs-frame rs-cta-inner">
           <div>
-            <h2>Read the theory.<br /><em>Then run it on your rack.</em></h2>
+            <h2>Read the theory.<br /><em>Then run it on your rack</em></h2>
           </div>
-          <a class="button-primary" href="contact.html">Request a platform brief <span aria-hidden="true">&rarr;</span></a>
+          <a class="button-primary" href="contact.html">Request Platform Brief <span aria-hidden="true">&rarr;</span></a>
         </div>
       </section>
     </main>
