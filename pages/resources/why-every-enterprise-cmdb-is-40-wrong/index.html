@@ -1,0 +1,942 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Why your infrastructure records are wrong more often than you think Â· RackTrack</title>
+<meta name="description" content="When the system of record drifts from what's actually installed, every decision built on it gets a little less safe, and the gap is more common than most teams assume.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap">
+<link rel="stylesheet" href="/design-system/base.css">
+<style>
+/* RackTrack Â· Resources Â· File no. 001 Â· OPSÂ·01 â€” design-system/ tokens.
+   CONCEPT Â· The drift clock. One rack (Rack 14) and its record, drawn as two aligned layers on the drawing sheet:
+   the rack on the left, a T-card record board on the right with one paper slip per device, each slip tied to its device
+   by a level tie line. A calendar ribbon lies across the front of the sheet; a cursor marks months since the last check.
+   Changes land on the floor first; the record lags. 4 of the 10 slips slide out of true (40%).
+   Beats (scroll value g):
+     hero (-1)       wide 3/4: rack, record, calendar; every slip level with its device.
+     lead (0)        top-down plan: Rack 14 on the floor plan.
+     what-it-is (1)  front elevation: slip vs device, "typed in" vs "bolted in".
+     why-it-drifts(2)time scrubs forward; three causes land one per bullet: vendor swap (APP-035 slides out, a different unit
+                     slides back), migration (DB-021 leaves, the SW-14-A uplink re-lands on another port), cleanup move
+                     (APP-032 arcs from U30 down to U10). Each floor change first, then its slip slides out of true.
+     key figure (3)  raking view along the record board: 4 of 10 slips out of true, the header counter reads 40%.
+     the-cost (4)    close on the lower rack: the capacity plan (blue-grey ghost) assumes U10 is free; triage starts at an empty slot.
+     closing-it (5)  a phone sweeps the rack bottom to top; each slip snaps back true and turns green; weekly ticks fill the calendar.
+   Camera: 8 keys (wide 3/4 â†’ top-down plan â†’ front elevation â†’ high 3/4 over the calendar â†’ raking side view â†’ low macro on U10 â†’ low sweep angle â†’ wide).
+   Guards: object never enters the left 45% (dolly-back guard); labels on/off at 0.5, collision list, text-column guard, hidden at Keep reading. */
+:root{
+  color-scheme: light;
+  
+}
+*{box-sizing:border-box}
+html{background:var(--paper)}
+body{margin:0;background:var(--paper);color:var(--fg);font:400 16px/1.5 var(--sans);-webkit-font-smoothing:antialiased;overflow-x:hidden}
+a{color:inherit}
+::selection{background:var(--link);color:#06140d}
+:focus-visible{outline:2px solid var(--link-ink);outline-offset:3px;border-radius:2px}
+body::before{content:"";position:fixed;inset:0;z-index:0;pointer-events:none;background:radial-gradient(60% 55% at 64% 50%,rgba(255,255,255,.6),transparent 72%)}
+#stage{position:fixed;left:0;top:0;z-index:1;display:block;width:100%;height:100%;pointer-events:none}
+#band{display:none}
+#scrim{position:fixed;inset:0;z-index:1;pointer-events:none;background:linear-gradient(90deg,var(--paper) 0,rgba(233,236,232,.94) 30%,rgba(233,236,232,0) 47%)}
+#hud{position:fixed;inset:0;z-index:3;pointer-events:none;overflow:hidden}
+main{position:relative;z-index:2}
+
+/* nav */
+.nav{position:fixed;left:0;right:0;top:0;z-index:10;display:flex;align-items:center;gap:28px;height:calc(var(--nav-h) + env(safe-area-inset-top,0px));padding:env(safe-area-inset-top,0px) var(--bleed) 0;background:linear-gradient(var(--paper) 55%,transparent)}
+.brand{display:flex;align-items:center;gap:10px;text-decoration:none;font:700 17px/1 var(--sans);letter-spacing:-.02em;color:var(--ink)}
+.brand img{width:26px;height:26px;border-radius:5px;display:block}
+.nav ul{display:flex;gap:24px;list-style:none;margin:0 0 0 auto;padding:0}
+.nav ul a{font:500 14px/1 var(--sans);text-decoration:none;color:var(--ink-2)}
+.nav ul a:hover{color:var(--ink)}
+.nav ul a[aria-current="page"]{color:var(--ink);text-decoration:underline;text-decoration-color:var(--link);text-decoration-thickness:2px;text-underline-offset:6px}
+.btn{display:inline-flex;align-items:center;gap:10px;height:46px;padding:0 20px;border-radius:3px;border:1px solid var(--fg);font:500 15px/1 var(--sans);text-decoration:none;cursor:pointer;background:transparent;color:var(--fg);transition:background .2s,color .2s,border-color .2s}
+.btn.solid{background:var(--fg);color:var(--bg)}
+.btn.solid:hover{background:var(--link-ink);border-color:var(--link-ink);color:#fff}
+.btn:not(.solid){border-color:var(--line)}
+.btn:not(.solid):hover{border-color:var(--fg)}
+.btn .led{width:7px;height:7px;border-radius:50%;background:var(--link);box-shadow:0 0 8px var(--link)}
+.nav .btn{height:38px;padding:0 16px;font-size:14px}
+
+/* type */
+.ch{position:relative;padding-inline:var(--bleed)}
+h1,h2,h3{margin:0 0 20px;text-wrap:balance}
+h2{max-width:15ch}
+h3{margin:0 0 12px}
+.k{margin:0 0 14px;font:400 12px/1 var(--mono);color:var(--link-ink)}
+.actions{display:flex;flex-wrap:wrap;gap:12px}
+.chip{font:500 11px/1 var(--mono);padding:5px 7px;border-radius:2px;border:1px solid var(--rule);color:var(--ink);background:rgba(244,246,243,.8)}
+.chip.c-operations{border-color:var(--ink)}
+.chip.c-infrastructure{border-color:var(--link);color:var(--link-ink);background:rgba(31,214,124,.08)}
+
+/* tags (3D labels) */
+.tag{position:absolute;left:0;top:0;display:flex;align-items:center;opacity:0;visibility:hidden;will-change:transform;white-space:nowrap}
+.tag.on{opacity:1;visibility:visible}
+.tag::before{content:"";width:7px;height:7px;border-radius:50%;background:var(--c,var(--ink));transform:translate(-3.5px,0);box-shadow:0 0 0 3px color-mix(in oklab,var(--c,var(--ink)) 22%,transparent)}
+.tag i{display:block;width:24px;height:1px;background:var(--c,var(--ink))}
+.tag span{padding:6px 9px;background:var(--paper-2);border:1px solid var(--c,var(--ink));border-radius:2px;font:400 11.5px/1.35 var(--mono);color:var(--ink);box-shadow:0 14px 28px -20px rgba(17,22,20,.45)}
+.tag span b{display:block;font:600 15px/1.15 var(--sans);letter-spacing:-.02em;margin-bottom:2px}
+.tag.left{flex-direction:row-reverse}.tag.left::before{transform:translate(3.5px,0)}
+.tag.up{flex-direction:column-reverse}.tag.up i{width:1px;height:22px}.tag.up::before{transform:translate(0,3.5px)}
+.tag.link{--c:var(--link)} .tag.link span b{color:var(--link-ink)}
+.tag.drift{--c:var(--drift)} .tag.drift span b{color:var(--drift-ink)}
+.tag.rec{--c:var(--record)} .tag.rec span b{color:var(--record-ink)}
+.tag.ink{--c:var(--ink)}
+
+/* figure caption + progress rail (fixed) */
+.figcap{position:fixed;right:var(--gutter);bottom:18px;z-index:3;display:flex;padding:7px 10px;background:rgba(233,236,232,.9);border:1px solid var(--rule);border-radius:2px;gap:14px;align-items:baseline;font:400 11.5px/1.3 var(--mono);color:var(--ink-2);pointer-events:none;transition:opacity .3s}
+.figcap b{font-weight:500;color:var(--ink)}
+.figcap em{font-style:normal;padding:3px 6px;border:1px dashed var(--rule);border-radius:2px}
+.figcap #figNow.drift{color:var(--drift-ink)} .figcap #figNow.link{color:var(--link-ink)}
+.rail{position:fixed;left:14px;top:50%;transform:translateY(-50%);z-index:4;display:flex;flex-direction:column;gap:0;font:500 10.5px/1 var(--mono);transition:opacity .3s}
+.rail a{display:flex;align-items:center;gap:7px;height:34px;text-decoration:none;color:var(--ink-2);position:relative}
+.rail a::before{content:"";width:2px;height:22px;background:var(--rule);transition:background .2s}
+.rail a.on{color:var(--ink)} .rail a.on::before{background:var(--link-ink)}
+.rail a.done::before{background:var(--ink-2)}
+.hide-fixed .figcap,.hide-fixed .rail{opacity:0;pointer-events:none}
+.hide-fixed .rail a{pointer-events:none}
+
+/* hero */
+#hero{min-height:100vh;display:flex;align-items:center;padding-top:96px;padding-bottom:6vh}
+.hero-in{width:min(35rem,40vw);}
+.kick{display:inline-flex;gap:8px;align-items:center;margin:0 0 30px;font:500 14px/1 var(--sans);color:var(--ink-2);text-decoration:none}
+.kick:hover{color:var(--ink)}
+.file{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin:0 0 20px;font:400 12px/1 var(--mono);color:var(--ink-2)}
+#hero h1{max-width:14ch;margin-bottom:24px}
+.dek{font-size:clamp(17px,1.35vw,20px);line-height:1.45;color:var(--ink-2);max-width:30rem;margin:0 0 30px;letter-spacing:-.005em}
+.scrollcue{font:400 12px/1 var(--mono);color:var(--ink-2);display:flex;gap:10px;align-items:center}
+.scrollcue i{display:block;width:34px;height:1px;background:var(--ink-2)}
+
+/* article */
+.art{position:relative;padding-inline:var(--bleed)}
+.col{width:min(35rem,40vw);}
+.beat{position:relative;min-height:108vh}
+.beat>.in{position:sticky;top:16vh;padding-bottom:var(--band-y)}
+#why-it-drifts{min-height:155vh}
+#key{min-height:100vh}
+#closing-it{min-height:128vh}
+.no{margin:0 0 16px;font:400 12px/1 var(--mono);color:var(--ink-2);display:flex;gap:10px;align-items:center}
+.no b{font-weight:500;color:var(--ink)}
+.col p{margin:0 0 18px;font-size:clamp(17px,1.2vw,18.5px);line-height:1.6;color:var(--ink)}
+.col p.lead{font-size:clamp(20px,1.55vw,24px);line-height:1.42;letter-spacing:-.012em;color:var(--ink);margin-bottom:34px}
+.toc{border-top:1px solid var(--ink);padding-top:14px;max-width:26rem}
+.toc b{display:block;font:400 12px/1 var(--mono);color:var(--link-ink);margin-bottom:12px}
+.toc ol{list-style:none;margin:0;padding:0;counter-reset:t}
+.toc li{counter-increment:t;border-bottom:1px solid var(--rule)}
+.toc a{display:flex;gap:14px;padding:10px 0;text-decoration:none;font:500 16px/1.25 var(--sans);color:var(--ink)}
+.toc a::before{content:"0" counter(t);font:400 11.5px/1.6 var(--mono);color:var(--ink-2);min-width:1.6rem}
+.toc a:hover{color:var(--link-ink)}
+.pq{margin:26px 0 0;padding:4px 0 4px 20px;border-left:2px solid var(--record);font:500 clamp(21px,1.75vw,27px)/1.28 var(--sans);letter-spacing:-.02em;color:var(--ink);max-width:30rem}
+.pq cite{display:block;margin-top:12px;font:400 11.5px/1.3 var(--mono);font-style:normal;color:var(--record-ink)}
+.drifts{list-style:none;margin:6px 0 22px;padding:0;border-top:1px solid var(--rule)}
+.drifts li{position:relative;display:grid;grid-template-columns:2.4rem 1fr;gap:4px;padding:14px 10px 14px 0;border-bottom:1px solid var(--rule);font-size:clamp(16.5px,1.15vw,18px);line-height:1.5;color:var(--ink-2);transition:color .3s,background .3s,padding .3s var(--ease)}
+.drifts li i{font:400 11.5px/1.9 var(--mono);font-style:normal;color:var(--ink-2)}
+.drifts li::before{content:"";position:absolute;left:-14px;top:14px;bottom:14px;width:2px;background:var(--drift);transform:scaleY(0);transition:transform .3s var(--ease)}
+.drifts li.done{color:var(--ink)}
+.drifts li.done i{color:var(--drift-ink)}
+.drifts li.now{background:linear-gradient(90deg,rgba(255,154,46,.1),rgba(255,154,46,0));padding-left:10px}
+.drifts li.now::before{transform:none}
+.drifts li.fixed i{color:var(--link-ink)}
+/* key figure */
+.fig40{border-top:1px solid var(--ink);border-bottom:1px solid var(--rule);padding:18px 0 22px;margin:0 0 20px}
+.fig40 .n{font:500 clamp(96px,11vw,176px)/.86 var(--sans);letter-spacing:-.06em;color:var(--drift-ink);margin:0 0 14px}
+.fig40 .n small{font-size:.5em;letter-spacing:-.04em}
+.fig40 p.l{margin:0;font:500 clamp(19px,1.5vw,23px)/1.3 var(--sans);letter-spacing:-.018em;max-width:24rem}
+.slips{display:flex;gap:6px;margin:0 0 12px;height:26px;align-items:center}
+.slips i{flex:1;max-width:34px;height:14px;border:1px solid var(--record);background:var(--paper-2);border-radius:1px}
+.slips i.x{border-color:var(--drift);background:rgba(255,154,46,.18);transform:translate(3px,-4px) rotate(-7deg)}
+.note{font:400 11.5px/1.45 var(--mono);color:var(--ink-2);margin:0}
+.plain{margin:26px 0 0;padding:18px 20px 4px;background:var(--paper-2);border:1px solid var(--rule);border-left:3px solid var(--record);border-radius:2px;max-width:32rem}
+.plain b{display:block;font:500 12px/1 var(--mono);color:var(--record-ink);margin-bottom:12px}
+.plain p{font-size:16.5px!important;line-height:1.55!important}
+.col figure{margin:26px 0 0;max-width:30rem}
+.col figure img{display:block;width:100%;height:auto;aspect-ratio:1400/399;object-fit:cover;border:1px solid var(--rule);border-radius:2px;filter:saturate(.55) contrast(.96)}
+.col figcaption{margin-top:8px;font:400 11.5px/1.3 var(--mono);color:var(--ink-2)}
+
+/* keep reading */
+#keep{position:relative;z-index:2;background:var(--paper);border-top:1px solid var(--rule);padding:var(--band-y) var(--bleed)}
+.kwrap{max-width:1200px;margin-inline:auto;}
+.kwrap .head{display:flex;justify-content:space-between;align-items:end;gap:20px;margin-bottom:44px}
+.kwrap h2{margin:0}
+.kwrap .all{font:500 15px/1 var(--sans);color:var(--link-ink);text-decoration:none;border-bottom:2px solid var(--link);padding-bottom:4px}
+.cards{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:clamp(20px,3vw,40px);list-style:none;margin:0;padding:0}
+.card{position:relative;margin-top:26px}
+.card a{display:grid;grid-template-rows:auto 1fr auto;min-height:250px;padding:26px 26px 22px;background:var(--paper-2);border:1px solid var(--rule);border-radius:0 2px 2px 2px;text-decoration:none;color:var(--ink);box-shadow:0 22px 40px -34px rgba(17,22,20,.5);transition:transform .35s var(--ease),border-color .25s,box-shadow .35s}
+.card a:hover,.card a:focus-visible{transform:translateY(-6px);border-color:var(--ink);box-shadow:0 30px 50px -36px rgba(17,22,20,.55)}
+.card .tabt{position:absolute;left:-1px;top:-26px;height:26px;padding:0 12px;display:flex;align-items:center;font:500 11.5px/1 var(--mono);border-radius:2px 2px 0 0;background:var(--tc);color:var(--tt,#fff)}
+.card .meta{display:flex;gap:10px;align-items:center;font:400 12px/1 var(--mono);color:var(--ink-2);margin-bottom:26px;padding-bottom:14px;border-bottom:1px dashed var(--rule)}
+.card .meta b{font-weight:500;color:var(--ink)}
+.card h3{max-width:20ch;margin:0 0 24px}
+.card .foot2{display:flex;justify-content:space-between;align-items:center;font:400 12px/1 var(--mono);color:var(--ink-2)}
+.card .go{font:500 15px/1 var(--sans);color:var(--link-ink)}
+.card.t-infrastructure{--tc:#1FD67C;--tt:#06140d}
+.card.t-operations{--tc:#111614;--tt:#E9ECE8}
+
+/* cta */
+#cta{padding-block:var(--band-y);text-align:center;background:var(--paper);position:relative;z-index:2;border-top:1px solid var(--rule)}
+#cta h2{margin:0 auto 34px;max-width:13ch}
+#cta .actions{justify-content:center}
+
+/* footer */
+.foot{position:relative;z-index:2;padding:var(--band-y) var(--bleed) calc(var(--s8) + env(safe-area-inset-bottom,0px));background:var(--paper);border-top:1px solid var(--rule);display:grid;grid-template-columns:var(--copy-w) repeat(3,minmax(0,1fr));gap:28px;font-size:14px;color:var(--ink-2)}
+.foot b{display:block;font:500 13px/1 var(--sans);color:var(--link-ink);margin-bottom:16px}
+.foot nav{display:flex;flex-direction:column;gap:11px}
+.foot nav a{color:var(--ink);text-decoration:none;font-size:15px}
+.foot nav a:hover{color:var(--link-ink)}
+.foot p{margin:0 0 11px;color:var(--ink);font-size:15px;line-height:1.45}
+.foot p a{text-decoration:none}.foot p a:hover{color:var(--link-ink)}
+.foot-brand .brand{margin-bottom:16px}
+.foot-brand p{color:var(--ink-2);max-width:18rem}
+.foot .fine{grid-column:1/-1;display:flex;justify-content:space-between;flex-wrap:wrap;gap:12px;margin-top:16px;padding-top:18px;border-top:1px solid var(--rule);font-size:13px}
+.foot .legal{display:flex;gap:18px;flex-wrap:wrap}.foot .legal a{color:var(--ink-2);text-decoration:none}.foot .legal a:hover{color:var(--link-ink)}
+.foot .social{display:flex;gap:18px}
+.foot .social a{color:var(--ink-2);text-decoration:none}
+
+.no-webgl #stage,.no-webgl #hud,.no-webgl #band,.no-webgl .figcap{display:none!important}
+@media (max-width:1180px){ .foot{grid-template-columns:repeat(2,minmax(0,1fr))} }
+@media (max-width:960px){ .rail{display:none} }
+@media (max-width:760px){
+  #band{display:block;position:fixed;left:0;right:0;top:0;height:46vh;z-index:4;background:var(--paper);border-bottom:1px solid var(--rule);pointer-events:none}
+  #band::after{content:"";position:absolute;inset:0;background:radial-gradient(70% 60% at 50% 55%,rgba(255,255,255,.55),transparent 75%)}
+  #stage{z-index:5;height:46vh}
+  #hud{z-index:6;bottom:auto;height:46vh}
+  #scrim{display:none}
+  #hud .tag:not(.keep){display:none}
+  .figcap{z-index:6;left:var(--gutter);right:auto;bottom:auto;top:calc(46vh - 34px);font-size:10.5px;gap:8px;padding:4px 7px;white-space:nowrap}
+  .figcap>span:first-child{display:none} .figcap em{padding:1px 4px}
+  #hero{align-items:flex-start;padding-top:calc(46vh + 22px);min-height:auto;padding-bottom:10vh}
+  .hero-in,.col{width:auto;padding-left:0}
+  .kick{margin-bottom:18px}
+  #hero h1{max-width:none}
+  .dek{font-size:16.5px;margin-bottom:18px}
+  .art{padding-top:0}
+  .beat,#why-it-drifts,#key,#closing-it{min-height:0;padding:0 0 26vh}
+  #why-it-drifts .drifts li{padding-block:12px}
+  #why-it-drifts{padding-bottom:var(--band-y)}
+  .beat>.in{position:static;padding-bottom:0}
+  .col p{font-size:17px}
+  .col p.lead{font-size:20px}
+  .fig40 .n{font-size:104px}
+  .cards{grid-template-columns:1fr}
+  .kwrap .head{flex-direction:column;align-items:flex-start}
+  .card a{min-height:0}
+}
+@media (max-width:560px){ .foot{grid-template-columns:repeat(2,minmax(0,1fr));gap:var(--s6) var(--s5);padding-block:var(--band-y-sm) calc(var(--s6) + env(safe-area-inset-bottom,0px))} }
+@media (prefers-reduced-motion:reduce){ .drifts li,.drifts li::before,.card a{transition:none!important} }
+</style>
+</head>
+<body class="stage-band">
+
+<canvas id="stage" aria-hidden="true"></canvas>
+<div id="band" aria-hidden="true"></div>
+<div id="scrim" aria-hidden="true"></div>
+<div id="hud" aria-hidden="true"></div>
+<p class="figcap" id="figcap" aria-hidden="true"><span><b>Fig. 01</b> the drift clock Â· Rack 14</span><span id="figNow">month 0 Â· 0 / 10 out of true</span><em>illustrative scene</em></p>
+
+<nav class="rail" aria-label="Article progress">
+  <a href="#what-it-is" data-i="1" aria-label="What a system of record is">01</a>
+  <a href="#why-it-drifts" data-i="2" aria-label="Why it drifts">02</a>
+  <a href="#the-cost" data-i="4" aria-label="The real cost">03</a>
+  <a href="#closing-it" data-i="5" aria-label="Closing the gap">04</a>
+</nav>
+
+<nav class="nav" aria-label="Primary">
+  <a class="brand" href="/"><img alt="" src="/design-system/assets/Logos/racktrack-mark.jpg">RackTrack</a>
+  <ul>
+    <li><a href="/pages/why-racktrack/">Why RackTrack</a></li>
+    <li><a href="/pages/solutions/">Solutions</a></li>
+    <li><a href="/pages/use-cases/">Use cases</a></li>
+    <li><a href="/pages/resources/" aria-current="page">Resources</a></li>
+    <li><a href="/pages/trust-security/">Trust</a></li>
+    <li><a href="/pages/about-us/">About</a></li>
+    <li><a href="/pages/sign-in/">Sign in</a></li>
+  </ul>
+  <a class="btn solid" href="/pages/contact-us/"><span class="led"></span>Book a sweep</a>
+</nav>
+
+<main>
+  <section class="ch" id="hero">
+    <div class="hero-in">
+      <a class="kick" href="/pages/resources/">â† All resources</a>
+      <p class="file">File no. 001 Â· OPSÂ·01 Â· <span class="chip c-operations">Operations</span> Â· 6 min read</p>
+      <h1>Why your infrastructure records are wrong more often than you think</h1>
+      <p class="dek">When the system of record drifts from what's actually installed, every decision built on it gets a little less safe, and the gap is more common than most teams assume.</p>
+      <p class="scrollcue" aria-hidden="true"><i></i>Scroll to start the clock</p>
+    </div>
+  </section>
+
+  <article class="art" aria-labelledby="art-title">
+    <h2 id="art-title" hidden>Why your infrastructure records are wrong more often than you think</h2>
+    <div class="col">
+
+      <section class="beat" id="lead">
+        <div class="in">
+          <p class="lead">Ask five people on an infrastructure team what's actually installed in Rack 14, and you'll get five different, confident answers. All five will be wrong in some small way, and none of them will know it.</p>
+          <nav class="toc" aria-label="On this page"><b>On this page</b>
+            <ol>
+              <li><a href="#what-it-is">What a system of record is</a></li>
+              <li><a href="#why-it-drifts">Why it drifts</a></li>
+              <li><a href="#the-cost">The real cost</a></li>
+              <li><a href="#closing-it">Closing the gap</a></li>
+            </ol>
+          </nav>
+        </div>
+      </section>
+
+      <section class="beat" id="what-it-is">
+        <div class="in">
+          <p class="no"><b>01</b> / 04</p>
+          <h2>What a system of record is</h2>
+          <p>A system of record (a CMDB, a spreadsheet, a DCIM platform, whatever your team calls it) is supposed to be the one place everyone trusts for the same answer: what do we actually have, and where is it. Budgets get built on it. Incidents get triaged against it. Auditors ask for it by name.</p>
+          <p>It only works if it stays true. And nothing about a spreadsheet keeps it that way on its own.</p>
+          <blockquote class="pq"><p style="margin:0;font:inherit;color:inherit">â€œThe list only tells you what someone typed in, not what's actually bolted into the rack.â€</p></blockquote>
+        </div>
+      </section>
+
+      <section class="beat" id="why-it-drifts">
+        <div class="in">
+          <p class="no"><b>02</b> / 04</p>
+          <h2>Why it drifts from reality</h2>
+          <p>Drift isn't one dramatic failure. It's dozens of small, reasonable ones, stacking quietly for months:</p>
+          <ul class="drifts" id="drifts">
+            <li><i>01</i><span>A vendor does emergency maintenance and skips the paperwork.</span></li>
+            <li><i>02</i><span>A migration ships on deadline and the record gets updated â€œlater.â€</span></li>
+            <li><i>03</i><span>A device moves racks during a cleanup, and nobody edits the row that describes it.</span></li>
+          </ul>
+          <p>None of that is negligence. It's just what happens when a record depends on someone remembering to update it, every time, forever.</p>
+        </div>
+      </section>
+
+      <section class="beat" id="key" aria-label="Key figure">
+        <div class="in">
+          <p class="no"><b>Key figure</b></p>
+          <div class="fig40">
+            <p class="n">40<small>%</small></p>
+            <p class="l">of enterprise infrastructure records no longer match what's physically in the rack.</p>
+          </div>
+          <div class="slips" aria-hidden="true"><i></i><i class="x"></i><i></i><i></i><i class="x"></i><i class="x"></i><i></i><i class="x"></i><i></i><i></i></div>
+          <p class="note">4 of every 10 record slips out of true Â· illustrative scene</p>
+        </div>
+      </section>
+
+      <section class="beat" id="the-cost">
+        <div class="in">
+          <p class="no"><b>03</b> / 04</p>
+          <h2>What that gap actually costs</h2>
+          <p>When the record is wrong, everything built on top of it inherits the error. Capacity planning assumes space that isn't free. Incident response starts from a floor plan that doesn't match the building. Audits stall while someone quietly reconciles the story by hand.</p>
+          <aside class="plain" aria-label="In plain terms"><b>In plain terms</b>
+            <p>Picture a store's inventory system claiming 50 units on the shelf when there are really 30. Every decision built on that number (what to reorder, what to promise a customer) is a little bit wrong, and nobody finds out until it's expensive.</p>
+          </aside>
+        </div>
+      </section>
+
+      <section class="beat" id="closing-it">
+        <div class="in">
+          <p class="no"><b>04</b> / 04</p>
+          <h2>Closing the gap without a full rebuild</h2>
+          <p>You don't need to rip out your CMDB or DCIM platform to fix this. You need a fast way to check what's physically there against what the record claims, on a normal week, not once a year. That's the entire idea behind a RackTrack sweep: walk the aisle with a phone, and let the comparison happen automatically instead of by memory.</p>
+          <figure><img src="/assets/resources/resources-band.jpg" alt="A long data hall aisle between rows of cabinets" loading="lazy" width="1400" height="399"><figcaption>The aisle a sweep walks.</figcaption></figure>
+        </div>
+      </section>
+
+    </div>
+  </article>
+
+  <section id="keep" aria-labelledby="keep-h">
+    <div class="kwrap">
+      <div class="head"><div><h2 id="keep-h">Keep reading</h2></div><a class="all" href="/pages/resources/">All resources â†’</a></div>
+      <ul class="cards">
+        <li class="card t-infrastructure"><span class="tabt">Infrastructure</span>
+          <a href="/pages/resources/the-hidden-cost-of-unreconciled-infrastructure/">
+            <span class="meta"><b>File no. 002</b> Â· INFÂ·01</span>
+            <h3>What it actually costs when nobody checks the rack</h3>
+            <span class="foot2"><span><span class="chip c-infrastructure">Infrastructure</span> Â· 5 min read</span><span class="go">Read â†’</span></span>
+          </a></li>
+        <li class="card t-operations"><span class="tabt">Operations</span>
+          <a href="/pages/resources/dcim-vs-physical-reality-why-the-gap-matters/">
+            <span class="meta"><b>File no. 006</b> Â· OPSÂ·02</span>
+            <h3>Your DCIM platform shows a plan. The rack shows what's real</h3>
+            <span class="foot2"><span><span class="chip c-operations">Operations</span> Â· 5 min read</span><span class="go">Read â†’</span></span>
+          </a></li>
+      </ul>
+    </div>
+  </section>
+
+  <section class="ch" id="cta">
+    <h2>Read the theory. Then verify your own rack</h2>
+    <div class="actions">
+      <a class="btn solid" href="/pages/contact-us/"><span class="led"></span>Request a platform brief</a>
+      <a class="btn" href="/pages/resources/">All resources</a>
+    </div>
+  </section>
+
+  <footer class="foot">
+    <div class="foot-brand">
+      <a class="brand" href="/"><img alt="" src="/design-system/assets/Logos/racktrack-mark.jpg">RackTrack</a>
+      <p>Physical infrastructure intelligence for data centers.</p>
+    </div>
+    <nav aria-label="Platform"><b>Platform</b>
+      <a href="/pages/why-racktrack/">Why RackTrack</a><a href="/pages/solutions/">Solutions</a><a href="/pages/use-cases/">Use cases</a><a href="/pages/trust-security/">Trust &amp; security</a></nav>
+    <nav aria-label="Company"><b>Company</b>
+      <a href="/pages/resources/">Resources</a><a href="/pages/about-us/">About us</a><a href="/pages/contact-us/">Contact us</a></nav>
+    <div><b>Contact</b>
+      <p><a href="mailto:info@racktrack.ai">info@racktrack.ai</a></p><p><a href="tel:+18608782448">+1 (860) 878 2448</a></p><p>85 Felt Rd, Suite #604<br>South Windsor, CT 06074</p></div>
+    <div class="fine">
+      <span>Â© 2026 RackTrack Inc. Â· Patent pending</span>
+      <span class="legal"><a href="/pages/legal/privacy-policy/">Privacy</a><a href="/pages/legal/terms-of-use/">Terms</a><a href="/pages/legal/cookie-policy/">Cookies</a><a href="/pages/legal/data-we-collect/">Data we collect</a><a href="/pages/legal/third-party-services/">Third parties</a></span>
+      <span class="social"><a href="https://www.linkedin.com/company/racktrack/" rel="noopener" target="_blank">LinkedIn</a><a href="https://www.instagram.com/racktrack_inc/" rel="noopener" target="_blank">Instagram</a><a href="https://www.facebook.com/share/18depF5xzA/" rel="noopener" target="_blank">Facebook</a></span>
+    </div>
+  </footer>
+</main>
+
+<script type="importmap">
+{ "imports": {
+  "three": "https://cdn.jsdelivr.net/npm/three@0.170.0/build/three.module.js",
+  "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.170.0/examples/jsm/"
+} }
+</script>
+<!--DOMJS-START-->
+<script>
+/* â”€â”€â”€â”€â”€ File 001: scroll value g (shared with the 3D), drift bullets, progress rail (no WebGL needed) â”€â”€â”€â”€â”€ */
+(()=>{
+const clamp=(x,a=0,b=1)=>Math.min(b,Math.max(a,x));
+const $=s=>document.querySelector(s), $$=s=>[...document.querySelectorAll(s)];
+const IDS=['lead','what-it-is','why-it-drifts','key','the-cost','closing-it','keep'];
+const els=IDS.map(id=>document.getElementById(id));
+const lis=$$('#drifts li'), rail=$$('.rail a'), keep=$('#keep');
+// the three causes land at these values of g (one per bullet, inside "why it drifts")
+const EV=[2.2,2.46,2.72];
+window.DRIFT_EV=EV;
+let TOPS=[],KEEPTOP=0;
+function measure(){const y=scrollY;TOPS=els.map(e=>e.getBoundingClientRect().top+y);KEEPTOP=keep.getBoundingClientRect().top+y;window.DRIFT_KEEPTOP=KEEPTOP;}
+measure();addEventListener('resize',measure);addEventListener('load',measure);document.fonts&&document.fonts.ready.then(measure);
+if('ResizeObserver' in window)new ResizeObserver(()=>measure()).observe(document.body);
+function G(){const vh=innerHeight,y=scrollY,mob=innerWidth<760;const A=mob?.74:.36;
+  const K=TOPS.map(t=>t-vh*A);
+  if(y<K[0])return -1+clamp(y/Math.max(1,K[0]));
+  for(let i=0;i<K.length-1;i++){if(y<K[i+1])return i+(y-K[i])/Math.max(1,K[i+1]-K[i]);}
+  return K.length-1;}
+const setC=(el,c,v)=>{if(el.classList.contains(c)!==v)el.classList.toggle(c,v);};
+let lastY=-1,lastW=-1;
+function frame(){
+  if(scrollY!==lastY||innerWidth!==lastW){lastY=scrollY;lastW=innerWidth;
+    const g=G();window.DRIFT_G=g;
+    lis.forEach((li,i)=>{const done=g>=EV[i]-.03;const nxt=i<2?EV[i+1]-.03:3.05;setC(li,'done',done);setC(li,'now',done&&g<nxt&&g<3.05);setC(li,'fixed',g>5.35);});
+    const cur=g<.9?-1:g<1.9?0:g<3.9?1:g<4.9?2:3;
+    rail.forEach((a,i)=>{setC(a,'on',i===cur);setC(a,'done',i<cur);});
+    setC(document.body,'hide-fixed',KEEPTOP-scrollY<innerHeight*.98);}
+  requestAnimationFrame(frame);}
+requestAnimationFrame(frame);
+})();
+</script>
+<!--DOMJS-END-->
+<!--GLJS-START-->
+<script type="module">
+/* â•â•â•â•â•â•â•â•â•â•â•â•â• File 001 Â· The drift clock Â· 3D â•â•â•â•â•â•â•â•â•â•â•â•â•
+   Rack 14 (left) and its record board (right): ten paper slips, each tied level to the device it describes.
+   A calendar ribbon runs along the front of the sheet. Changes land on the floor first; the record lags.
+   All device names, U positions, ports, serials and months are illustrative scene data. */
+import * as THREE from 'three';
+import { RoomEnvironment } from 'three/addons/environments/RoomEnvironment.js';
+import { RoundedBoxGeometry } from 'three/addons/geometries/RoundedBoxGeometry.js';
+
+const reduce=matchMedia('(prefers-reduced-motion: reduce)').matches;
+const SNAP=location.search.includes('snap');
+const clamp=(x,a=0,b=1)=>Math.min(b,Math.max(a,x));
+const smooth=(a,b,x)=>{const t=clamp((x-a)/(b-a));return t*t*(3-2*t)};
+const lerp=(a,b,t)=>a+(b-a)*t;
+const C=h=>new THREE.Color(h);
+const COL={link:C('#1FD67C'),linkInk:C('#04703F'),drift:C('#FF9A2E'),driftInk:C('#9C4C00'),record:C('#7C93A8'),recInk:C('#3F5871'),ink:C('#111614')};
+const MONO='"JetBrains Mono", monospace', SANS='"Inter", sans-serif';
+const V3=(x,y,z)=>new THREE.Vector3(x,y,z);
+
+const canvas=document.getElementById('stage');
+let renderer;
+try{ renderer=new THREE.WebGLRenderer({canvas,antialias:true,alpha:true,powerPreference:'high-performance'}); }
+catch(e){ document.documentElement.classList.add('no-webgl'); throw e; }
+renderer.setPixelRatio(SNAP?1:Math.min(devicePixelRatio,1.5));
+renderer.setClearColor(0,0);
+renderer.toneMapping=THREE.ACESFilmicToneMapping; renderer.toneMappingExposure=1.02;
+renderer.outputColorSpace=THREE.SRGBColorSpace;
+renderer.shadowMap.enabled=true;renderer.shadowMap.autoUpdate=false;renderer.shadowMap.needsUpdate=true; renderer.shadowMap.type=THREE.PCFShadowMap;
+const scene=new THREE.Scene();
+scene.environment=new THREE.PMREMGenerator(renderer).fromScene(new RoomEnvironment(),.04).texture; scene.environmentIntensity=.85;
+const camera=new THREE.PerspectiveCamera(28,1,.05,300);
+scene.add(new THREE.HemisphereLight(0xffffff,0x9aa39e,.55));
+const sun=new THREE.DirectionalLight(0xffffff,1.7);sun.position.set(-4,10,7);sun.castShadow=true;
+sun.shadow.mapSize.set(1024,1024);Object.assign(sun.shadow.camera,{left:-4,right:4,top:4,bottom:-3,near:1,far:30});sun.shadow.bias=-.0005;sun.shadow.radius=4;scene.add(sun);
+const fill=new THREE.DirectionalLight(0xdfe9ff,.5);fill.position.set(7,4,-5);scene.add(fill);
+const front=new THREE.DirectionalLight(0xffffff,.4);front.position.set(1,2,8);scene.add(front);
+
+function cnv(w,h){const c=document.createElement('canvas');c.width=w;c.height=h;return [c,c.getContext('2d')];}
+function tex(c){const t=new THREE.CanvasTexture(c);t.colorSpace=THREE.SRGBColorSpace;t.anisotropy=Math.min(8,renderer.capabilities.getMaxAnisotropy());return t;}
+const alu=new THREE.MeshStandardMaterial({color:'#dfe3df',metalness:.72,roughness:.3});
+const graph=new THREE.MeshStandardMaterial({color:'#2a302d',metalness:.55,roughness:.45});
+const dark=new THREE.MeshStandardMaterial({color:'#1d2321',metalness:.4,roughness:.55});
+const add=(m,p,parent=scene)=>{if(p)m.position.set(...p);parent.add(m);return m;};
+
+/* â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ layout â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
+const RX=-.55, BX=.55;                         // rack and record board, side by side
+const RW=.66, RD=.96, U=.044, Y0=.1, ZF=RD/2, FACE=ZF-.03;
+const uy=(u,h=1)=>Y0+(u-1)*U+h*U/2;
+const FW=RW-.1;                                 // device face width
+const RIB={x0:-.9,x1:1.9,z:FACE+.55,w:.26};  // calendar ribbon on the sheet
+const monthX=m=>lerp(RIB.x0+.22,RIB.x1-.08,m/12);
+
+/* â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ drawing sheet â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
+const SX=.55, SZ=.33, BW=3.3, BD=2.15;
+function sheetCanvas(){const W=2048,H=Math.round(W*BD/BW),s=W/BW;const [c,g]=cnv(W,H);const X=x=>(x-SX+BW/2)*s,Z=z=>(z-SZ+BD/2)*s;
+  g.fillStyle='#F4F6F3';g.fillRect(0,0,W,H);
+  for(let x=-BW/2;x<=BW/2+.01;x+=.2){g.fillStyle='rgba(17,22,20,.05)';g.fillRect((x+BW/2)*s,0,1.2,H);} for(let z=-BD/2;z<=BD/2+.01;z+=.2){g.fillStyle='rgba(17,22,20,.05)';g.fillRect(0,(z+BD/2)*s,W,1.2);}
+  g.strokeStyle='#111614';g.lineWidth=3;g.strokeRect(16,16,W-32,H-32);
+  // footprints
+  g.strokeStyle='#4A544F';g.lineWidth=2;g.strokeRect(X(RX-RW/2),Z(-RD/2),RW*s,RD*s);
+  g.setLineDash([12,9]);g.strokeStyle='#7C93A8';g.lineWidth=2.5;g.strokeRect(X(BX-.36),Z(FACE-.2),.72*s,.32*s);g.setLineDash([]);
+  g.fillStyle='#4A544F';g.font=`400 20px ${MONO}`;g.fillText('R14 Â· 42U Â· as installed',X(RX-RW/2),Z(-RD/2)-14);
+  g.fillStyle='#3F5871';g.fillText('R14 Â· the record',X(BX-.36),Z(FACE-.2)-14);
+  // dimension: rack â†” record
+  const dz=Z(-RD/2-.22);g.strokeStyle='#4A544F';g.lineWidth=1.5;g.setLineDash([6,6]);g.beginPath();g.moveTo(X(RX),dz);g.lineTo(X(BX),dz);g.stroke();g.setLineDash([]);
+  [X(RX),X(BX)].forEach(x=>{g.beginPath();g.moveTo(x,dz-12);g.lineTo(x,dz+12);g.stroke();});
+  g.fillStyle='#4A544F';g.fillText('aligned by U',(X(RX)+X(BX))/2-64,dz-10);
+  // title block
+  g.fillStyle='#111614';g.fillRect(W-600,H-150,570,120);g.fillStyle='#DDE4DF';g.font=`500 32px ${MONO}`;g.fillText('DC1 Â· hall B Â· Rack 14',W-574,H-98);
+  g.fillStyle='#93A19A';g.font=`400 22px ${MONO}`;g.fillText('fig. 01 Â· the drift clock Â· illustrative',W-574,H-58);
+  return c;}
+const sheetMat=new THREE.MeshStandardMaterial({map:tex(sheetCanvas()),roughness:.9});
+const base=add(new THREE.Mesh(new THREE.BoxGeometry(BW,.2,BD),[alu,alu,sheetMat,alu,alu,alu]),[SX,-.1,SZ]);base.receiveShadow=true;
+add(new THREE.Mesh(new THREE.BoxGeometry(BW+.14,.04,BD+.14),graph),[SX,-.22,SZ]);
+
+/* â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ the rack â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
+const RACK=new THREE.Group();RACK.position.x=RX;scene.add(RACK);
+[[-1,-1],[1,-1],[-1,1],[1,1]].forEach(([sx,sz])=>{const p=add(new THREE.Mesh(new THREE.BoxGeometry(.035,2.0,.035),graph),[sx*(RW/2-.018),1.0,sz*(RD/2-.018)],RACK);p.castShadow=true;});
+[-1,1].forEach(sx=>{const s=add(new THREE.Mesh(new THREE.BoxGeometry(.012,1.9,RD-.04),new THREE.MeshStandardMaterial({color:'#222826',metalness:.5,roughness:.5})),[sx*(RW/2-.006),1.0,0],RACK);s.castShadow=true;s.receiveShadow=true;});
+add(new THREE.Mesh(new THREE.BoxGeometry(RW,.05,RD),graph),[0,2.0,0],RACK).castShadow=true;
+add(new THREE.Mesh(new THREE.BoxGeometry(RW,.08,RD),graph),[0,.04,0],RACK);
+add(new THREE.Mesh(new THREE.BoxGeometry(RW-.02,1.9,.01),dark),[0,1.0,-RD/2+.02],RACK);
+function railCanvas(){const [c,g]=cnv(24,1024);g.fillStyle='#c9cfcb';g.fillRect(0,0,24,1024);g.fillStyle='#2a302d';for(let i=0;i<126;i++){g.fillRect(8,4+i*8.1,8,4);}return c;}
+const railMat=new THREE.MeshStandardMaterial({map:tex(railCanvas()),metalness:.6,roughness:.35});
+[-1,1].forEach(sx=>add(new THREE.Mesh(new THREE.BoxGeometry(.022,42*U,.012),[alu,alu,alu,alu,railMat,alu]),[sx*(RW/2-.045),Y0+21*U,FACE+.004],RACK));
+// rack name plate on the top
+function plateCanvas(t){const [c,g]=cnv(512,96);g.fillStyle='#111614';g.fillRect(0,0,512,96);g.fillStyle='#DDE4DF';g.font=`500 44px ${MONO}`;g.fillText(t,22,64);return c;}
+add(new THREE.Mesh(new THREE.PlaneGeometry(.3,.056),new THREE.MeshBasicMaterial({map:tex(plateCanvas('R14 Â· 42U')),toneMapped:false})),[-.1,2.0,ZF+.001],RACK);
+
+/* devices: index = slip index. Only these ten are in the record. */
+const EQ=[
+ {u:41,h:1,k:'patch',  n:'PP-14A', rec:'patch panel Â· 24 ports'},
+ {u:39,h:1,k:'switch', n:'SW-14-A',rec:'uplink PP-14A:12 â†’ port 12', fix:'uplink PP-14A:12 â†’ port 20'},
+ {u:37,h:1,k:'switch', n:'SW-14-B',rec:'48 ports Â· access'},
+ {u:33,h:2,k:'server', n:'APP-031',rec:'2U Â· SN 5H0R-22'},
+ {u:30,h:2,k:'server', n:'APP-032',rec:'2U Â· in service', fix:'2U Â· moved here'},
+ {u:27,h:2,k:'server', n:'DB-021', rec:'2U Â· in service'},
+ {u:22,h:4,k:'storage',n:'NAS-02', rec:'4U Â· 12 bays'},
+ {u:18,h:2,k:'server', n:'APP-035',rec:'2U Â· SN 7Q2K-41', fix:'2U Â· SN 3M8P-06'},
+ {u:14,h:2,k:'server', n:'APP-036',rec:'2U Â· SN 2B9T-17'},
+ {u:3, h:3,k:'ups',    n:'UPS-14', rec:'3U Â· 3 kVA'}];
+const BLANKS=[{u:42,h:1},{u:40,h:1},{u:38,h:1},{u:35,h:2},{u:24,h:2},{u:6,h:4}];
+const MOVE_TO=10;   // APP-032 is moved from U30 to U10 during a cleanup
+const PCX=c=>-FW/2+((270+c*27.5+10)/1024)*FW;   // port c (0-based) centre x on patch and switch faces
+function faceCanvas(d,alt){const W=1024,H=Math.round(d.h*80);const [c,g]=cnv(W,H);const k=d.k;
+  const bg={blank:'#222826',patch:'#1d2321',switch:'#2a302d',server:alt?'#353d39':'#2f3633',storage:'#262c29',ups:'#2b312e'}[k];
+  g.fillStyle=bg;g.fillRect(0,0,W,H);g.fillStyle='rgba(255,255,255,.07)';g.fillRect(0,0,W,3);g.fillStyle='rgba(0,0,0,.35)';g.fillRect(0,H-3,W,3);
+  const label=(t,y)=>{g.fillStyle='#DDE4DF';g.font=`500 26px ${MONO}`;g.fillText(t,26,y);};
+  if(k==='blank'){g.fillStyle='rgba(255,255,255,.05)';for(let y=10;y<H-8;y+=14)g.fillRect(80,y,W-160,3);}
+  if(k==='patch'){label(d.n,H/2+9);for(let i=0;i<24;i++){const x=270+i*27.5;g.fillStyle='#0d1110';g.fillRect(x,H/2-8,20,16);g.fillStyle='#9aa6a0';g.font=`400 10px ${MONO}`;if(i%4===3)g.fillText(String(i+1),x+2,H/2+22>H?H-2:H/2+22);}}
+  if(k==='switch'){label(d.n,H/2+9);for(let r=0;r<2;r++)for(let i=0;i<24;i++){const x=270+i*27.5,y=r?46:14;g.fillStyle='#0d1110';g.fillRect(x,y,20,18);g.fillStyle=(i*7+r*3)%5?'#1FD67C':'#56605b';if(d.n==='SW-14-B'&&i>15)g.fillStyle='#56605b';g.fillRect(x+15,y+2,3,3);}
+    g.fillStyle='#111514';g.fillRect(W-110,18,80,44);}
+  if(k==='server'){g.fillStyle='#262c29';for(let i=0;i<8;i++)g.fillRect(250+i*78,14,68,H-28);g.fillStyle='#1d2321';for(let i=0;i<8;i++)g.fillRect(258+i*78,H/2-3,52,6);
+    label(d.n,40);g.fillStyle='#93A19A';g.font=`400 18px ${MONO}`;g.fillText(alt?'SN 3M8P-06':(d.sn||''),26,70);
+    g.fillStyle='#1FD67C';g.fillRect(26,H-26,12,12);g.fillStyle='#7C93A8';g.fillRect(46,H-26,12,12);
+    g.fillStyle='#1a1f1d';for(let y=16;y<H-14;y+=11)g.fillRect(W-150,y,116,5);
+    if(alt){g.fillStyle='#DDE4DF';g.fillRect(W-190,12,28,H-24);}}
+  if(k==='storage'){label(d.n,40);for(let r=0;r<3;r++)for(let i=0;i<4;i++){const x=190+i*196,y=18+r*(H-36)/3;g.fillStyle='#343b38';g.fillRect(x,y,184,(H-36)/3-10);g.fillStyle=(r+i)%5?'#1FD67C':'#7C93A8';g.fillRect(x+162,y+10,10,10);}}
+  if(k==='ups'){label(d.n,40);g.fillStyle='#0c1110';g.fillRect(W-340,30,280,88);g.fillStyle='#1FD67C';g.font=`500 32px ${MONO}`;g.fillText('230V 41%',W-320,88);
+    g.fillStyle='#1a1f1d';for(let y=24;y<H-16;y+=14)g.fillRect(80,y,W-480,6);}
+  return c;}
+EQ[3].sn='SN 5H0R-22';EQ[4].sn='SN 6C4L-09';EQ[5].sn='SN 1V7D-30';EQ[7].sn='SN 7Q2K-41';EQ[8].sn='SN 2B9T-17';
+const DEVS=EQ.map((d,i)=>{const hh=d.h*U-.003;const y=uy(d.u,d.h);
+  const own=(i===5)?dark.clone():dark;if(i===5){own.transparent=true;}
+  const fm=new THREE.MeshStandardMaterial({map:tex(faceCanvas(d)),metalness:.35,roughness:.55,transparent:i===5});
+  const mats=[own,own,own,own,fm,own];
+  const mesh=add(new THREE.Mesh(new THREE.BoxGeometry(FW,hh,.78),mats),[0,y,FACE-.39],RACK);mesh.castShadow=true;mesh.receiveShadow=true;
+  return {...d,i,y,mesh,mats,fm,own};});
+BLANKS.forEach(b=>{const m=add(new THREE.Mesh(new THREE.BoxGeometry(FW,b.h*U-.003,.02),[dark,dark,dark,dark,new THREE.MeshStandardMaterial({map:tex(faceCanvas({k:'blank',h:b.h})),metalness:.35,roughness:.55}),dark]),[0,uy(b.u,b.h),FACE-.01],RACK);m.receiveShadow=true;});
+// the swapped unit (vendor maintenance): same slot, different serial and faceplate
+const altFace=new THREE.MeshStandardMaterial({map:tex(faceCanvas(EQ[7],true)),metalness:.35,roughness:.55});
+
+/* cables: patch â†’ switch. SW-14-A uplink (patch 12 â†’ port 12) is the one that moves (â†’ port 20). */
+const PP=DEVS[0], SA=DEVS[1], SB=DEVS[2];
+const pPort=c=>V3(PCX(c),PP.y,FACE+.001), sPort=(dev,c,row)=>V3(PCX(c),dev.y+(row?-.0074:.0104),FACE+.001);
+function cableCurve(a,b,out=.06){const mx=(a.x+b.x)/2,my=(a.y+b.y)/2;
+  return new THREE.CatmullRomCurve3([a.clone(),a.clone().add(V3(0,-.004,.03)),V3(mx,my-.01,a.z+out+Math.abs(a.x-b.x)*.12),b.clone().add(V3(0,.006,.03)),b.clone()]);}
+const cabMat=new THREE.MeshStandardMaterial({color:'#3a423e',roughness:.6,metalness:.1});
+[[1,1,0],[3,3,0],[5,5,1],[7,7,0],[15,14,0,SB],[17,16,1,SB],[19,18,0,SB],[21,20,1,SB]].forEach(([pc,sc,row,dev])=>{
+  const cv=cableCurve(pPort(pc),sPort(dev||SA,sc,row),.04);add(new THREE.Mesh(new THREE.TubeGeometry(cv,24,.0028,6,false),cabMat),null,RACK).castShadow=true;});
+const hotOld=cableCurve(pPort(11),sPort(SA,11,0),.07), hotNew=cableCurve(pPort(11),sPort(SA,19,0),.09);
+const hotOldM=new THREE.MeshStandardMaterial({color:'#7C93A8',roughness:.5,metalness:.1});
+const hotNewM=new THREE.MeshBasicMaterial({color:COL.drift,toneMapped:false});
+const hotA=add(new THREE.Mesh(new THREE.TubeGeometry(hotOld,40,.0042,8,false),hotOldM),null,RACK);
+const hotB=add(new THREE.Mesh(new THREE.TubeGeometry(hotNew,40,.0046,8,false),hotNewM),null,RACK);
+const hotAN=hotA.geometry.index.count, hotBN=hotB.geometry.index.count;
+
+// outlines: empty slot left by DB-021, clash box at U10, scan band + wash
+function outline(w,h,d,pos,col,dashed){const g=new THREE.EdgesGeometry(new THREE.BoxGeometry(w,h,d));const m=dashed?new THREE.LineDashedMaterial({color:col,dashSize:.014,gapSize:.01,transparent:true,toneMapped:false}):new THREE.LineBasicMaterial({color:col,transparent:true,toneMapped:false});
+  const l=new THREE.LineSegments(g,m);if(dashed)l.computeLineDistances();l.position.set(...pos);RACK.add(l);return l;}
+const slotDB=outline(FW+.01,2*U-.004,.02,[0,uy(27,2),FACE+.004],COL.drift,true);
+const slotFill=add(new THREE.Mesh(new THREE.PlaneGeometry(FW,2*U-.006),new THREE.MeshBasicMaterial({color:COL.drift,transparent:true,opacity:0,depthWrite:false,toneMapped:false})),[0,uy(27,2),FACE-.02],RACK);
+const clash=outline(FW+.03,2*U+.006,.03,[0,uy(MOVE_TO,2),FACE+.006],COL.drift,false);
+const band=add(new THREE.Mesh(new THREE.PlaneGeometry(RW+.04,.012),new THREE.MeshBasicMaterial({color:COL.link,transparent:true,opacity:0,toneMapped:false,depthWrite:false})),[0,1,ZF+.012],RACK);
+const wash=add(new THREE.Mesh(new THREE.PlaneGeometry(RW,1),new THREE.MeshBasicMaterial({color:COL.link,transparent:true,opacity:0,toneMapped:false,depthWrite:false})),[0,.5,ZF+.01],RACK);
+// the capacity plan's ghost: a new 2U server the record thinks fits at U10
+const GHOST=new THREE.Group();GHOST.position.set(0,uy(MOVE_TO,2),FACE+.2);RACK.add(GHOST);
+const ghostBox=add(new THREE.Mesh(new THREE.BoxGeometry(FW,2*U-.004,.26),new THREE.MeshBasicMaterial({color:COL.record,transparent:true,opacity:.22,depthWrite:false,toneMapped:false})),null,GHOST);
+const ghostEdge=add(new THREE.LineSegments(new THREE.EdgesGeometry(new THREE.BoxGeometry(FW,2*U-.004,.26)),new THREE.LineDashedMaterial({color:COL.recInk,dashSize:.016,gapSize:.01,transparent:true,toneMapped:false})),null,GHOST);ghostEdge.computeLineDistances();
+
+/* â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ the record board (T-card board) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
+const BOARD=new THREE.Group();BOARD.position.x=BX;scene.add(BOARD);
+const BH=2.2, BWd=.68;
+const panelM=new THREE.MeshStandardMaterial({color:'#e2e7e2',metalness:.1,roughness:.75});
+add(new THREE.Mesh(new THREE.BoxGeometry(BWd-.03,BH-.08,.012),panelM),[0,BH/2+.04,FACE-.05],BOARD).receiveShadow=true;
+[-1,1].forEach(sx=>{add(new THREE.Mesh(new THREE.BoxGeometry(.022,BH,.05),alu),[sx*(BWd/2-.011),BH/2,FACE-.03],BOARD).castShadow=true;});
+add(new THREE.Mesh(new THREE.BoxGeometry(BWd+.1,.04,.34),graph),[0,.02,FACE-.1],BOARD).castShadow=true;
+add(new THREE.Mesh(new THREE.BoxGeometry(BWd,.02,.05),alu),[0,BH,FACE-.03],BOARD);
+// slot rails (thin ledges each slip sits on)
+const ledge=new THREE.InstancedMesh(new THREE.BoxGeometry(.6,.006,.02),alu,EQ.length+1);BOARD.add(ledge);
+// header plate: counter
+let headState='';
+function headCanvas(n,mode){const W=2048,H=400;const [c,g]=cnv(W,H);g.fillStyle='#F4F6F3';g.fillRect(0,0,W,H);g.strokeStyle='#111614';g.lineWidth=10;g.strokeRect(5,5,W-10,H-10);
+  g.textBaseline='middle';g.fillStyle='#111614';g.font=`700 150px ${SANS}`;g.fillText('Rack 14 record',70,122);
+  g.font=`700 118px ${MONO}`;g.fillStyle=mode==='link'?'#04703F':n>0?'#9C4C00':'#3F5871';
+  g.fillText(`${n}/10 wrong`,70,292);
+  if(n>0&&mode!=='link'){g.fillStyle='#FF9A2E';g.fillRect(W-250,190,190,190);g.fillStyle='#111614';g.font=`700 150px ${MONO}`;g.fillText('â‰ ',W-200,292);}
+  if(mode==='link'){g.strokeStyle='#04703F';g.lineWidth=26;g.beginPath();g.moveTo(W-240,285);g.lineTo(W-175,345);g.lineTo(W-70,215);g.stroke();}
+  g.textBaseline='alphabetic';return c;}
+const headMat=new THREE.MeshBasicMaterial({map:tex(headCanvas(0,'rec')),toneMapped:false});
+const head=add(new THREE.Mesh(new THREE.PlaneGeometry(.62,.121),headMat),[0,2.1,FACE+.004],BOARD);
+// slips
+const SLW=.56, SLH=.074;
+function slipCanvas(d,st){const W=2048,H=Math.round(W*SLH/SLW);const [c,g]=cnv(W,H);
+  g.fillStyle='#F4F6F3';g.fillRect(0,0,W,H);
+  const barC=st==='fix'?'#1FD67C':'#7C93A8';g.fillStyle=barC;g.fillRect(0,0,44,H);
+  g.strokeStyle='rgba(17,22,20,.4)';g.lineWidth=6;g.strokeRect(3,3,W-6,H-6);
+  const u=st==='fix'&&d.i===4?MOVE_TO:d.u;const mid=H/2+8;g.textBaseline='middle';
+  g.fillStyle=st==='fix'?'#04703F':'#3F5871';g.font=`700 132px ${MONO}`;g.fillText('U'+String(u).padStart(2,'0'),96,mid);
+  g.fillStyle='#111614';g.font=`700 170px ${SANS}`;g.fillText(d.n,420,mid);
+  const t=st==='fix'?'âœ“':d.h+'U';g.fillStyle=st==='fix'?'#04703F':'#4A544F';g.font=`700 132px ${MONO}`;g.fillText(t,W-90-g.measureText(t).width,mid);
+  g.textBaseline='alphabetic';return c;}
+const slipSide=new THREE.MeshStandardMaterial({color:'#F4F6F3',roughness:.8});
+const SLIPS=DEVS.map((d,i)=>{const fm=new THREE.MeshBasicMaterial({map:tex(slipCanvas(d,'rec')),toneMapped:false});
+  const fx=d.fix?new THREE.MeshBasicMaterial({map:tex(slipCanvas(d,'fix')),toneMapped:false}):null;
+  const m=add(new THREE.Mesh(new THREE.BoxGeometry(SLW,SLH,.004),[slipSide,slipSide,slipSide,slipSide,fm,slipSide]),[0,d.y,FACE+.008],BOARD);m.castShadow=true;
+  return {m,fm,fx,y0:d.y,d:0,v:0,fade:1};});
+// mounts behind the slips: where each slip belongs (colour = record / drift / verified)
+const mounts=new THREE.InstancedMesh(new THREE.BoxGeometry(SLW+.024,SLH+.012,.004),new THREE.MeshBasicMaterial({toneMapped:false}),EQ.length+1);BOARD.add(mounts);
+{const M=new THREE.Matrix4();EQ.forEach((d,i)=>{M.makeTranslation(0,uy(d.u,d.h),FACE-.001);mounts.setMatrixAt(i,M);ledge.setMatrixAt(i,new THREE.Matrix4().makeTranslation(0,uy(d.u,d.h)-SLH/2-.006,FACE+.004));});
+ M.makeTranslation(0,uy(MOVE_TO,2),FACE-.001);mounts.setMatrixAt(10,M);ledge.setMatrixAt(10,new THREE.Matrix4().makeTranslation(0,uy(MOVE_TO,2)-SLH/2-.006,FACE+.004));}
+// ties: device â†” slip
+const ties=new THREE.InstancedMesh(new THREE.CylinderGeometry(1,1,1,6),new THREE.MeshBasicMaterial({toneMapped:false}),EQ.length);scene.add(ties);
+const tieDots=new THREE.InstancedMesh(new THREE.SphereGeometry(1,10,8),new THREE.MeshBasicMaterial({toneMapped:false}),EQ.length*2);scene.add(tieDots);
+
+/* â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ calendar ribbon â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
+function ribCanvas(){const W=3072,H=Math.round(W*RIB.w/(RIB.x1-RIB.x0));const [c,g]=cnv(W,H);const s=W/(RIB.x1-RIB.x0);const X=m=>(monthX(m)-RIB.x0)*s;
+  g.fillStyle='#F4F6F3';g.fillRect(0,0,W,H);g.strokeStyle='#111614';g.lineWidth=4;g.strokeRect(2,2,W-4,H-4);
+  g.fillStyle='#111614';g.fillRect(0,0,X(0)-40,H);g.fillStyle='#DDE4DF';g.font=`500 30px ${MONO}`;g.fillText('drift',24,H/2-6);g.fillText('clock',24,H/2+30);
+  for(let w=0;w<=52;w++){const m=w*12/52;g.fillStyle='rgba(17,22,20,.35)';g.fillRect(X(m)-1,H-44,2,18);}
+  for(let m=0;m<=12;m++){g.fillStyle='#111614';g.fillRect(X(m)-2,H-64,4,40);g.font=`400 30px ${MONO}`;g.fillStyle='#4A544F';const t=m===0?'last audit':m===12?'12 mo':String(m);g.fillText(t,m===12?X(m)-110:m===0?X(m)+10:X(m)-(t.length>1?18:9),48);}
+  g.fillStyle='#4A544F';g.font=`400 22px ${MONO}`;g.fillText('months since the record was last checked',X(3.2),H-80);
+  return c;}
+add(new THREE.Mesh(new THREE.BoxGeometry(RIB.x1-RIB.x0+.03,.012,RIB.w+.03),graph),[(RIB.x0+RIB.x1)/2,.006,RIB.z],scene).receiveShadow=true;
+const ribMat=new THREE.MeshBasicMaterial({map:tex(ribCanvas()),toneMapped:false});
+const rib=add(new THREE.Mesh(new THREE.PlaneGeometry(RIB.x1-RIB.x0,RIB.w),ribMat),[(RIB.x0+RIB.x1)/2,.0135,RIB.z]);rib.rotation.x=-Math.PI/2;
+// the "now" cursor
+const CUR=new THREE.Group();scene.add(CUR);CUR.position.set(monthX(0),0,RIB.z);
+add(new THREE.Mesh(new THREE.BoxGeometry(.03,.03,RIB.w+.08),graph),[0,.03,0],CUR).castShadow=true;
+add(new THREE.Mesh(new THREE.CylinderGeometry(.005,.005,.28,8),graph),[0,.17,-RIB.w/2-.02],CUR).castShadow=true;
+const curHead=add(new THREE.Mesh(new THREE.BoxGeometry(.05,.05,.012),new THREE.MeshStandardMaterial({color:'#111614',roughness:.4})),[0,.31,-RIB.w/2-.02],CUR);
+// drift flags (one per cause) at months 2, 4, 6
+const FLAGM=[2,4,6];
+const flags=FLAGM.map(m=>{const G=new THREE.Group();G.position.set(monthX(m),.014,RIB.z-RIB.w/2+.04);scene.add(G);
+  const pole=add(new THREE.Mesh(new THREE.CylinderGeometry(.004,.004,.16,6),graph),[0,.08,0],G);
+  const fm=new THREE.MeshBasicMaterial({color:COL.drift,side:THREE.DoubleSide,toneMapped:false});
+  const sh=new THREE.Shape();sh.moveTo(0,0);sh.lineTo(.07,-.022);sh.lineTo(0,-.044);sh.closePath();
+  const f=add(new THREE.Mesh(new THREE.ShapeGeometry(sh),fm),[.004,.16,0],G);
+  return {G,fm,m};});
+// weekly sweep ticks
+const ticks=new THREE.InstancedMesh(new THREE.BoxGeometry(.012,.008,.07),new THREE.MeshBasicMaterial({color:COL.link,toneMapped:false}),52);scene.add(ticks);
+
+/* â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ the capture phone (shared model) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
+function makePhone(parent,W,label){
+  const H=W*2.06, D=W*.105, R=W*.15;
+  const frameM=new THREE.MeshStandardMaterial({color:'#c9cfcb',metalness:.85,roughness:.22});
+  const backM=new THREE.MeshStandardMaterial({color:'#2a302d',metalness:.35,roughness:.28});
+  const body=new THREE.Mesh(new RoundedBoxGeometry(W,H,D,6,R*.55),frameM);body.castShadow=true;parent.add(body);
+  const back=new THREE.Mesh(new RoundedBoxGeometry(W*.965,H*.975,D*.2,5,R*.5),backM);back.position.z=-D/2+D*.06;parent.add(back);
+  const bump=new THREE.Mesh(new RoundedBoxGeometry(W*.46,W*.46,D*.5,5,W*.09),backM);bump.position.set(-W*.2,H*.34,-D/2-D*.14);parent.add(bump);
+  const lensM=new THREE.MeshStandardMaterial({color:'#0b0e0d',metalness:.6,roughness:.08}),ringM=new THREE.MeshStandardMaterial({color:'#9aa39e',metalness:.9,roughness:.25});
+  [[-.3,.1],[-.1,.1],[-.2,-.1]].forEach(([x,y])=>{const r=new THREE.Mesh(new THREE.CylinderGeometry(W*.085,W*.085,D*.28,24),ringM);r.rotation.x=Math.PI/2;r.position.set(W*x,H*.34+W*y,-D/2-D*.42);parent.add(r);
+    const l=new THREE.Mesh(new THREE.CircleGeometry(W*.062,24),lensM);l.rotation.y=Math.PI;l.position.set(W*x,H*.34+W*y,-D/2-D*.57);parent.add(l);});
+  [[W/2+D*.02,H*.18,H*.12],[-W/2-D*.02,H*.24,H*.06],[-W/2-D*.02,H*.14,H*.06]].forEach(([x,y,h])=>{const b=new THREE.Mesh(new THREE.BoxGeometry(D*.28,h,D*.42),frameM);b.position.set(x,y,0);parent.add(b);});
+  const cw=420,ch=Math.round(cw*2.06);
+  const pc=document.createElement('canvas');pc.width=cw;pc.height=ch;const pg=pc.getContext('2d');
+  function draw(t){const c=pc,g=pg;g.setTransform(1,0,0,1,0,0);g.clearRect(0,0,cw,ch);const r=58;g.save();
+    g.beginPath();g.roundRect(0,0,cw,ch,r);g.clip();g.fillStyle='#050706';g.fillRect(0,0,cw,ch);
+    const b=10;g.save();g.beginPath();g.roundRect(b,b,cw-2*b,ch-2*b,r-b);g.clip();
+    g.fillStyle='#cfd5d0';g.fillRect(0,0,cw,ch);g.fillStyle='#b9c0bb';g.fillRect(0,ch*.62,cw,ch*.38);
+    const rx=cw*.2,rw=cw*.6,ry=ch*.12,rh=ch*.6;g.fillStyle='#1d2321';g.fillRect(rx,ry,rw,rh);
+    for(let i=0;i<16;i++){const y=ry+10+i*(rh-20)/16;g.fillStyle=i%4===1?'#343b38':'#2a302d';g.fillRect(rx+12,y,rw-24,(rh-20)/16-5);for(let k=0;k<6;k++){g.fillStyle=(i+k)%3?'#1FD67C':'#56605b';g.fillRect(rx+rw-60+k*7,y+6,4,3);}}
+    g.strokeStyle='#1FD67C';g.lineWidth=4;[[2,2],[7,1],[11,3]].forEach(([i,n])=>{const y=ry+10+i*(rh-20)/16;g.strokeRect(rx+8,y-3,rw-16,n*(rh-20)/16+1);});
+    const sy=ry+rh*(.25+.5*t);g.fillStyle='rgba(31,214,124,.9)';g.fillRect(rx-18,sy,rw+36,4);g.fillStyle='rgba(31,214,124,.16)';g.fillRect(rx,ry,rw,sy-ry);
+    g.fillStyle='rgba(12,17,16,.78)';g.fillRect(rx+rw-8,ry+10+7*(rh-20)/16-34,150,28);g.fillStyle='#DDE4DF';g.font='500 17px "JetBrains Mono", monospace';g.fillText('APP-032 Â· U10',rx+rw-2,ry+10+7*(rh-20)/16-14);
+    g.fillStyle='rgba(0,0,0,.28)';g.fillRect(0,0,cw,78);g.fillStyle='#fff';g.font='600 24px "Inter", sans-serif';g.fillText('9:41',40,50);
+    g.fillRect(cw-78,34,34,16);g.fillRect(cw-116,38,6,12);g.fillRect(cw-106,34,6,16);g.fillRect(cw-96,30,6,20);
+    g.fillStyle='#000';g.beginPath();g.roundRect(cw/2-62,22,124,36,18);g.fill();
+    g.fillStyle='rgba(12,17,16,.8)';g.beginPath();g.roundRect(cw/2-110,92,220,40,20);g.fill();g.fillStyle='#1FD67C';g.beginPath();g.arc(cw/2-84,112,7,0,7);g.fill();
+    g.fillStyle='#fff';g.font='500 18px "JetBrains Mono", monospace';g.fillText(label,cw/2-66,118);
+    g.fillStyle='rgba(5,7,6,.88)';g.fillRect(0,ch-230,cw,230);
+    g.font='600 17px "Inter", sans-serif';g.fillStyle='#93A19A';g.fillText('photo',64,ch-190);g.fillText('video',cw-116,ch-190);g.fillStyle='#1FD67C';g.fillText('SWEEP',cw/2-30,ch-190);
+    g.strokeStyle='#fff';g.lineWidth=6;g.beginPath();g.arc(cw/2,ch-104,46,0,7);g.stroke();g.fillStyle='#1FD67C';g.beginPath();g.roundRect(cw/2-20,ch-124,40,40,8);g.fill();
+    g.fillStyle='#6d7772';g.beginPath();g.roundRect(56,ch-130,52,52,10);g.fill();g.strokeStyle='#DDE4DF';g.lineWidth=2;g.beginPath();g.arc(cw-82,ch-104,24,0,7);g.stroke();
+    g.fillStyle='#fff';g.beginPath();g.roundRect(cw/2-70,ch-30,140,7,4);g.fill();
+    g.restore();g.restore();return c;}
+  const tx=new THREE.CanvasTexture(draw(.5));tx.colorSpace=THREE.SRGBColorSpace;tx.anisotropy=8;
+  const scr=new THREE.Mesh(new THREE.PlaneGeometry(W*.965,H*.975),new THREE.MeshBasicMaterial({map:tx,transparent:true,toneMapped:false}));scr.position.z=D/2+.0004*W/.08;parent.add(scr);
+  let last=-1;parent.userData.phoneTick=t=>{const k=Math.round(((t%1)+1)%1*24)/24;if(k===last)return;last=k;tx.image=draw(k);tx.needsUpdate=true;};
+  document.fonts&&document.fonts.ready.then(()=>{tx.image=draw(.5);tx.needsUpdate=true;});
+  return parent;}
+const PHW=.17;
+const PHONE=new THREE.Group();scene.add(PHONE);makePhone(PHONE,PHW,'R14 Â· sweep');
+/* â”€â”€ draw-call diet: collapse 6-material boxes to 1â€“2 draws, keep shadows to the big pieces â”€â”€ */
+(function optimise(){
+  const boxMerge=new Map();
+  scene.traverse(o=>{
+    if(!o.isMesh||o.isInstancedMesh)return;
+    const g=o.geometry;
+    if(Array.isArray(o.material)&&g&&g.type==='BoxGeometry'&&g.groups.length===6&&g.index){
+      const m=o.material,side=m[0];
+      if([1,2,3,5].every(i=>m[i]===side)){
+        const key=g.uuid;let ng=boxMerge.get(key);
+        if(!ng){ng=g.clone();const idx=Array.from(g.index.array);const gr=g.groups;
+          const take=i=>idx.slice(gr[i].start,gr[i].start+gr[i].count);
+          const face=take(4);const rest=[0,1,2,3,5].flatMap(take);
+          ng.setIndex(rest.concat(face));ng.clearGroups();
+          if(m[4]===side){ng.addGroup(0,rest.length+face.length,0);}else{ng.addGroup(0,rest.length,0);ng.addGroup(rest.length,face.length,1);}
+          boxMerge.set(key,ng);}
+        o.geometry=ng;o.material=m[4]===side?side:[side,m[4]];if(!Array.isArray(o.material)){ng.clearGroups();}
+      }
+    }
+    if(o.castShadow){if(!o.geometry.boundingSphere)o.geometry.computeBoundingSphere();const r=o.geometry.boundingSphere.radius*Math.max(o.scale.x,o.scale.y,o.scale.z);if(r<.3)o.castShadow=false;}
+  });
+})();
+const frustum=new THREE.LineSegments(new THREE.BufferGeometry(),new THREE.LineBasicMaterial({color:COL.link,transparent:true,opacity:0,toneMapped:false,depthWrite:false}));scene.add(frustum);
+
+[ties,tieDots,mounts,ledge,ticks].forEach(m=>m.frustumCulled=false);
+
+/* â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ tags (priority = order of definition) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
+const hud=document.getElementById('hud');const TG=[];
+function tag(k,html,cls,pos){const el=document.createElement('div');el.className='tag '+cls;el.innerHTML=`<i></i><span>${html}</span>`;hud.appendChild(el);const t={k,el,pos:typeof pos==='function'?pos:()=>V3(...pos),on:false};TG.push(t);TG[k]=t;return t;}
+const devW=(i)=>DEVS[i].mesh.getWorldPosition(V3());
+const slipW=(i,dx=SLW/2)=>SLIPS[i].m.localToWorld(V3(dx,0,.004));
+tag('cnt','<b>0 / 10</b>out of true','drift keep',()=>BOARD.localToWorld(V3(BWd/2,2.1,FACE)));
+const flagTop=i=>flags[i].G.localToWorld(V3(.07,.14,0));
+tag('e1','<b>Month 2 Â· vendor maintenance</b>APP-035 swapped Â· no paperwork','drift keep',()=>flagTop(0));
+tag('e2','<b>Month 4 Â· migration</b>DB-021 gone Â· uplink re-landed','drift keep',()=>flagTop(1));
+tag('e3','<b>Month 6 Â· cleanup move</b>APP-032 Â· U30 â†’ U10','drift keep',()=>flagTop(2));
+tag('mo','<b>Month 0</b>since the last check','ink up keep',()=>curHead.getWorldPosition(V3()).add(V3(0,.03,0)));
+tag('lag','<b>The record</b>unchanged','rec',()=>BOARD.localToWorld(V3(BWd/2,1.25,FACE)));
+tag('hR','<b>Rack 14</b>what\'s bolted in','ink up keep',()=>V3(RX,2.03,0));
+tag('hB','<b>The record</b>what someone typed in','rec keep',()=>BOARD.localToWorld(V3(BWd/2,1.55,FACE)));
+tag('hC','<b>Calendar</b>time since the last check','ink',()=>V3(RIB.x1-.3,.02,RIB.z+RIB.w/2));
+tag('pR','<b>Rack 14</b>on the floor plan','ink keep',()=>V3(RX+RW/2,2.03,ZF));
+tag('pB','<b>Its record</b>one slip per device','rec',()=>BOARD.localToWorld(V3(BWd/2,2.2,FACE-.03)));
+tag('wT','<b>Typed in = bolted in</b>APP-032 Â· U30, for now','rec keep',()=>slipW(4));
+tag('wU','<b>One place everyone trusts</b>budgets Â· incidents Â· audits','rec',()=>BOARD.localToWorld(V3(BWd/2,2.1,FACE)));
+tag('c1','<b>Capacity plan</b>assumes U10â€“11 are free','rec keep',()=>GHOST.localToWorld(V3(FW/2,0,.13)));
+tag('c2','<b>Incident triage</b>record says DB-021 is at U27','drift keep',()=>slipW(5));
+tag('c3','<b>Audit</b>reconciled by hand','drift',()=>BOARD.localToWorld(V3(BWd/2,2.1,FACE)));
+tag('k1','<b>One sweep</b>walk the aisle with a phone','link keep',()=>PHONE.localToWorld(V3(PHW/2,.04,0)));
+tag('k2','<b>Same record</b>corrected, not rebuilt','link keep',()=>BOARD.localToWorld(V3(BWd/2,2.1,FACE)));
+tag('k3','<b>Every week</b>not once a year','link',()=>V3(monthX(9),.02,RIB.z+RIB.w/2));
+
+/* â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ scroll â†’ g (from the DOM script) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
+const EV=window.DRIFT_EV||[2.2,2.46,2.72];
+const on=(g,a,b)=>smooth(a-.2,a+.15,g)*(1-smooth(b-.15,b+.2,g));
+// camera keys: [g, position, target]
+const CAMS=[
+  [-1, [3.0,2.2,4.6],[.4,1.0,.3]],      // wide 3/4 establishing
+  [.5, [.55,6.3,2.3], [.5,.25,.3]],      // top-down plan: Rack 14 on the floor plan
+  [1.5,[.9,1.2,4.2],  [.15,1.15,.2]],    // front elevation: layer beside layer
+  [2.5,[2.6,3.0,4.0], [.4,.8,.5]],       // high 3/4, calendar in view
+  [3.5,[2.3,1.5,3.1], [.25,1.15,.3]],   // raking side view along the record: slips out of true
+  [4.5,[2.0,.95,2.6], [-.2,.8,.4]],      // low macro on U10 and U27
+  [5.35,[1.8,.62,3.0],[-.1,1.0,.4]],     // low hero angle: the sweep
+  [5.95,[2.8,2.0,4.4],[.35,1.0,.3]]];    // wide, reconciled
+let vw=0,vh=0,cw=0,chh=0,mobile=false;
+function resize(){vw=innerWidth;vh=innerHeight;mobile=vw<760;cw=vw;chh=mobile?Math.round(vh*.46):vh;renderer.setSize(cw,chh,false);canvas.style.height=chh+'px';camera.aspect=cw/chh;camera.updateProjectionMatrix();}
+addEventListener('resize',resize);resize();
+const cp=V3(...CAMS[0][1]),ct=V3(...CAMS[0][2]);
+const clock=new THREE.Clock();const M4=new THREE.Matrix4(),Q=new THREE.Quaternion(),UPV=V3(0,1,0);
+const keepEl=document.getElementById('keep'), figNow=document.getElementById('figNow'), bandEl=document.getElementById('band');
+const colEl=document.querySelector('.col'), heroIn=document.querySelector('.hero-in');
+let lastHead='',lastFig='',lastMo=-1,lastCnt=-1;
+// bounding points used by the framing guard
+const BOXPTS=[];[[RX-RW/2,RX+RW/2,0,2.05,-RD/2,ZF+.08],[BX-BWd/2,BX+BWd/2+.1,0,2.2,FACE-.12,FACE+.06],[RIB.x0,RIB.x1,0,.02,RIB.z-RIB.w/2,RIB.z+RIB.w/2],[SX-BW/2,SX+BW/2,0,0,SZ-BD/2,SZ+BD/2]].forEach(([a,b,c,d,e,f])=>{for(const x of [a,b])for(const y of [c,d])for(const z of [e,f])BOXPTS.push(V3(x,y,z));});
+const pv=V3();
+function project(p){pv.copy(p).project(camera);return {x:(pv.x+1)/2*cw,y:(1-pv.y)/2*chh,z:pv.z};}
+function fits(pts){camera.updateMatrixWorld();
+  for(const p of pts){const s=project(p);if(s.z>1||s.z<-1)return false;
+    if(mobile){if(s.x<cw*.04||s.x>cw*.96||s.y<62||s.y>chh-30)return false;}
+    else if(s.x<cw*.46)return false;}return true;}
+let guardK=1;
+function guard(pts,dt){// continuous dolly-back so nothing enters the text column; the factor is eased so the camera never jumps
+  const dir=camera.position.clone().sub(ct);const dist=dir.length();dir.normalize();
+  const at=k=>{camera.position.copy(ct).addScaledVector(dir,dist*k);return fits(pts);};
+  let need=1;if(!at(1)){let lo=1,hi=1.35;while(!at(hi)&&hi<5){lo=hi;hi*=1.35;}for(let i=0;i<9;i++){const m=(lo+hi)/2;if(at(m))hi=m;else lo=m;}need=hi;}
+  guardK=(reduce||SNAP)?need:guardK+(need-guardK)*(1-Math.pow(.004,dt));
+  camera.position.copy(ct).addScaledVector(dir,dist*guardK);camera.updateMatrixWorld();}
+
+function frame(){
+  requestAnimationFrame(frame);
+  const dt=Math.min(clock.getDelta(),.05),time=clock.elapsedTime;
+  const kt=(window.DRIFT_KEEPTOP??keepEl.getBoundingClientRect().top+scrollY)-scrollY;
+  const show=kt>(mobile?vh*.62:vh*.98);
+  const off=!show;if(off!==frame.off){frame.off=off;const v=off?'hidden':'visible';canvas.style.visibility=v;hud.style.visibility=v;if(bandEl)bandEl.style.visibility=v;}
+  if(off){TG.forEach(t=>{if(t.on){t.on=false;t.el.classList.remove('on');}});return;}
+  const gRaw=window.DRIFT_G??-1;
+  if(frame.gs===undefined||reduce||SNAP||Math.abs(gRaw-frame.gs)>1.5)frame.gs=gRaw;else frame.gs+=(gRaw-frame.gs)*(1-Math.pow(.0005,dt));
+  if(Math.abs(gRaw-frame.gs)<1e-5)frame.gs=gRaw;
+  const g=frame.gs;
+  if(g!==frame.gPrev){frame.gPrev=g;renderer.shadowMap.needsUpdate=true;}
+
+  // â”€â”€ camera
+  let Pp=V3(...CAMS[0][1]),Tt=V3(...CAMS[0][2]);
+  for(let i=1;i<CAMS.length;i++){const [gi,p,t]=CAMS[i];const gp=CAMS[i-1][0];const k=smooth(gp+(gi-gp)*.3,gi-(gi-gp)*.12,g);if(k>0){Pp.lerp(V3(...p),k);Tt.lerp(V3(...t),k);}}
+  if(!reduce&&!SNAP){Pp.x+=Math.sin(time*.13)*.08;}
+  if(mobile){Pp.sub(Tt).multiplyScalar(1.25).add(Tt);}
+  const f=(reduce||SNAP)?1:1-Math.pow(.02,dt);cp.lerp(Pp,f);ct.lerp(Tt,f);camera.position.copy(cp);camera.lookAt(ct);
+  camera.setViewOffset(cw,chh,mobile?0:-(.63-.5)*cw,mobile?-chh*.04:0,cw,chh);
+
+  // â”€â”€ time and causes
+  const e1=smooth(EV[0]-.07,EV[0]+.13,g), e2=smooth(EV[1]-.07,EV[1]+.13,g), e3=smooth(EV[2]-.07,EV[2]+.15,g);
+  const month=g<2?0:g<3?lerp(0,7.5,smooth(2,3,g)*.4+clamp(g-2)*.6):g<5?lerp(7.5,11,clamp((g-3)/2)):lerp(11,12,clamp(g-5));
+  const wHero=1-smooth(-.55,-.1,g), wLead=on(g,0,1), wWhat=on(g,1,2), wWhy=on(g,2,3), wKey=on(g,3,4), wCost=on(g,4,5), wClose=smooth(4.8,5.15,g);
+  // closing: phone sweeps the rack bottom â†’ top, then weekly ticks
+  const sw=smooth(5.05,5.55,g);const sweepY=lerp(.14,2.02,sw);
+  const vOf=y=>smooth(y-.03,y+.05,sweepY)*smooth(5.0,5.05,g);
+
+  // vendor swap: APP-035 slides out, a different unit slides back in
+  {const D=DEVS[7];const z=Math.sin(Math.PI*e1)*.5;D.mesh.position.z=FACE-.39+z;{const fa=e1>.5?altFace:D.fm,M=D.mesh.material,fi=Array.isArray(M)&&M.length===2?1:4;if(Array.isArray(M)&&M[fi]!==fa)M[fi]=fa;}}
+  // migration: DB-021 slides out and is gone; the uplink re-lands on port 20
+  {const D=DEVS[5];const k=clamp(e2*1.6);D.mesh.position.z=FACE-.39+k*.62;const o=1-smooth(.62,1,e2);D.own.opacity=o;D.fm.opacity=o;D.mesh.visible=o>.01;D.mesh.castShadow=o>.5;
+   const c=smooth(.3,1,e2);hotA.geometry.setDrawRange(0,Math.floor((1-c)*hotAN/6)*6);hotA.visible=c<.99;hotB.geometry.setDrawRange(0,Math.floor(c*hotBN/6)*6);hotB.visible=c>.01;}
+  // cleanup: APP-032 arcs from U30 down to U10 (out, down in front of the rack, back in)
+  {const D=DEVS[4];const out=smooth(0,.28,e3)*(1-smooth(.72,1,e3));const dn=smooth(.25,.75,e3);
+   D.mesh.position.set(0,lerp(uy(30,2),uy(MOVE_TO,2),dn),FACE-.39+out*.5);}
+  // slips: after each floor change lands, its slip slides out of true
+  const vv=DEVS.map((d,i)=>vOf(i===4?uy(MOVE_TO,2):d.y));
+  const drift=[0,smooth(.65,1,e2),0,0,smooth(.75,1,e3),smooth(.65,1,e2),0,smooth(.6,1,e1),0,0];
+  const pop=1+.35*wKey;
+  let outCnt=0;
+  SLIPS.forEach((s,i)=>{const v=vv[i];const d=drift[i]*(1-v);if(d>.5)outCnt++;
+    // corrected record: APP-032 slip moves to U10, DB-021 slip is pulled
+    let y=s.y0,x=.09*d*pop,z=FACE+.008+.02*d,rz=-.075*d*pop,sc=1;
+    if(i===4&&drift[i]>.01){const mv=smooth(.1,.9,v);y=lerp(s.y0,uy(MOVE_TO,2),mv);x+=Math.sin(Math.PI*mv)*.12;}
+    if(i===5&&drift[i]>.01){const k=smooth(.2,1,v);x+=k*.5;z+=k*.05;sc=1-k*.999;}
+    s.m.position.set(x,y,z);s.m.rotation.z=rz;s.m.scale.setScalar(Math.max(.001,sc));s.m.visible=sc>.01;
+    if(s.fx){const useFix=v>.5&&drift[i]>.5;const M=s.m.material,fi=M.length===2?1:4,fa=useFix?s.fx:s.fm;if(M[fi]!==fa)M[fi]=fa;}
+    s.d=d;s.v=v;s.col=d>.02?COL.record.clone().lerp(COL.drift,smooth(0,.6,d)):v>.02?COL.record.clone().lerp(COL.link,v):COL.record.clone();});
+  // mounts + ties
+  EQ.forEach((d,i)=>{const s=SLIPS[i];let mc=COL.record.clone().lerp(COL.drift,smooth(0,.5,s.d));mc.lerp(COL.link,s.v*(1-s.d));
+    if(i===4)mc.lerp(C('#C6CCC7'),smooth(.3,.9,vv[4])*(drift[4]>.5?1:0));
+    if(i===5)mc.lerp(C('#C6CCC7'),smooth(.3,.9,vv[5])*(drift[5]>.5?1:0));
+    mounts.setColorAt(i,mc);});
+  mounts.setColorAt(10,COL.link.clone().lerp(C('#C6CCC7'),1-smooth(.4,.9,vv[4])*(drift[4]>.5?1:0)));
+  mounts.instanceColor.needsUpdate=true;
+  BOARD.updateMatrixWorld();RACK.updateMatrixWorld();
+  EQ.forEach((d,i)=>{const s=SLIPS[i];const D=DEVS[i];
+    let a=D.mesh.getWorldPosition(V3());a.x=RX+RW/2+.012;a.z=FACE+.04;
+    const b=s.m.localToWorld(V3(-SLW/2,0,.004));b.z=FACE+.04;
+    let r=.0028,hide=false;
+    if(i===5&&drift[5]>.01){a.y=uy(27,2);}          // tie now leads to an empty slot
+    if(i===5&&vv[5]>.3&&drift[5]>.5)hide=true;
+    const dd=b.clone().sub(a);const L=dd.length();
+    if(hide||L<1e-4){M4.makeScale(0,0,0);ties.setMatrixAt(i,M4);tieDots.setMatrixAt(i*2,M4);tieDots.setMatrixAt(i*2+1,M4);return;}
+    Q.setFromUnitVectors(UPV,dd.clone().normalize());M4.compose(a.clone().addScaledVector(dd,.5),Q,V3(r,L,r));ties.setMatrixAt(i,M4);
+    ties.setColorAt(i,s.col);
+    M4.compose(a,Q.identity(),V3(.008,.008,.008));tieDots.setMatrixAt(i*2,M4);M4.compose(b,Q,V3(.008,.008,.008));tieDots.setMatrixAt(i*2+1,M4);
+    tieDots.setColorAt(i*2,s.col);tieDots.setColorAt(i*2+1,s.col);});
+  ties.instanceMatrix.needsUpdate=tieDots.instanceMatrix.needsUpdate=true;ties.instanceColor.needsUpdate=tieDots.instanceColor.needsUpdate=true;
+  // outlines
+  const e2d=smooth(.7,1,e2);
+  slotDB.material.opacity=e2d*(1-smooth(.2,.8,vv[5]))*(reduce?1:(wCost>.3?.7+.3*Math.sin(time*4):1));slotDB.visible=slotDB.material.opacity>.01;
+  slotFill.material.opacity=.16*e2d*(1-smooth(.2,.8,vv[5]));
+  clash.material.opacity=wCost*smooth(.9,1,e3);clash.visible=clash.material.opacity>.01;
+  const gh=wCost*smooth(.9,1,e3);ghostBox.material.opacity=.4*gh;ghostEdge.material.opacity=gh;GHOST.visible=gh>.01;GHOST.position.z=FACE+.2+(1-gh)*.2;
+  // hot cable colour: amber once re-landed, green once swept
+  hotNewM.color.copy(COL.drift).lerp(COL.link,vv[1]*(drift[1]>.5?1:0));
+  // header counter
+  const shown=Math.max(0,outCnt);const mode=sw>.95&&g>5.4?'link':'rec';const hs=shown+mode;
+  if(hs!==lastHead){lastHead=hs;headMat.map.image=headCanvas(shown,mode);headMat.map.needsUpdate=true;}
+  // calendar cursor + flags + weekly ticks
+  CUR.position.x=monthX(month);
+  const evs=[e1,e2,e3];
+  const tk=smooth(5.3,5.75,g);
+  flags.forEach((fl,i)=>{const k=smooth(.2,.6,evs[i]);fl.G.scale.set(1,Math.max(.001,k),1);fl.G.visible=k>.01;fl.fm.color.copy(COL.drift).lerp(COL.link,smooth(fl.m/12-.02,fl.m/12+.02,tk));});
+  for(let w=0;w<52;w++){const m=w*12/52;const k=tk*1.02>m/12?1:0;M4.compose(V3(monthX(m),.018,RIB.z+RIB.w/2-.05),Q.identity(),V3(k,k,k));ticks.setMatrixAt(w,M4);}
+  ticks.instanceMatrix.needsUpdate=true;
+  // phone sweep
+  const ph=smooth(4.95,5.1,g)*(1-smooth(5.62,5.8,g));
+  PHONE.visible=ph>.01;PHONE.scale.setScalar(Math.max(.001,ph));
+  PHONE.position.set(RX+.05,Math.max(.3,sweepY),ZF+.55);PHONE.rotation.set(-.05,-.35,0);
+  if(PHONE.visible&&PHONE.userData.phoneTick)PHONE.userData.phoneTick(reduce?.5:time*.35);
+  const scanOn=ph*(sw>0&&sw<1?1:0);
+  band.position.y=sweepY;band.material.opacity=scanOn*(reduce?.9:.75+.25*Math.sin(time*9));
+  wash.scale.y=Math.max(.001,sweepY-.1);wash.position.y=.1+(sweepY-.1)/2;wash.material.opacity=scanOn*.09;
+  {const pts=[];if(scanOn>.02){const a=PHONE.localToWorld(V3(-PHW*.2,PHW*.7,-.01));[[-RW/2,sweepY+.09],[RW/2,sweepY+.09],[-RW/2,sweepY-.09],[RW/2,sweepY-.09]].forEach(([x,y])=>pts.push(a.clone(),V3(RX+x,y,ZF+.012)));}
+   if(pts.length||!frame.fEmpty){frustum.geometry.setFromPoints(pts.length?pts:[V3(),V3()]);frame.fEmpty=!pts.length;}frustum.material.opacity=scanOn*.5;}
+
+  // â”€â”€ framing guard
+  camera.updateMatrixWorld();camera.updateProjectionMatrix();
+  const gp=BOXPTS.slice();if(PHONE.visible)gp.push(PHONE.position.clone().add(V3(-PHW,0,0)));if(GHOST.visible)gp.push(GHOST.localToWorld(V3(-FW/2,0,.17)));
+  guard(gp,dt);
+
+  // â”€â”€ DOM caption
+  const mo=Math.round(month);const fig=`month ${mo} Â· ${shown} / 10 out of true`+(mode==='link'?' Â· swept':'');
+  if(fig!==lastFig){lastFig=fig;figNow.textContent=fig;figNow.className=mode==='link'?'link':shown?'drift':'';}
+  if(mo!==lastMo){lastMo=mo;TG.mo.el.querySelector('span').innerHTML=`<b>Month ${mo}</b>since the last check`;}
+  if(shown!==lastCnt){lastCnt=shown;TG.cnt.el.querySelector('span').innerHTML=`<b>${shown} of 10 Â· ${shown*10}%</b>slips out of true`;}
+
+  // â”€â”€ tags: on/off at 0.5, text-column guard, collision list, viewport + behind-camera checks
+  const vis={hR:wHero,hB:wHero,hC:wHero,pR:wLead,pB:wLead,
+    wT:wWhat,wU:wWhat,
+    mo:wWhy*(g<EV[0]-.02?1:0),e1:wWhy*(g>EV[0]-.02&&g<EV[1]-.03?1:0),e2:wWhy*(g>EV[1]-.02&&g<EV[2]-.03?1:0),e3:wWhy*(g>EV[2]-.02?1:0),lag:wWhy*(g>EV[0]+.05?1:0),
+    cnt:wKey,c1:wCost,c2:wCost,c3:wCost,
+    k1:wClose*ph*(sw<.98?1:0),k2:wClose*smooth(5.45,5.6,g),k3:wClose*smooth(5.55,5.75,g)};
+  if(!frame.cr||frame.crW!==cw){frame.crW=cw;frame.cr={h:heroIn.getBoundingClientRect().right+14,c:colEl.getBoundingClientRect().right+14};}
+  const colR=mobile?0:Math.max(cw*.38,g<-.2?frame.cr.h:frame.cr.c);
+  const placed=[];
+  for(const t of TG){let want=(vis[t.k]||0)>.5;
+    if(want&&mobile&&!t.el.classList.contains('keep'))want=false;
+    if(want){const p=t.pos();const s=project(p);
+      if(s.z>1||s.z<-1)want=false;else{
+        const cl=t.el.classList;if(!t.sz||t.sz.k!==t.el.textContent){t.sz={k:t.el.textContent,w:t.el.offsetWidth,h:t.el.offsetHeight};}const ew=t.sz.w,eh=t.sz.h;
+        const tx=cl.contains('left')?s.x-ew+3.5:cl.contains('up')?s.x-ew/2:s.x-3.5, ty=cl.contains('up')?s.y-eh+3.5:s.y-eh/2;
+        const box={l:tx,t:ty,r:tx+ew,b:ty+eh};
+        if(box.l<colR||box.r>cw-8||box.t<(mobile?58:72)||box.b>chh-(mobile?30:48))want=false;
+        else if(placed.some(q=>!(box.r+6<q.l||box.l-6>q.r||box.b+4<q.t||box.t-4>q.b)))want=false;
+        if(want){placed.push(box);const tf=`translate3d(${tx.toFixed(1)}px,${ty.toFixed(1)}px,0)`;if(tf!==t.tf){t.tf=tf;t.el.style.transform=tf;}}}}
+    if(want!==t.on){t.on=want;t.el.classList.toggle('on',want);}}
+  renderer.render(scene,camera);
+}
+function redrawText(){sheetMat.map.image=sheetCanvas();sheetMat.map.needsUpdate=true;
+  DEVS.forEach(d=>{d.fm.map.image=faceCanvas(d);d.fm.map.needsUpdate=true;});altFace.map.image=faceCanvas(EQ[7],true);altFace.map.needsUpdate=true;
+  SLIPS.forEach((s,i)=>{s.fm.map.image=slipCanvas(DEVS[i],'rec');s.fm.map.needsUpdate=true;if(s.fx){s.fx.map.image=slipCanvas(DEVS[i],'fix');s.fx.map.needsUpdate=true;}});
+  ribMat.map.image=ribCanvas();ribMat.map.needsUpdate=true;lastHead='';}
+document.fonts.ready.then(()=>{redrawText();TG.forEach(t=>t.sz=null);frame.cr=null;});
+{const hid=[];scene.traverse(o=>{if(!o.visible){hid.push(o);o.visible=true;}});try{renderer.compile(scene,camera);}catch(e){}hid.forEach(o=>o.visible=false);}
+requestAnimationFrame(frame);
+</script>
+<!--GLJS-END-->
+<script src="/design-system/nav.js" defer></script>
+</body>
+</html>

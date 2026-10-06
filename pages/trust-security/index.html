@@ -1,0 +1,688 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Trust &amp; security · RackTrack</title>
+<meta name="description" content="Enterprise-grade by architecture. Your rack footage is processed inside your tenant, your keys stay in your vault, and you decide what is kept.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap">
+<link rel="stylesheet" href="/design-system/base.css">
+<style>
+/* RackTrack · Trust & security — design-system/ tokens. Protagonist: the tenant, a glass enclosure. Data is made inside it and never crosses its wall. */
+:root{
+  color-scheme: light;
+  
+}
+*{box-sizing:border-box}
+html{background:var(--paper)}
+body{margin:0;background:var(--paper);color:var(--fg);font:400 16px/1.5 var(--sans);-webkit-font-smoothing:antialiased;overflow-x:hidden}
+a{color:inherit}
+::selection{background:var(--link);color:#06140d}
+:focus-visible{outline:2px solid var(--link-ink);outline-offset:3px;border-radius:2px}
+body::before{content:"";position:fixed;inset:0;z-index:0;pointer-events:none;background:radial-gradient(60% 55% at 64% 50%,rgba(255,255,255,.6),transparent 72%)}
+#stage{position:fixed;inset:0;z-index:1;display:block;width:100%;height:100%;pointer-events:none}
+#scrim{position:fixed;inset:0;z-index:1;pointer-events:none;opacity:.6;background:linear-gradient(90deg,var(--paper) 0,rgba(233,236,232,.9) 25%,rgba(233,236,232,0) 46%)}
+#hud{position:fixed;inset:0;z-index:3;pointer-events:none;overflow:hidden}
+main{position:relative;z-index:2}
+
+/* nav */
+.nav{position:fixed;left:0;right:0;top:0;z-index:10;display:flex;align-items:center;gap:28px;height:calc(var(--nav-h) + env(safe-area-inset-top,0px));padding:env(safe-area-inset-top,0px) var(--bleed) 0;background:linear-gradient(var(--paper) 55%,transparent)}
+.brand{display:flex;align-items:center;gap:10px;text-decoration:none;font:700 17px/1 var(--sans);letter-spacing:-.02em;color:var(--ink)}
+.brand img{width:26px;height:26px;border-radius:5px;display:block}
+.nav ul{display:flex;gap:24px;list-style:none;margin:0 0 0 auto;padding:0}
+.nav ul a{font:500 14px/1 var(--sans);text-decoration:none;color:var(--ink-2)}
+.nav ul a:hover{color:var(--ink)}
+.nav ul a[aria-current="page"]{color:var(--ink);text-decoration:underline;text-decoration-color:var(--link);text-decoration-thickness:2px;text-underline-offset:6px}
+.btn{display:inline-flex;align-items:center;gap:10px;height:46px;padding:0 20px;border-radius:3px;border:1px solid var(--fg);font:500 15px/1 var(--sans);text-decoration:none;cursor:pointer;background:transparent;color:var(--fg);transition:background .2s,color .2s,border-color .2s}
+.btn.solid{background:var(--fg);color:var(--bg)}
+.btn.solid:hover{background:var(--link-ink);border-color:var(--link-ink);color:#fff}
+.btn:not(.solid){border-color:var(--line)}
+.btn:not(.solid):hover{border-color:var(--fg)}
+.btn .led{width:7px;height:7px;border-radius:50%;background:var(--link);box-shadow:0 0 8px var(--link)}
+.nav .btn{height:38px;padding:0 16px;font-size:14px}
+
+/* type */
+.ch{position:relative;padding-inline:var(--bleed)}
+.copy{max-width:30rem;}
+h1,h2,h3{margin:0 0 20px;text-wrap:balance}
+h1{max-width:10ch}
+h2{max-width:14ch}
+h3{margin:0 0 12px}
+.lede{color:var(--fg-2);max-width:26rem;margin:0 0 28px}
+.k{margin:0 0 14px;font:400 12px/1 var(--mono);color:var(--link-ink)}
+.actions{display:flex;flex-wrap:wrap;gap:12px}
+
+/* tags */
+.tag{position:absolute;left:0;top:0;display:flex;align-items:center;opacity:0;will-change:transform,opacity;white-space:nowrap}
+.tag::before{content:"";width:7px;height:7px;border-radius:50%;background:var(--c,var(--ink));transform:translate(-3.5px,0);box-shadow:0 0 0 3px color-mix(in oklab,var(--c,var(--ink)) 22%,transparent)}
+.tag i{display:block;width:24px;height:1px;background:var(--c,var(--ink))}
+.tag span{padding:6px 9px;background:var(--paper-2);border:1px solid var(--c,var(--ink));border-radius:2px;font:400 11.5px/1.35 var(--mono);color:var(--ink);box-shadow:0 14px 28px -20px rgba(17,22,20,.45)}
+.tag span b{display:block;font:600 15px/1.15 var(--sans);letter-spacing:-.02em;margin-bottom:2px}
+.tag.left{flex-direction:row-reverse}.tag.left::before{transform:translate(3.5px,0)}
+.tag.up{flex-direction:column-reverse}.tag.up i{width:1px;height:22px}.tag.up::before{transform:translate(0,3.5px)}
+.tag.link{--c:var(--link)} .tag.link span b{color:var(--link-ink)}
+.tag.drift{--c:var(--drift)} .tag.drift span b{color:var(--drift-ink)}
+.tag.rec{--c:var(--record)} .tag.rec span b{color:var(--record-ink)}
+.tag.ink{--c:var(--ink)}
+
+/* hero */
+#hero{min-height:100vh;display:flex;align-items:center;padding-top:90px}
+.readout{margin-top:36px;max-width:25rem;border-top:1px solid var(--rule);font:400 12px/1 var(--mono)}
+.readout .cap{display:flex;justify-content:space-between;color:var(--ink-2);padding:12px 0 8px}
+.readout .cap i{display:inline-flex;align-items:center;gap:7px;font-style:normal;color:var(--link-ink)}
+.readout .cap i::before{content:"";width:7px;height:7px;border-radius:50%;background:var(--link);animation:blip 2s ease-in-out infinite}
+@keyframes blip{50%{opacity:.25}}
+.readout dl{margin:0;display:grid;grid-template-columns:1fr auto;gap:0}
+.readout dt,.readout dd{margin:0;padding:8px 0;border-bottom:1px dashed var(--rule)}
+.readout dt{color:var(--ink)} .readout dd{color:var(--link-ink);text-align:right}
+.readout dd.a{color:var(--drift-ink)}
+
+/* pinned chapters */
+.pinsec{position:relative}
+#posture{min-height:620vh} #data{min-height:560vh} #deploy{min-height:520vh}
+.pin{position:sticky;top:0;height:100vh}
+.scopy{position:absolute;left:var(--gutter);top:50%;transform:translateY(-50%);width:min(30rem,40vw);}
+.scopy .h{margin-bottom:34px}
+.stack{position:relative;height:250px}
+.st{position:absolute;inset:0;opacity:0;transform:translateY(14px);transition:opacity .45s,transform .55s var(--ease);pointer-events:none}
+.st.on{opacity:1;transform:none;pointer-events:auto}
+.st .no{font:400 12px/1 var(--mono);color:var(--ink-2);margin:0 0 12px;display:flex;gap:10px;align-items:center}
+.chip{font:500 11px/1 var(--mono);padding:5px 7px;border-radius:2px;border:1px solid var(--link);color:var(--link-ink);background:rgba(31,214,124,.08)}
+.chip.a{border-color:var(--drift);color:var(--drift-ink);background:rgba(255,154,46,.1)}
+.st p{margin:0 0 14px;color:var(--ink-2);max-width:26rem}
+.st ul{list-style:none;margin:0;padding:0;font:400 12.5px/1.4 var(--mono)}
+.st li{display:flex;gap:10px;padding:7px 0;border-top:1px dashed var(--rule)}
+.st li b{font-weight:500;color:var(--ink);min-width:7.5rem}
+.prog{display:flex;gap:5px;align-items:center;margin-top:18px;font:400 11px/1 var(--mono);color:var(--ink-2)}
+.prog i{width:28px;height:3px;background:var(--rule);position:relative;overflow:hidden}
+.prog i b{position:absolute;inset:0 auto 0 0;width:0;background:var(--link-ink)}
+.prog span{margin-left:8px}
+.never{margin-top:16px;font:500 15px/1.3 var(--sans);color:var(--link-ink);display:flex;gap:10px;align-items:center}
+.never::before{content:"";width:18px;height:1.5px;background:var(--link-ink)}
+
+/* deployment spectrum */
+.spec{position:absolute;left:50%;transform:translateX(-50%);bottom:34px;width:min(760px,86vw);z-index:4;padding-left:0}
+.spec .bar{display:grid;grid-template-columns:repeat(4,1fr);gap:6px}
+.spec button{all:unset;box-sizing:border-box;cursor:pointer;padding:10px 12px 10px;border-top:3px solid var(--rule);font:500 13.5px/1.25 var(--sans);color:var(--ink-2);transition:border-color .3s,color .3s;background:rgba(244,246,243,.72);backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px)}
+.spec button small{display:block;font:400 11px/1.3 var(--mono);color:var(--ink-2);margin-top:4px}
+.spec button.on{border-color:var(--link-ink);color:var(--ink)}
+.spec button:focus-visible{outline:2px solid var(--link-ink);outline-offset:2px}
+.spec .ends{display:flex;justify-content:space-between;font:400 11px/1 var(--mono);color:var(--ink-2);margin-top:8px}
+
+/* patents */
+#patents{padding-block:var(--band-y);background:var(--paper);position:relative;z-index:2}
+.pwrap{max-width:1720px;margin-inline:auto;}
+.pwrap .head{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,26rem);gap:40px;align-items:end;margin-bottom:46px}
+.pwrap .head .lede{margin:0}
+.figs{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:clamp(20px,2.4vw,36px)}
+.fig{border-top:1px solid var(--ink);padding-top:14px}
+.fig .top{display:flex;justify-content:space-between;font:400 11.5px/1 var(--mono);color:var(--ink-2);margin-bottom:14px}
+.fig .top b{color:var(--link-ink);font-weight:500}
+.fig svg{display:block;width:100%;height:auto;background:var(--paper-2);border:1px solid var(--rule);border-radius:2px}
+.fig svg .ln{fill:none;stroke:#111614;stroke-width:1.2}
+.fig svg .lt{fill:none;stroke:#4A544F;stroke-width:.8}
+.fig svg .g{fill:none;stroke:#1FD67C;stroke-width:1.6}
+.fig svg .gi{fill:none;stroke:#04703F;stroke-width:1.2;stroke-dasharray:3 3}
+.fig svg text{font:400 9px var(--mono);fill:#4A544F}
+.fig svg .draw{stroke-dasharray:var(--l,600);stroke-dashoffset:var(--l,600);transition:stroke-dashoffset 1.8s var(--ease)}
+.figs.in svg .draw{stroke-dashoffset:0}
+.fig h3{margin:18px 0 8px}
+.fig p{margin:0;color:var(--ink-2);font-size:15px}
+.appno{margin-top:34px;font:400 12.5px/1.4 var(--mono);color:var(--ink-2);display:flex;gap:12px;align-items:center}
+.appno b{color:var(--ink);font-weight:500}
+
+/* cta */
+#cta{padding-block:var(--band-y);text-align:center;background:var(--paper);position:relative;z-index:2}
+#cta h2{margin-inline:auto;max-width:13ch}
+#cta .lede{margin-inline:auto}
+#cta .actions{justify-content:center}
+
+/* footer */
+.foot{position:relative;z-index:2;padding:var(--band-y) var(--bleed) calc(var(--s8) + env(safe-area-inset-bottom,0px));background:var(--paper);border-top:1px solid var(--rule);display:grid;grid-template-columns:var(--copy-w) repeat(3,minmax(0,1fr));gap:28px;font-size:14px;color:var(--ink-2)}
+.foot b{display:block;font:500 13px/1 var(--sans);color:var(--link-ink);margin-bottom:16px}
+.foot nav{display:flex;flex-direction:column;gap:11px}
+.foot nav a{color:var(--ink);text-decoration:none;font-size:15px}
+.foot nav a:hover{color:var(--link-ink)}
+.foot p{margin:0 0 11px;color:var(--ink);font-size:15px;line-height:1.45}
+.foot p a{text-decoration:none}.foot p a:hover{color:var(--link-ink)}
+.foot-brand .brand{margin-bottom:16px}
+.foot-brand p{color:var(--ink-2);max-width:18rem}
+.foot .fine{grid-column:1/-1;display:flex;justify-content:space-between;flex-wrap:wrap;gap:12px;margin-top:16px;padding-top:18px;border-top:1px solid var(--rule);font-size:13px}
+.foot .legal{display:flex;gap:18px;flex-wrap:wrap}.foot .legal a{color:var(--ink-2);text-decoration:none}.foot .legal a:hover{color:var(--link-ink)}
+.foot .social{display:flex;gap:18px}
+.foot .social a{color:var(--ink-2);text-decoration:none}
+
+.no-webgl #stage,.no-webgl #hud{display:none}
+@media (max-width:1180px){ .foot{grid-template-columns:repeat(2,minmax(0,1fr))} }
+@media (max-width:960px){ .figs{grid-template-columns:1fr} .pwrap .head{grid-template-columns:1fr} }
+@media (max-width:760px){
+  #scrim{background:linear-gradient(0deg,var(--paper) 0,rgba(233,236,232,.93) 42%,rgba(233,236,232,0) 62%)}
+  #hud .tag:not(.keep){display:none}
+  #hero{align-items:flex-end;padding-top:48vh;padding-bottom:5vh}
+  .readout{display:none}
+  .scopy{left:var(--gutter);right:var(--gutter);width:auto;top:auto;bottom:4vh;transform:none;padding-left:0}
+  .scopy .h h2{margin-bottom:10px} .scopy .h .lede{display:none} .scopy .h{margin-bottom:12px}
+  .stack{height:200px} .st ul{display:none}
+  .spec{bottom:auto;top:84px;width:92vw} .spec button small,.spec .ends{display:none} .spec button{font-size:12px;padding:8px}
+  #deploy .scopy{bottom:3vh}
+}
+@media (max-width:560px){ .foot{grid-template-columns:repeat(2,minmax(0,1fr));gap:var(--s6) var(--s5);padding-block:var(--band-y-sm) calc(var(--s6) + env(safe-area-inset-bottom,0px))} }
+@media (prefers-reduced-motion:reduce){ .st,.fig svg .draw{transition:none!important} .readout .cap i::before{animation:none} }
+</style>
+</head>
+<body>
+
+<canvas id="stage" aria-hidden="true"></canvas>
+<div id="scrim" aria-hidden="true"></div>
+<div id="hud" aria-hidden="true"></div>
+
+<nav class="nav" aria-label="Primary">
+  <a class="brand" href="/"><img alt="" src="/design-system/assets/Logos/racktrack-mark.jpg">RackTrack</a>
+  <ul>
+    <li><a href="/pages/why-racktrack/">Why RackTrack</a></li>
+    <li><a href="/pages/solutions/">Solutions</a></li>
+    <li><a href="/pages/use-cases/">Use cases</a></li>
+    <li><a href="/pages/resources/">Resources</a></li>
+    <li><a href="/pages/trust-security/" aria-current="page">Trust</a></li>
+    <li><a href="/pages/about-us/">About</a></li>
+    <li><a href="/pages/sign-in/">Sign in</a></li>
+  </ul>
+  <a class="btn solid" href="/pages/contact-us/"><span class="led"></span>Book a sweep</a>
+</nav>
+
+<main>
+  <section class="ch" id="hero">
+    <div class="copy">
+      <h1>Enterprise-grade by architecture</h1>
+      <p class="lede">Your footage is processed inside your tenant. Your keys stay in your vault. Your team decides what's kept.</p>
+      <div class="actions">
+        <a class="btn solid" href="/pages/contact-us/"><span class="led"></span>Request a security brief</a>
+        <a class="btn" href="#data">See data handling ↓</a>
+      </div>
+      <div class="readout" aria-label="Security posture">
+        <div class="cap"><span>posture readout</span><i>live</i></div>
+        <dl>
+          <dt>tenant isolation</dt><dd>enforced</dd>
+          <dt>encryption at rest</dt><dd>active</dd>
+          <dt>encryption in transit</dt><dd>active</dd>
+          <dt>access control</dt><dd>role-based</dd>
+          <dt>audit logging</dt><dd>enabled</dd>
+          <dt>SOC 2 Type II</dt><dd class="a">in progress</dd>
+        </dl>
+      </div>
+    </div>
+  </section>
+
+  <section class="ch pinsec" id="posture" data-steps="5">
+    <div class="pin">
+      <div class="scopy">
+        <div class="h"><h2>Built for the checks procurement runs first</h2></div>
+        <div class="stack">
+          <div class="st on"><p class="no">01 · Tenant isolation <span class="chip">verified</span></p><h3>Your data has its own walls</h3><p>Every customer environment is isolated. Evidence and structured records stay under your control.</p></div>
+          <div class="st"><p class="no">02 · Encryption <span class="chip">active</span></p><h3>Sealed in motion and at rest</h3><p>Rack video, derived records and operational metadata are encrypted in transit and at rest.</p></div>
+          <div class="st"><p class="no">03 · Credential vaulting <span class="chip">active</span></p><h3>The keys never come inside</h3><p>Works with the credential vault you already run. RackTrack never stores production access keys.</p></div>
+          <div class="st"><p class="no">04 · Access control &amp; audit logs <span class="chip">enabled</span></p><h3>Every door has a log</h3><p>Role-based access and full audit logging support least privilege and after-the-fact review.</p></div>
+          <div class="st"><p class="no">05 · SOC 2 Type II <span class="chip a">in progress</span></p><h3>Being prepared for formal review</h3><p>Controls and evidence practices are being prepared for the Type II audit. It isn't complete yet, and we say so.</p></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="ch pinsec" id="data" data-steps="4">
+    <div class="pin">
+      <div class="scopy">
+        <div class="h"><h2>Your data stays inside your tenant</h2></div>
+        <div class="stack">
+          <div class="st on"><p class="no">1 · Rack video</p><h3>You capture it. You own it</h3><p>The sweep is filmed on your phone and uploaded straight into your tenant.</p></div>
+          <div class="st"><p class="no">2 · AI processing</p><h3>Runs inside your tenant</h3><p>Frames are read where they land. Nothing is sent somewhere else to be processed.</p></div>
+          <div class="st"><p class="no">3 · Structured output</p><h3>Devices, connections, topology</h3><p>The structured record is what powers your workflows.</p></div>
+          <div class="st"><p class="no">4 · Your control</p><h3>Retain, delete or reprocess</h3>
+            <ul><li><b>Retain as evidence</b>keep what matters, as long as you need</li><li><b>Delete anytime</b>remove raw footage when it's done</li><li><b>Reprocess</b>re-run past footage as the platform improves</li></ul>
+            <p class="never">Raw footage never leaves your control.</p></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="ch pinsec" id="deploy" data-steps="4">
+    <div class="pin">
+      <div class="scopy">
+        <div class="h"><h2>The same boundary, drawn four ways</h2></div>
+        <div class="stack">
+          <div class="st on"><p class="no">Multi-tenant cloud</p><h3>Fastest path to value</h3><p>Secure and scalable, and the right starting point for most teams. Your tenant sits beside others, walled off.</p></div>
+          <div class="st"><p class="no">Dedicated cloud tenancy</p><h3>Your own private environment</h3><p>Deployed inside your private cloud environment, with full control over that tenancy.</p></div>
+          <div class="st"><p class="no">Customer-hosted</p><h3>Inside your data center</h3><p>Runs in your own facility, built for regulated environments.</p></div>
+          <div class="st"><p class="no">Sovereign / air-gapped</p><h3>No external network at all</h3><p>For classified or restricted facilities. Architecture detail is shared during formal evaluation. <a href="/pages/contact-us/">Contact RackTrack →</a></p></div>
+        </div>
+      </div>
+      <div class="spec" id="spec">
+        <div class="bar">
+          <button type="button" class="on" data-go="0">Multi-tenant cloud<small>shared</small></button>
+          <button type="button" data-go="1">Dedicated tenancy<small>private cloud</small></button>
+          <button type="button" data-go="2">Customer-hosted<small>your facility</small></button>
+          <button type="button" data-go="3">Sovereign / air-gapped<small>no network</small></button>
+        </div>
+        <div class="ends"><span>shared · fastest to deploy</span><span>isolated · strictest boundary</span></div>
+      </div>
+    </div>
+  </section>
+
+  <section class="ch" id="patents">
+    <div class="pwrap">
+      <div class="head"><h2>Built on defensible innovation</h2><p class="lede">Pending patent filings cover automated cable mapping and infrastructure intelligence workflows.</p></div>
+      <div class="figs" id="figs">
+        <article class="fig"><div class="top"><span>FIG. i</span><b>patent pending</b></div>
+          <svg viewBox="0 0 320 200" role="img" aria-label="Drawing: a rack front with detected devices boxed">
+            <rect class="ln" x="118" y="18" width="84" height="164"/>
+            <g class="lt"><rect x="124" y="26" width="72" height="12"/><rect x="124" y="42" width="72" height="12"/><rect x="124" y="58" width="72" height="24"/><rect x="124" y="86" width="72" height="24"/><rect x="124" y="114" width="72" height="40"/><rect x="124" y="158" width="72" height="18"/></g>
+            <g class="g"><rect class="draw" style="--l:180" x="120" y="24" width="76" height="16"/><rect class="draw" style="--l:220" x="120" y="84" width="76" height="28"/><rect class="draw" style="--l:260" x="120" y="112" width="76" height="44"/></g>
+            <path class="gi draw" style="--l:200" d="M200 32 H250 M200 98 H250 M200 134 H250"/>
+            <text x="254" y="35">102 device</text><text x="254" y="101">104 port</text><text x="254" y="137">106 label</text>
+            <path class="lt" d="M40 150 L100 100 M40 150 L100 60"/><rect class="ln" x="22" y="140" width="22" height="38" rx="4"/><text x="16" y="194">110 capture</text>
+          </svg>
+          <h3>Visual rack intelligence</h3><p>Capturing rack imagery and identifying devices, ports, cables and labels directly from the physical environment.</p></article>
+        <article class="fig"><div class="top"><span>FIG. ii</span><b>patent pending</b></div>
+          <svg viewBox="0 0 320 200" role="img" aria-label="Drawing: cables mapped from a patch panel to switch ports and checked against neighbour data">
+            <rect class="ln" x="30" y="40" width="260" height="22"/><rect class="ln" x="30" y="130" width="260" height="22"/>
+            <g class="lt"><rect x="40" y="46" width="10" height="10"/><rect x="60" y="46" width="10" height="10"/><rect x="80" y="46" width="10" height="10"/><rect x="100" y="46" width="10" height="10"/><rect x="120" y="46" width="10" height="10"/><rect x="140" y="46" width="10" height="10"/>
+              <rect x="40" y="136" width="10" height="10"/><rect x="60" y="136" width="10" height="10"/><rect x="80" y="136" width="10" height="10"/><rect x="100" y="136" width="10" height="10"/><rect x="120" y="136" width="10" height="10"/><rect x="140" y="136" width="10" height="10"/></g>
+            <g class="g"><path class="draw" style="--l:140" d="M45 56 C45 95 85 100 85 136"/><path class="draw" style="--l:140" d="M65 56 C65 95 105 100 105 136"/><path class="draw" style="--l:140" d="M125 56 C125 95 45 100 45 136"/></g>
+            <path class="gi draw" style="--l:180" d="M170 141 H230 V100 H270"/><rect class="ln" x="232" y="88" width="72" height="24"/><text x="238" y="103">CDP · LLDP</text>
+            <text x="30" y="32">210 patch panel</text><text x="30" y="170">212 switch</text><text x="160" y="190">214 validated map</text>
+          </svg>
+          <h3>Cable-to-port mapping &amp; validation</h3><p>Cable-to-port maps generated from visual data and validated against live CDP, LLDP, ARP and neighbour data.</p></article>
+        <article class="fig"><div class="top"><span>FIG. iii</span><b>patent pending</b></div>
+          <svg viewBox="0 0 320 200" role="img" aria-label="Drawing: several sweeps merged into one verified state">
+            <g class="lt"><rect x="24" y="28" width="70" height="40"/><rect x="24" y="80" width="70" height="40"/><rect x="24" y="132" width="70" height="40"/></g>
+            <text x="28" y="22">sweep 10</text><text x="28" y="76">sweep 11</text><text x="28" y="128">sweep 12</text>
+            <rect class="ln" x="226" y="70" width="74" height="60"/><text x="232" y="146">310 verified state</text>
+            <g class="g"><path class="draw" style="--l:180" d="M94 48 C160 48 170 100 226 100"/><path class="draw" style="--l:140" d="M94 100 H226"/><path class="draw" style="--l:180" d="M94 152 C160 152 170 100 226 100"/></g>
+            <rect class="gi draw" style="--l:150" x="140" y="84" width="46" height="32"/><text x="140" y="80">312 reconcile</text>
+            <path class="lt" d="M234 84 H292 M234 96 H292 M234 108 H280 M234 120 H270"/>
+          </svg>
+          <h3>Infrastructure reconciliation methods</h3><p>Merging scans across sessions and reconciling physical-to-logical data into one verified state.</p></article>
+      </div>
+      <p class="appno"><b>US Application 19/219,347</b> · covers all three filings · patent pending</p>
+    </div>
+  </section>
+
+  <section class="ch" id="cta">
+    <h2>Bring RackTrack to your security team</h2>
+    <p class="lede">We'll share the security brief and walk your reviewers through the architecture.</p>
+    <div class="actions">
+      <a class="btn solid" href="/pages/contact-us/"><span class="led"></span>Request a security brief</a>
+      <a class="btn" href="/pages/solutions/">View solutions</a>
+    </div>
+  </section>
+
+  <footer class="foot">
+    <div class="foot-brand">
+      <a class="brand" href="/"><img alt="" src="/design-system/assets/Logos/racktrack-mark.jpg">RackTrack</a>
+      <p>Physical infrastructure intelligence for data centers.</p>
+    </div>
+    <nav aria-label="Platform"><b>Platform</b>
+      <a href="/pages/why-racktrack/">Why RackTrack</a><a href="/pages/solutions/">Solutions</a><a href="/pages/use-cases/">Use cases</a><a href="/pages/trust-security/">Trust &amp; security</a></nav>
+    <nav aria-label="Company"><b>Company</b>
+      <a href="/pages/resources/">Resources</a><a href="/pages/about-us/">About us</a><a href="/pages/contact-us/">Contact us</a></nav>
+    <div><b>Contact</b>
+      <p><a href="mailto:info@racktrack.ai">info@racktrack.ai</a></p><p><a href="tel:+18608782448">+1 (860) 878 2448</a></p><p>85 Felt Rd, Suite #604<br>South Windsor, CT 06074</p></div>
+    <div class="fine">
+      <span>© 2026 RackTrack Inc. · Patent pending</span>
+      <span class="legal"><a href="/pages/legal/privacy-policy/">Privacy</a><a href="/pages/legal/terms-of-use/">Terms</a><a href="/pages/legal/cookie-policy/">Cookies</a><a href="/pages/legal/data-we-collect/">Data we collect</a><a href="/pages/legal/third-party-services/">Third parties</a></span>
+      <span class="social"><a href="https://www.linkedin.com/company/racktrack/" rel="noopener" target="_blank">LinkedIn</a><a href="https://www.instagram.com/racktrack_inc/" rel="noopener" target="_blank">Instagram</a><a href="https://www.facebook.com/share/18depF5xzA/" rel="noopener" target="_blank">Facebook</a></span>
+    </div>
+  </footer>
+</main>
+
+<script type="importmap">
+{ "imports": {
+  "three": "https://cdn.jsdelivr.net/npm/three@0.170.0/build/three.module.js",
+  "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.170.0/examples/jsm/"
+} }
+</script>
+<!--DOMJS-START-->
+<script>
+/* ───── Trust & security: pinned step copy, spectrum buttons, reveals (no WebGL needed) ───── */
+(()=>{
+const reduce=matchMedia('(prefers-reduced-motion: reduce)').matches;
+const clamp=(x,a=0,b=1)=>Math.min(b,Math.max(a,x));
+const $=s=>document.querySelector(s), $$=s=>[...document.querySelectorAll(s)];
+const secs=$$('.pinsec').map(el=>({el,n:+el.dataset.steps,st:[...el.querySelectorAll('.st')],bars:[...el.querySelectorAll('.prog i b')],lbl:el.querySelector('.prog .n'),cur:-1}));
+const prog=el=>{const r=el.getBoundingClientRect();return -r.top/(r.height-innerHeight);};
+window.TS={p:id=>prog(document.getElementById(id))};
+const go=(el,n,k)=>{const r=el.getBoundingClientRect();scrollTo({top:scrollY+r.top+(r.height-innerHeight)*((k+.5)/n),behavior:reduce?'auto':'smooth'});};
+const spec=$$('#spec button');
+spec.forEach(b=>b.addEventListener('click',()=>go($('#deploy'),4,+b.dataset.go)));
+new IntersectionObserver(es=>es.forEach(e=>{if(e.isIntersecting)$('#figs').classList.add('in')}),{threshold:.3}).observe($('#figs'));
+function frame(){
+  const vh=innerHeight,S=scrollY/(document.documentElement.scrollHeight-vh||1);
+  secs.forEach(s=>{const p=clamp(prog(s.el));const x=p*s.n;const k=Math.min(s.n-1,Math.floor(x));
+    if(k!==s.cur){s.cur=k;s.st.forEach((e,i)=>e.classList.toggle('on',i===k));if(s.lbl)s.lbl.textContent=(k+1)+' / '+s.n;if(s.el.id==='deploy')spec.forEach((b,i)=>b.classList.toggle('on',i===k));}
+    s.bars.forEach((b,i)=>b.style.width=(clamp(x-i)*100)+'%');});
+  requestAnimationFrame(frame);
+}
+requestAnimationFrame(frame);
+})();
+</script>
+<!--DOMJS-END-->
+<!--GLJS-START-->
+<script type="module">
+/* ═════════════ Trust & security · 3D ═════════════
+   The tenant: a glass enclosure on a drawing sheet. Inside it, a rack is filmed, frames are processed in a core,
+   records stack up and go where you decide. Nothing crosses the glass.
+   Posture (5 stops): isolation · encryption · vault · access & audit · SOC 2 (in progress)
+   Data (4 stops): rack video · processing · structured output · your control
+   Deployment (4 stops): the same boundary among neighbours · inside a private boundary · inside your building · air-gapped */
+import * as THREE from 'three';
+import { RoomEnvironment } from 'three/addons/environments/RoomEnvironment.js';
+import { RoundedBoxGeometry } from 'three/addons/geometries/RoundedBoxGeometry.js';
+
+const reduce=matchMedia('(prefers-reduced-motion: reduce)').matches;
+const SNAP=location.search.includes('snap');
+const clamp=(x,a=0,b=1)=>Math.min(b,Math.max(a,x));
+const smooth=(a,b,x)=>{const t=clamp((x-a)/(b-a));return t*t*(3-2*t)};
+const lerp=(a,b,t)=>a+(b-a)*t;
+const C=h=>new THREE.Color(h);
+const COL={link:C('#1FD67C'),linkInk:C('#04703F'),drift:C('#FF9A2E'),record:C('#7C93A8'),ink:C('#111614')};
+const MONO='"JetBrains Mono", monospace', SANS='"Inter", sans-serif';
+const V3=(x,y,z)=>new THREE.Vector3(x,y,z);
+
+const canvas=document.getElementById('stage');
+let renderer;
+try{ renderer=new THREE.WebGLRenderer({canvas,antialias:true,alpha:true,powerPreference:'high-performance'}); }
+catch(e){ document.documentElement.classList.add('no-webgl'); throw e; }
+renderer.setPixelRatio(SNAP?1:Math.min(devicePixelRatio,2));
+renderer.setClearColor(0,0);
+renderer.toneMapping=THREE.ACESFilmicToneMapping; renderer.toneMappingExposure=1.02;
+renderer.outputColorSpace=THREE.SRGBColorSpace;
+renderer.shadowMap.enabled=true; renderer.shadowMap.type=SNAP?THREE.PCFShadowMap:THREE.PCFSoftShadowMap;
+const scene=new THREE.Scene();
+scene.environment=new THREE.PMREMGenerator(renderer).fromScene(new RoomEnvironment(),.04).texture; scene.environmentIntensity=.85;
+const camera=new THREE.PerspectiveCamera(28,1,.1,300);
+scene.add(new THREE.HemisphereLight(0xffffff,0x9aa39e,.55));
+const sun=new THREE.DirectionalLight(0xffffff,1.8);sun.position.set(-6,12,8);sun.castShadow=true;
+sun.shadow.mapSize.set(SNAP?1024:2048,SNAP?1024:2048);Object.assign(sun.shadow.camera,{left:-9,right:9,top:8,bottom:-8,near:1,far:40});sun.shadow.bias=-.0006;sun.shadow.radius=4;scene.add(sun);
+const fill=new THREE.DirectionalLight(0xdfe9ff,.5);fill.position.set(7,5,-6);scene.add(fill);
+
+function cnv(w,h){const c=document.createElement('canvas');c.width=w;c.height=h;return [c,c.getContext('2d')];}
+function tex(c){const t=new THREE.CanvasTexture(c);t.colorSpace=THREE.SRGBColorSpace;t.anisotropy=Math.min(8,renderer.capabilities.getMaxAnisotropy());return t;}
+const alu=new THREE.MeshStandardMaterial({color:'#dfe3df',metalness:.72,roughness:.3});
+const graph=new THREE.MeshStandardMaterial({color:'#2a302d',metalness:.55,roughness:.45});
+const paperM=new THREE.MeshStandardMaterial({color:'#F4F6F3',roughness:.9});
+const add=(m,p,parent=scene)=>{if(p)m.position.set(...p);parent.add(m);return m;};
+
+/* ─────────── base sheet ─────────── */
+const EX=3, EZ=2, EH=2.4;          // enclosure half-width, half-depth, height
+const BW=11.4, BD=8.4;
+function sheetCanvas(){const W=2280,H=Math.round(W*BD/BW),s=W/BW;const [c,g]=cnv(W,H);const X=x=>(x+BW/2)*s,Z=z=>(z+BD/2)*s;
+  g.fillStyle='#F4F6F3';g.fillRect(0,0,W,H);
+  for(let x=-BW/2;x<=BW/2;x+=.3){g.fillStyle='rgba(17,22,20,.045)';g.fillRect(X(x),0,1.2,H);} for(let z=-BD/2;z<=BD/2;z+=.3){g.fillStyle='rgba(17,22,20,.045)';g.fillRect(0,Z(z),W,1.2);}
+  g.strokeStyle='#111614';g.lineWidth=3;g.strokeRect(18,18,W-36,H-36);
+  g.setLineDash([14,10]);g.strokeStyle='#04703F';g.lineWidth=3;g.strokeRect(X(-EX-.25),Z(-EZ-.25),(2*EX+.5)*s,(2*EZ+.5)*s);g.setLineDash([]);
+  g.fillStyle='#04703F';g.font=`500 26px ${MONO}`;g.fillText('tenant boundary',X(-EX-.2),Z(-EZ-.36));
+  g.fillStyle='#4A544F';g.font=`400 22px ${MONO}`;g.fillText('outside · your vault, your people',X(-5.3),Z(3.7));
+  g.fillStyle='#111614';g.fillRect(W-560,H-122,540,100);g.fillStyle='#DDE4DF';g.font=`500 30px ${MONO}`;g.fillText('Tenant T-0412',W-540,H-74);
+  g.fillStyle='#93A19A';g.font=`400 22px ${MONO}`;g.fillText('isolation enforced · 1:40',W-540,H-40);
+  return c;}
+const sheetMat=new THREE.MeshStandardMaterial({map:tex(sheetCanvas()),roughness:.9});
+const base=add(new THREE.Mesh(new THREE.BoxGeometry(BW,.24,BD),[alu,alu,sheetMat,alu,alu,alu]),[0,-.12,0]);base.receiveShadow=true;
+add(new THREE.Mesh(new THREE.BoxGeometry(BW+.16,.05,BD+.16),graph),[0,-.265,0]);
+
+/* ─────────── the enclosure ─────────── */
+const ENC=new THREE.Group();scene.add(ENC);
+const FR=.05;
+function bar(a,b){const A=V3(...a),B=V3(...b);const L=A.distanceTo(B);const m=new THREE.Mesh(new THREE.BoxGeometry(FR,FR,L),alu);m.position.copy(A).lerp(B,.5);m.lookAt(B);m.castShadow=true;ENC.add(m);}
+[[-EX,-EZ],[EX,-EZ],[EX,EZ],[-EX,EZ]].forEach(([x,z])=>bar([x,0,z],[x,EH,z]));
+[0,EH].forEach(y=>{bar([-EX,y,-EZ],[EX,y,-EZ]);bar([-EX,y,EZ],[EX,y,EZ]);bar([-EX,y,-EZ],[-EX,y,EZ]);bar([EX,y,-EZ],[EX,y,EZ]);});
+for(let x=-2;x<=2;x+=1){if(Math.abs(x-1.5)<.6)continue;bar([x,0,-EZ],[x,EH,-EZ]);bar([x,0,EZ],[x,EH,EZ]);}
+bar([-EX,0,0],[-EX,EH,0]);bar([EX,0,0],[EX,EH,0]);
+const glassMat=new THREE.MeshStandardMaterial({color:'#d4e2da',metalness:0,roughness:.1,transparent:true,opacity:.14,side:THREE.DoubleSide,depthWrite:false});
+const walls=[[2*EX,EH,[0,EH/2,-EZ],0],[2*EX,EH,[0,EH/2,EZ],0],[2*EZ,EH,[-EX,EH/2,0],Math.PI/2],[2*EZ,EH,[EX,EH/2,0],Math.PI/2]].map(([w,h,p,ry])=>{const m=new THREE.Mesh(new THREE.PlaneGeometry(w,h),glassMat);m.position.set(...p);m.rotation.y=ry;m.renderOrder=2;ENC.add(m);return m;});
+const glowEdges=new THREE.LineSegments(new THREE.EdgesGeometry(new THREE.BoxGeometry(2*EX+.08,EH+.04,2*EZ+.08)),new THREE.LineBasicMaterial({color:COL.link,transparent:true,opacity:0,toneMapped:false,depthWrite:false}));
+glowEdges.position.y=EH/2;ENC.add(glowEdges);
+// door in the front wall + badge reader
+const DX=1.5;
+{const dm=new THREE.MeshStandardMaterial({color:'#9aa6a0',metalness:.2,roughness:.2,transparent:true,opacity:.35,depthWrite:false});
+ const leaf=new THREE.Mesh(new THREE.PlaneGeometry(.78,1.95),dm);leaf.position.set(DX,.98,EZ+.004);ENC.add(leaf);
+ bar([DX-.42,0,EZ],[DX-.42,2.0,EZ]);bar([DX+.42,0,EZ],[DX+.42,2.0,EZ]);bar([DX-.42,2.0,EZ],[DX+.42,2.0,EZ]);}
+const reader=add(new THREE.Mesh(new RoundedBoxGeometry(.12,.18,.04,2,.01),graph),[DX+.58,1.05,EZ+.03],ENC);
+const readerLed=add(new THREE.Mesh(new THREE.PlaneGeometry(.05,.02),new THREE.MeshBasicMaterial({color:COL.link,toneMapped:false})),[DX+.58,1.1,EZ+.052],ENC);
+
+/* ─────────── inside: rack, phone, core, records, control ─────────── */
+function rackFace(){const [c,g]=cnv(128,352);g.fillStyle='#1d2321';g.fillRect(0,0,128,352);
+  for(let i=0;i<14;i++){const y=8+i*24;g.fillStyle=i%3===0?'#2f3633':'#262c29';g.fillRect(8,y,112,20);for(let k=0;k<8;k++){g.fillStyle=(i+k)%3?'#1FD67C':'#0c0f0e';g.fillRect(14+k*12,y+13,5,3);}}return c;}
+const rack=add(new THREE.Mesh(new THREE.BoxGeometry(.56,1.5,.56),[graph,graph,graph,graph,new THREE.MeshStandardMaterial({map:tex(rackFace()),metalness:.3,roughness:.6}),graph]),[-2.25,.75,-.7]);rack.castShadow=true;
+const phone=add(new THREE.Mesh(new RoundedBoxGeometry(.2,.4,.025,4,.025),new THREE.MeshStandardMaterial({color:'#15191a',metalness:.4,roughness:.35})),[-2.25,1.0,.35]);
+{const [c,g]=cnv(100,200);g.fillStyle='#0c1110';g.fillRect(0,0,100,200);g.strokeStyle='#1FD67C';g.lineWidth=3;g.strokeRect(14,30,72,120);g.fillStyle='rgba(31,214,124,.4)';for(let i=0;i<5;i++)g.fillRect(20,38+i*22,60,12);g.fillStyle='#ff5a4a';g.beginPath();g.arc(50,178,7,0,7);g.fill();
+ const s=new THREE.Mesh(new THREE.PlaneGeometry(.18,.37),new THREE.MeshBasicMaterial({map:tex(c),toneMapped:false}));s.position.z=.014;phone.add(s);}
+const frustum=new THREE.LineSegments(new THREE.BufferGeometry().setFromPoints([[-.27,1.5],[.27,1.5],[-.27,0],[.27,0]].flatMap(([x,y])=>[V3(-2.25,1.0,.33),V3(-2.25+x,y,-.41)])),new THREE.LineBasicMaterial({color:COL.link,transparent:true,opacity:.4,toneMapped:false}));scene.add(frustum);
+const CORE=V3(-.35,.82,0);
+add(new THREE.Mesh(new RoundedBoxGeometry(.9,.5,.9,2,.02),alu),[-.35,.25,0]).castShadow=true;
+const coreBody=add(new THREE.Mesh(new THREE.CylinderGeometry(.3,.3,.5,40),graph),[-.35,.75,0]);coreBody.castShadow=true;
+const coreRing=add(new THREE.Mesh(new THREE.TorusGeometry(.5,.018,10,80),new THREE.MeshBasicMaterial({color:COL.link,toneMapped:false,transparent:true,opacity:.8})),[-.35,.82,0]);
+const coreRing2=add(new THREE.Mesh(new THREE.TorusGeometry(.42,.01,8,80),new THREE.MeshBasicMaterial({color:COL.linkInk,toneMapped:false,transparent:true,opacity:.6})),[-.35,.82,0]);
+const STACK=V3(1.15,0,-.45);
+add(new THREE.Mesh(new RoundedBoxGeometry(.66,.08,.48,2,.01),alu),[STACK.x,.04,STACK.z]).castShadow=true;
+const plateMat=new THREE.MeshStandardMaterial({color:'#F4F6F3',roughness:.7});
+const NP=16;
+const stackPlates=new THREE.InstancedMesh(new THREE.BoxGeometry(.54,.022,.38),plateMat,NP);stackPlates.castShadow=true;scene.add(stackPlates);
+const plateEdges=new THREE.InstancedMesh(new THREE.BoxGeometry(.545,.006,.385),new THREE.MeshBasicMaterial({color:COL.link,toneMapped:false}),NP);scene.add(plateEdges);
+const lockBand=add(new THREE.LineSegments(new THREE.EdgesGeometry(new THREE.BoxGeometry(.72,.5,.54)),new THREE.LineBasicMaterial({color:COL.link,transparent:true,opacity:0,toneMapped:false})),[STACK.x,.33,STACK.z]);
+// control pedestals
+const PED=[V3(2.3,0,-1.2),V3(2.3,0,0),V3(2.3,0,1.2)];
+const retain=add(new THREE.Mesh(new RoundedBoxGeometry(.5,.42,.42,2,.02),graph),[PED[0].x,.21,PED[0].z]);retain.castShadow=true;
+add(new THREE.Mesh(new THREE.BoxGeometry(.3,.01,.05),new THREE.MeshBasicMaterial({color:'#050707'})),[PED[0].x,.425,PED[0].z]);
+const grate=add(new THREE.Mesh(new THREE.CylinderGeometry(.23,.25,.07,40),alu),[PED[1].x,.035,PED[1].z]);
+const grateRing=add(new THREE.Mesh(new THREE.RingGeometry(.1,.2,40),new THREE.MeshBasicMaterial({color:'#2a302d',side:THREE.DoubleSide})),[PED[1].x,.073,PED[1].z]);grateRing.rotation.x=-Math.PI/2;
+const loopArrow=add(new THREE.Mesh(new THREE.TorusGeometry(.2,.03,10,50,Math.PI*1.6),alu),[PED[2].x,.3,PED[2].z]);loopArrow.rotation.y=Math.PI/2;loopArrow.castShadow=true;
+add(new THREE.Mesh(new THREE.ConeGeometry(.06,.12,16),alu),[PED[2].x,.3+.2*Math.sin(Math.PI*1.6),PED[2].z+.2*Math.cos(Math.PI*1.6)]).rotation.x=Math.PI*.1;
+
+/* ─────────── outside: vault, audit printer, SOC 2 plaque ─────────── */
+const VAULT=V3(-4.35,0,.9);
+function vaultFace(){const [c,g]=cnv(256,320);g.fillStyle='#2a302d';g.fillRect(0,0,256,320);g.strokeStyle='#3a423e';g.lineWidth=6;g.strokeRect(14,14,228,292);
+  g.strokeStyle='#c3cac5';g.lineWidth=5;g.beginPath();g.arc(128,150,46,0,7);g.stroke();for(let i=0;i<24;i++){const a=i/24*Math.PI*2;g.beginPath();g.moveTo(128+Math.cos(a)*38,150+Math.sin(a)*38);g.lineTo(128+Math.cos(a)*46,150+Math.sin(a)*46);g.stroke();}
+  g.fillStyle='#c3cac5';g.fillRect(190,130,14,44);g.fillStyle='#E9ECE8';g.fillRect(40,250,120,26);g.fillStyle='#111614';g.font=`500 17px ${MONO}`;g.fillText('your vault',48,269);return c;}
+const vault=add(new THREE.Mesh(new RoundedBoxGeometry(.72,.9,.6,3,.03),[graph,graph,graph,graph,new THREE.MeshStandardMaterial({map:tex(vaultFace()),metalness:.5,roughness:.4}),graph]),[VAULT.x,.45,VAULT.z]);vault.castShadow=true;vault.rotation.y=.5;
+const SLOT=V3(-EX,1.15,.9);
+add(new THREE.Mesh(new THREE.BoxGeometry(.03,.12,.2),graph),[SLOT.x-.01,SLOT.y,SLOT.z]);
+const tokenLine=add(new THREE.Line(new THREE.BufferGeometry().setFromPoints([V3(VAULT.x+.3,.75,VAULT.z+.1),V3(-3.7,1.15,.9),SLOT.clone()]),new THREE.LineDashedMaterial({color:COL.linkInk,dashSize:.06,gapSize:.05,transparent:true,opacity:.5})));tokenLine.computeLineDistances();
+const token=add(new THREE.Mesh(new RoundedBoxGeometry(.1,.06,.06,2,.012),new THREE.MeshBasicMaterial({color:COL.link,toneMapped:false,transparent:true})));
+const PRN=V3(2.7,0,2.75);
+add(new THREE.Mesh(new RoundedBoxGeometry(.36,.2,.26,2,.02),graph),[PRN.x,.1,PRN.z]).castShadow=true;
+function logCanvas(){const [c,g]=cnv(128,1024);g.fillStyle='#F4F6F3';g.fillRect(0,0,128,1024);g.font=`400 10px ${MONO}`;
+  const acts=['viewed DC1-R07','export audit','signed in','changed role','viewed B-06','approved CHG','deleted clip','viewed topo'];const roles=['admin','reviewer','viewer'];
+  for(let i=0;i<64;i++){const y=12+i*16;g.fillStyle='#4A544F';g.fillText(`09:${String(10+i%50).padStart(2,'0')}`,6,y);g.fillStyle=i%9===4?'#9C4C00':'#111614';g.fillText(`${roles[i%3]}`,42,y);g.fillStyle='#4A544F';g.fillText(acts[i%8],6,y+7.5>1024?y:y);}
+  return c;}
+const logTex=tex(logCanvas());logTex.wrapS=logTex.wrapT=THREE.RepeatWrapping;logTex.repeat.set(1,.28);
+const tape=add(new THREE.Mesh(new THREE.PlaneGeometry(.2,.95),new THREE.MeshStandardMaterial({map:logTex,side:THREE.DoubleSide,roughness:.9})),[PRN.x,.66,PRN.z-.02]);tape.rotation.x=-.12;
+function plaqueCanvas(){const [c,g]=cnv(512,272);g.fillStyle='#F4F6F3';g.fillRect(0,0,512,272);g.strokeStyle='#C6CCC7';g.lineWidth=4;g.strokeRect(2,2,508,268);
+  g.fillStyle='#111614';g.font=`500 46px ${SANS}`;g.fillText('SOC 2 Type II',30,82);g.fillStyle='#9C4C00';g.font=`500 26px ${MONO}`;g.fillText('in progress',30,130);
+  g.fillStyle='#4A544F';g.font=`400 20px ${MONO}`;g.fillText('controls & evidence practices',30,190);g.fillText('prepared for formal review',30,220);
+  g.strokeStyle='#E2E6E2';g.lineWidth=14;g.beginPath();g.arc(420,150,54,0,7);g.stroke();
+  g.strokeStyle='#FF9A2E';g.setLineDash([10,8]);g.beginPath();g.arc(420,150,54,-Math.PI/2,Math.PI*.55);g.stroke();g.setLineDash([]);return c;}
+const PLQ=V3(-1.35,0,2.8);
+const plaque=add(new THREE.Mesh(new THREE.PlaneGeometry(1.0,.53),new THREE.MeshStandardMaterial({map:tex(plaqueCanvas()),roughness:.7})),[PLQ.x,.3,PLQ.z]);plaque.rotation.x=-.45;plaque.castShadow=true;
+add(new THREE.Mesh(new THREE.BoxGeometry(.9,.04,.3),alu),[PLQ.x,.02,PLQ.z-.08]);
+
+/* ─────────── moving frames, records, ripples ─────────── */
+function frameCanvas(cipher){const [c,g]=cnv(128,84);g.fillStyle=cipher?'#0c1110':'#15191a';g.fillRect(0,0,128,84);
+  if(!cipher){g.fillStyle='#262c29';for(let i=0;i<5;i++)g.fillRect(30,10+i*13,68,10);g.fillStyle='#1FD67C';for(let i=0;i<5;i++)g.fillRect(84,13+i*13,6,3);}
+  else{g.fillStyle='#1FD67C';g.font=`500 10px ${MONO}`;for(let r=0;r<6;r++){let s='';for(let k=0;k<12;k++)s+='0123456789abcdef'[(r*7+k*13)%16];g.fillText(s,24,14+r*12);}}
+  g.fillStyle='#E9ECE8';for(let i=0;i<6;i++){g.fillRect(6,6+i*13,8,6);g.fillRect(114,6+i*13,8,6);}return c;}
+const NF=18;
+const frames=new THREE.InstancedMesh(new THREE.PlaneGeometry(.28,.18),new THREE.MeshBasicMaterial({map:tex(frameCanvas(false)),toneMapped:false,side:THREE.DoubleSide,transparent:true}),NF);scene.add(frames);
+const cipher=new THREE.InstancedMesh(new THREE.PlaneGeometry(.285,.185),new THREE.MeshBasicMaterial({map:tex(frameCanvas(true)),toneMapped:false,side:THREE.DoubleSide,transparent:true,opacity:0,depthWrite:false}),NF);cipher.renderOrder=3;scene.add(cipher);
+const flying=new THREE.InstancedMesh(new THREE.BoxGeometry(.3,.014,.2),plateMat,8);scene.add(flying);
+const F=[...Array(NF)].map(()=>({on:false,route:0,t:0,sp:.5,dest:0}));
+const P=[...Array(8)].map(()=>({on:false,t:0}));
+let stackCount=5, spawnT=0, rippleT=9;
+const ripple=add(new THREE.Mesh(new THREE.RingGeometry(.05,.09,48),new THREE.MeshBasicMaterial({color:COL.link,transparent:true,opacity:0,side:THREE.DoubleSide,toneMapped:false,depthWrite:false})),[EX-.005,1.1,.9]);ripple.rotation.y=Math.PI/2;
+const HIT=V3(EX-.12,1.1,.9);
+const bez=(a,b,h)=>t=>{const m=a.clone().lerp(b,.5);m.y+=h;const p=a.clone().lerp(m,t),q=m.clone().lerp(b,t);return p.lerp(q,t);};
+const R1=bez(V3(-2.25,1.0,.3),CORE.clone().add(V3(-.2,.1,0)),.7);
+const R2=bez(CORE.clone().add(V3(.2,.15,0)),V3(STACK.x,.5,STACK.z),.6);
+const R3=PED.map((p,k)=>bez(CORE.clone().add(V3(.25,.1,0)),V3(p.x,k===2?.55:.5,p.z),.7));
+const R4=bez(CORE.clone().add(V3(.25,.1,.2)),HIT,.3);
+
+/* ─────────── deployment props ─────────── */
+const DEP=new THREE.Group();scene.add(DEP);
+const dashMat=c=>new THREE.LineDashedMaterial({color:c,dashSize:.14,gapSize:.1,transparent:true,opacity:0,depthWrite:false,toneMapped:false});
+function dashedBox(w,h,d,pos,c){const l=new THREE.LineSegments(new THREE.EdgesGeometry(new THREE.BoxGeometry(w,h,d)),dashMat(c));l.computeLineDistances();l.position.set(...pos);DEP.add(l);return l;}
+const neighbours=[[-7.4,0],[7.4,0],[-7.4,-6.0],[0,-6.0],[7.4,-6.0]].map(([x,z])=>{const g=new THREE.Group();g.position.set(x,0,z);DEP.add(g);
+  const e=new THREE.LineSegments(new THREE.EdgesGeometry(new THREE.BoxGeometry(2*EX,EH,2*EZ)),dashMat(COL.record));e.computeLineDistances();e.position.y=EH/2;g.add(e);
+  const fl=new THREE.Mesh(new THREE.PlaneGeometry(2*EX,2*EZ),new THREE.MeshBasicMaterial({color:'#dfe6ec',transparent:true,opacity:0,depthWrite:false}));fl.rotation.x=-Math.PI/2;fl.position.y=.01;g.add(fl);g.userData={e,fl};return g;});
+const shared=new THREE.Mesh(new THREE.PlaneGeometry(24,17),new THREE.MeshBasicMaterial({color:'#e2e7e3',transparent:true,opacity:0,depthWrite:false}));shared.rotation.x=-Math.PI/2;shared.position.set(0,-.3,-3);DEP.add(shared);
+const priv=dashedBox(2*EX+2.2,EH+1.0,2*EZ+2.2,[0,(EH+1.0)/2-.25,0],COL.linkInk);
+// building (customer-hosted): slab, two cut walls, a few rows of racks
+const bldg=new THREE.Group();DEP.add(bldg);
+const slabMat=new THREE.MeshStandardMaterial({color:'#d3d8d4',roughness:.95,transparent:true,opacity:0});
+const slab=new THREE.Mesh(new THREE.BoxGeometry(17,.12,13),slabMat);slab.position.set(-.5,-.36,-1.8);slab.receiveShadow=true;bldg.add(slab);
+const wallMat=new THREE.MeshStandardMaterial({color:'#c9cfcb',roughness:.8,transparent:true,opacity:0});
+const wallB=new THREE.Mesh(new THREE.BoxGeometry(17,3.4,.18),wallMat);wallB.position.set(-.5,1.4,-8.2);bldg.add(wallB);
+const wallL=new THREE.Mesh(new THREE.BoxGeometry(.18,3.4,13),wallMat);wallL.position.set(-9,1.4,-1.8);bldg.add(wallL);
+const rowMat=new THREE.MeshStandardMaterial({color:'#2a302d',metalness:.4,roughness:.5,transparent:true,opacity:0});
+const rowsG=new THREE.InstancedMesh(new THREE.BoxGeometry(.5,1.2,.6),rowMat,24);bldg.add(rowsG);
+{const m=new THREE.Matrix4();let k=0;for(const z of [-5.6,-6.8])for(let i=0;i<12;i++){m.makeTranslation(-6.2+i*.56+(i>5?1.4:0),.6-.3,z);rowsG.setMatrixAt(k++,m);}}
+// air gap: an external line that stops short of the building
+const gapA=new THREE.Mesh(new THREE.CylinderGeometry(.035,.035,6,10),new THREE.MeshStandardMaterial({color:'#2a302d',transparent:true,opacity:0}));gapA.rotation.z=Math.PI/2;gapA.position.set(-13.4,-.22,-3.2);DEP.add(gapA);
+const gapEnd=new THREE.Mesh(new THREE.RingGeometry(.12,.17,32),new THREE.MeshBasicMaterial({color:COL.drift,transparent:true,opacity:0,side:THREE.DoubleSide,toneMapped:false}));gapEnd.rotation.y=Math.PI/2;gapEnd.position.set(-10.4,-.22,-3.2);DEP.add(gapEnd);
+const gapStub=new THREE.Mesh(new THREE.CylinderGeometry(.035,.035,.8,10),new THREE.MeshStandardMaterial({color:'#2a302d',transparent:true,opacity:0}));gapStub.rotation.z=Math.PI/2;gapStub.position.set(-9.4,-.22,-3.2);DEP.add(gapStub);
+
+/* ─────────── tags ─────────── */
+const hud=document.getElementById('hud');const TG={};
+function tag(k,html,cls,pos){const el=document.createElement('div');el.className='tag '+cls;el.innerHTML=`<i></i><span>${html}</span>`;hud.appendChild(el);TG[k]={el,pos:V3(...pos),cur:0,t:0};}
+tag('wall','<b>Tenant wall</b>nothing crosses it','link up keep',[EX,EH+.02,.9]);
+tag('hit','<b>Held at the boundary</b>raw footage stays inside','link left',[EX-.05,1.25,.9]);
+tag('transit','<b>In transit</b>encrypted','link up',[-1.4,1.55,.1]);
+tag('rest','<b>At rest</b>encrypted','link up',[STACK.x,.72,STACK.z]);
+tag('vault','<b>Your vault</b>keys stay here','ink up keep',[VAULT.x,1.0,VAULT.z]);
+tag('slot','<b>Credential requested</b>from your vault · never stored','link up',[SLOT.x,1.3,SLOT.z]);
+tag('door','<b>Role-based access</b>admin · reviewer · viewer','link up keep',[DX,2.08,EZ]);
+tag('log','<b>Audit log</b>every action, timestamped','ink left',[PRN.x-.12,1.05,PRN.z]);
+tag('soc','<b>SOC 2 Type II</b>in progress, not yet certified','drift up keep',[PLQ.x,.62,PLQ.z]);
+tag('d1','<b>Rack video</b>captured inside the tenant','link up keep',[-2.25,1.55,-.4]);
+tag('d2','<b>AI processing</b>runs here, in your tenant','link up keep',[CORE.x,1.3,CORE.z]);
+tag('d3','<b>Structured output</b>devices · connections · topology','link up keep',[STACK.x,.8,STACK.z]);
+tag('r0','<b>Retain</b>as evidence','ink up',[PED[0].x,.55,PED[0].z]);
+tag('r1','<b>Delete</b>anytime','ink up',[PED[1].x,.3,PED[1].z]);
+tag('r2','<b>Reprocess</b>as we improve','ink up',[PED[2].x,.62,PED[2].z]);
+tag('m0','<b>Your tenant</b>walled off from the rest','link up keep',[0,EH+.05,0]);
+tag('m1','<b>Other tenants</b>','rec up',[7.4,EH+.05,0]);
+tag('p1','<b>Your private environment</b>','link up keep',[0,EH+.8,0]);
+tag('b1','<b>Your data center</b>runs on your floor','ink up keep',[-5,2.2,-6.2]);
+tag('a1','<b>Air gap</b>no external network','drift up keep',[-10.4,.1,-3.2]);
+
+/* ─────────── scroll → global G ─────────── */
+const secEls=['posture','data','deploy'].map(id=>document.getElementById(id));
+const pat=document.getElementById('patents');
+function G(){const y=scrollY,vh=innerHeight;const r=secEls.map(e=>{const t=e.offsetTop;return [t,t+e.offsetHeight-vh];});
+  const K=[[0,-1],[r[0][0],0],[r[0][1],5],[r[1][0],5.5],[r[1][1],9.5],[r[2][0],10],[r[2][1],14]];
+  for(let i=0;i<K.length-1;i++){if(y<=K[i+1][0])return lerp(K[i][1],K[i+1][1],clamp((y-K[i][0])/((K[i+1][0]-K[i][0])||1)));}return 14;}
+const on=(g,a,b)=>smooth(a-.2,a+.15,g)*(1-smooth(b-.15,b+.2,g));
+const CAMS=[[-1,null],[.5,[7.6,6.4,10.6],[0,1,0]],[1.5,[-1.6,4.4,7.4],[-.3,.9,-.2]],[2.5,[-9.4,4.4,8.4],[-3.1,.9,.6]],[3.5,[5.6,3.0,8.8],[1.9,.9,2]],[4.5,[-3.2,2.6,7.6],[-1.3,.4,2.6]],
+  [6,[-4.8,2.7,5.6],[-2.0,1.0,-.2]],[7,[1.4,3.7,5.8],[-.4,.8,0]],[8,[3.8,3.1,5.0],[1.1,.5,-.3]],[9,[7.6,5.4,5.8],[2.1,.6,0]],
+  [10.5,[2.5,17.5,21.5],[0,0,-2.8]],[11.5,[9.8,9.6,14.2],[0,.6,0]],[12.5,[-12.4,11.4,13.8],[-.5,.5,-1.6]],[13.5,[-17,11.5,10.5],[-4.4,0,-1.8]]];
+let vw=0,vh=0,mobile=false;
+function resize(){vw=innerWidth;vh=innerHeight;mobile=vw<760;renderer.setSize(vw,vh,false);camera.aspect=vw/vh;camera.updateProjectionMatrix();}
+addEventListener('resize',resize);resize();
+const mouse={x:0,sx:0};addEventListener('pointermove',e=>{mouse.x=e.clientX/innerWidth*2-1;},{passive:true});
+const cp=V3(10,7,12),ct=V3();
+const clock=new THREE.Clock();const M4=new THREE.Matrix4(),Q=new THREE.Quaternion(),S1=V3(1,1,1),tmp=V3();
+const scrim=document.getElementById('scrim');
+
+function frame(){
+  requestAnimationFrame(frame);
+  const dt=Math.min(clock.getDelta(),.05),time=clock.elapsedTime;
+  const pr=pat.getBoundingClientRect();const show=pr.top>0;
+  canvas.style.visibility=hud.style.visibility=show?'visible':'hidden';if(!show)return;
+  const g=G();
+  // camera: hero orbit, then keyed stops
+  const ang=.55+(reduce?0:time*.04);
+  // on desktop the hero sits further back than the keyed stops so the 11.4 x 8.4
+  // plinth clears the right edge instead of running off it as the orbit turns.
+  // phones already pull back via the 1.55 push below, so they keep the near orbit.
+  const hr=mobile?17:23.5;
+  const hp=V3(Math.sin(ang)*hr,hr*.587,Math.cos(ang)*hr);
+  let Pp=hp.clone(),Tt=V3(0,.6,0);
+  for(let i=1;i<CAMS.length;i++){const [gi,p0,t]=CAMS[i];const p=gi<10?t.map((tv,j)=>tv+(p0[j]-tv)*1.18):p0;const gp=CAMS[i-1][0];const k=smooth(gp+(gi-gp)*.3,gi-(gi-gp)*.15,g);if(k>0){Pp.lerp(V3(...p),k);Tt.lerp(V3(...t),k);}}
+  if(mobile){Pp.sub(Tt).multiplyScalar(1.55).add(Tt);}
+  const f=(reduce||SNAP)?1:1-Math.pow(.02,dt);cp.lerp(Pp,f);ct.lerp(Tt,f);camera.position.copy(cp);camera.lookAt(ct);
+  // optical centre: .555 of the viewport on the hero (balanced gutters either side
+  // of the copy), easing to the usual .63 once the keyed sections take over
+  const cx=mobile?.5:lerp(.555,.63,smooth(-.75,.1,g));
+  camera.setViewOffset(vw,vh,-(cx-.5)*vw,mobile?vh*.2:0,vw,vh);
+  mouse.sx=lerp(mouse.sx,mouse.x,.05);scene.rotation.y=reduce?0:mouse.sx*.04;
+  scrim.style.opacity=mobile?1:(g<-.4?.6:1);
+
+  const wIso=on(g,0,1), wEnc=on(g,1,2), wVault=on(g,2,3), wAcc=on(g,3,4), wSoc=on(g,4,5.4);
+  const wD1=on(g,5.5,6.5), wD2=on(g,6.5,7.5), wD3=on(g,7.5,8.5), wD4=on(g,8.5,9.9);
+  const wM=on(g,10,11), wP=on(g,11,12), wB=smooth(11.85,12.2,g), wA=smooth(12.85,13.2,g), wDep=smooth(9.8,10.2,g);
+  const wHero=1-smooth(-.6,-.05,g);
+  /* g tops out at 14 as the last section finishes. The closing tag is the only
+     one with nothing after it to hand over to, so it is faded on the way out
+     rather than left lit for the rest of the page. */
+  const wOut=1-smooth(13.5,13.95,g);
+
+  // walls: glow for isolation and the deployment views
+  glowEdges.material.opacity=Math.max(wIso*.95,wDep*.8,wHero*.35,wD4*.5);
+  glassMat.opacity=.12+wIso*.08;
+  // flow loop
+  const speed=reduce?0:1;
+  spawnT-=dt*speed; if(spawnT<=0){spawnT=.62;const s=F.find(x=>!x.on);if(s){s.on=true;s.route=0;s.t=0;s.sp=.55;}}
+  let fi=0;
+  F.forEach(fr=>{if(!fr.on)return;fr.t+=dt*fr.sp*speed;
+    if(fr.t>=1){ if(fr.route===0){ const pl=P.find(x=>!x.on);if(pl){pl.on=true;pl.t=0;}
+        if(wD4>.3&&Math.random()<.75){fr.route=1;fr.dest=Math.floor(Math.random()*3);fr.t=0;fr.sp=.55;} else if(wIso>.3&&rippleT>1.6){fr.route=2;fr.t=0;fr.sp=.7;} else fr.on=false; }
+      else if(fr.route===2){rippleT=0;fr.route=3;fr.t=0;fr.sp=.9;}
+      else fr.on=false; }
+  });
+  F.forEach((fr,i)=>{let p,s=1;
+    if(fr.on){ if(fr.route===0)p=R1(fr.t); else if(fr.route===1){p=R3[fr.dest](fr.t);if(fr.dest===1)s=1-smooth(.7,1,fr.t);} else if(fr.route===2)p=R4(fr.t); else {p=R4(1-fr.t*.6);s=1-fr.t;} }
+    if(!fr.on||!p){M4.makeScale(0,0,0);}else{Q.setFromEuler(new THREE.Euler(0,Math.atan2(camera.position.x-p.x,camera.position.z-p.z),0));M4.compose(p,Q,S1.set(s,s,s));}
+    frames.setMatrixAt(i,M4);cipher.setMatrixAt(i,M4);});
+  frames.instanceMatrix.needsUpdate=cipher.instanceMatrix.needsUpdate=true; cipher.material.opacity=wEnc;
+  rippleT+=dt;ripple.scale.setScalar(1+rippleT*5);ripple.material.opacity=(1-smooth(0,.9,rippleT))*Math.max(wIso,wD4);
+  // records fly to the stack
+  P.forEach((pl,i)=>{if(pl.on){pl.t+=dt*.6*speed;if(pl.t>=1){pl.on=false;stackCount++;if(stackCount>NP)stackCount=5;}}
+    if(pl.on){M4.compose(R2(pl.t),Q.identity(),S1.set(1,1,1));}else M4.makeScale(0,0,0);flying.setMatrixAt(i,M4);});
+  flying.instanceMatrix.needsUpdate=true;
+  for(let i=0;i<NP;i++){if(i<stackCount){M4.makeTranslation(STACK.x,.1+i*.028,STACK.z);}else M4.makeScale(0,0,0);stackPlates.setMatrixAt(i,M4);
+    if(i<stackCount){M4.makeTranslation(STACK.x,.1+i*.028-.009,STACK.z);}plateEdges.setMatrixAt(i,M4);}
+  stackPlates.instanceMatrix.needsUpdate=plateEdges.instanceMatrix.needsUpdate=true;
+  lockBand.material.opacity=wEnc*(.6+.3*Math.sin(time*3));
+  coreRing.rotation.x=Math.PI/2+Math.sin(time*.7)*.4;coreRing.rotation.z+=dt*(1+wD2*3)*speed;coreRing2.rotation.y+=dt*(1.5+wD2*4)*speed;coreRing2.rotation.x=Math.PI/2.6;
+  coreRing.material.opacity=.55+.45*Math.max(wD2,wHero*.5);
+  frustum.material.opacity=.2+.5*Math.max(wD1,wHero*.3)*(reduce?1:.7+.3*Math.sin(time*6));
+  // vault token
+  const tk=reduce?.5:(time%2.6)/2.6;const tp=tk<.6?(()=>{const a=V3(VAULT.x+.3,.75,VAULT.z+.1),b=V3(-3.7,1.15,.9);return tk<.3?a.lerp(b,tk/.3):b.lerp(SLOT.clone(),(tk-.3)/.3);})():SLOT.clone().lerp(CORE,(tk-.6)/.4);
+  token.position.copy(tp);token.material.opacity=wVault*(tk<.6?1:1-smooth(.6,.8,tk));tokenLine.material.opacity=.25+.6*wVault;
+  // access & audit
+  readerLed.material.color.copy(Math.sin(time*5)>0?COL.link:C('#0a3a22'));
+  logTex.offset.y=(reduce?0:time*.03)%1;
+  // deployment props
+  neighbours.forEach(n=>{n.userData.e.material.opacity=wM*.8;n.userData.fl.material.opacity=wM*.35;});
+  shared.material.opacity=wM*.6;
+  priv.material.opacity=wP*(1-wB*.5)*.9;
+  slabMat.opacity=wB;wallMat.opacity=wB*.95;rowMat.opacity=wB;bldg.visible=wB>.01;
+  [gapA,gapStub].forEach(m=>m.material.opacity=wA);gapEnd.material.opacity=wA*(reduce?1:.6+.4*Math.sin(time*4));gapA.visible=gapStub.visible=gapEnd.visible=wA>.01;
+  DEP.visible=wDep>.001;
+  // tags
+  const vis={wall:Math.max(wIso,wHero*.9),hit:wIso*(rippleT<1.2?1:0),transit:wEnc,rest:wEnc,vault:Math.max(wVault,wHero*0),slot:wVault,door:wAcc,log:wAcc,soc:wSoc,
+    d1:wD1,d2:wD2,d3:wD3,r0:wD4,r1:wD4,r2:wD4,m0:wM,m1:wM,p1:wP*(1-wB),b1:wB*(1-wA),a1:wA*wOut};
+  const v=V3();
+  for(const [n,t] of Object.entries(TG)){t.t=vis[n]||0;t.cur=(reduce||SNAP)?t.t:lerp(t.cur,t.t,1-Math.pow(.001,dt));
+    if(t.cur<.01){t.el.style.opacity=0;continue;}
+    v.copy(t.pos);scene.localToWorld(v);v.project(camera);const x=(v.x+1)/2*vw,y=(1-v.y)/2*vh;const cl=t.el.classList,ew=t.el.offsetWidth,eh=t.el.offsetHeight;
+    const tx=cl.contains('left')?x-ew+3.5:cl.contains('up')?x-ew/2:x-3.5,ty=cl.contains('up')?y-eh+3.5:y-eh/2;
+    t.el.style.transform=`translate3d(${tx.toFixed(1)}px,${ty.toFixed(1)}px,0)`;t.el.style.opacity=t.cur.toFixed(3);}
+  renderer.render(scene,camera);
+}
+document.fonts.ready.then(()=>{sheetMat.map.image=sheetCanvas();sheetMat.map.needsUpdate=true;plaque.material.map.image=plaqueCanvas();plaque.material.map.needsUpdate=true;vault.material[4].map.image=vaultFace();vault.material[4].map.needsUpdate=true;});
+requestAnimationFrame(frame);
+</script>
+<!--GLJS-END-->
+<script src="/design-system/nav.js" defer></script>
+</body>
+</html>

@@ -1,0 +1,801 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>About us · RackTrack</title>
+<meta name="description" content="Every system above the rack assumed the rack matched the record. No system could prove it. The story behind RackTrack, the team, and the mission.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap">
+<link rel="stylesheet" href="/design-system/base.css">
+<style>
+/* RackTrack · About us — design-system/ tokens. Protagonist: the stack. Systems float above one rack; the layer between them is missing until RackTrack fills it. */
+:root{
+  color-scheme: light;
+  
+}
+*{box-sizing:border-box}
+html{background:var(--paper)}
+body{margin:0;background:var(--paper);color:var(--fg);font:400 16px/1.5 var(--sans);-webkit-font-smoothing:antialiased;overflow-x:hidden}
+a{color:inherit}
+::selection{background:var(--link);color:#06140d}
+:focus-visible{outline:2px solid var(--link-ink);outline-offset:3px;border-radius:2px}
+body::before{content:"";position:fixed;inset:0;z-index:0;pointer-events:none;background:radial-gradient(60% 55% at 64% 50%,rgba(255,255,255,.6),transparent 72%)}
+#stage{position:fixed;inset:0;z-index:1;display:block;width:100%;height:100%;pointer-events:none}
+#scrim{position:fixed;inset:0;z-index:1;pointer-events:none;background:linear-gradient(90deg,var(--paper) 0,rgba(233,236,232,.92) 24%,rgba(233,236,232,0) 45%)}
+#hud{position:fixed;inset:0;z-index:3;pointer-events:none;overflow:hidden}
+main{position:relative;z-index:2}
+
+/* nav */
+.nav{position:fixed;left:0;right:0;top:0;z-index:10;display:flex;align-items:center;gap:28px;height:calc(var(--nav-h) + env(safe-area-inset-top,0px));padding:env(safe-area-inset-top,0px) var(--bleed) 0;background:linear-gradient(var(--paper) 55%,transparent)}
+.brand{display:flex;align-items:center;gap:10px;text-decoration:none;font:700 17px/1 var(--sans);letter-spacing:-.02em;color:var(--ink)}
+.brand img{width:26px;height:26px;border-radius:5px;display:block}
+.nav ul{display:flex;gap:24px;list-style:none;margin:0 0 0 auto;padding:0}
+.nav ul a{font:500 14px/1 var(--sans);text-decoration:none;color:var(--ink-2)}
+.nav ul a:hover{color:var(--ink)}
+.nav ul a[aria-current="page"]{color:var(--ink);text-decoration:underline;text-decoration-color:var(--link);text-decoration-thickness:2px;text-underline-offset:6px}
+.btn{display:inline-flex;align-items:center;gap:10px;height:46px;padding:0 20px;border-radius:3px;border:1px solid var(--fg);font:500 15px/1 var(--sans);text-decoration:none;cursor:pointer;background:transparent;color:var(--fg);transition:background .2s,color .2s,border-color .2s}
+.btn.solid{background:var(--fg);color:var(--bg)}
+.btn.solid:hover{background:var(--link-ink);border-color:var(--link-ink);color:#fff}
+.btn:not(.solid){border-color:var(--line)}
+.btn:not(.solid):hover{border-color:var(--fg)}
+.btn .led{width:7px;height:7px;border-radius:50%;background:var(--link);box-shadow:0 0 8px var(--link)}
+.nav .btn{height:38px;padding:0 16px;font-size:14px}
+
+/* type */
+.ch{position:relative;padding-inline:var(--bleed)}
+.copy{max-width:31rem;}
+h1,h2,h3{margin:0 0 20px;text-wrap:balance}
+h1{max-width:9ch}
+h2{max-width:15ch}
+h3{margin:0 0 12px}
+.lede{color:var(--fg-2);max-width:27rem;margin:0 0 28px}
+.k{margin:0 0 14px;font:400 12px/1 var(--mono);color:var(--link-ink)}
+.actions{display:flex;flex-wrap:wrap;gap:12px}
+
+/* tags */
+.tag{position:absolute;left:0;top:0;display:flex;align-items:center;opacity:0;will-change:transform,opacity;white-space:nowrap}
+.tag::before{content:"";width:7px;height:7px;border-radius:50%;background:var(--c,var(--ink));transform:translate(-3.5px,0);box-shadow:0 0 0 3px color-mix(in oklab,var(--c,var(--ink)) 22%,transparent)}
+.tag i{display:block;width:24px;height:1px;background:var(--c,var(--ink))}
+.tag span{padding:6px 9px;background:var(--paper-2);border:1px solid var(--c,var(--ink));border-radius:2px;font:400 11.5px/1.35 var(--mono);color:var(--ink);box-shadow:0 14px 28px -20px rgba(17,22,20,.45)}
+.tag span b{display:block;font:600 15px/1.15 var(--sans);letter-spacing:-.02em;margin-bottom:2px}
+.tag.left{flex-direction:row-reverse}.tag.left::before{transform:translate(3.5px,0)}
+.tag.up{flex-direction:column-reverse}.tag.up i{width:1px;height:22px}.tag.up::before{transform:translate(0,3.5px)}
+.tag.link{--c:var(--link)} .tag.link span b{color:var(--link-ink)}
+.tag.drift{--c:var(--drift)} .tag.drift span b{color:var(--drift-ink)}
+.tag.rec{--c:var(--record)} .tag.rec span b{color:var(--record-ink)}
+.tag.ink{--c:var(--ink)}
+
+/* hero */
+#hero{min-height:100vh;display:flex;align-items:center;padding-top:90px}
+.quote{margin:4px 0 26px;padding:2px 0 2px 18px;border-left:2px solid var(--link);font:500 clamp(19px,1.55vw,23px)/1.3 var(--sans);letter-spacing:-.015em;color:var(--ink);max-width:25rem}
+.quote em{font-style:normal;color:var(--drift-ink)}
+
+/* pinned chapters */
+.pinsec{position:relative}
+#does{min-height:520vh} #story{min-height:600vh} #company{min-height:230vh} #mission{min-height:230vh}
+.pin{position:sticky;top:0;height:100vh}
+.scopy{position:absolute;left:var(--gutter);top:50%;transform:translateY(-50%);width:min(31rem,40vw);}
+.scopy .h{margin-bottom:30px}
+.scopy .h .lede{margin:0}
+.stack{position:relative;height:230px}
+#story .stack{height:420px}
+.st{position:absolute;inset:0;opacity:0;transform:translateY(14px);transition:opacity .45s,transform .55s var(--ease);pointer-events:none}
+.st.on{opacity:1;transform:none;pointer-events:auto}
+.st .no{font:400 12px/1 var(--mono);color:var(--ink-2);margin:0 0 12px;display:flex;gap:10px;align-items:center}
+.chip{font:500 11px/1 var(--mono);padding:5px 7px;border-radius:2px;border:1px solid var(--link);color:var(--link-ink);background:rgba(31,214,124,.08)}
+.chip.a{border-color:var(--drift);color:var(--drift-ink);background:rgba(255,154,46,.1)}
+.chip.r{border-color:var(--record);color:var(--record-ink);background:rgba(124,147,168,.1)}
+.st p{margin:0 0 14px;color:var(--ink-2);max-width:27rem}
+.st ul{list-style:none;margin:0;padding:0;font:400 12.5px/1.4 var(--mono)}
+.st li{display:flex;gap:10px;padding:7px 0;border-top:1px dashed var(--rule)}
+.st li b{font-weight:500;color:var(--ink);min-width:9.5rem}
+.st figure{margin:4px 0 0;max-width:19rem}
+.st figure img{display:block;width:100%;height:auto;aspect-ratio:16/8.4;object-fit:cover;object-position:60% 40%;border-radius:2px;border:1px solid var(--rule)}
+.st figcaption{margin-top:8px;font:400 11.5px/1.3 var(--mono);color:var(--ink-2)}
+.big{font:500 clamp(44px,4.4vw,64px)/1 var(--sans);letter-spacing:-.045em;color:var(--ink);margin:4px 0 6px}
+.big small{font:400 13px/1 var(--mono);letter-spacing:0;color:var(--ink-2);margin-left:10px}
+.prog{display:flex;gap:5px;align-items:center;margin-top:18px;font:400 11px/1 var(--mono);color:var(--ink-2)}
+.prog i{width:28px;height:3px;background:var(--rule);position:relative;overflow:hidden}
+.prog i b{position:absolute;inset:0 auto 0 0;width:0;background:var(--link-ink)}
+.prog span{margin-left:8px}
+
+/* company facts */
+.facts{margin:0;border-top:1px solid var(--ink)}
+.facts div{display:grid;grid-template-columns:5.2rem 1fr;gap:14px;padding:12px 0;border-bottom:1px solid var(--rule);align-items:baseline}
+.facts dt{margin:0;font:500 30px/1 var(--sans);letter-spacing:-.04em;color:var(--ink)}
+.facts dt.w{font:500 12.5px/1.2 var(--mono);letter-spacing:0;color:var(--link-ink);padding-top:3px}
+.facts dd{margin:0;font-size:14.5px;line-height:1.4;color:var(--ink-2)}
+.facts dd b{display:block;font-weight:500;color:var(--ink);font-size:15.5px}
+.clocks{display:flex;gap:18px;margin-top:14px;font:400 12px/1.3 var(--mono);color:var(--ink-2)}
+.clocks b{color:var(--ink);font-weight:500}
+
+/* why it matters */
+#matters{position:relative;z-index:2;background:var(--paper);padding:var(--band-y) var(--bleed);border-top:1px solid var(--rule)}
+.mwrap{max-width:var(--shell);margin-inline:auto;}
+.mwrap .head{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,25rem);gap:40px;align-items:end;margin-bottom:56px}
+.mwrap .head h2{max-width:17ch;margin:0}
+.mwrap .head .lede{margin:0}
+.stats{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:clamp(20px,3vw,48px)}
+.stat{border-top:1px solid var(--ink);padding-top:16px}
+.stat .n{font:500 clamp(56px,6vw,88px)/.95 var(--sans);letter-spacing:-.05em;color:var(--ink)}
+.stat .l{margin:12px 0 4px;font:500 17px/1.2 var(--sans);letter-spacing:-.01em}
+.stat p{margin:0 0 20px;color:var(--ink-2);font-size:15px}
+.stat svg{display:block;width:100%;height:auto}
+.stat svg text{font:400 10px var(--mono);fill:#4A544F}
+
+/* mission */
+#mission .scopy{width:min(33rem,42vw)}
+#mission h2{max-width:13ch}
+.nots{list-style:none;margin:0 0 26px;padding:0;border-top:1px solid var(--rule)}
+.nots li{display:flex;align-items:center;gap:14px;padding:13px 0;border-bottom:1px solid var(--rule);font:500 clamp(18px,1.5vw,22px)/1.2 var(--sans);letter-spacing:-.02em;color:var(--ink-2)}
+.nots li s{text-decoration-color:var(--drift);text-decoration-thickness:2px}
+.nots li i{font:400 11px/1 var(--mono);font-style:normal;color:var(--ink-2);width:3.2rem;flex:none}
+.nots li.yes{color:var(--ink)}
+.nots li.yes i{color:var(--link-ink)}
+
+/* cta */
+#cta{padding-block:var(--band-y);text-align:center;background:var(--paper);position:relative;z-index:2;border-top:1px solid var(--rule)}
+#cta h2{margin-inline:auto;max-width:13ch}
+#cta .lede{margin-inline:auto}
+#cta .actions{justify-content:center}
+.appno{margin-top:30px;font:400 12.5px/1.4 var(--mono);color:var(--ink-2)}
+.appno b{color:var(--ink);font-weight:500}
+
+/* footer */
+.foot{position:relative;z-index:2;padding:var(--band-y) var(--bleed) calc(var(--s8) + env(safe-area-inset-bottom,0px));background:var(--paper);border-top:1px solid var(--rule);display:grid;grid-template-columns:var(--copy-w) repeat(3,minmax(0,1fr));gap:28px;font-size:14px;color:var(--ink-2)}
+.foot b{display:block;font:500 13px/1 var(--sans);color:var(--link-ink);margin-bottom:16px}
+.foot nav{display:flex;flex-direction:column;gap:11px}
+.foot nav a{color:var(--ink);text-decoration:none;font-size:15px}
+.foot nav a:hover{color:var(--link-ink)}
+.foot p{margin:0 0 11px;color:var(--ink);font-size:15px;line-height:1.45}
+.foot p a{text-decoration:none}.foot p a:hover{color:var(--link-ink)}
+.foot-brand .brand{margin-bottom:16px}
+.foot-brand p{color:var(--ink-2);max-width:18rem}
+.foot .fine{grid-column:1/-1;display:flex;justify-content:space-between;flex-wrap:wrap;gap:12px;margin-top:16px;padding-top:18px;border-top:1px solid var(--rule);font-size:13px}
+.foot .legal{display:flex;gap:18px;flex-wrap:wrap}.foot .legal a{color:var(--ink-2);text-decoration:none}.foot .legal a:hover{color:var(--link-ink)}
+.foot .social{display:flex;gap:18px}
+.foot .social a{color:var(--ink-2);text-decoration:none}
+
+.no-webgl #stage,.no-webgl #hud{display:none}
+@media (max-width:1180px){ .foot{grid-template-columns:repeat(2,minmax(0,1fr))} }
+@media (max-width:960px){ .stats{grid-template-columns:1fr} .mwrap .head{grid-template-columns:1fr} }
+@media (max-width:760px){
+  #scrim{background:linear-gradient(0deg,var(--paper) 0,rgba(233,236,232,.94) 44%,rgba(233,236,232,0) 64%)}
+  #hud .tag:not(.keep){display:none}
+  #hero{align-items:flex-end;padding-top:46vh;padding-bottom:5vh}
+  .quote{font-size:17px;margin-bottom:18px}
+  #hero .lede{display:none}
+  .scopy,#mission .scopy{left:var(--gutter);right:var(--gutter);width:auto;top:auto;bottom:4vh;transform:none;padding-left:0}
+  .scopy .h h2{margin-bottom:10px} .scopy .h .lede{display:none} .scopy .h{margin-bottom:12px}
+  .stack{height:190px} #story .stack{height:210px} .st ul,.st figure{display:none}
+  .facts div{padding:8px 0;grid-template-columns:4rem 1fr} .facts dt{font-size:22px} .facts dd{font-size:13px} .facts dd b{font-size:14px} .facts dd span{display:none}
+  .clocks{display:none}
+  #mission h2{} .nots li{font-size:16px;padding:9px 0}
+}
+@media (max-width:560px){ .foot{grid-template-columns:repeat(2,minmax(0,1fr));gap:var(--s6) var(--s5);padding-block:var(--band-y-sm) calc(var(--s6) + env(safe-area-inset-bottom,0px))} }
+@media (prefers-reduced-motion:reduce){ .st{transition:none!important} }
+</style>
+</head>
+<body>
+
+<canvas id="stage" aria-hidden="true"></canvas>
+<div id="scrim" aria-hidden="true"></div>
+<div id="hud" aria-hidden="true"></div>
+
+<nav class="nav" aria-label="Primary">
+  <a class="brand" href="/"><img alt="" src="/design-system/assets/Logos/racktrack-mark.jpg">RackTrack</a>
+  <ul>
+    <li><a href="/pages/why-racktrack/">Why RackTrack</a></li>
+    <li><a href="/pages/solutions/">Solutions</a></li>
+    <li><a href="/pages/use-cases/">Use cases</a></li>
+    <li><a href="/pages/resources/">Resources</a></li>
+    <li><a href="/pages/trust-security/">Trust</a></li>
+    <li><a href="/pages/about-us/" aria-current="page">About</a></li>
+    <li><a href="/pages/sign-in/">Sign in</a></li>
+  </ul>
+  <a class="btn solid" href="/pages/contact-us/"><span class="led"></span>Book a sweep</a>
+</nav>
+
+<main>
+  <section class="ch" id="hero">
+    <div class="copy">
+      <h1>Why we built RackTrack</h1>
+      <p class="quote">Every system above the rack assumed the rack matched the record. <em>No system could prove it.</em></p>
+      <p class="lede">Two decades of running enterprise infrastructure, and one problem that never went away. We stopped waiting for someone else to solve it.</p>
+      <div class="actions">
+        <a class="btn solid" href="/pages/solutions/"><span class="led"></span>See the platform</a>
+        <a class="btn" href="#story">Read the story ↓</a>
+      </div>
+    </div>
+  </section>
+
+  <section class="ch pinsec" id="does" data-steps="4">
+    <div class="pin">
+      <div class="scopy">
+        <div class="h"><h2>The missing layer, filled in</h2><p class="lede">One phone sweep produces a continuously reconciled record of your rack, synced to the systems your teams already run.</p></div>
+        <div class="stack">
+          <div class="st on"><p class="no">01 · Capture <span class="chip">phone-guided</span></p><h3>Phone-guided rack sensing</h3><p>A guided sweep of the rack face, bottom to top, filmed on a phone.</p></div>
+          <div class="st"><p class="no">02 · Validate <span class="chip">physical-to-network</span></p><h3>Physical-to-network truth</h3><p>What the camera sees is checked against what the network reports. The mismatches stop hiding.</p></div>
+          <div class="st"><p class="no">03 · Reconcile <span class="chip">structured</span></p><h3>Structured intelligence</h3><p>Inventory, topology, port state and firmware currency, merged into one record of the rack.</p></div>
+          <div class="st"><p class="no">04 · Operationalize <span class="chip">audit-ready</span></p><h3>Audit-ready artifacts</h3><p>The record syncs up into the tools above it, so every system finally works from what's really there.</p></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="ch pinsec" id="story" data-steps="4">
+    <div class="pin">
+      <div class="scopy">
+        <div class="h"><h2>The story behind RackTrack</h2></div>
+        <div class="stack">
+          <div class="st on"><p class="no">i · The moment</p><h3>Three sources. Three different stories</h3><p>It started in a rack audit where the spreadsheet, the switch labels and the live ports each told a different story, and a team that should have been planning a change was crouched in front of cabinets instead.</p>
+            <figure><img src="/assets/about/rack-audit-moment.jpg" alt="A technician kneeling in front of an open rack, checking a label with a phone" loading="lazy" width="1600" height="873"><figcaption>Reading tiny labels, taking photos, cross-checking ports by hand.</figcaption></figure></div>
+          <div class="st"><p class="no">ii · The reason</p><h3>One missed cable</h3><p>One missed cable could delay a migration, or send someone back into the data hall after hours. The physical layer deserved the same confidence teams already expect from their cloud dashboards.</p></div>
+          <div class="st"><p class="no">iii · The team</p><h3>Four disciplines, one product</h3><p>Our founding team brings every layer of the problem to the table.</p>
+            <ul><li><b>Enterprise architecture</b>leadership</li><li><b>Integration depth</b>Salesforce &amp; MuleSoft</li><li><b>Networking operations</b>hands-on</li><li><b>Product design</b>built in complex environments</li></ul></div>
+          <div class="st"><p class="no">iv · The build <span class="chip">patent pending</span></p><h3>Automated network cable mapping</h3><p class="big">18<small>months of engineering</small></p><p>RackTrack is built on patent-pending innovations for automated cable mapping, now the subject of a pending US utility patent application.</p></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="ch pinsec" id="company" data-steps="1">
+    <div class="pin">
+      <div class="scopy">
+        <div class="h"><h2>A small team, built for enterprise infrastructure</h2></div>
+        <dl class="facts">
+          <div><dt>15+</dt><dd><b>Employees</b><span>AI researchers, software engineers and domain experts who have run infrastructure themselves.</span></dd></div>
+          <div><dt>2</dt><dd><b>Locations: IN &amp; USA</b><span>Hyderabad, India and Connecticut, USA, serving customers across regions.</span></dd></div>
+          <div><dt>4+</dt><dd><b>Startup programmes</b><span>Recognised by leading startup ecosystems for innovation and growth potential.</span></dd></div>
+          <div><dt class="w">enterprise ready</dt><dd><b>Scalable, secure, reliable</b><span>Designed for data center operations.</span></dd></div>
+          <div><dt class="w">R&amp;D-driven</dt><dd><b>Computer vision &amp; automation</b><span>Applied to infrastructure management.</span></dd></div>
+        </dl>
+        <p class="clocks" aria-live="off"><span>Hyderabad <b id="clkH">--:--</b></span><span>Connecticut <b id="clkC">--:--</b></span></p>
+      </div>
+    </div>
+  </section>
+
+  <section id="matters">
+    <div class="mwrap">
+      <div class="head"><div><h2>Less manual audit work. More rack data your teams can use</h2></div><p class="lede">RackTrack keeps physical rack data current, structured and ready for the teams that operate it every day.</p></div>
+      <div class="stats">
+        <article class="stat"><div class="n" data-to="99.2" data-suf="%">0%</div><p class="l">Truth fidelity</p><p>Verified device and port recognition.</p>
+          <svg id="fidelity" viewBox="0 0 250 64" role="img" aria-label="125 ports: 124 recognised and verified, 1 flagged"></svg></article>
+        <article class="stat"><div class="n">Minutes</div><p class="l">Time to verified state</p><p>From rack capture to operational context.</p>
+          <svg viewBox="0 0 250 64" role="img" aria-label="A short line from rack capture to verified state">
+            <path d="M8 34 H242" stroke="#C6CCC7" stroke-width="1"/>
+            <g stroke="#4A544F" stroke-width="1">
+              <path d="M8 29 V39"/><path d="M242 29 V39"/></g>
+            <path id="minLine" d="M8 34 H96" stroke="#04703F" stroke-width="3" stroke-dasharray="88" stroke-dashoffset="88" style="transition:stroke-dashoffset 1.4s cubic-bezier(.2,.7,.2,1)"/>
+            <circle cx="96" cy="34" r="4.5" fill="#1FD67C"/>
+            <text x="8" y="58">rack capture</text><text x="96" y="20" text-anchor="middle" fill="#04703F">verified</text><text x="242" y="58" text-anchor="end">a manual audit</text>
+          </svg></article>
+        <article class="stat"><div class="n" data-to="34" data-suf="%">0%</div><p class="l">Manual operations reduced</p><p>Less manual discovery and triage.</p>
+          <svg viewBox="0 0 250 64" role="img" aria-label="Manual work bar reduced by 34 percent">
+            <defs><pattern id="hatch" width="5" height="5" patternUnits="userSpaceOnUse" patternTransform="rotate(45)"><path d="M0 0 V5" stroke="#FF9A2E" stroke-width="1.4"/></pattern></defs>
+            <text x="0" y="10">before</text><rect x="0" y="14" width="246" height="10" fill="#2a302d"/>
+            <text x="0" y="40">with RackTrack</text><rect x="0" y="44" width="162" height="10" fill="#2a302d"/>
+            <rect id="cutBar" x="162" y="44" width="0" height="10" fill="url(#hatch)" stroke="#FF9A2E" stroke-width="1"/>
+            <text x="246" y="40" text-anchor="end" fill="#9C4C00">−34%</text>
+          </svg></article>
+      </div>
+    </div>
+  </section>
+
+  <section class="ch pinsec" id="mission" data-steps="1">
+    <div class="pin">
+      <div class="scopy">
+        <div class="h"><h2>Build the Physical Infrastructure Intelligence Platform for data centers</h2></div>
+        <ul class="nots">
+          <li><i>not</i><s>An audit tool</s></li>
+          <li><i>not</i><s>A DCIM replacement</s></li>
+          <li class="yes"><i>but</i>The intelligence layer underneath both</li>
+        </ul>
+        <span class="chip">patent-pending platform</span>
+      </div>
+    </div>
+  </section>
+
+  <section class="ch" id="cta">
+    <h2>Legible, trusted, operational</h2>
+    <p class="lede">Built to make physical infrastructure legible, trusted and operational at enterprise scale.</p>
+    <div class="actions">
+      <a class="btn solid" href="/pages/contact-us/"><span class="led"></span>Request a demo</a>
+      <a class="btn" href="/pages/why-racktrack/">Why RackTrack</a>
+    </div>
+    <p class="appno"><b>US Application 19/219,347</b> · patent pending</p>
+  </section>
+
+  <footer class="foot">
+    <div class="foot-brand">
+      <a class="brand" href="/"><img alt="" src="/design-system/assets/Logos/racktrack-mark.jpg">RackTrack</a>
+      <p>Physical infrastructure intelligence for data centers.</p>
+    </div>
+    <nav aria-label="Platform"><b>Platform</b>
+      <a href="/pages/why-racktrack/">Why RackTrack</a><a href="/pages/solutions/">Solutions</a><a href="/pages/use-cases/">Use cases</a><a href="/pages/trust-security/">Trust &amp; security</a></nav>
+    <nav aria-label="Company"><b>Company</b>
+      <a href="/pages/resources/">Resources</a><a href="/pages/about-us/">About us</a><a href="/pages/contact-us/">Contact us</a></nav>
+    <div><b>Contact</b>
+      <p><a href="mailto:info@racktrack.ai">info@racktrack.ai</a></p><p><a href="tel:+18608782448">+1 (860) 878 2448</a></p><p>85 Felt Rd, Suite #604<br>South Windsor, CT 06074</p></div>
+    <div class="fine">
+      <span>© 2026 RackTrack Inc. · Patent pending</span>
+      <span class="legal"><a href="/pages/legal/privacy-policy/">Privacy</a><a href="/pages/legal/terms-of-use/">Terms</a><a href="/pages/legal/cookie-policy/">Cookies</a><a href="/pages/legal/data-we-collect/">Data we collect</a><a href="/pages/legal/third-party-services/">Third parties</a></span>
+      <span class="social"><a href="https://www.linkedin.com/company/racktrack/" rel="noopener" target="_blank">LinkedIn</a><a href="https://www.instagram.com/racktrack_inc/" rel="noopener" target="_blank">Instagram</a><a href="https://www.facebook.com/share/18depF5xzA/" rel="noopener" target="_blank">Facebook</a></span>
+    </div>
+  </footer>
+</main>
+
+<script type="importmap">
+{ "imports": {
+  "three": "https://cdn.jsdelivr.net/npm/three@0.170.0/build/three.module.js",
+  "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.170.0/examples/jsm/"
+} }
+</script>
+<!--DOMJS-START-->
+<script>
+/* ───── About us: pinned step copy, count-ups, fidelity grid, clocks (no WebGL needed) ───── */
+(()=>{
+const reduce=matchMedia('(prefers-reduced-motion: reduce)').matches;
+const clamp=(x,a=0,b=1)=>Math.min(b,Math.max(a,x));
+const $=s=>document.querySelector(s), $$=s=>[...document.querySelectorAll(s)];
+const secs=$$('.pinsec').filter(el=>+el.dataset.steps>1).map(el=>({el,n:+el.dataset.steps,st:[...el.querySelectorAll('.st')],bars:[...el.querySelectorAll('.prog i b')],lbl:el.querySelector('.prog .n'),cur:-1}));
+const prog=el=>{const r=el.getBoundingClientRect();return -r.top/(r.height-innerHeight);};
+
+// fidelity: 125 ports, 124 verified, 1 flagged (= 99.2%)
+{const s=$('#fidelity');let h='';const cols=25,sz=7.2,gap=2.6;
+ for(let i=0;i<125;i++){const c=i%cols,r=Math.floor(i/cols);const x=c*(sz+gap)+2,y=r*(sz+gap)+2;const bad=i===83;
+  h+=`<rect class="pt" data-i="${i}" x="${x}" y="${y}" width="${sz}" height="${sz}" rx="1" fill="${bad?'rgba(255,154,46,.18)':'#F4F6F3'}" stroke="${bad?'#FF9A2E':'#C6CCC7'}" stroke-width="1"/>`;}
+ s.innerHTML=h;s._pts=[...s.querySelectorAll('.pt')];}
+function fillFidelity(){const pts=$('#fidelity')._pts;pts.forEach((p,i)=>{if(i===83)return;const d=reduce?0:i*9;setTimeout(()=>{p.setAttribute('fill','#1FD67C');p.setAttribute('stroke','#04703F');},d);});}
+
+// count-ups, fired once when visible
+function countUp(el){const to=parseFloat(el.dataset.to),suf=el.dataset.suf||'',dec=(el.dataset.to.split('.')[1]||'').length;
+  if(reduce){el.textContent=to.toFixed(dec)+suf;return;}const t0=performance.now(),D=1300;
+  (function tick(n){const p=Math.min((n-t0)/D,1),e=1-Math.pow(1-p,3);el.textContent=(to*e).toFixed(dec)+suf;if(p<1)requestAnimationFrame(tick);})(t0);}
+let fired=false;
+function fireStats(){if(fired)return;fired=true;$$('.stat .n[data-to]').forEach(countUp);fillFidelity();
+  $('#minLine').style.strokeDashoffset='0';const cb=$('#cutBar');cb.style.transition=reduce?'none':'width 1.2s cubic-bezier(.2,.7,.2,1)';
+  requestAnimationFrame(()=>{cb.style.width='83.5px';});}
+if('IntersectionObserver' in window){new IntersectionObserver((es,o)=>es.forEach(e=>{if(e.isIntersecting){fireStats();o.disconnect();}}),{threshold:.35}).observe($('.stats'));}
+setTimeout(()=>{const r=$('.stats').getBoundingClientRect();if(r.top<innerHeight&&r.bottom>0)fireStats();},2500);
+addEventListener('scroll',()=>{if(!fired){const r=$('.stats').getBoundingClientRect();if(r.top<innerHeight*.8&&r.bottom>0)fireStats();}},{passive:true});
+
+// live local time in both offices
+const fmt=tz=>new Intl.DateTimeFormat('en-GB',{timeZone:tz,hour:'2-digit',minute:'2-digit',hour12:false});
+const fH=fmt('Asia/Kolkata'),fC=fmt('America/New_York');
+function clocks(){const d=new Date();$('#clkH').textContent=fH.format(d)+' IST';$('#clkC').textContent=fC.format(d)+' ET';window.ABOUT_CLOCK={h:fH.format(d),c:fC.format(d)};}
+clocks();setInterval(clocks,20000);
+
+function frame(){
+  const vh=innerHeight,S=scrollY/(document.documentElement.scrollHeight-vh||1);
+  secs.forEach(s=>{const p=clamp(prog(s.el));const x=p*s.n;const k=Math.min(s.n-1,Math.floor(x));
+    if(k!==s.cur){s.cur=k;s.st.forEach((e,i)=>e.classList.toggle('on',i===k));if(s.lbl)s.lbl.textContent=(k+1)+' / '+s.n;}
+    s.bars.forEach((b,i)=>b.style.width=(clamp(x-i)*100)+'%');});
+  requestAnimationFrame(frame);
+}
+requestAnimationFrame(frame);
+})();
+</script>
+<!--DOMJS-END-->
+<!--GLJS-START-->
+<script type="module">
+/* ═════════════ About us · 3D ═════════════
+   The stack: one real rack on a drawing sheet. Above it float the systems that describe it (Audit, DCIM, CMDB).
+   Between the rack and those systems there is a gap: a layer nobody built, so nothing could prove the record.
+   What RackTrack does (4): capture · validate · reconcile (the layer forms) · operationalize (it syncs upward)
+   Story (4): the moment (three sources disagree) · the reason (one missed cable) · the team (the anatomy) · the build (cable map)
+   Company: a map plate, two offices, today's night side drawn live.   Mission: the stack in section, the layer underneath both. */
+import * as THREE from 'three';
+import { RoomEnvironment } from 'three/addons/environments/RoomEnvironment.js';
+import { RoundedBoxGeometry } from 'three/addons/geometries/RoundedBoxGeometry.js';
+
+const reduce=matchMedia('(prefers-reduced-motion: reduce)').matches;
+const SNAP=location.search.includes('snap');
+const clamp=(x,a=0,b=1)=>Math.min(b,Math.max(a,x));
+const smooth=(a,b,x)=>{const t=clamp((x-a)/(b-a));return t*t*(3-2*t)};
+const lerp=(a,b,t)=>a+(b-a)*t;
+const C=h=>new THREE.Color(h);
+const COL={link:C('#1FD67C'),linkInk:C('#04703F'),drift:C('#FF9A2E'),record:C('#7C93A8'),ink:C('#111614')};
+const MONO='"JetBrains Mono", monospace', SANS='"Inter", sans-serif';
+const V3=(x,y,z)=>new THREE.Vector3(x,y,z);
+
+const canvas=document.getElementById('stage');
+let renderer;
+try{ renderer=new THREE.WebGLRenderer({canvas,antialias:true,alpha:true,powerPreference:'high-performance'}); }
+catch(e){ document.documentElement.classList.add('no-webgl'); throw e; }
+renderer.setPixelRatio(SNAP?1:Math.min(devicePixelRatio,2));
+renderer.setClearColor(0,0);
+renderer.toneMapping=THREE.ACESFilmicToneMapping; renderer.toneMappingExposure=1.02;
+renderer.outputColorSpace=THREE.SRGBColorSpace;
+renderer.shadowMap.enabled=true; renderer.shadowMap.type=SNAP?THREE.PCFShadowMap:THREE.PCFSoftShadowMap;
+const scene=new THREE.Scene();
+scene.environment=new THREE.PMREMGenerator(renderer).fromScene(new RoomEnvironment(),.04).texture; scene.environmentIntensity=.85;
+const camera=new THREE.PerspectiveCamera(28,1,.05,300);
+scene.add(new THREE.HemisphereLight(0xffffff,0x9aa39e,.55));
+const sun=new THREE.DirectionalLight(0xffffff,1.75);sun.position.set(-5,11,7);sun.castShadow=true;
+sun.shadow.mapSize.set(SNAP?1024:2048,SNAP?1024:2048);Object.assign(sun.shadow.camera,{left:-5,right:5,top:6,bottom:-4,near:1,far:30});sun.shadow.bias=-.0005;sun.shadow.radius=4;scene.add(sun);
+const fill=new THREE.DirectionalLight(0xdfe9ff,.55);fill.position.set(7,4,-5);scene.add(fill);
+const front=new THREE.DirectionalLight(0xffffff,.35);front.position.set(1,2,8);scene.add(front);
+
+function cnv(w,h){const c=document.createElement('canvas');c.width=w;c.height=h;return [c,c.getContext('2d')];}
+function tex(c){const t=new THREE.CanvasTexture(c);t.colorSpace=THREE.SRGBColorSpace;t.anisotropy=Math.min(8,renderer.capabilities.getMaxAnisotropy());return t;}
+const alu=new THREE.MeshStandardMaterial({color:'#dfe3df',metalness:.72,roughness:.3});
+const graph=new THREE.MeshStandardMaterial({color:'#2a302d',metalness:.55,roughness:.45});
+const dark=new THREE.MeshStandardMaterial({color:'#1a1f1d',metalness:.4,roughness:.55});
+const add=(m,p,parent=scene)=>{if(p)m.position.set(...p);parent.add(m);return m;};
+
+/* ─────────── drawing sheet ─────────── */
+const BW=6.6, BD=4.8;
+function sheetCanvas(){const W=2048,H=Math.round(W*BD/BW),s=W/BW;const [c,g]=cnv(W,H);const X=x=>(x+BW/2)*s,Z=z=>(z+BD/2)*s;
+  g.fillStyle='#F4F6F3';g.fillRect(0,0,W,H);
+  for(let x=-BW/2;x<=BW/2+.01;x+=.2){g.fillStyle='rgba(17,22,20,.05)';g.fillRect(X(x),0,1.2,H);} for(let z=-BD/2;z<=BD/2+.01;z+=.2){g.fillStyle='rgba(17,22,20,.05)';g.fillRect(0,Z(z),W,1.2);}
+  g.strokeStyle='#111614';g.lineWidth=3;g.strokeRect(16,16,W-32,H-32);
+  // slab footprint (dashed) + rack footprint
+  g.setLineDash([12,9]);g.strokeStyle='#7C93A8';g.lineWidth=2.5;g.strokeRect(X(-1.1),Z(-.75),2.2*s,1.5*s);g.setLineDash([]);
+  g.strokeStyle='#4A544F';g.lineWidth=2;g.strokeRect(X(-.34),Z(-.49),.68*s,.98*s);
+  g.fillStyle='#4A544F';g.font=`400 20px ${MONO}`;g.fillText('R07 · 42U',X(-.34),Z(.62));
+  g.fillText('A',X(-2.9),Z(0)+7);g.fillText('A',X(2.8),Z(0)+7);g.setLineDash([4,6]);g.beginPath();g.moveTo(X(-2.7),Z(0));g.lineTo(X(-1.3),Z(0));g.moveTo(X(1.3),Z(0));g.lineTo(X(2.7),Z(0));g.stroke();g.setLineDash([]);
+  g.fillStyle='#111614';g.fillRect(W-520,H-120,500,100);g.fillStyle='#DDE4DF';g.font=`500 28px ${MONO}`;g.fillText('DC1 · row C · R07',W-500,H-74);
+  g.fillStyle='#93A19A';g.font=`400 20px ${MONO}`;g.fillText('section A–A · 1:12',W-500,H-40);
+  return c;}
+const sheetMat=new THREE.MeshStandardMaterial({map:tex(sheetCanvas()),roughness:.9});
+const base=add(new THREE.Mesh(new THREE.BoxGeometry(BW,.2,BD),[alu,alu,sheetMat,alu,alu,alu]),[0,-.1,0]);base.receiveShadow=true;
+add(new THREE.Mesh(new THREE.BoxGeometry(BW+.14,.04,BD+.14),graph),[0,-.22,0]);
+
+/* ─────────── the rack ─────────── */
+const RW=.66, RD=.96, U=.044, Y0=.1, ZF=RD/2, FACE=ZF-.03;
+const uy=(u,h=1)=>Y0+(u-1)*U+h*U/2;           // centre y of a device starting at U u with height h
+const RACK=new THREE.Group();scene.add(RACK);
+[[-1,-1],[1,-1],[-1,1],[1,1]].forEach(([sx,sz])=>{const p=add(new THREE.Mesh(new THREE.BoxGeometry(.035,2.0,.035),graph),[sx*(RW/2-.018),1.0,sz*(RD/2-.018)],RACK);p.castShadow=true;});
+[-1,1].forEach(sx=>{const s=add(new THREE.Mesh(new THREE.BoxGeometry(.012,1.9,RD-.04),new THREE.MeshStandardMaterial({color:'#222826',metalness:.5,roughness:.5})),[sx*(RW/2-.006),1.0,0],RACK);s.castShadow=true;s.receiveShadow=true;});
+add(new THREE.Mesh(new THREE.BoxGeometry(RW,.05,RD),graph),[0,2.0,0],RACK).castShadow=true;
+add(new THREE.Mesh(new THREE.BoxGeometry(RW,.08,RD),graph),[0,.04,0],RACK);
+add(new THREE.Mesh(new THREE.BoxGeometry(RW-.02,1.9,.01),dark),[0,1.0,-RD/2+.02],RACK);
+function railCanvas(){const [c,g]=cnv(24,1024);g.fillStyle='#c9cfcb';g.fillRect(0,0,24,1024);g.fillStyle='#2a302d';for(let i=0;i<126;i++){g.fillRect(8,4+i*8.1,8,4);}return c;}
+const railMat=new THREE.MeshStandardMaterial({map:tex(railCanvas()),metalness:.6,roughness:.35});
+[-1,1].forEach(sx=>add(new THREE.Mesh(new THREE.BoxGeometry(.022,42*U,.012),[alu,alu,alu,alu,railMat,alu]),[sx*(RW/2-.045),Y0+21*U,FACE+.004],RACK));
+
+// equipment
+const EQ=[
+ {u:42,h:1,k:'blank'},{u:41,h:1,k:'patch',n:'PP-A'},{u:40,h:1,k:'mgr'},{u:39,h:1,k:'switch',n:'SW-04'},{u:38,h:1,k:'switch',n:'SW-05'},{u:37,h:1,k:'blank'},
+ {u:35,h:2,k:'server',n:'SRV-01'},{u:34,h:1,k:'blank'},{u:32,h:2,k:'server',n:'SRV-02'},{u:30,h:2,k:'server',n:'SRV-03',mis:'extra'},
+ {u:24,h:4,k:'storage',n:'ST-01'},{u:22,h:2,k:'server',n:'SRV-05'},{u:20,h:2,k:'server',n:'SRV-06',mis:'serial'},{u:16,h:4,k:'storage',n:'ST-02'},
+ {u:14,h:2,k:'blank'},{u:12,h:2,k:'server',n:'SRV-07'},{u:10,h:2,k:'server',n:'SRV-08'},{u:6,h:4,k:'blank'},{u:3,h:3,k:'ups',n:'UPS-1'},{u:1,h:2,k:'blank'}];
+const GHOST={u:28,h:2,n:'SRV-04'};           // the record says it's here; the slot is empty
+function faceCanvas(k,n,h){const W=512,H=Math.round(h*37);const [c,g]=cnv(W,H);
+  const bg={blank:'#222826',patch:'#1d2321',mgr:'#1a1f1d',switch:'#2a302d',server:'#2f3633',storage:'#262c29',ups:'#2b312e'}[k];
+  g.fillStyle=bg;g.fillRect(0,0,W,H);g.fillStyle='rgba(255,255,255,.06)';g.fillRect(0,0,W,2);g.fillStyle='rgba(0,0,0,.35)';g.fillRect(0,H-2,W,2);
+  if(k==='blank'){g.fillStyle='rgba(255,255,255,.05)';for(let y=6;y<H-4;y+=8)g.fillRect(40,y,W-80,2);}
+  if(k==='mgr'){g.fillStyle='#111514';g.fillRect(30,H/2-5,W-60,10);g.fillStyle='#2f3633';for(let x=34;x<W-34;x+=14)g.fillRect(x,H/2-9,6,18);}
+  if(k==='patch'||k==='switch'){g.fillStyle='#DDE4DF';g.font=`500 13px ${MONO}`;g.fillText(n,14,H/2+5);
+    if(k==='switch'){g.fillStyle='#111514';for(let i=0;i<4;i++)g.fillRect(W-38+i*0,6,0,0);}}
+  if(k==='server'){g.fillStyle='#262c29';for(let i=0;i<8;i++)g.fillRect(120+i*38,8,32,H-16);g.fillStyle='#1d2321';for(let i=0;i<8;i++)g.fillRect(124+i*38,H/2-2,24,3);
+    g.fillStyle='#DDE4DF';g.font=`500 13px ${MONO}`;g.fillText(n,14,20);g.fillStyle='#1FD67C';g.fillRect(14,H-16,6,6);g.fillStyle='#7C93A8';g.fillRect(26,H-16,6,6);
+    g.fillStyle='#1a1f1d';for(let y=10;y<H-8;y+=6)g.fillRect(W-72,y,56,3);}
+  if(k==='storage'){g.fillStyle='#DDE4DF';g.font=`500 13px ${MONO}`;g.fillText(n,14,20);for(let r=0;r<3;r++)for(let i=0;i<4;i++){const x=90+i*100,y=10+r*(H-20)/3;g.fillStyle='#343b38';g.fillRect(x,y,92,(H-20)/3-6);g.fillStyle=(r+i)%5?'#1FD67C':'#7C93A8';g.fillRect(x+80,y+6,5,5);}}
+  if(k==='ups'){g.fillStyle='#DDE4DF';g.font=`500 13px ${MONO}`;g.fillText(n,14,20);g.fillStyle='#0c1110';g.fillRect(W-170,16,140,44);g.fillStyle='#1FD67C';g.font=`500 16px ${MONO}`;g.fillText('230V 41%',W-160,44);
+    g.fillStyle='#1a1f1d';for(let y=12;y<H-8;y+=7)g.fillRect(40,y,W-240,3);}
+  return c;}
+const DEV={};
+EQ.forEach(d=>{const hh=d.h*U-.003;const y=uy(d.u,d.h);
+  const body=add(new THREE.Mesh(new THREE.BoxGeometry(RW-.1,hh,.78),[dark,dark,dark,dark,new THREE.MeshStandardMaterial({map:tex(faceCanvas(d.k,d.n,d.h)),metalness:.35,roughness:.55}),dark]),[0,y,FACE-.39],RACK);
+  body.castShadow=true;body.receiveShadow=true;DEV[d.n||('b'+d.u)]={...d,y,mesh:body};});
+// ports: patch (24) + two switches (48 each)
+const PX=c=>-.205+c*.0191;
+const PORTS=[];                                   // {x,y,kind,dev,col,row,used,mis}
+for(let c=0;c<24;c++)PORTS.push({x:PX(c),y:uy(41),dev:'PP-A',col:c,row:0,used:c>=3&&c<=19});
+['SW-04','SW-05'].forEach((sw,si)=>{for(let r=0;r<2;r++)for(let c=0;c<24;c++){const idx=r*24+c;PORTS.push({x:PX(c),y:uy(si?38:39)+(r?-.0092:.0092),dev:sw,col:c,row:r,idx,used:si?(c<14):(c<22)});}});
+const portGeo=new THREE.PlaneGeometry(.0135,.0075);
+const portMat=new THREE.MeshBasicMaterial({color:0xffffff,toneMapped:false});
+const ports=new THREE.InstancedMesh(portGeo,portMat,PORTS.length);RACK.add(ports);
+{const m=new THREE.Matrix4();PORTS.forEach((p,i)=>{m.makeTranslation(p.x,p.y,FACE+.0015);ports.setMatrixAt(i,m);ports.setColorAt(i,C('#101413'));});}
+const misPorts=new Set(PORTS.map((p,i)=>p.dev==='SW-04'&&p.row===0&&(p.col===17||p.col===18||p.col===19)?i:-1).filter(i=>i>=0));
+const P_UNUSED=C('#0d1110'),P_DIM=C('#56605b'),P_PATCH=C('#9aa6a0');
+
+// cables: patch col → SW-04 port (record-blue), plus green verified overlays for the build beat
+const CAB=[];
+function cableCurve(a,b){const z=FACE+.004;const mx=(a.x+b.x)/2,my=(a.y+b.y)/2;const sag=.018+Math.abs(a.x-b.x)*.35;
+  return new THREE.CatmullRomCurve3([V3(a.x,a.y,z),V3(a.x,a.y-.004,z+.035),V3(mx,my-sag*.4,z+.07+Math.abs(a.x-b.x)*.12),V3(b.x,b.y+.004,z+.035),V3(b.x,b.y,z)]);}
+const greenCab=new THREE.MeshBasicMaterial({color:COL.link,toneMapped:false});
+for(let i=0;i<16;i++){const pc=i+3;const a=PORTS[pc];
+  const sw=i<13?'SW-04':'SW-05';const col=i<13?(i*1.5|0)+2:(i-13)*3+4;const row=i%2;
+  const b=PORTS.find(p=>p.dev===sw&&p.col===Math.min(23,col)&&p.row===row);
+  const curve=cableCurve(a,b);const mat=new THREE.MeshStandardMaterial({color:'#6f8599',roughness:.6,metalness:.1});
+  const tube=add(new THREE.Mesh(new THREE.TubeGeometry(curve,28,.003,6,false),mat),null,RACK);
+  const gt=add(new THREE.Mesh(new THREE.TubeGeometry(curve,28,.0036,6,false),greenCab),null,RACK);gt.geometry.setDrawRange(0,0);
+  CAB.push({curve,mat,tube,gt,a,b,pc,n:gt.geometry.index.count});}
+const HOT=CAB[8];   // "P-12": the cable nobody could agree on
+// mismatch outlines (amber) — resolved to green in "validate"
+function outline(w,h,d,pos,col,dashed){const g=new THREE.EdgesGeometry(new THREE.BoxGeometry(w,h,d));const m=dashed?new THREE.LineDashedMaterial({color:col,dashSize:.014,gapSize:.01,transparent:true,toneMapped:false}):new THREE.LineBasicMaterial({color:col,transparent:true,toneMapped:false});
+  const l=new THREE.LineSegments(g,m);if(dashed)l.computeLineDistances();l.position.set(...pos);RACK.add(l);return l;}
+const MIS=[
+  {o:outline(RW-.07,2*U-.002,.02,[0,uy(30,2),FACE+.006],COL.drift,false),y:uy(30,2),txt:'not in the record'},
+  {o:outline(RW-.07,2*U-.002,.02,[0,uy(20,2),FACE+.006],COL.drift,false),y:uy(20,2),txt:'serial differs'},
+  {o:outline(RW-.07,2*U-.002,.78,[0,uy(28,2),FACE-.39],COL.drift,true),y:uy(28,2),txt:'record says SRV-04'}];
+const ghostFill=add(new THREE.Mesh(new THREE.PlaneGeometry(RW-.08,2*U-.004),new THREE.MeshBasicMaterial({color:COL.drift,transparent:true,opacity:.14,depthWrite:false,toneMapped:false})),[0,uy(28,2),FACE-.02],RACK);
+// scan band + scanned wash (capture)
+const band=add(new THREE.Mesh(new THREE.PlaneGeometry(RW+.04,.012),new THREE.MeshBasicMaterial({color:COL.link,transparent:true,opacity:0,toneMapped:false,depthWrite:false})),[0,1,ZF+.01],RACK);
+const wash=add(new THREE.Mesh(new THREE.PlaneGeometry(RW,1),new THREE.MeshBasicMaterial({color:COL.link,transparent:true,opacity:0,toneMapped:false,depthWrite:false})),[0,.5,ZF+.008],RACK);
+
+/* ─────────── the phone ─────────── */
+const PHONE=new THREE.Group();scene.add(PHONE);
+add(new THREE.Mesh(new RoundedBoxGeometry(.078,.158,.009,4,.008),new THREE.MeshStandardMaterial({color:'#15191a',metalness:.45,roughness:.3})),null,PHONE).castShadow=true;
+function phoneScreen(){const [c,g]=cnv(156,316);g.fillStyle='#0c1110';g.fillRect(0,0,156,316);
+  g.fillStyle='#1d2321';for(let i=0;i<11;i++)g.fillRect(26,40+i*21,104,16);g.strokeStyle='#1FD67C';g.lineWidth=3;g.strokeRect(20,34,116,236);
+  g.fillStyle='rgba(31,214,124,.35)';g.fillRect(20,150,116,6);g.fillStyle='#DDE4DF';g.font=`500 12px ${MONO}`;g.fillText('R07 · sweep',24,24);g.fillStyle='#1FD67C';g.fillText('● rec',96,24);
+  g.fillStyle='#93A19A';g.font=`400 11px ${MONO}`;g.fillText('hold steady · move up',22,296);return c;}
+add(new THREE.Mesh(new THREE.PlaneGeometry(.07,.148),new THREE.MeshBasicMaterial({map:tex(phoneScreen()),toneMapped:false})),[0,0,.0052],PHONE);
+const frustum=new THREE.LineSegments(new THREE.BufferGeometry(),new THREE.LineBasicMaterial({color:COL.link,transparent:true,opacity:0,toneMapped:false,depthWrite:false}));scene.add(frustum);
+
+/* ─────────── the stack: systems above, the missing layer ─────────── */
+const SW=2.2, SD=1.5, ST=.03;
+const LV={rec:2.45,audit:3.0,dcim:3.55,cmdb:4.1};
+function slabCanvas(kind,synced){const W=1100,H=750;const [c,g]=cnv(W,H);
+  const isRec=kind==='rec';g.fillStyle=isRec?'#F4F6F3':'#EEF1ED';g.fillRect(0,0,W,H);
+  g.strokeStyle=isRec?'#04703F':'#C6CCC7';g.lineWidth=isRec?8:4;g.strokeRect(4,4,W-8,H-8);
+  const T={audit:['Audit','spreadsheet · annual walk-through'],dcim:['DCIM','the plan'],cmdb:['CMDB','the inventory'],rec:['RackTrack record','DC1 · R07 · verified']}[kind];
+  g.fillStyle='#111614';g.font=`500 64px ${SANS}`;g.fillText(T[0],48,104);g.fillStyle=isRec?'#04703F':'#4A544F';g.font=`400 26px ${MONO}`;g.fillText(T[1],50,148);
+  const ok=synced||isRec;
+  const mark=(x,y,bad)=>{if(bad&&!ok){g.fillStyle='#FF9A2E';g.fillRect(x,y-20,26,26);g.fillStyle='#111614';g.font=`500 22px ${MONO}`;g.fillText('?',x+6,y);}else{g.strokeStyle=ok?'#04703F':'#7C93A8';g.lineWidth=4;g.beginPath();g.moveTo(x+3,y-8);g.lineTo(x+10,y);g.lineTo(x+24,y-18);g.stroke();}};
+  if(kind==='audit'||kind==='cmdb'||isRec){
+    const rows=kind==='audit'?[['U39','SW-04','P-12 → 17',1],['U35','SRV-01','ok',0],['U30','—','empty',1],['U28','SRV-04','present',1],['U20','SRV-06','SN 4K1-88',1],['U16','ST-02','ok',0],['U03','UPS-1','ok',0]]
+      :kind==='cmdb'?[['CI-2041','SW-04','firmware 9.3',1],['CI-2044','SRV-01','in service',0],['CI-2051','SRV-04','in service',1],['CI-2057','SRV-06','SN 4K1-88',1],['CI-2060','ST-01','in service',0],['CI-2071','UPS-1','in service',0]]
+      :[['inventory','38 devices','reconciled',0],['topology','212 links','traced',0],['port state','96 / 96','read',0],['firmware','12 devices','currency checked',0],['U28','empty','SRV-04 removed',0],['U30','SRV-03','added',0]];
+    g.font=`400 27px ${MONO}`;rows.forEach((r,i)=>{const y=224+i*72;g.fillStyle='rgba(17,22,20,.07)';g.fillRect(48,y+22,W-96,2);
+      g.fillStyle='#4A544F';g.fillText(r[0],52,y);g.fillStyle='#111614';g.fillText(r[1],isRec?300:230,y);g.fillStyle=(r[3]&&!ok)?'#9C4C00':'#4A544F';g.fillText(ok&&r[3]&&!isRec?'verified':r[2],isRec?580:520,y);mark(W-100,y,r[3]);});}
+  if(kind==='dcim'){ // a planned elevation next to a small floor grid
+    const x0=60,y0=190;g.strokeStyle='#111614';g.lineWidth=3;g.strokeRect(x0,y0,190,500);
+    const plan=[[1,1],[3,2],[6,2],[9,2],[12,2],[15,4],[20,2],[22,2],[25,4],[30,2],[33,2],[36,3]];
+    plan.forEach(([u,h],i)=>{const y=y0+500-(u+h)*11.5;const bad=(u===12)||(u===15)?0:(i===4||i===9);g.fillStyle=bad&&!ok?'rgba(255,154,46,.25)':'#dfe3df';g.fillRect(x0+10,y,170,h*11.5-4);if(bad&&!ok){g.strokeStyle='#FF9A2E';g.lineWidth=3;g.strokeRect(x0+10,y,170,h*11.5-4);}});
+    g.fillStyle='#4A544F';g.font=`400 22px ${MONO}`;g.fillText('R07 · planned',x0,y0+530);
+    const gx=330,gy=200;for(let r=0;r<4;r++)for(let k=0;k<9;k++){const on=r===2&&k===6;g.fillStyle=on?'#111614':'#dfe3df';g.fillRect(gx+k*76,gy+r*110,62,80);}
+    g.fillStyle='#4A544F';g.fillText('row C · floor plan',gx,gy+470);
+    g.font=`400 26px ${MONO}`;g.fillStyle=ok?'#04703F':'#9C4C00';g.fillText(ok?'elevation matches the rack':'last updated: planned, not observed',gx,gy+530);}
+  return c;}
+const SLABS={};
+function makeSlab(kind,y){const grp=new THREE.Group();grp.position.y=y;scene.add(grp);
+  const top=new THREE.MeshBasicMaterial({map:tex(slabCanvas(kind,false)),transparent:true,opacity:kind==='rec'?0:.96,toneMapped:false});
+  const side=new THREE.MeshStandardMaterial({color:kind==='rec'?'#e6ece7':'#dfe3df',metalness:.2,roughness:.5,transparent:true,opacity:kind==='rec'?0:1});
+  const m=add(new THREE.Mesh(new THREE.BoxGeometry(SW,ST,SD),[side,side,top,side,side,side]),null,grp);m.castShadow=kind!=='rec';m.receiveShadow=true;
+  const edge=add(new THREE.LineSegments(new THREE.EdgesGeometry(new THREE.BoxGeometry(SW+.004,ST+.004,SD+.004)),new THREE.LineBasicMaterial({color:kind==='rec'?COL.link:C('#4A544F'),transparent:true,toneMapped:false})),null,grp);
+  let synced=null;
+  if(kind!=='rec'){synced=add(new THREE.Mesh(new THREE.PlaneGeometry(SW,SD),new THREE.MeshBasicMaterial({map:tex(slabCanvas(kind,true)),transparent:true,opacity:0,depthWrite:false,toneMapped:false})),[0,ST/2+.002,0],grp);synced.rotation.x=-Math.PI/2;}
+  SLABS[kind]={grp,m,top,side,edge,synced,y};return SLABS[kind];}
+['rec','audit','dcim','cmdb'].forEach(k=>makeSlab(k,LV[k]));
+// the gap: a ghost of the layer nobody built
+const ghost=new THREE.LineSegments(new THREE.EdgesGeometry(new THREE.BoxGeometry(SW,ST,SD)),new THREE.LineDashedMaterial({color:COL.drift,dashSize:.07,gapSize:.05,transparent:true,toneMapped:false,depthWrite:false}));ghost.computeLineDistances();ghost.position.y=LV.rec;scene.add(ghost);
+function hatchCanvas(){const [c,g]=cnv(512,350);g.strokeStyle='rgba(255,154,46,.55)';g.lineWidth=3;for(let i=-400;i<600;i+=26){g.beginPath();g.moveTo(i,0);g.lineTo(i+350,350);g.stroke();}return c;}
+const ghostFillSlab=add(new THREE.Mesh(new THREE.PlaneGeometry(SW,SD),new THREE.MeshBasicMaterial({map:tex(hatchCanvas()),transparent:true,opacity:.5,depthWrite:false,toneMapped:false,side:THREE.DoubleSide})),[0,LV.rec,0]);ghostFillSlab.rotation.x=-Math.PI/2;
+// plumb lines (assumed, dashed amber) and sync beams (green) share three columns
+const COLS=[[-.72,-.42,'audit'],[.08,.46,'dcim'],[.78,-.16,'cmdb']];
+const plumbs=COLS.map(([x,z,k])=>{const l=new THREE.Line(new THREE.BufferGeometry().setFromPoints([V3(x,LV[k]-.02,z),V3(x,LV.rec+.01,z)]),new THREE.LineDashedMaterial({color:COL.drift,dashSize:.05,gapSize:.04,transparent:true,toneMapped:false}));l.computeLineDistances();scene.add(l);
+  const ring=add(new THREE.Mesh(new THREE.RingGeometry(.035,.05,32),new THREE.MeshBasicMaterial({color:COL.drift,transparent:true,side:THREE.DoubleSide,toneMapped:false,depthWrite:false})),[x,LV.rec+.02,z]);ring.rotation.x=-Math.PI/2;return {l,ring};});
+const beams=COLS.map(([x,z,k])=>{const h=LV[k]-LV.rec;const b=add(new THREE.Mesh(new THREE.CylinderGeometry(.008,.008,h,8),new THREE.MeshBasicMaterial({color:COL.link,transparent:true,opacity:0,toneMapped:false,depthWrite:false})),[x,LV.rec+h/2,z]);
+  const pulses=[0,1,2].map(()=>add(new THREE.Mesh(new THREE.SphereGeometry(.022,12,8),new THREE.MeshBasicMaterial({color:COL.link,transparent:true,opacity:0,toneMapped:false,depthWrite:false})),[x,LV.rec,z]));return {b,pulses,x,z,h};});
+// tiles that assemble the record (reconcile)
+const NT=30;
+const tileMat=new THREE.MeshStandardMaterial({color:'#F4F6F3',roughness:.6,emissive:'#0b3a22',emissiveIntensity:0});
+const tiles=new THREE.InstancedMesh(new THREE.BoxGeometry(.2,.012,.13),tileMat,NT);tiles.castShadow=true;scene.add(tiles);
+const tileEdge=new THREE.InstancedMesh(new THREE.BoxGeometry(.205,.004,.135),new THREE.MeshBasicMaterial({color:COL.link,toneMapped:false}),NT);scene.add(tileEdge);
+const devList=EQ.filter(d=>d.k!=='blank');
+const TILES=[...Array(NT)].map((_,i)=>{const d=devList[i%devList.length];const s=V3((i%3-1)*.15,uy(d.u,d.h),FACE+.02);const c=i%6,r=Math.floor(i/6);const e=V3(-.85+c*.34,LV.rec+.02,-.52+r*.26);return {s,e,d:i/NT};});
+
+/* ─────────── company: a map plate, two offices, tonight's night side ─────────── */
+const MX=17;
+const MAP=new THREE.Group();MAP.position.set(MX,0,0);scene.add(MAP);
+const LON_W=-130, LON_E=112, LAT_N=72, LAT_S=-42, MW=4.9, MD=MW*(LAT_N-LAT_S)/(LON_E-LON_W);
+const LAND=[
+ [[-168,66],[-156,71],[-140,70],[-128,70],[-110,68],[-95,70],[-85,69],[-80,63],[-94,59],[-90,57],[-82,55],[-78,60],[-70,60],[-64,58],[-60,54],[-56,51],[-60,47],[-64,45],[-70,43],[-70,41],[-74,40],[-76,37],[-76,35],[-81,31],[-80,26],[-81,25],[-83,29],[-85,30],[-89,30],[-94,29],[-97,27],[-97,22],[-94,18],[-91,19],[-90,21],[-87,21],[-88,16],[-84,15],[-83,10],[-80,8],[-78,9],[-80,7],[-83,8],[-86,11],[-88,13],[-92,14],[-96,16],[-105,20],[-106,23],[-109,26],[-113,31],[-117,33],[-121,35],[-124,40],[-124,46],[-124,49],[-128,51],[-133,56],[-137,59],[-142,60],[-148,61],[-152,59],[-158,57],[-164,55],[-158,58],[-162,60],[-165,62],[-166,65]],
+ [[-73,78],[-60,82],[-35,83],[-20,80],[-20,72],[-24,69],[-32,68],[-40,65],[-44,60],[-50,62],[-54,67],[-56,72],[-66,76]],
+ [[-80,8],[-77,9],[-72,12],[-66,11],[-60,10],[-52,5],[-50,1],[-44,-2],[-35,-5],[-35,-9],[-39,-14],[-39,-18],[-41,-22],[-48,-26],[-49,-29],[-53,-34],[-58,-35],[-57,-38],[-62,-39],[-65,-42],[-66,-47],[-69,-51],[-68,-54],[-72,-54],[-75,-50],[-74,-44],[-73,-37],[-71,-30],[-70,-18],[-76,-14],[-80,-7],[-81,-3],[-80,1],[-78,3],[-77,7]],
+ [[-9,37],[-9,43],[-2,43],[-1,46],[-4,48],[2,51],[5,53],[8,54],[9,57],[11,58],[12,56],[14,55],[20,55],[21,57],[24,59],[22,60],[22,63],[25,65],[21,64],[17,61],[18,59],[16,56],[12,58],[10,59],[6,58],[5,62],[10,64],[14,67],[18,70],[25,71],[31,70],[40,68],[44,68],[45,66],[53,68],[60,69],[68,70],[73,72],[80,73],[88,75],[100,77],[110,76],[114,74],[128,73],[140,72],[150,71],[160,70],[170,70],[180,69],[180,65],[178,64],[172,60],[163,59],[162,55],[157,51],[156,57],[163,62],[160,62],[152,59],[143,59],[137,54],[141,52],[140,48],[135,43],[131,43],[129,40],[127,38],[129,35],[126,35],[125,38],[122,40],[121,39],[119,37],[122,37],[120,33],[122,30],[120,26],[117,23],[112,21],[108,21],[106,19],[108,16],[109,12],[105,9],[103,10],[101,13],[99,9],[103,5],[104,1],[101,3],[98,8],[98,16],[94,19],[92,22],[90,22],[87,21],[85,19],[80,15],[80,10],[77,8],[76,10],[73,16],[73,21],[70,22],[68,24],[62,25],[57,26],[56,27],[52,28],[48,30],[50,26],[52,24],[56,24],[57,23],[59,22],[56,18],[52,16],[45,13],[43,15],[39,21],[35,28],[33,31],[35,33],[36,36],[30,36],[27,37],[26,40],[23,40],[23,37],[21,38],[19,42],[14,45],[12,44],[16,41],[18,40],[16,38],[12,38],[13,42],[10,44],[7,44],[3,43],[3,42],[0,39],[-1,37],[-5,36]],
+ [[-17,21],[-17,15],[-15,11],[-13,8],[-8,4],[-3,5],[2,6],[6,4],[9,4],[10,2],[9,-1],[12,-5],[13,-9],[12,-17],[14,-22],[15,-27],[17,-29],[18,-34],[20,-35],[26,-34],[28,-33],[32,-29],[33,-26],[35,-24],[35,-20],[40,-16],[40,-11],[39,-5],[41,-1],[44,2],[48,5],[51,11],[44,11],[43,13],[39,17],[37,22],[35,25],[33,30],[32,31],[29,31],[25,32],[20,31],[19,30],[15,32],[11,33],[10,37],[3,37],[-2,35],[-6,36],[-9,33],[-10,29],[-13,27],[-15,24]],
+ [[44,-25],[47,-25],[50,-16],[49,-12],[44,-16]],
+ [[114,-22],[114,-26],[115,-34],[118,-35],[123,-34],[129,-32],[132,-32],[136,-35],[138,-34],[140,-38],[146,-39],[150,-37],[153,-32],[153,-26],[149,-21],[146,-18],[145,-15],[142,-11],[141,-13],[140,-17],[137,-15],[136,-12],[132,-11],[129,-15],[125,-14],[122,-18],[118,-20]],
+ [[130,31],[132,34],[135,34],[140,35],[141,38],[142,41],[140,41],[139,38],[136,36],[132,35]],[[140,42],[144,43],[145,44],[142,45]],
+ [[-5,50],[1,51],[2,53],[0,54],[-2,56],[-2,58],[-5,58],[-6,56],[-5,54],[-3,53],[-5,52]],[[-10,52],[-6,52],[-6,55],[-8,55],[-10,54]],
+ [[95,5],[98,4],[104,-2],[106,-6],[102,-4],[96,2]],[[109,1],[110,-3],[116,-4],[118,1],[117,7],[113,3]],[[105,-6],[114,-7],[114,-8],[106,-7]],[[131,-1],[138,-2],[146,-6],[150,-10],[141,-9],[138,-8],[135,-4]],
+ [[80,6],[82,7],[81,9],[80,9]],[[172,-34],[178,-38],[174,-41],[172,-41]],[[172,-41],[174,-42],[171,-46],[167,-46]],[[120,18],[122,18],[124,13],[126,7],[122,7],[120,14]],
+ [[-24,64],[-22,66],[-15,66],[-14,64],[-19,63]],[[-85,22],[-80,23],[-75,20],[-78,20]],[[-168,66],[-180,69],[-180,65],[-172,64]]];
+function inPoly(x,y,P){let c=false;for(let i=0,j=P.length-1;i<P.length;j=i++){const [xi,yi]=P[i],[xj,yj]=P[j];if(((yi>y)!==(yj>y))&&(x<(xj-xi)*(y-yi)/(yj-yi)+xi))c=!c;}return c;}
+const DOTS=[];for(let lat=LAT_N-1;lat>=LAT_S;lat-=1.6)for(let lon=LON_W+.8;lon<LON_E;lon+=1.6){if(LAND.some(P=>inPoly(lon,lat,P)))DOTS.push([lon,lat]);}
+function sunPos(d){const doy=Math.floor((d-Date.UTC(d.getUTCFullYear(),0,0))/864e5);const dec=-23.44*Math.cos(2*Math.PI/365*(doy+10));const h=d.getUTCHours()+d.getUTCMinutes()/60;return {dec:dec*Math.PI/180,lon:(12-h)*15};}
+const mapW=2048,mapH=Math.round(2048*MD/MW);
+const mX=lon=>(lon-LON_W)/(LON_E-LON_W)*mapW, mY=lat=>(LAT_N-lat)/(LAT_N-LAT_S)*mapH;
+function mapCanvas(){const [c,g]=cnv(mapW,mapH);g.fillStyle='#F4F6F3';g.fillRect(0,0,mapW,mapH);
+  const S=sunPos(new Date());
+  // night side, soft terminator
+  const img=g.getImageData(0,0,mapW,mapH),D=img.data;
+  for(let y=0;y<mapH;y+=2){const lat=(LAT_N-y/mapH*(LAT_N-LAT_S))*Math.PI/180;for(let x=0;x<mapW;x+=2){const lon=LON_W+x/mapW*(LON_E-LON_W);
+    const cz=Math.sin(lat)*Math.sin(S.dec)+Math.cos(lat)*Math.cos(S.dec)*Math.cos((lon-S.lon)*Math.PI/180);const n=1-smooth(-.08,.06,cz);
+    if(n>0)for(let yy=0;yy<2;yy++)for(let xx=0;xx<2;xx++){const k=((y+yy)*mapW+x+xx)*4;D[k]=lerp(D[k],206,n);D[k+1]=lerp(D[k+1],212,n);D[k+2]=lerp(D[k+2],210,n);}}}
+  g.putImageData(img,0,0);
+  g.strokeStyle='rgba(17,22,20,.08)';g.lineWidth=1.5;for(let lon=-120;lon<LON_E;lon+=30){g.beginPath();g.moveTo(mX(lon),0);g.lineTo(mX(lon),mapH);g.stroke();}for(let lat=60;lat>LAT_S;lat-=30){g.beginPath();g.moveTo(0,mY(lat));g.lineTo(mapW,mY(lat));g.stroke();}
+  g.strokeStyle='rgba(17,22,20,.2)';g.setLineDash([8,8]);g.beginPath();g.moveTo(0,mY(0));g.lineTo(mapW,mY(0));g.stroke();g.setLineDash([]);
+  DOTS.forEach(([lon,lat])=>{const la=lat*Math.PI/180;const cz=Math.sin(la)*Math.sin(S.dec)+Math.cos(la)*Math.cos(S.dec)*Math.cos((lon-S.lon)*Math.PI/180);const night=cz<0;
+    g.fillStyle=night?'#39413d':'#8f9b95';g.beginPath();g.arc(mX(lon),mY(lat),4.6,0,7);g.fill();});
+  g.fillStyle='#4A544F';g.font=`400 18px ${MONO}`;g.fillText('0°',mX(0)+6,mY(0)-8);g.fillText('night side · drawn for right now',24,mapH-24);
+  g.strokeStyle='#111614';g.lineWidth=3;g.strokeRect(2,2,mapW-4,mapH-4);return c;}
+const mapMat=new THREE.MeshStandardMaterial({map:tex(mapCanvas()),roughness:.85});
+add(new THREE.Mesh(new THREE.BoxGeometry(MW,.12,MD),[alu,alu,mapMat,alu,alu,alu]),[0,-.06,0],MAP).receiveShadow=true;
+add(new THREE.Mesh(new THREE.BoxGeometry(MW+.12,.04,MD+.12),graph),[0,-.14,0],MAP);
+const LL=(lon,lat)=>V3((lon-LON_W)/(LON_E-LON_W)*MW-MW/2,0,(LAT_N-lat)/(LAT_N-LAT_S)*MD-MD/2);
+const OFF={hyd:{lon:78.47,lat:17.39},ct:{lon:-72.62,lat:41.83}};
+const pins={};
+Object.entries(OFF).forEach(([k,o])=>{const p=LL(o.lon,o.lat);const g=new THREE.Group();g.position.copy(p);MAP.add(g);
+  add(new THREE.Mesh(new THREE.CylinderGeometry(.012,.012,.34,10),graph),[0,.17,0],g).castShadow=true;
+  const head=add(new THREE.Mesh(new THREE.SphereGeometry(.05,20,14),new THREE.MeshStandardMaterial({color:COL.link,emissive:COL.link,emissiveIntensity:.6,roughness:.3})),[0,.36,0],g);
+  const ring=add(new THREE.Mesh(new THREE.RingGeometry(.06,.075,40),new THREE.MeshBasicMaterial({color:COL.linkInk,transparent:true,side:THREE.DoubleSide,toneMapped:false,depthWrite:false})),[0,.004,0],g);ring.rotation.x=-Math.PI/2;
+  pins[k]={g,head,ring,p};});
+// great-circle arc between the offices
+function slerpLL(a,b,t){const toV=o=>{const la=o.lat*Math.PI/180,lo=o.lon*Math.PI/180;return V3(Math.cos(la)*Math.cos(lo),Math.sin(la),Math.cos(la)*Math.sin(lo));};
+  const A=toV(a),B=toV(b);const om=Math.acos(clamp(A.dot(B),-1,1));const v=A.clone().multiplyScalar(Math.sin((1-t)*om)/Math.sin(om)).add(B.clone().multiplyScalar(Math.sin(t*om)/Math.sin(om)));
+  return {lat:Math.asin(v.y)*180/Math.PI,lon:Math.atan2(v.z,v.x)*180/Math.PI};}
+const arcPts=[];for(let i=0;i<=80;i++){const t=i/80;const ll=slerpLL(OFF.hyd,OFF.ct,t);const p=LL(ll.lon,ll.lat);p.y=.36+Math.sin(Math.PI*t)*.6;arcPts.push(p);}
+const arcCurve=new THREE.CatmullRomCurve3(arcPts);
+const arc=add(new THREE.Mesh(new THREE.TubeGeometry(arcCurve,120,.009,6,false),new THREE.MeshBasicMaterial({color:COL.linkInk,toneMapped:false})),null,MAP);
+const arcN=arc.geometry.index.count;arc.geometry.setDrawRange(0,0);
+const arcPulse=add(new THREE.Mesh(new THREE.SphereGeometry(.035,14,10),new THREE.MeshBasicMaterial({color:COL.link,toneMapped:false,transparent:true})),null,MAP);
+
+[ports,tiles,tileEdge].forEach(m=>m.frustumCulled=false);
+/* ─────────── tags ─────────── */
+const hud=document.getElementById('hud');const TG={};
+function tag(k,html,cls,pos,follow){const el=document.createElement('div');el.className='tag '+cls;el.innerHTML=`<i></i><span>${html}</span>`;hud.appendChild(el);TG[k]={el,pos:pos.clone?pos:V3(...pos),cur:0,t:0,follow};}
+const SL=(k,y)=>[SW/2,y,SD/2];
+tag('hA','<b>Audit</b>a spreadsheet, once a year','rec',SL('audit',LV.audit));
+tag('hD','<b>DCIM</b>the plan','rec',SL('dcim',LV.dcim));
+tag('hC','<b>CMDB</b>the inventory','rec',SL('cmdb',LV.cmdb));
+tag('hG','<b>The missing layer</b>no system could prove the record','drift keep',SL('rec',LV.rec));
+tag('hR','<b>The rack</b>what\'s actually there','ink',[RW/2,.55,ZF]);
+tag('cap','<b>One sweep</b>phone-guided, bottom to top','link keep',V3(),()=>PHONE.position.clone().add(V3(.05,.06,0)));
+tag('val','<b>Port state</b>matches the live network','link keep',[RW/2-.03,uy(39),FACE]);
+tag('m0','<b>Not in the record</b>found','drift',[RW/2-.03,MIS[0].y,FACE]);
+tag('m1','<b>Serial differs</b>corrected','drift',[RW/2-.03,MIS[1].y,FACE]);
+tag('m2','<b>Record says SRV-04</b>slot is empty','drift',[RW/2-.03,MIS[2].y,FACE]);
+tag('rec','<b>One reconciled record</b>inventory · topology · ports · firmware','link keep',SL('rec',LV.rec));
+tag('sA','<b>Audit</b>synced · evidence attached','link',SL('audit',LV.audit));
+tag('sD','<b>DCIM</b>synced · plan matches rack','link',SL('dcim',LV.dcim));
+tag('sC','<b>CMDB</b>synced','link keep',SL('cmdb',LV.cmdb));
+const pP12=PORTS[HOT.pc], pSW=HOT.b;
+tag('mS','<b>Spreadsheet</b>P-12 → SW-04 · port 17','rec up keep',[pP12.x,pP12.y+.012,FACE]);
+tag('mL','<b>Cable label</b>P-12 → port 18','ink left keep',HOT.curve.getPoint(.42));
+tag('mP','<b>Live port</b>SW-04 · port 19 is up','drift keep',[PX(19),uy(39)+.0092,FACE]);
+tag('rC','<b>One missed cable</b>the migration waits','drift keep',HOT.curve.getPoint(.5));
+tag('rT','<b>After hours</b>back into the data hall','ink',[RW/2,uy(33),ZF]);
+tag('e1','<b>Enterprise architecture</b>the whole stack','ink keep',[SW/2,LV.cmdb,SD/2]);
+tag('e2','<b>Integration</b>Salesforce · MuleSoft','link',[COLS[2][0],(LV.rec+LV.dcim)/2,COLS[2][1]]);
+tag('e3','<b>Networking operations</b>the rack','ink left keep',[-RW/2,1.5,ZF]);
+tag('e4','<b>Product design</b>the capture app','ink',V3(),()=>PHONE.position.clone().add(V3(.04,.07,0)));
+tag('b1','<b>Cable-to-port map</b>drawn automatically','link keep',HOT.curve.getPoint(.5));
+tag('b2','<b>US 19/219,347</b>patent pending','ink',[RW/2-.03,uy(42),FACE]);
+tag('pH','<b>Hyderabad, IN</b>--:-- IST','link up keep',V3(),()=>pins.hyd.g.getWorldPosition(V3()).add(V3(0,.42,0)));
+tag('pC','<b>Connecticut, US</b>--:-- ET','link up keep',V3(),()=>pins.ct.g.getWorldPosition(V3()).add(V3(0,.42,0)));
+tag('xA','<b>Audit tools</b>above','rec',[SW/2,LV.audit,0]);
+tag('xD','<b>DCIM</b>above','rec',[SW/2,LV.dcim,0]);
+tag('xR','<b>RackTrack</b>the intelligence layer underneath both','link keep',[SW/2,LV.rec,0]);
+tag('xK','<b>The rack</b>physical truth','ink keep',[RW/2,1.0,0]);
+
+/* ─────────── scroll → global g ─────────── */
+const secEls=['does','story','company','mission'].map(id=>document.getElementById(id));
+const matters=document.getElementById('matters'), missionEl=secEls[3];
+function G(){const y=scrollY,vh=innerHeight;const r=secEls.map(e=>{const t=e.offsetTop;return [t,t+e.offsetHeight-vh];});
+  const K=[[0,-1],[r[0][0],0],[r[0][1],4],[r[1][0],4.5],[r[1][1],8.5],[r[2][0],9],[r[2][1],10],[r[3][0],11],[r[3][1],12]];
+  for(let i=0;i<K.length-1;i++){if(y<=K[i+1][0])return lerp(K[i][1],K[i+1][1],clamp((y-K[i][0])/((K[i+1][0]-K[i][0])||1)));}return 12;}
+const on=(g,a,b)=>smooth(a-.2,a+.15,g)*(1-smooth(b-.15,b+.2,g));
+const CAMS=[[-1,null],
+  [.5,[1.3,1.5,4.0],[0,1.05,.3]],[1.5,[1.35,1.85,2.9],[0,1.42,.35]],[2.5,[3.6,4.6,5.8],[0,1.85,0]],[3.5,[3.9,5.4,8.4],[.1,2.35,0]],
+  [5,[.95,2.2,2.05],[.04,1.8,.44]],[6,[-1.1,2.45,2.5],[.02,1.72,.3]],[7,[6.2,4.3,7.8],[.15,2.25,0]],[8,[.75,2.25,2.1],[.03,1.8,.44]],
+  [9.5,[MX-.5,8.0,7.6],[MX-.5,-.15,-.1]],[11.5,[9.4,5.4,6.2],[0,2.2,0]]];
+let vw=0,vh=0,mobile=false;
+function resize(){vw=innerWidth;vh=innerHeight;mobile=vw<760;renderer.setSize(vw,vh,false);camera.aspect=vw/vh;camera.updateProjectionMatrix();}
+addEventListener('resize',resize);resize();
+const mouse={x:0,sx:0};addEventListener('pointermove',e=>{mouse.x=e.clientX/innerWidth*2-1;},{passive:true});
+const cp=V3(6.2,4.6,8.6),ct=V3(.1,2.15,0);
+const clock=new THREE.Clock();const M4=new THREE.Matrix4(),Q=new THREE.Quaternion(),S1=V3(1,1,1);
+let lastClock='';
+function frame(){
+  requestAnimationFrame(frame);
+  const dt=Math.min(clock.getDelta(),.05),time=clock.elapsedTime;
+  const mr=matters.getBoundingClientRect(),xr=missionEl.getBoundingClientRect();
+  const show=!(mr.top<=0&&mr.bottom>=vh)&&xr.bottom>0;
+  canvas.style.visibility=hud.style.visibility=show?'visible':'hidden';if(!show)return;
+  const g=G();
+  // camera
+  const sway=reduce?0:Math.sin(time*.12)*.16;
+  const hp=V3(Math.sin(.3+sway)*10.2,7.4,Math.cos(.3+sway)*10.2);
+  let Pp=hp.clone(),Tt=V3(.15,2.05,0);
+  for(let i=1;i<CAMS.length;i++){const [gi,p,t]=CAMS[i];const gp=CAMS[i-1][0];const k=smooth(gp+(gi-gp)*.3,gi-(gi-gp)*.15,g);if(k>0){Pp.lerp(V3(...p),k);Tt.lerp(V3(...t),k);}}
+  if(mobile){Pp.sub(Tt).multiplyScalar(1.5).add(Tt);}
+  const f=(reduce||SNAP)?1:1-Math.pow(.02,dt);cp.lerp(Pp,f);ct.lerp(Tt,f);camera.position.copy(cp);camera.lookAt(ct);
+  camera.setViewOffset(vw,vh,mobile?0:-(.63-.5)*vw,mobile?vh*.2:0,vw,vh);
+  mouse.sx=lerp(mouse.sx,mouse.x,.05);
+
+  // states
+  const A=(a,b)=>smooth(a,b,g)*(1-smooth(4.15,4.45,g));
+  const wTeam=on(g,6.5,7.5), wMis=smooth(10.3,10.8,g);
+  const fix=Math.max(A(.9,1.6),wTeam,wMis);
+  const rec=Math.max(A(2.05,2.9),wTeam,wMis);
+  const sync=Math.max(A(3.05,3.6),wTeam,wMis);
+  const wHero=1-smooth(-.6,-.05,g);
+  const wCap=on(g,0,1),wVal=on(g,1,2),wRec=on(g,2,3),wOp=on(g,3,4.2);
+  const wMom=on(g,4.5,5.5),wRea=on(g,5.5,6.5),wBld=on(g,7.5,8.8),wMap=on(g,8.9,10.3);
+  const vprog=smooth(1.0,1.75,g);
+
+  // capture: phone sweeps up the rack face
+  const cp01=smooth(.05,.9,g);
+  const phoneOn=Math.max(smooth(-.25,.05,g)*(1-smooth(4.1,4.4,g)),wTeam);
+  const sweepY=lerp(.22,1.95,cp01);
+  const restP=V3(.62,1.15,ZF+.42);
+  const capP=V3(.04,sweepY,ZF+.5);
+  const pw=clamp(wCap*1.4);
+  PHONE.position.lerpVectors(restP,capP,pw);PHONE.rotation.set(-.08*pw,(1-pw)*-.5,(1-pw)*.08);
+  PHONE.scale.setScalar(Math.max(.0001,phoneOn));PHONE.visible=phoneOn>.01;
+  band.position.y=sweepY;band.material.opacity=wCap*(reduce?.9:.75+.25*Math.sin(time*9));
+  wash.scale.y=Math.max(.001,sweepY-.1);wash.position.y=.1+(sweepY-.1)/2;wash.material.opacity=wCap*.1;
+  {const a=PHONE.position,z=ZF+.01,pts=[];if(wCap>.02){[[-RW/2,sweepY+.07],[RW/2,sweepY+.07],[-RW/2,sweepY-.07],[RW/2,sweepY-.07]].forEach(([x,y])=>pts.push(a.clone(),V3(x,y,z)));}
+   frustum.geometry.setFromPoints(pts.length?pts:[V3(),V3()]);frustum.material.opacity=wCap*.55;}
+
+  // ports + mismatches
+  PORTS.forEach((p,i)=>{let c;
+    if(p.dev==='PP-A')c=p.used?P_PATCH:P_UNUSED;
+    else if(!p.used)c=P_UNUSED;
+    else{const sweeping=g>.85&&g<2.1;const reached=!sweeping||vprog*1.12>p.col/24+(p.dev==='SW-05'?.06:0);
+      c=(fix>.5&&reached)?COL.link:(misPorts.has(i)?COL.drift:P_DIM);}
+    ports.setColorAt(i,c);});
+  ports.instanceColor.needsUpdate=true;
+  const misVis=1-fix;
+  MIS.forEach((m,i)=>{const res=fix;m.o.material.color.copy(COL.drift).lerp(COL.link,smooth(.2,.6,res));m.o.material.opacity=Math.max(misVis,wVal*(1-smooth(.75,1,vprog)))*(1-wBld);});
+  ghostFill.material.opacity=.16*(1-fix);
+  // cables: record-blue; P-12 lights amber for the reason beat, white-ish for the moment
+  CAB.forEach((c,i)=>{const hot=c===HOT;c.mat.color.set(hot&&wRea>.05?'#FF9A2E':hot&&wMom>.05?'#c9d3dc':'#6f8599');c.mat.emissive.set(hot&&wRea>.05?'#8a3d00':'#000000');
+    const bp=clamp(smooth(7.55,8.35,g)*1.7-i*.045)*(1-smooth(8.7,9,g));c.gt.geometry.setDrawRange(0,Math.floor(bp*c.n/6)*6);c.gt.visible=bp>0;});
+
+  // the stack
+  ['audit','dcim','cmdb'].forEach(k=>{const s=SLABS[k];s.synced.material.opacity=sync;s.edge.material.color.copy(C('#4A544F')).lerp(COL.linkInk,sync);s.edge.material.opacity=.9;});
+  const R=SLABS.rec;R.top.opacity=rec*.97;R.side.opacity=rec;R.edge.material.opacity=rec;R.m.castShadow=rec>.5;R.grp.visible=rec>.01;
+  ghost.material.opacity=(1-rec)*.95;ghostFillSlab.material.opacity=(1-rec)*.45;ghost.visible=ghostFillSlab.visible=rec<.99;
+  plumbs.forEach(p=>{p.l.material.opacity=(1-rec)*.9;p.ring.material.opacity=(1-rec)*(reduce?1:.6+.4*Math.sin(time*3));});
+  beams.forEach((b,bi)=>{b.b.material.opacity=sync*.85;b.pulses.forEach((s,j)=>{const t=reduce?(j+.5)/3:((time*.45+j/3+bi*.17)%1);s.position.y=LV.rec+t*b.h;s.material.opacity=sync*(1-Math.abs(t-.5)*1.4);});});
+  // tiles fly from the rack into the record
+  const tp=smooth(2.0,2.85,g)*(1-smooth(4.1,4.4,g));
+  TILES.forEach((t,i)=>{const k=clamp((tp-t.d*.55)/.45);let p;
+    if(k<=0||k>=1||rec>.995&&tp>=1){M4.makeScale(0,0,0);}
+    else{const m=t.s.clone().lerp(t.e,.5);m.y+=.5;const a=t.s.clone().lerp(m,k),b=m.clone().lerp(t.e,k);p=a.lerp(b,k);Q.setFromEuler(new THREE.Euler(0,(1-k)*1.2,0));M4.compose(p,Q,S1.setScalar(.4+.6*k));}
+    tiles.setMatrixAt(i,M4);tileEdge.setMatrixAt(i,M4);});
+  tiles.instanceMatrix.needsUpdate=tileEdge.instanceMatrix.needsUpdate=true;
+
+  // map
+  MAP.visible=wMap>.001||(g>8.6&&g<10.6);
+  const ap=smooth(9.0,9.6,g);arc.geometry.setDrawRange(0,Math.floor(ap*arcN/6)*6);
+  const at=reduce?.5:(time*.22)%1;arcPulse.position.copy(arcCurve.getPoint(at));arcPulse.material.opacity=ap>=.99?1-Math.abs(at-.5)*1.2:0;
+  Object.values(pins).forEach((p,i)=>{const t=reduce?.4:((time*.6+i*.5)%1);p.ring.scale.setScalar(1+t*3);p.ring.material.opacity=(1-t)*.8;});
+
+  // tags
+  const ck=window.ABOUT_CLOCK;if(ck&&ck.h+ck.c!==lastClock){lastClock=ck.h+ck.c;TG.pH.el.querySelector('span').innerHTML=`<b>Hyderabad, IN</b>${ck.h} IST · now`;TG.pC.el.querySelector('span').innerHTML=`<b>South Windsor, CT</b>${ck.c} ET · now`;}
+  const vis={hA:wHero,hD:wHero,hC:wHero,hG:Math.max(wHero,0),hR:wHero,
+    cap:wCap,val:wVal*smooth(.6,1,vprog),m0:wVal*(1-smooth(.85,1,vprog))*.999,m1:wVal*(1-smooth(.85,1,vprog)),m2:wVal*(1-smooth(.85,1,vprog)),
+    rec:wRec*smooth(.6,1,rec),sA:wOp,sD:wOp,sC:wOp,
+    mS:wMom,mL:wMom,mP:wMom,rC:wRea,rT:wRea,e1:wTeam,e2:wTeam,e3:wTeam,e4:wTeam,b1:wBld*smooth(.5,1,smooth(7.55,8.35,g)),b2:wBld,
+    pH:wMap*ap,pC:wMap*ap,xA:wMis,xD:wMis,xR:wMis,xK:wMis};
+  const v=V3();
+  for(const [n,t] of Object.entries(TG)){t.t=vis[n]||0;t.cur=(reduce||SNAP)?t.t:lerp(t.cur,t.t,1-Math.pow(.001,dt));
+    if(t.cur<.01){t.el.style.opacity=0;continue;}
+    if(t.follow)t.pos.copy(t.follow());
+    v.copy(t.pos);v.project(camera);if(v.z>1){t.el.style.opacity=0;continue;}const x=(v.x+1)/2*vw,y=(1-v.y)/2*vh;const cl=t.el.classList,ew=t.el.offsetWidth,eh=t.el.offsetHeight;
+    const tx=clamp(cl.contains('left')?x-ew+3.5:cl.contains('up')?x-ew/2:x-3.5,8,vw-ew-8),ty=cl.contains('up')?y-eh+3.5:y-eh/2;
+    t.el.style.transform=`translate3d(${tx.toFixed(1)}px,${ty.toFixed(1)}px,0)`;t.el.style.opacity=t.cur.toFixed(3);}
+  renderer.render(scene,camera);
+}
+function redrawText(){sheetMat.map.image=sheetCanvas();sheetMat.map.needsUpdate=true;
+  Object.entries(SLABS).forEach(([k,s])=>{s.top.map.image=slabCanvas(k,false);s.top.map.needsUpdate=true;if(s.synced){s.synced.material.map.image=slabCanvas(k,true);s.synced.material.map.needsUpdate=true;}});
+  mapMat.map.image=mapCanvas();mapMat.map.needsUpdate=true;}
+document.fonts.ready.then(redrawText);
+setInterval(()=>{mapMat.map.image=mapCanvas();mapMat.map.needsUpdate=true;},5*60*1000);
+requestAnimationFrame(frame);
+</script>
+<!--GLJS-END-->
+<script src="/design-system/nav.js" defer></script>
+</body>
+</html>

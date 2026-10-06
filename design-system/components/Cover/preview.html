@@ -1,0 +1,60 @@
+<!-- @dsCard height=288 -->
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>RackTrack</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Schibsted+Grotesk:wght@400;500;600&display=swap">
+<style>
+  html, body { margin:0; height:100%; }
+  body { background:var(--paper); color:var(--ink); font-family:var(--font-sans); overflow:hidden; }
+  .cover { position:relative; height:288px; overflow:hidden; }
+  .art { position:absolute; top:0; left:480px; width:480px; height:288px; overflow:hidden; }
+  .art svg { display:block; width:480px; height:288px; }
+  .slab { fill:var(--ink); }
+  .slot { fill:var(--ink-muted); }
+  .slot.ok { fill:var(--link); }
+  .slot.dr { fill:var(--drift); }
+  .green { fill:var(--link); }
+  .alu { fill:var(--aluminium); }
+  .amber { fill:var(--drift); }
+  .ghost { fill:none; stroke:var(--record); stroke-width:1.5; stroke-dasharray:8 6; }
+  .sq { rx:var(--radius-sm); }
+  .words { position:absolute; left:var(--space-10); bottom:var(--space-10); max-width:440px; }
+  .name { margin:0; font-family:var(--font-sans); font-size:88px; line-height:.95; font-weight:500; letter-spacing:-.045em; color:var(--ink); }
+  .tag { margin:var(--space-3) 0 0 3px; font-size:14px; line-height:20px; color:var(--ink-muted); }
+</style>
+</head>
+<body>
+<div class="cover">
+<div class="art" aria-hidden="true">
+<svg viewBox="0 0 480 288" width="480" height="288">
+<!--
+  blocks      ink cabinet slab 176×272 bled off the top (identity: graphite equipment) · link 184×144 (verified green, the colour people remember) · aluminium 96×64 (the shell tint) · drift 72×32 once (a state, kept small) — ≈30% of 960×288
+  arrangement one tall slab with satellites, bottoms on one line space-6 above the edge, space-4 gutters; a record-dashed ghost of the slab sits offset up-left behind it
+  pattern     modular tiles, from "hardware is rectilinear, units are content": rack units cut into the slab at a space-4 pitch, some merged 2U/4U like real devices, one link, one drift
+  scales      sides in space-4 multiples; gutters space-4; unit pitch space-4; corners radius-sm throughout (radius-md is the UI max)
+-->
+<rect class="ghost" x="32" y="8" width="176" height="248" rx="2"/>
+<rect class="slab sq" x="56" y="-16" width="176" height="280" rx="2"/>
+<rect class="slot" x="72" y="16" width="144" height="12" rx="2"/>
+<rect class="slot ok" x="72" y="32" width="144" height="12" rx="2"/>
+<rect class="slot" x="72" y="48" width="144" height="12" rx="2"/>
+<rect class="slot dr" x="72" y="64" width="144" height="12" rx="2"/>
+<rect class="slot" x="72" y="80" width="144" height="28" rx="2"/>
+<rect class="slot" x="72" y="128" width="144" height="28" rx="2"/>
+<rect class="slot" x="72" y="160" width="144" height="12" rx="2"/>
+<rect class="slot" x="72" y="176" width="144" height="12" rx="2"/>
+<rect class="slot" x="72" y="192" width="144" height="60" rx="2"/>
+<rect class="alu sq" x="248" y="40" width="96" height="64" rx="2"/>
+<rect class="amber sq" x="360" y="72" width="72" height="32" rx="2"/>
+<rect class="green sq" x="248" y="120" width="232" height="144" rx="2"/>
+</svg>
+</div>
+<div class="words">
+<p class="name">RackTrack</p>
+<p class="tag">Ground truth, made visible.</p>
+</div>
+</div>
+</body>
+</html>

@@ -1,0 +1,784 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Your DCIM platform shows a plan. The rack shows what's real. Â· RackTrack</title>
+<meta name="description" content="DCIM tools model what should be there. Knowing where that model and the real rack disagree helps you fix the right problem.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap">
+<link rel="stylesheet" href="/design-system/base.css">
+<style>
+/* RackTrack Â· Resources Â· File 006 Â· OPSÂ·02 â€” "Blueprint over steel".
+   Concept: one real 42U rack (R12) stands on a drawing sheet. Its DCIM elevation is drawn as a translucent
+   blue-grey blueprint plane that hangs exactly over the rack face. The plane peels forward so the plan and
+   the steel can be compared; where they disagree, amber projection lines tie the plan slot to the real slot.
+   Beats (scroll value g):
+     hero (-1) the plan hovers over the steel, both named ............ low hero 3/4 from front right
+     lead (0)  the plan laid flush over the rack: a floor plan, not the building ... near-front, straight on
+     s1   (1)  the plane peels forward: slots, power allocation, cooling ......... elevated 3/4 on the plane
+     s2   (2)  the room changes, the plan doesn't: 02:14 swap, vendor appliance,
+               temporary cable, each lit amber in turn ......................... orbit to the side angle
+     key  (3)  2x: a blueprint column (planned) beside a steel column (checked) ... wide 3/4
+     s3   (4)  two endings: ghost racks bought from the plan / no power headroom .. top-down plan view
+     s4   (5)  a physical sweep rises up the face; amber turns green, the plan is
+               updated and settles back flush. DCIM stays ...................... front 3/4, back to alignment
+   Colour law: blue-grey = the plan's claim Â· amber = mismatch Â· green = verified by a sweep. */
+:root{
+  color-scheme: light;
+  --col:min(33rem,36vw);
+  --band:46vh;
+}
+*{box-sizing:border-box}
+html{background:var(--paper)}
+body{margin:0;background:var(--paper);color:var(--fg);font:400 16px/1.5 var(--sans);-webkit-font-smoothing:antialiased;overflow-x:hidden}
+a{color:inherit}
+::selection{background:var(--link);color:#06140d}
+:focus-visible{outline:2px solid var(--link-ink);outline-offset:3px;border-radius:2px}
+body::before{content:"";position:fixed;inset:0;z-index:0;pointer-events:none;background:radial-gradient(60% 55% at 66% 50%,rgba(255,255,255,.6),transparent 72%)}
+#stage{position:fixed;left:0;top:0;z-index:1;display:block;width:100%;height:100%;pointer-events:none}
+#scrim{position:fixed;inset:0;z-index:1;pointer-events:none;background:linear-gradient(90deg,var(--paper) 0,rgba(233,236,232,.94) 30%,rgba(233,236,232,0) 46%)}
+#hud{position:fixed;left:0;top:0;width:100%;height:100%;z-index:3;pointer-events:none;overflow:hidden;transition:opacity .25s}
+main{position:relative;z-index:2}
+
+/* nav */
+.nav{position:fixed;left:0;right:0;top:0;z-index:10;display:flex;align-items:center;gap:28px;height:calc(var(--nav-h) + env(safe-area-inset-top,0px));padding:env(safe-area-inset-top,0px) var(--bleed) 0;background:linear-gradient(var(--paper) 55%,transparent)}
+.brand{display:flex;align-items:center;gap:10px;text-decoration:none;font:700 17px/1 var(--sans);letter-spacing:-.02em;color:var(--ink)}
+.brand img{width:26px;height:26px;border-radius:5px;display:block}
+.nav ul{display:flex;gap:24px;list-style:none;margin:0 0 0 auto;padding:0}
+.nav ul a{font:500 14px/1 var(--sans);text-decoration:none;color:var(--ink-2)}
+.nav ul a:hover{color:var(--ink)}
+.nav ul a[aria-current="page"]{color:var(--ink);text-decoration:underline;text-decoration-color:var(--link);text-decoration-thickness:2px;text-underline-offset:6px}
+.btn{display:inline-flex;align-items:center;gap:10px;height:46px;padding:0 20px;border-radius:3px;border:1px solid var(--fg);font:500 15px/1 var(--sans);text-decoration:none;cursor:pointer;background:transparent;color:var(--fg);transition:background .2s,color .2s,border-color .2s}
+.btn.solid{background:var(--fg);color:var(--bg)}
+.btn.solid:hover{background:var(--link-ink);border-color:var(--link-ink);color:#fff}
+.btn:not(.solid){border-color:var(--line)}
+.btn:not(.solid):hover{border-color:var(--fg)}
+.btn .led{width:7px;height:7px;border-radius:50%;background:var(--link);box-shadow:0 0 8px var(--link)}
+.nav .btn{height:38px;padding:0 16px;font-size:14px}
+
+/* type */
+h1,h2,h3{margin:0 0 20px;text-wrap:balance}
+h2{max-width:17ch}
+h3{margin:0 0 10px}
+.k{margin:0 0 14px;font:400 12px/1 var(--mono);color:var(--link-ink)}
+.actions{display:flex;flex-wrap:wrap;gap:12px}
+.chip{font:500 11px/1 var(--mono);padding:5px 7px;border-radius:2px;border:1px solid var(--rule);color:var(--ink);background:rgba(244,246,243,.8)}
+.chip.c-operations{border-color:var(--ink)}
+.chip.c-infrastructure{border-color:var(--link);color:var(--link-ink);background:rgba(31,214,124,.08)}
+
+/* tags */
+.tag{position:absolute;left:0;top:0;display:flex;align-items:center;opacity:0;will-change:transform,opacity;white-space:nowrap}
+.tag::before{content:"";width:7px;height:7px;border-radius:50%;background:var(--c,var(--ink));transform:translate(-3.5px,0);box-shadow:0 0 0 3px color-mix(in oklab,var(--c,var(--ink)) 22%,transparent)}
+.tag i{display:block;width:24px;height:1px;background:var(--c,var(--ink))}
+.tag span{padding:6px 9px;background:var(--paper-2);border:1px solid var(--c,var(--ink));border-radius:2px;font:400 11.5px/1.35 var(--mono);color:var(--ink);box-shadow:0 14px 28px -20px rgba(17,22,20,.45)}
+.tag span b{display:block;font:600 15px/1.15 var(--sans);letter-spacing:-.02em;margin-bottom:2px}
+.tag.left{flex-direction:row-reverse}.tag.left::before{transform:translate(3.5px,0)}
+.tag.up{flex-direction:column-reverse}.tag.up i{width:1px;height:22px}.tag.up::before{transform:translate(0,3.5px)}
+.tag.link{--c:var(--link)} .tag.link span b{color:var(--link-ink)}
+.tag.drift{--c:var(--drift)} .tag.drift span b{color:var(--drift-ink)}
+.tag.rec{--c:var(--record)} .tag.rec span b{color:var(--record-ink)}
+.tag.ink{--c:var(--ink)}
+.figcap{position:fixed;right:var(--gutter);bottom:18px;z-index:3;pointer-events:none;font:400 11.5px/1.3 var(--mono);color:var(--ink-2);text-align:right;transition:opacity .25s}
+.figcap b{font-weight:500;color:var(--ink)}
+.figcap i{font-style:normal;color:var(--record-ink)}
+
+/* progress rail (on this page) */
+.rail{position:fixed;left:16px;top:50%;transform:translateY(-50%);z-index:4;display:flex;flex-direction:column;gap:6px}
+.rail a{display:flex;align-items:center;gap:8px;text-decoration:none;font:500 10.5px/1 var(--mono);color:var(--ink-2);padding:3px 0}
+.rail a i{display:block;width:6px;height:34px;background:var(--rule);position:relative;overflow:hidden}
+.rail a i b{position:absolute;left:0;right:0;top:0;height:0;background:var(--ink)}
+.rail a[aria-current="true"]{color:var(--ink)}
+.rail a[aria-current="true"] i{background:#b7beb9}
+.rail.off{opacity:0;pointer-events:none}
+
+/* hero */
+#hero{min-height:100vh;display:flex;align-items:center;padding:var(--band-y) var(--bleed) var(--band-y)}
+.copy{width:var(--col);}
+.back{display:inline-flex;gap:8px;align-items:center;margin:0 0 22px;font:500 12.5px/1 var(--mono);color:var(--link-ink);text-decoration:none;border-bottom:1px solid transparent;padding-bottom:3px}
+.back:hover{border-bottom-color:var(--link-ink)}
+.file{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin:0 0 18px;font:400 12px/1 var(--mono);color:var(--ink-2)}
+#hero h1{max-width:14ch;margin-bottom:22px}
+.dek{font-size:clamp(17px,1.35vw,19.5px);line-height:1.45;color:var(--fg-2);max-width:31rem;margin:0 0 30px;letter-spacing:-.005em}
+.toc{border-top:1px solid var(--ink);max-width:31rem}
+.toc p{margin:12px 0 6px;font:400 11.5px/1 var(--mono);color:var(--ink-2)}
+.toc ol{list-style:none;margin:0;padding:0;counter-reset:t}
+.toc li{counter-increment:t;border-bottom:1px solid var(--rule)}
+.toc a{display:flex;gap:14px;align-items:baseline;padding:9px 0;text-decoration:none;font:500 15px/1.3 var(--sans);color:var(--ink)}
+.toc a::before{content:"0" counter(t);font:400 11px/1 var(--mono);color:var(--ink-2);width:1.4rem;flex:none}
+.toc a:hover{color:var(--link-ink)}
+
+/* article beats */
+.art{position:relative}
+.beat{position:relative;min-height:125vh;padding:0 var(--bleed)}
+.beat.tall{min-height:175vh}
+.bcopy{position:sticky;top:max(104px,19vh);width:var(--col);;padding-bottom:var(--band-y)}
+.no{display:flex;gap:10px;align-items:center;margin:0 0 14px;font:400 12px/1 var(--mono);color:var(--ink-2)}
+.no .chip{font-size:10.5px}
+.art p.body{margin:0 0 16px;font-size:clamp(17px,1.25vw,19px);line-height:1.58;color:#27302c;max-width:34rem;letter-spacing:-.003em}
+.leadp{margin:0 0 26px;font:500 clamp(21px,1.75vw,27px)/1.34 var(--sans);letter-spacing:-.02em;color:var(--ink);max-width:33rem}
+.leadp::first-letter{color:var(--ink)}
+.fig{margin:0;max-width:26rem}
+.fig img{display:block;width:100%;height:auto;aspect-ratio:16/8.2;object-fit:cover;object-position:50% 55%;border-radius:2px;border:1px solid var(--rule);filter:saturate(.85)}
+.fig figcaption{margin-top:8px;font:400 11.5px/1.35 var(--mono);color:var(--ink-2)}
+.drifts{list-style:none;margin:4px 0 0;padding:0;border-top:1px solid var(--rule);max-width:34rem}
+.drifts li{display:grid;grid-template-columns:2.2rem 1fr;gap:4px;padding:12px 0;border-bottom:1px solid var(--rule);font-size:clamp(16px,1.15vw,18px);line-height:1.45;color:var(--ink-2)}
+.drifts li i{font:400 11px/1.9 var(--mono);font-style:normal;color:var(--ink-2)}
+.drifts li i::before{content:"";display:inline-block;width:7px;height:7px;border-radius:50%;border:1px solid var(--rule);margin-right:6px;vertical-align:0}
+.drifts li.on{color:var(--ink)}
+.drifts li.on i{color:var(--drift-ink)}
+.drifts li.on i::before{background:var(--drift);border-color:var(--drift)}
+.pq{margin:26px 0 0;padding:4px 0 4px 20px;border-left:2px solid var(--record);max-width:32rem}
+.pq p{margin:0;font:500 clamp(20px,1.6vw,25px)/1.3 var(--sans);letter-spacing:-.02em;color:var(--ink)}
+.pq footer{margin-top:10px;font:400 11.5px/1 var(--mono);color:var(--record-ink)}
+.plain{margin:26px 0 0;padding:18px 20px 18px;background:var(--paper-2);border:1px solid var(--rule);border-top:2px solid var(--ink);border-radius:2px;max-width:32rem;box-shadow:0 18px 40px -34px rgba(17,22,20,.5)}
+.plain .k{color:var(--ink-2);margin-bottom:10px}
+.plain p.body{margin:0;font-size:clamp(16px,1.15vw,18px);color:var(--ink)}
+
+/* key figure */
+.kfig{border-top:1px solid var(--ink);border-bottom:1px solid var(--rule);padding:14px 0 22px;max-width:32rem}
+.kfig .n{display:block;font:500 clamp(120px,12.5vw,210px)/.86 var(--sans);letter-spacing:-.07em;color:var(--ink);margin:6px 0 16px}
+.kfig .n em{font-style:normal;color:var(--drift-ink)}
+.kfig p{margin:0;font:500 clamp(18px,1.45vw,22px)/1.35 var(--sans);letter-spacing:-.015em;color:var(--ink);max-width:28rem}
+.note{margin:14px 0 0;font:400 11.5px/1.45 var(--mono);color:var(--ink-2);max-width:30rem}
+.note b{font-weight:500;color:var(--record-ink)}
+.note s{text-decoration:none;color:var(--ink)}
+
+/* keep reading */
+#more{position:relative;z-index:2;background:var(--paper);border-top:1px solid var(--rule);padding:var(--band-y) var(--bleed)}
+.mwrap{max-width:1180px;margin-inline:auto}
+.mwrap h2{margin-bottom:40px}
+.cards{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:clamp(20px,3vw,40px);list-style:none;margin:0;padding:0}
+.icard{position:relative;display:flex;flex-direction:column;min-height:280px;margin-top:22px;padding:30px 26px 22px;text-decoration:none;color:var(--ink);background:var(--paper-2);border:1px solid var(--rule);border-radius:2px;box-shadow:0 22px 40px -36px rgba(17,22,20,.55);transition:transform .35s var(--ease),border-color .25s,box-shadow .35s}
+.icard::before{content:"";position:absolute;left:0;right:0;top:0;height:2px;background:var(--tc)}
+.icard .tab{position:absolute;left:18px;top:-23px;height:23px;padding:0 11px;display:flex;align-items:center;font:500 11px/1 var(--mono);color:var(--tfg,var(--ink));background:var(--tc);border-radius:2px 2px 0 0}
+.icard p.file{font-size:12px;margin:0 0 22px;padding-bottom:14px;border-bottom:1px dashed var(--rule)}
+.icard h3{max-width:20ch;margin-bottom:14px}
+.icard p{margin:0 0 20px;color:var(--ink-2);font-size:15px;line-height:1.45;max-width:30rem}
+.icard .go{margin-top:auto;font:500 15px/1 var(--sans);color:var(--link-ink)}
+.icard:hover{transform:translateY(-4px);border-color:var(--ink);box-shadow:0 26px 44px -30px rgba(17,22,20,.55)}
+.icard[data-cat="infrastructure"]{--tc:#1FD67C}
+
+/* cta */
+#cta{padding:var(--band-y) var(--bleed);text-align:center;background:var(--paper);position:relative;z-index:2;border-top:1px solid var(--rule)}
+#cta h2{margin-inline:auto;max-width:13ch}
+#cta .lede{color:var(--fg-2);max-width:27rem;margin:0 auto 28px}
+#cta .actions{justify-content:center}
+
+/* footer */
+.foot{position:relative;z-index:2;padding:var(--band-y) var(--bleed) calc(var(--s8) + env(safe-area-inset-bottom,0px));background:var(--paper);border-top:1px solid var(--rule);display:grid;grid-template-columns:var(--copy-w) repeat(3,minmax(0,1fr));gap:28px;font-size:14px;color:var(--ink-2)}
+.foot b{display:block;font:500 13px/1 var(--sans);color:var(--link-ink);margin-bottom:16px}
+.foot nav{display:flex;flex-direction:column;gap:11px}
+.foot nav a{color:var(--ink);text-decoration:none;font-size:15px}
+.foot nav a:hover{color:var(--link-ink)}
+.foot p{margin:0 0 11px;color:var(--ink);font-size:15px;line-height:1.45}
+.foot p a{text-decoration:none}.foot p a:hover{color:var(--link-ink)}
+.foot-brand .brand{margin-bottom:16px}
+.foot-brand p{color:var(--ink-2);max-width:18rem}
+.foot .fine{grid-column:1/-1;display:flex;justify-content:space-between;flex-wrap:wrap;gap:12px;margin-top:16px;padding-top:18px;border-top:1px solid var(--rule);font-size:13px}
+.foot .legal{display:flex;gap:18px;flex-wrap:wrap}.foot .legal a{color:var(--ink-2);text-decoration:none}.foot .legal a:hover{color:var(--link-ink)}
+.foot .social{display:flex;gap:18px}
+.foot .social a{color:var(--ink-2);text-decoration:none}
+
+.no-webgl #stage,.no-webgl #hud,.no-webgl .figcap{display:none}
+@media (max-width:1180px){ .foot{grid-template-columns:repeat(2,minmax(0,1fr))} }
+@media (max-width:960px){ .rail{display:none} }
+@media (max-width:760px){
+  :root{--col:auto}
+  #stage{height:var(--band);background:var(--paper);z-index:4;border-bottom:1px solid var(--rule)}
+  #hud{height:var(--band);z-index:5}
+  #scrim{display:none}
+  .figcap .ft{display:none}
+  .figcap{top:calc(var(--band) - 24px);bottom:auto;right:var(--gutter);z-index:5;font-size:10.5px}
+  #hud .tag:not(.keep){display:none}
+  #hero{align-items:flex-start;padding-top:calc(var(--band) + 18px);min-height:auto;padding-bottom:12vh}
+  .copy,.bcopy{margin-left:0}
+  #hero h1{margin-bottom:14px}
+  .dek{font-size:16.5px;margin-bottom:20px}
+  .back{margin-bottom:14px}.file{margin-bottom:12px}
+  .toc a{padding:7px 0;font-size:14.5px}
+  .beat{min-height:112vh}.beat.tall{min-height:150vh}
+  .bcopy{top:calc(var(--band) + 14px);padding-bottom:var(--band-y)}
+  h2{margin-bottom:12px}
+  .leadp{font-size:19px;margin-bottom:16px}
+  .art p.body{font-size:16px;line-height:1.5;margin-bottom:10px}
+  .fig{max-width:15rem}.fig figcaption{font-size:10.5px}
+  .drifts li{padding:7px 0;font-size:15px;line-height:1.4}
+  .pq{margin-top:14px;padding-left:14px}.pq p{font-size:17.5px}
+  .plain{margin-top:14px;padding:12px 14px}.plain p.body{font-size:15px}
+  .kfig .n{font-size:108px;margin:2px 0 8px}.kfig p{font-size:17px}
+  .note{font-size:10.5px}
+  #more{padding-top:var(--band-y)}
+  .cards{grid-template-columns:1fr}
+  .icard{min-height:0}
+}
+@media (max-width:560px){ .foot{grid-template-columns:repeat(2,minmax(0,1fr));gap:var(--s6) var(--s5);padding-block:var(--band-y-sm) calc(var(--s6) + env(safe-area-inset-bottom,0px))} }
+@media (prefers-reduced-motion:reduce){ .icard,.drifts li,#hud,.figcap,.rail{transition:none!important} }
+</style>
+</head>
+<body class="stage-band">
+
+<canvas id="stage" aria-hidden="true"></canvas>
+<div id="scrim" aria-hidden="true"></div>
+<div id="hud" aria-hidden="true"></div>
+<p class="figcap" id="figcap" aria-hidden="true"><b id="figN">fig. 0</b><span class="ft"> Â· <span id="figT">DCIM elevation over rack R12</span></span> Â· <i>illustrative scene</i></p>
+
+<nav class="rail off" id="rail" aria-label="Article progress">
+  <a href="#what-dcim-models" data-i="1" title="What DCIM actually models"><i><b></b></i>01</a>
+  <a href="#why-it-drifts" data-i="2" title="Why the model and the room disagree"><i><b></b></i>02</a>
+  <a href="#cost-of-trusting" data-i="4" title="The cost of trusting it blindly"><i><b></b></i>03</a>
+  <a href="#using-both" data-i="5" title="Using both together"><i><b></b></i>04</a>
+</nav>
+
+<nav class="nav" aria-label="Primary">
+  <a class="brand" href="/"><img alt="" src="/design-system/assets/Logos/racktrack-mark.jpg">RackTrack</a>
+  <ul>
+    <li><a href="/pages/why-racktrack/">Why RackTrack</a></li>
+    <li><a href="/pages/solutions/">Solutions</a></li>
+    <li><a href="/pages/use-cases/">Use cases</a></li>
+    <li><a href="/pages/resources/" aria-current="page">Resources</a></li>
+    <li><a href="/pages/trust-security/">Trust</a></li>
+    <li><a href="/pages/about-us/">About</a></li>
+    <li><a href="/pages/sign-in/">Sign in</a></li>
+  </ul>
+  <a class="btn solid" href="/pages/contact-us/"><span class="led"></span>Book a sweep</a>
+</nav>
+
+<main>
+  <header class="ch" id="hero">
+    <div class="copy">
+      <a class="back" href="/pages/resources/">â† All resources</a>
+      <p class="file">File no. 006 Â· OPSÂ·02 Â· <span class="chip c-operations">Operations</span> Â· 5 min read</p>
+      <h1>Your DCIM platform shows a plan. The rack shows what's real</h1>
+      <p class="dek">DCIM tools model what should be there. Knowing where that model and the real rack disagree helps you fix the right problem.</p>
+      <nav class="toc" aria-label="On this page">
+        <p>On this page</p>
+        <ol>
+          <li><a href="#what-dcim-models">What DCIM actually models</a></li>
+          <li><a href="#why-it-drifts">Why the model and the room disagree</a></li>
+          <li><a href="#cost-of-trusting">The cost of trusting it blindly</a></li>
+          <li><a href="#using-both">Using both together</a></li>
+        </ol>
+      </nav>
+    </div>
+  </header>
+
+  <article class="art">
+    <section class="beat" id="lead" data-beat="0" aria-label="Introduction">
+      <div class="bcopy">
+        <p class="leadp">A DCIM platform is a floor plan of your infrastructure. A floor plan is not the building. Both are useful, but only one of them is true right now.</p>
+        <figure class="fig">
+          <img src="/assets/resources/crash-cart-racks.jpg" alt="A crash cart with a monitor and keyboard parked beside a row of closed server cabinets" loading="lazy" width="1400" height="875">
+          <figcaption>The room, not the plan.</figcaption>
+        </figure>
+      </div>
+    </section>
+
+    <section class="beat" id="what-dcim-models" data-beat="1">
+      <div class="bcopy">
+        <p class="no">01 / 04 <span class="chip">the plan</span></p>
+        <h2>What DCIM is actually modeling</h2>
+        <p class="body">DCIM (Data Center Infrastructure Management) tracks the intended layout: what's supposed to sit in each rack slot, how power and cooling are supposed to be allocated. As a planning tool, that's genuinely valuable, right up until â€œsupposed toâ€ quietly becomes â€œused to.â€</p>
+        <blockquote class="pq">
+          <p>â€œDCIM tells you what the data center was designed to look like. It doesn't know what actually happened after installation day.â€</p>
+        </blockquote>
+      </div>
+    </section>
+
+    <section class="beat tall" id="why-it-drifts" data-beat="2">
+      <div class="bcopy">
+        <p class="no">02 / 04 <span class="chip">the drift</span></p>
+        <h2>Why the model and the room disagree</h2>
+        <p class="body">None of it is malicious:</p>
+        <ul class="drifts">
+          <li><i>a</i><span>A swap happens off-ticket during an emergency fix at 2 a.m.</span></li>
+          <li><i>b</i><span>A vendor technician makes a change and doesn't touch the plan.</span></li>
+          <li><i>c</i><span>A â€œtemporaryâ€ cable run becomes permanent, and nobody circles back.</span></li>
+        </ul>
+      </div>
+    </section>
+
+    <section class="beat" id="key-figure" data-beat="3" aria-label="Key figure">
+      <div class="bcopy">
+        <p class="no">Key figure</p>
+        <div class="kfig">
+          <b class="n">2<em>x</em></b>
+          <p>is a commonly reported gap between planned and actual rack utilization once teams check physically.</p>
+        </div>
+        <p class="note"><b>Figure:</b> a blueprint column (planned) beside a steel column (checked), drawn 2:1 Â· <s>illustrative scene</s></p>
+      </div>
+    </section>
+
+    <section class="beat" id="cost-of-trusting" data-beat="4">
+      <div class="bcopy">
+        <p class="no">03 / 04 <span class="chip">the cost</span></p>
+        <h2>What it costs to trust the model blindly</h2>
+        <p class="body">Capacity planning built on the plan instead of the room tends to end one of two ways: buying more racks than necessary, or running out of power and space at the exact moment there's no time left to fix it.</p>
+        <aside class="plain" aria-label="In plain terms">
+          <p class="body">DCIM is the map. The rack is the territory. When they disagree, the territory always wins. The only question is whether you find that out on a calm Tuesday or during an outage.</p>
+        </aside>
+      </div>
+    </section>
+
+    <section class="beat tall" id="using-both" data-beat="5">
+      <div class="bcopy">
+        <p class="no">04 / 04 <span class="chip c-infrastructure">the fix</span></p>
+        <h2>Using the model and the room together</h2>
+        <p class="body">The fix isn't replacing DCIM. It's treating a physical sweep as the regular reconciliation step that keeps the map honest, instead of assuming it's accurate simply because nobody's said otherwise.</p>
+      </div>
+    </section>
+  </article>
+
+  <section id="more" aria-labelledby="more-h">
+    <div class="mwrap">
+      <h2 id="more-h">Keep reading</h2>
+      <ul class="cards">
+        <li><a class="icard" data-cat="infrastructure" href="/pages/resources/the-hidden-cost-of-unreconciled-infrastructure/">
+          <span class="tab">INFÂ·01</span>
+          <p class="file">File no. 002 Â· INFÂ·01 Â· <span class="chip c-infrastructure">Infrastructure</span> Â· 5 min read</p>
+          <h3>What it actually costs when nobody checks the rack</h3>
+          <p>Manual audits are slow and go stale fast. Here's a plain way to put a number on what that gap costs your team.</p>
+          <span class="go">Read â†’</span></a></li>
+        <li><a class="icard" data-cat="infrastructure" href="/pages/resources/what-network-verified-actually-means/">
+          <span class="tab">INFÂ·02</span>
+          <p class="file">File no. 008 Â· INFÂ·02 Â· <span class="chip c-infrastructure">Infrastructure</span> Â· 5 min read</p>
+          <h3>What we mean when we say a record is â€œverifiedâ€</h3>
+          <p>A record only earns trust when what's physically there matches what the network reports. Here's how that check actually works.</p>
+          <span class="go">Read â†’</span></a></li>
+      </ul>
+    </div>
+  </section>
+
+  <section class="ch" id="cta">
+    <h2>Read the theory. Then verify your own rack</h2>
+    <p class="lede">One sweep of one rack is enough to see the gap these articles describe.</p>
+    <div class="actions">
+      <a class="btn solid" href="/pages/contact-us/"><span class="led"></span>Request a platform brief</a>
+      <a class="btn" href="/pages/resources/">All resources</a>
+    </div>
+  </section>
+
+  <footer class="foot">
+    <div class="foot-brand">
+      <a class="brand" href="/"><img alt="" src="/design-system/assets/Logos/racktrack-mark.jpg">RackTrack</a>
+      <p>Physical infrastructure intelligence for data centers.</p>
+    </div>
+    <nav aria-label="Platform"><b>Platform</b>
+      <a href="/pages/why-racktrack/">Why RackTrack</a><a href="/pages/solutions/">Solutions</a><a href="/pages/use-cases/">Use cases</a><a href="/pages/trust-security/">Trust &amp; security</a></nav>
+    <nav aria-label="Company"><b>Company</b>
+      <a href="/pages/resources/">Resources</a><a href="/pages/about-us/">About us</a><a href="/pages/contact-us/">Contact us</a></nav>
+    <div><b>Contact</b>
+      <p><a href="mailto:info@racktrack.ai">info@racktrack.ai</a></p><p><a href="tel:+18608782448">+1 (860) 878 2448</a></p><p>85 Felt Rd, Suite #604<br>South Windsor, CT 06074</p></div>
+    <div class="fine">
+      <span>Â© 2026 RackTrack Inc. Â· Patent pending</span>
+      <span class="legal"><a href="/pages/legal/privacy-policy/">Privacy</a><a href="/pages/legal/terms-of-use/">Terms</a><a href="/pages/legal/cookie-policy/">Cookies</a><a href="/pages/legal/data-we-collect/">Data we collect</a><a href="/pages/legal/third-party-services/">Third parties</a></span>
+      <span class="social"><a href="https://www.linkedin.com/company/racktrack/" rel="noopener" target="_blank">LinkedIn</a><a href="https://www.instagram.com/racktrack_inc/" rel="noopener" target="_blank">Instagram</a><a href="https://www.facebook.com/share/18depF5xzA/" rel="noopener" target="_blank">Facebook</a></span>
+    </div>
+  </footer>
+</main>
+
+<script type="importmap">
+{ "imports": {
+  "three": "https://cdn.jsdelivr.net/npm/three@0.170.0/build/three.module.js",
+  "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.170.0/examples/jsm/"
+} }
+</script>
+<!--DOMJS-START-->
+<script>
+/* â”€â”€â”€â”€â”€ File 006: scroll value g, progress rail, drift list, captions (no WebGL needed) â”€â”€â”€â”€â”€ */
+(()=>{
+const clamp=(x,a=0,b=1)=>Math.min(b,Math.max(a,x)), lerp=(a,b,t)=>a+(b-a)*t;
+const $=s=>document.querySelector(s), $$=s=>[...document.querySelectorAll(s)];
+const beats=$$('.beat'), more=$('#more'), rail=$('#rail'), railA=$$('#rail a'), drifts=$$('.drifts li');
+const ART=window.ART={g:-1,beat:-1};
+const CAP=[['fig. 0','DCIM elevation over rack R12'],['fig. 1','the plan laid over the rack'],['fig. 2','what the plan models: slots, power, cooling'],['fig. 3','the room changes; the plan doesn\'t'],
+  ['fig. 4','planned vs checked utilization'],['fig. 5','two ways a blind plan ends'],['fig. 6','a sweep reconciles the plan; DCIM stays']];
+const DT=[2.1,2.3,2.5];   // when each drift lands in the 3D (keep in sync with the scene)
+let lastCap=-9;
+function G(){const y=scrollY,vh=innerHeight,top=e=>e.getBoundingClientRect().top+y;
+  const K=[[0,-1]];beats.forEach((b,i)=>K.push([top(b)-vh*.55,i]));K.push([top(more)-vh*.55,6]);
+  for(let i=0;i<K.length-1;i++){if(y<=K[i+1][0])return lerp(K[i][1],K[i+1][1],clamp((y-K[i][0])/((K[i+1][0]-K[i][0])||1)));}return 6;}
+function frame(){
+  const g=ART.g=G();const b=Math.floor(g);ART.beat=b;
+  // rail: 4 article sections (key figure rides with section 02)
+  const secs=[[1,2],[2,4],[4,5],[5,6]];let cur=-1;
+  railA.forEach((a,i)=>{const [s,e]=secs[i];const p=clamp((g-s)/(e-s));a.querySelector('b').style.height=(p*100)+'%';if(g>=s&&g<e){cur=i;}a.setAttribute('aria-current',String(g>=s&&g<e));});
+  rail.classList.toggle('off',g<.6||more.getBoundingClientRect().top<innerHeight*.9);
+  drifts.forEach((li,i)=>li.classList.toggle('on',g>=DT[i]));
+  const ci=clamp(Math.floor(g)+1,0,6);if(ci!==lastCap){lastCap=ci;$('#figN').textContent=CAP[ci][0];$('#figT').textContent=CAP[ci][1];}
+  requestAnimationFrame(frame);
+}
+requestAnimationFrame(frame);
+})();
+</script>
+<!--DOMJS-END-->
+<!--GLJS-START-->
+<script type="module">
+/* â•â•â•â•â•â•â•â•â•â•â•â•â• File 006 Â· Blueprint over steel â•â•â•â•â•â•â•â•â•â•â•â•â•
+   One real rack (R12) on a drawing sheet; its DCIM elevation drawn as a translucent blueprint plane hung over the face.
+   The plan peels forward, the room drifts under it, a sweep reconciles the two, and the plan settles back flush. */
+import * as THREE from 'three';
+import { RoomEnvironment } from 'three/addons/environments/RoomEnvironment.js';
+
+const reduce=matchMedia('(prefers-reduced-motion: reduce)').matches;
+const SNAP=location.search.includes('snap');
+const clamp=(x,a=0,b=1)=>Math.min(b,Math.max(a,x));
+const smooth=(a,b,x)=>{const t=clamp((x-a)/(b-a));return t*t*(3-2*t)};
+const lerp=(a,b,t)=>a+(b-a)*t;
+const C=h=>new THREE.Color(h);
+const COL={link:C('#1FD67C'),linkInk:C('#04703F'),drift:C('#FF9A2E'),record:C('#7C93A8'),recInk:C('#3F5871'),ink:C('#111614')};
+const MONO='"JetBrains Mono", monospace', SANS='"Inter", sans-serif';
+const V3=(x,y,z)=>new THREE.Vector3(x,y,z);
+
+const canvas=document.getElementById('stage');
+let renderer;
+try{ renderer=new THREE.WebGLRenderer({canvas,antialias:true,alpha:true,powerPreference:'high-performance'}); }
+catch(e){ document.documentElement.classList.add('no-webgl'); throw e; }
+renderer.setPixelRatio(SNAP?1:Math.min(devicePixelRatio,2));
+renderer.setClearColor(0,0);
+renderer.toneMapping=THREE.ACESFilmicToneMapping; renderer.toneMappingExposure=1.02;
+renderer.outputColorSpace=THREE.SRGBColorSpace;
+renderer.shadowMap.enabled=true; renderer.shadowMap.type=SNAP?THREE.PCFShadowMap:THREE.PCFSoftShadowMap;
+const scene=new THREE.Scene();
+scene.environment=new THREE.PMREMGenerator(renderer).fromScene(new RoomEnvironment(),.04).texture; scene.environmentIntensity=.85;
+const camera=new THREE.PerspectiveCamera(28,1,.05,300);
+scene.add(new THREE.HemisphereLight(0xffffff,0x9aa39e,.55));
+const sun=new THREE.DirectionalLight(0xffffff,1.75);sun.position.set(-4,10,7);sun.castShadow=true;
+sun.shadow.mapSize.set(SNAP?1024:2048,SNAP?1024:2048);Object.assign(sun.shadow.camera,{left:-3.5,right:4,top:4,bottom:-3,near:1,far:30});sun.shadow.bias=-.0005;sun.shadow.radius=4;scene.add(sun);
+const fill=new THREE.DirectionalLight(0xdfe9ff,.55);fill.position.set(7,4,-5);scene.add(fill);
+const front=new THREE.DirectionalLight(0xffffff,.4);front.position.set(1,2,8);scene.add(front);
+
+function cnv(w,h){const c=document.createElement('canvas');c.width=w;c.height=h;return [c,c.getContext('2d')];}
+function tex(c){const t=new THREE.CanvasTexture(c);t.colorSpace=THREE.SRGBColorSpace;t.anisotropy=Math.min(8,renderer.capabilities.getMaxAnisotropy());return t;}
+const alu=new THREE.MeshStandardMaterial({color:'#dfe3df',metalness:.72,roughness:.3});
+const graph=new THREE.MeshStandardMaterial({color:'#2a302d',metalness:.55,roughness:.45});
+const dark=new THREE.MeshStandardMaterial({color:'#1d2321',metalness:.4,roughness:.55});
+const add=(m,p,parent=scene)=>{if(p)m.position.set(...p);parent.add(m);return m;};
+
+/* â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ rack geometry constants â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
+const RW=.66, RD=.96, U=.044, Y0=.1, ZF=RD/2, FACE=ZF-.03;
+const uy=(u,h=1)=>Y0+(u-1)*U+h*U/2;
+const GX=[1.0,1.85];                   // planned (ghost) rack positions R13, R14
+const COLX=[1.08,1.46], COLZ=1.0, CW=.26, HA=1.36, HB=.68;   // key-figure columns (2:1)
+
+/* â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ drawing sheet â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
+const SX=.8, SZ=.4, BW=9.6, BD=7.2;
+function sheetCanvas(){const W=3072,H=Math.round(W*BD/BW),s=W/BW;const [c,g]=cnv(W,H);const X=x=>(x-SX+BW/2)*s,Z=z=>(z-SZ+BD/2)*s;
+  g.fillStyle='#F4F6F3';g.fillRect(0,0,W,H);
+  for(let x=SX-BW/2;x<=SX+BW/2+.01;x+=.2){g.fillStyle='rgba(17,22,20,.05)';g.fillRect(X(x),0,1.2,H);} for(let z=SZ-BD/2;z<=SZ+BD/2+.01;z+=.2){g.fillStyle='rgba(17,22,20,.05)';g.fillRect(0,Z(z),W,1.2);}
+  g.strokeStyle='#111614';g.lineWidth=3;g.strokeRect(16,16,W-32,H-32);
+  // the real rack footprint
+  g.strokeStyle='#4A544F';g.lineWidth=2.5;g.strokeRect(X(-RW/2),Z(-RD/2),RW*s,RD*s);
+  g.fillStyle='#4A544F';g.font=`400 19px ${MONO}`;g.fillText('R12 Â· 42U',X(-RW/2),Z(-RD/2)-12);
+  // planned positions on the DCIM floor plan
+  g.setLineDash([12,9]);g.strokeStyle='#7C93A8';g.lineWidth=2.5;GX.forEach(x=>g.strokeRect(X(x-RW/2),Z(-RD/2),RW*s,RD*s));g.setLineDash([]);
+  g.fillStyle='#3F5871';GX.forEach((x,i)=>g.fillText(['R13 Â· planned','R14 Â· planned'][i],X(x-RW/2),Z(-RD/2)-12));
+  // the plan's line on the floor (where the elevation hangs)
+  g.setLineDash([5,7]);g.strokeStyle='#7C93A8';g.lineWidth=2;g.beginPath();g.moveTo(X(-.62),Z(.92));g.lineTo(X(.62),Z(.92));g.stroke();g.setLineDash([]);
+  g.fillStyle='#3F5871';g.font=`400 17px ${MONO}`;g.fillText('elevation plane Â· plan',X(-.62),Z(.92)+26);
+  // rack width dimension
+  g.strokeStyle='#4A544F';g.lineWidth=1.5;const dz=Z(-RD/2)-40;g.beginPath();g.moveTo(X(-RW/2),dz);g.lineTo(X(RW/2),dz);g.moveTo(X(-RW/2),dz-8);g.lineTo(X(-RW/2),dz+8);g.moveTo(X(RW/2),dz-8);g.lineTo(X(RW/2),dz+8);g.stroke();
+  g.fillStyle='#4A544F';g.font=`400 16px ${MONO}`;g.fillText('600',X(0)-15,dz-8);
+  // airflow arrow (front â†’ back)
+  g.strokeStyle='#7C93A8';g.lineWidth=2;const ax=X(-.72);g.beginPath();g.moveTo(ax,Z(.45));g.lineTo(ax,Z(-.4));g.moveTo(ax-8,Z(-.4)+14);g.lineTo(ax,Z(-.4));g.lineTo(ax+8,Z(-.4)+14);g.stroke();
+  g.save();g.translate(ax-12,Z(.45));g.rotate(-Math.PI/2);g.fillStyle='#3F5871';g.font=`400 15px ${MONO}`;g.fillText('airflow',0,0);g.restore();
+  // title block
+  {const bx=X(1.3),bz=Z(1.62);g.fillStyle='#111614';g.fillRect(bx,bz,440,96);g.fillStyle='#DDE4DF';g.font=`500 26px ${MONO}`;g.fillText('DC1 Â· row C Â· R12',bx+20,bz+42);
+   g.fillStyle='#93A19A';g.font=`400 18px ${MONO}`;g.fillText('plan vs room Â· 1:12 Â· illustrative',bx+20,bz+74);}
+  return c;}
+const sheetMat=new THREE.MeshStandardMaterial({map:tex(sheetCanvas()),roughness:.9});
+const base=add(new THREE.Mesh(new THREE.BoxGeometry(BW,.2,BD),[alu,alu,sheetMat,alu,alu,alu]),[SX,-.1,SZ]);base.receiveShadow=true;
+add(new THREE.Mesh(new THREE.BoxGeometry(BW+.14,.04,BD+.14),graph),[SX,-.22,SZ]);
+
+/* â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ the rack (steel) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
+const RACK=new THREE.Group();scene.add(RACK);
+[[-1,-1],[1,-1],[-1,1],[1,1]].forEach(([sx,sz])=>{const p=add(new THREE.Mesh(new THREE.BoxGeometry(.035,2.0,.035),graph),[sx*(RW/2-.018),1.0,sz*(RD/2-.018)],RACK);p.castShadow=true;});
+const sideMat=new THREE.MeshStandardMaterial({color:'#222826',metalness:.5,roughness:.5});
+[-1,1].forEach(sx=>{const s=add(new THREE.Mesh(new THREE.BoxGeometry(.012,1.9,RD-.04),sideMat),[sx*(RW/2-.006),1.0,0],RACK);s.castShadow=true;s.receiveShadow=true;});
+add(new THREE.Mesh(new THREE.BoxGeometry(RW,.05,RD),graph),[0,2.0,0],RACK).castShadow=true;
+add(new THREE.Mesh(new THREE.BoxGeometry(RW,.08,RD),graph),[0,.04,0],RACK);
+add(new THREE.Mesh(new THREE.BoxGeometry(RW-.02,1.9,.01),dark),[0,1.0,-RD/2+.02],RACK);
+function railCanvas(){const [c,g]=cnv(24,1024);g.fillStyle='#c9cfcb';g.fillRect(0,0,24,1024);g.fillStyle='#2a302d';for(let i=0;i<126;i++){g.fillRect(8,4+i*8.1,8,4);}return c;}
+const railMat=new THREE.MeshStandardMaterial({map:tex(railCanvas()),metalness:.6,roughness:.35});
+[-1,1].forEach(sx=>add(new THREE.Mesh(new THREE.BoxGeometry(.022,42*U,.012),[alu,alu,alu,alu,railMat,alu]),[sx*(RW/2-.045),Y0+21*U,FACE+.004],RACK));
+
+// the plan, as installed on day one (the steel starts out matching it)
+const PLAN=[
+ {id:'PP-A',u:41,h:1,k:'patch',kw:0},{id:'SW-01',u:39,h:1,k:'switch',kw:.2},{id:'SW-02',u:38,h:1,k:'switch',kw:.2},
+ {id:'SRV-01',u:35,h:2,k:'server',kw:.5},{id:'SRV-02',u:33,h:2,k:'server',kw:.5},{id:'SRV-03',u:31,h:2,k:'server',kw:.5},
+ {id:'SRV-04',u:28,h:2,k:'server',kw:.5},{id:'ST-01',u:24,h:4,k:'storage',kw:.9},{id:'SRV-05',u:19,h:2,k:'server',kw:.5},
+ {id:'SRV-06',u:17,h:2,k:'server',kw:.5},{id:'ST-02',u:12,h:4,k:'storage',kw:.9},{id:'UPS-1',u:3,h:3,k:'ups',kw:0}];
+const SWAP={id:'SRV-03',u:32,h:1,k:'server'};    // 02:14 replacement: 1U where the plan says 2U
+const VEND={id:'VND-A',u:22,h:2,k:'vendor'};     // vendor appliance, never added to the plan
+function faceCanvas(k,n,h){const W=512,H=Math.max(37,Math.round(h*37));const [c,g]=cnv(W,H);
+  const bg={blank:'#222826',patch:'#1d2321',switch:'#2a302d',server:'#2f3633',storage:'#262c29',ups:'#2b312e',vendor:'#3a4240'}[k];
+  g.fillStyle=bg;g.fillRect(0,0,W,H);g.fillStyle='rgba(255,255,255,.07)';g.fillRect(0,0,W,2);g.fillStyle='rgba(0,0,0,.35)';g.fillRect(0,H-2,W,2);
+  if(k==='blank'){g.fillStyle='rgba(255,255,255,.05)';for(let y=8;y<H-6;y+=8)g.fillRect(40,y,W-80,2);}
+  if(k==='patch'||k==='switch'){g.fillStyle='#DDE4DF';g.font=`500 12px ${MONO}`;g.fillText(n,10,H/2+4);}
+  if(k==='server'){const tall=h>1;g.fillStyle='#262c29';for(let i=0;i<8;i++)g.fillRect(120+i*38,6,32,H-12);g.fillStyle='#1d2321';for(let i=0;i<8;i++)g.fillRect(124+i*38,H/2-2,24,3);
+    g.fillStyle='#DDE4DF';g.font=`500 13px ${MONO}`;g.fillText(n,14,tall?22:H/2+5);if(tall){g.fillStyle='#1FD67C';g.fillRect(14,H-16,6,6);g.fillStyle='#7C93A8';g.fillRect(26,H-16,6,6);}
+    g.fillStyle='#1a1f1d';for(let y=8;y<H-6;y+=6)g.fillRect(W-72,y,56,3);}
+  if(k==='storage'){g.fillStyle='#DDE4DF';g.font=`500 13px ${MONO}`;g.fillText(n,14,20);for(let r=0;r<3;r++)for(let i=0;i<4;i++){const x=90+i*100,y=10+r*(H-20)/3;g.fillStyle='#343b38';g.fillRect(x,y,92,(H-20)/3-6);g.fillStyle=(r+i)%5?'#1FD67C':'#7C93A8';g.fillRect(x+80,y+6,5,5);}}
+  if(k==='ups'){g.fillStyle='#DDE4DF';g.font=`500 13px ${MONO}`;g.fillText(n,14,20);g.fillStyle='#0c1110';g.fillRect(W-170,16,140,44);g.fillStyle='#1FD67C';g.font=`500 16px ${MONO}`;g.fillText('230V 44%',W-160,44);
+    g.fillStyle='#1a1f1d';for(let y=12;y<H-8;y+=7)g.fillRect(40,y,W-240,3);}
+  if(k==='vendor'){g.fillStyle='#4a5350';for(let y=8;y<H-6;y+=7)for(let x=150;x<W-20;x+=9)g.fillRect(x+(y%14?4:0),y,4,4);
+    g.fillStyle='#e5e9e6';g.fillRect(14,12,96,H-24);g.fillStyle='#111614';g.font=`600 16px ${MONO}`;g.fillText(n,22,H/2+6);}
+  return c;}
+function makeDev(d){const grp=new THREE.Group();grp.position.set(0,uy(d.u,d.h),FACE-.39);RACK.add(grp);const hh=d.h*U-.003;
+  const body=add(new THREE.Mesh(new THREE.BoxGeometry(RW-.1,hh,.78),dark),null,grp);body.castShadow=true;body.receiveShadow=true;
+  const fm=new THREE.MeshStandardMaterial({map:tex(faceCanvas(d.k,d.id,d.h)),metalness:.3,roughness:.55});
+  add(new THREE.Mesh(new THREE.PlaneGeometry(RW-.1,hh),fm),[0,0,.3905],grp);
+  return {grp,fm,d,z0:FACE-.39};}
+const DEV=PLAN.map(makeDev);
+const OLD3=DEV.find(o=>o.d.id==='SRV-03');
+const NEW3=makeDev(SWAP), VND=makeDev(VEND);
+// blank plates everywhere else (except the vendor slot, which the plan leaves open)
+{const occ=new Set();PLAN.forEach(d=>{for(let i=0;i<d.h;i++)occ.add(d.u+i);});[22,23].forEach(u=>occ.add(u));
+ const free=[];for(let u=1;u<=42;u++)if(!occ.has(u))free.push(u);
+ const bm=new THREE.MeshStandardMaterial({map:tex(faceCanvas('blank','',1)),metalness:.35,roughness:.6});
+ const blanks=new THREE.InstancedMesh(new THREE.BoxGeometry(RW-.1,U-.003,.012),bm,free.length);const m=new THREE.Matrix4();
+ free.forEach((u,i)=>{m.makeTranslation(0,uy(u),FACE-.006);blanks.setMatrixAt(i,m);});blanks.receiveShadow=true;RACK.add(blanks);}
+// ports on PP-A and both switches (one instanced draw)
+const PX=c=>-.205+c*.0191;
+const PORTS=[];for(let c=0;c<24;c++)PORTS.push([PX(c),uy(41),c>=2&&c<=19]);
+[39,38].forEach((u,si)=>{for(let r=0;r<2;r++)for(let c=0;c<24;c++)PORTS.push([PX(c),uy(u)+(r?-.0092:.0092),si?c<16:c<21]);});
+{const pm=new THREE.InstancedMesh(new THREE.PlaneGeometry(.0135,.0075),new THREE.MeshBasicMaterial({color:0xffffff,toneMapped:false}),PORTS.length);const m=new THREE.Matrix4();
+ PORTS.forEach(([x,y,used],i)=>{m.makeTranslation(x,y,FACE+.0015);pm.setMatrixAt(i,m);pm.setColorAt(i,C(used?'#6d7772':'#0d1110'));});RACK.add(pm);pm.frustumCulled=false;}
+// the "temporary" cable: SW-02 port 21 â†’ down the outside of the face â†’ SRV-05
+const cA=V3(PX(20),uy(38)+.0092,FACE), cB=V3(.2,uy(19,2)+.01,FACE);
+const cableCurve=new THREE.CatmullRomCurve3([cA,V3(cA.x+.012,cA.y-.012,FACE+.045),V3(.285,cA.y-.16,FACE+.08),V3(.3,(cA.y+cB.y)/2,FACE+.088),V3(.285,cB.y+.14,FACE+.08),V3(cB.x+.01,cB.y+.012,FACE+.045),cB]);
+const cableMat=new THREE.MeshStandardMaterial({color:'#FF9A2E',emissive:'#7a3800',emissiveIntensity:.5,roughness:.5,metalness:.1});
+const cable=add(new THREE.Mesh(new THREE.TubeGeometry(cableCurve,64,.0048,8,false),cableMat),null,RACK);cable.castShadow=true;
+const cableN=cable.geometry.index.count;
+
+/* â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ the blueprint plane (DCIM elevation) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
+const BPW=1.2, BPY0=.06, BPY1=2.26, BPH=BPY1-BPY0, ZFLUSH=FACE+.15, ZPEEL=FACE+.46;
+function planCanvas(rec){const W=1024,s=W/BPW,H=Math.round(BPH*s);const [c,g]=cnv(W,H);const X=x=>(x+BPW/2)*s,Y=y=>(BPY1-y)*s;
+  g.fillStyle=rec?'rgba(124,147,168,.11)':'rgba(124,147,168,.15)';g.fillRect(0,0,W,H);
+  g.strokeStyle='rgba(63,88,113,.13)';g.lineWidth=1.5;for(let x=-.6;x<=.6;x+=.05){g.beginPath();g.moveTo(X(x),0);g.lineTo(X(x),H);g.stroke();}for(let y=BPY0;y<=BPY1;y+=.05){g.beginPath();g.moveTo(0,Y(y));g.lineTo(W,Y(y));g.stroke();}
+  g.strokeStyle='#3F5871';g.lineWidth=5;g.strokeRect(4,4,W-8,H-8);
+  // header
+  g.fillStyle='#3F5871';g.font=`500 34px ${MONO}`;g.fillText('DCIM Â· planned elevation',30,64);
+  g.font=`400 23px ${MONO}`;g.fillStyle='#4f6780';g.fillText('R12 Â· 42U Â· rev 7',30,102);
+  if(rec){g.fillStyle='rgba(31,214,124,.2)';g.fillRect(W-330,34,300,82);g.strokeStyle='#04703F';g.lineWidth=4;g.strokeRect(W-330,34,300,82);g.fillStyle='#04703F';g.font=`500 22px ${MONO}`;g.fillText('reconciled',W-306,68);g.font=`400 18px ${MONO}`;g.fillText('from a physical sweep',W-306,98);}
+  else{g.fillStyle='#4f6780';g.font=`400 20px ${MONO}`;g.fillText('planned, not observed',W-300,102);}
+  // rack outline + U scale
+  const rx0=X(-RW/2),rx1=X(RW/2),ry0=Y(Y0+42*U),ry1=Y(Y0);g.strokeStyle='#3F5871';g.lineWidth=4;g.strokeRect(rx0,ry0,rx1-rx0,ry1-ry0);
+  g.lineWidth=1.5;for(let u=1;u<=42;u++){const y=Y(Y0+(u-1)*U);g.beginPath();g.moveTo(rx0-12,y);g.lineTo(rx0,y);g.stroke();}
+  g.fillStyle='#4f6780';g.font=`400 18px ${MONO}`;[1,6,12,18,24,30,36,42].forEach(u=>g.fillText('U'+String(u).padStart(2,'0'),X(-.585),Y(uy(u))+6));
+  // power column
+  g.fillStyle='#3F5871';g.font=`500 19px ${MONO}`;g.fillText('kW',X(.39),ry0-14);
+  // slots
+  const list=rec?PLAN.filter(d=>d.id!=='SRV-03').concat([{...SWAP,kw:.5,chg:'swapped 02:14'},{...VEND,kw:.3,chg:'added'}]):PLAN;
+  let tot=0;list.forEach(d=>{tot+=d.kw||0;const y0=Y(Y0+(d.u-1+d.h)*U)+3,y1=Y(Y0+(d.u-1)*U)-3;const x0=X(-RW/2+.05),x1=X(RW/2-.05);const chg=!!d.chg;
+    g.fillStyle=chg?'rgba(31,214,124,.2)':'rgba(124,147,168,.26)';g.fillRect(x0,y0,x1-x0,y1-y0);g.strokeStyle=chg?'#04703F':'#3F5871';g.lineWidth=chg?4:3;g.strokeRect(x0,y0,x1-x0,y1-y0);
+    const fs=d.h>1?20:16;g.font=`500 ${fs}px ${MONO}`;g.fillStyle=chg?'#04703F':'#3F5871';g.fillText(d.id+(chg?' Â· '+d.chg:''),x0+10,(y0+y1)/2+fs*.36);
+    g.font=`400 17px ${MONO}`;g.fillStyle=chg?'#04703F':'#4f6780';if(d.kw)g.fillText(d.kw.toFixed(1),X(.39),(y0+y1)/2+6);});
+  if(rec){// the cable, now on the plan
+    g.strokeStyle='#04703F';g.lineWidth=3;g.setLineDash([10,7]);g.beginPath();g.moveTo(X(.2),Y(uy(38)));g.lineTo(X(.3),Y(uy(38))+20);g.lineTo(X(.3),Y(uy(19,2))-20);g.lineTo(X(.2),Y(uy(19,2)));g.stroke();g.setLineDash([]);}
+  // footer: totals + cooling
+  g.strokeStyle='#3F5871';g.lineWidth=2;g.beginPath();g.moveTo(30,ry1+18);g.lineTo(W-30,ry1+18);g.stroke();
+  g.fillStyle='#3F5871';g.font=`400 19px ${MONO}`;g.fillText(`allocated ${tot.toFixed(1)} kW Â· cooling front â†’ back`,30,ry1+48);
+  return c;}
+const BP=new THREE.Group();BP.position.set(0,0,ZPEEL);scene.add(BP);
+const pgeo=new THREE.PlaneGeometry(BPW,BPH);
+const planA=add(new THREE.Mesh(pgeo,new THREE.MeshBasicMaterial({map:tex(planCanvas(false)),transparent:true,depthWrite:false,side:THREE.DoubleSide,toneMapped:false})),[0,(BPY0+BPY1)/2,0],BP);
+const planB=add(new THREE.Mesh(pgeo,new THREE.MeshBasicMaterial({map:tex(planCanvas(true)),transparent:true,opacity:0,depthWrite:false,side:THREE.DoubleSide,toneMapped:false})),[0,(BPY0+BPY1)/2,.001],BP);
+planA.renderOrder=planB.renderOrder=5;
+const bpEdge=add(new THREE.LineSegments(new THREE.EdgesGeometry(pgeo),new THREE.LineBasicMaterial({color:COL.recInk,transparent:true,toneMapped:false})),[0,(BPY0+BPY1)/2,0],BP);
+// hanging threads (the plan floats; these show it is suspended, not standing)
+const threads=add(new THREE.LineSegments(new THREE.BufferGeometry().setFromPoints([V3(-BPW/2+.04,BPY1,0),V3(-BPW/2+.04,BPY1+.3,0),V3(BPW/2-.04,BPY1,0),V3(BPW/2-.04,BPY1+.3,0)]),new THREE.LineDashedMaterial({color:COL.record,dashSize:.03,gapSize:.03,transparent:true,opacity:.7,toneMapped:false})),null,BP);threads.computeLineDistances();
+
+/* â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ mismatch marks: steel outline Â· plan outline Â· projection lines â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
+const SLOTS=[{u:31,h:2},{u:22,h:2}];     // swap slot, vendor slot
+const steelOut=SLOTS.map(s=>{const l=new THREE.LineSegments(new THREE.EdgesGeometry(new THREE.BoxGeometry(RW-.06,s.h*U+.004,.03)),new THREE.LineBasicMaterial({color:COL.drift,transparent:true,toneMapped:false}));l.position.set(0,uy(s.u,s.h),FACE+.014);RACK.add(l);return l;});
+const planOut=SLOTS.map(s=>{const l=new THREE.LineSegments(new THREE.EdgesGeometry(new THREE.PlaneGeometry(RW-.08,s.h*U)),new THREE.LineDashedMaterial({color:COL.drift,dashSize:.012,gapSize:.008,transparent:true,toneMapped:false,depthWrite:false}));l.computeLineDistances();l.position.set(0,uy(s.u,s.h),.004);l.renderOrder=6;BP.add(l);return l;});
+const slotFill=SLOTS.map(s=>{const m=add(new THREE.Mesh(new THREE.PlaneGeometry(RW-.08,s.h*U),new THREE.MeshBasicMaterial({color:COL.drift,transparent:true,opacity:0,depthWrite:false,toneMapped:false})),[0,uy(s.u,s.h),.003],BP);m.renderOrder=6;return m;});
+function projLines(color,n){const geo=new THREE.BufferGeometry();geo.setAttribute('position',new THREE.BufferAttribute(new Float32Array(n*2*3),3));const l=new THREE.LineSegments(geo,new THREE.LineDashedMaterial({color,dashSize:.02,gapSize:.016,transparent:true,toneMapped:false,depthWrite:false}));l.frustumCulled=false;l.renderOrder=4;scene.add(l);return l;}
+const projMis=SLOTS.map(()=>projLines(COL.drift,4));
+const projRack=projLines(COL.record,4);
+function setProj(l,pairs){const a=l.geometry.attributes.position.array;pairs.forEach(([p,q],i)=>{a.set([p.x,p.y,p.z,q.x,q.y,q.z],i*6);});l.geometry.attributes.position.needsUpdate=true;l.computeLineDistances();}
+
+/* â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ the sweep (reconciliation) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
+const band=add(new THREE.Mesh(new THREE.PlaneGeometry(RW+.06,.014),new THREE.MeshBasicMaterial({color:COL.link,transparent:true,opacity:0,toneMapped:false,depthWrite:false})),[0,1,ZF+.012],RACK);
+const wash=add(new THREE.Mesh(new THREE.PlaneGeometry(RW,1),new THREE.MeshBasicMaterial({color:COL.link,transparent:true,opacity:0,toneMapped:false,depthWrite:false})),[0,.5,ZF+.009],RACK);
+
+/* â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ key figure: planned vs checked (2:1) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
+function colCanvas(){const [c,g]=cnv(128,640);g.fillStyle='rgba(124,147,168,.24)';g.fillRect(0,0,128,640);g.strokeStyle='rgba(63,88,113,.55)';g.lineWidth=2;for(let y=0;y<640;y+=16){g.beginPath();g.moveTo(0,y);g.lineTo(128,y);g.stroke();}return c;}
+const KF=new THREE.Group();scene.add(KF);
+const colAmat=new THREE.MeshBasicMaterial({map:tex(colCanvas()),transparent:true,depthWrite:false,toneMapped:false,side:THREE.DoubleSide});
+const colA=add(new THREE.Mesh(new THREE.BoxGeometry(CW,1,CW),colAmat),[COLX[0],.5,COLZ],KF);colA.renderOrder=3;
+const colAe=add(new THREE.LineSegments(new THREE.EdgesGeometry(new THREE.BoxGeometry(CW,1,CW)),new THREE.LineBasicMaterial({color:COL.recInk,toneMapped:false})),[COLX[0],.5,COLZ],KF);
+const colB=add(new THREE.Mesh(new THREE.BoxGeometry(CW,1,CW),[graph,graph,alu,graph,graph,graph]),[COLX[1],.5,COLZ],KF);colB.castShadow=true;
+const dimX=COLX[1]+CW/2+.12;
+const dimLine=new THREE.LineSegments(new THREE.BufferGeometry(),new THREE.LineBasicMaterial({color:COL.drift,toneMapped:false,transparent:true}));KF.add(dimLine);
+const dimDash=new THREE.LineSegments(new THREE.BufferGeometry(),new THREE.LineDashedMaterial({color:COL.drift,dashSize:.025,gapSize:.018,toneMapped:false,transparent:true}));KF.add(dimDash);
+
+/* â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ cost: ghost racks bought from the plan Â· no power headroom â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
+const GH=GX.map(x=>{const grp=new THREE.Group();grp.position.set(x,0,0);scene.add(grp);
+  const box=new THREE.BoxGeometry(RW,2.0,RD);
+  const fillm=add(new THREE.Mesh(box,new THREE.MeshBasicMaterial({color:COL.record,transparent:true,opacity:.12,depthWrite:false,toneMapped:false})),[0,1.0,0],grp);
+  const e=add(new THREE.LineSegments(new THREE.EdgesGeometry(box),new THREE.LineDashedMaterial({color:COL.recInk,dashSize:.05,gapSize:.035,transparent:true,toneMapped:false})),[0,1.0,0],grp);e.computeLineDistances();
+  return {grp,fillm,e};});
+function hatchCanvas(){const [c,g]=cnv(512,512);g.strokeStyle='rgba(255,154,46,.8)';g.lineWidth=5;for(let i=-512;i<1024;i+=30){g.beginPath();g.moveTo(i,0);g.lineTo(i+512,512);g.stroke();}g.strokeStyle='#FF9A2E';g.lineWidth=10;g.strokeRect(5,5,502,502);return c;}
+const hatch=add(new THREE.Mesh(new THREE.PlaneGeometry(RW+.32,RD+.3),new THREE.MeshBasicMaterial({map:tex(hatchCanvas()),transparent:true,opacity:0,depthWrite:false,toneMapped:false})),[0,.004,0]);hatch.rotation.x=-Math.PI/2;
+
+/* â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ tags (priority order: earlier wins a collision) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
+const hud=document.getElementById('hud');const TG=[];
+function tag(k,html,cls,pos){const el=document.createElement('div');el.className='tag '+cls;el.innerHTML=`<i></i><span>${html}</span>`;hud.appendChild(el);TG.push({k,el,pos,keep:cls.includes('keep'),left:cls.includes('left'),up:cls.includes('up'),on:false});}
+const onPlan=(x,y)=>()=>V3(x,y,BP.position.z);
+tag('hP','<b>DCIM elevation</b>the plan Â· what should be there','rec keep',onPlan(BPW/2,1.72));
+tag('hR','<b>The rack</b>what\'s physically there now','ink',V3(RW/2,.55,ZF));
+tag('lP','<b>The plan</b>laid over the rack','rec keep',onPlan(BPW/2,1.9));
+tag('lR','<b>The rack</b>true right now','ink keep',V3(RW/2,.5,ZF));
+tag('tS','<b>Slots</b>what should sit in each U','rec keep',onPlan(RW/2-.05,uy(33,2)));
+tag('tW','<b>Power</b>allocated per device','rec',onPlan(.5,uy(24,4)));
+tag('tC','<b>Cooling</b>front-to-back airflow','rec',onPlan(.45,.16));
+tag('tI','<b>Installation day</b>plan and rack agree','ink',V3(-RW/2,1.3,ZF));
+tag('d1','<b>02:14 Â· swap, off-ticket</b>U31 Â· 1U where the plan says 2U','drift keep',V3(RW/2-.03,uy(31,2),FACE));
+tag('d2','<b>Vendor change</b>U22 Â· not on the plan','drift keep',V3(RW/2-.03,uy(22,2),FACE));
+tag('d3','<b>Temporary cable</b>SW-02 â†’ SRV-05 Â· still there','drift keep',cableCurve.getPoint(.2));
+tag('dP','<b>The plan</b>unchanged since install','rec',onPlan(BPW/2,2.0));
+tag('kA','<b>Planned</b>utilization in the plan','rec up keep',V3(COLX[0],HA+.02,COLZ));
+tag('kB','<b>Checked</b>in the room','ink keep',V3(COLX[1]+CW/2,HB*.55,COLZ+CW/2));
+tag('kG','<b>2x</b>the reported gap','drift',V3(dimX,(HA+HB)/2,COLZ));
+tag('o2','<b>Outcome 2</b>out of power and space, too late','drift keep',V3(RW/2+.16,.004,RD/2+.15));
+tag('o1','<b>Outcome 1</b>more racks than necessary','drift up keep',()=>GH[1].grp.position.clone().add(V3(0,2.0,RD/2)));
+tag('oP','<b>Bought from the plan</b>R13 Â· R14','rec',()=>GH[0].grp.position.clone().add(V3(0,2.0,-RD/2)));
+tag('sW','<b>Physical sweep</b>the regular reconciliation step','link keep',()=>V3(RW/2+.03,band.position.y,ZF+.012));
+tag('sP','<b>DCIM plan</b>kept, and updated from the room','link keep',onPlan(BPW/2,1.9));
+tag('sA','<b>Plan and rack agree</b>verified by the sweep','link',V3(RW/2,.5,ZF));
+
+/* â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ camera keys â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
+const CAMS=[[-1,[3.3,1.2,4.6],[.1,1.0,.4]],
+  [.5,[.45,1.12,5.9],[0,1.05,.45]],        // lead: near-front, the plan flush over the steel
+  [1.5,[2.3,2.2,4.1],[0,1.28,.6]],         // s1: elevated 3/4 on the plane
+  [2.5,[3.4,1.4,3.1],[0,1.05,.4]],         // s2: orbit to the side, where plan and steel part
+  [3.5,[3.6,2.5,5.4],[.75,.9,.4]],         // key figure: wide
+  [4.5,[1.1,9.6,2.9],[.95,0,.1]],         // s3: top-down plan view
+  [5.5,[1.7,1.3,5.0],[0,1.02,.45]],        // s4: front 3/4, back into alignment
+  [6.5,[3.8,2.8,6.2],[.5,1,0]]];
+let vw=0,vh=0,H=0,mobile=false;
+function resize(){vw=innerWidth;vh=innerHeight;mobile=vw<760;H=mobile?Math.round(vh*.46):vh;
+  document.documentElement.style.setProperty('--band',H+'px');
+  renderer.setSize(vw,H,false);canvas.style.height=H+'px';camera.aspect=vw/H;camera.updateProjectionMatrix();}
+addEventListener('resize',resize);resize();
+const cp=V3(...CAMS[0][1]),ct=V3(...CAMS[0][2]);
+const clock=new THREE.Clock();
+const moreEl=document.getElementById('more'), figcap=document.getElementById('figcap');
+
+/* framing guard: every frame, project the visible objects' bounding points; zoom out along the view vector
+   (bisection) until they fit the space right of the reading column, then shift the view offset to place them. */
+const _v=V3();
+const RACKPTS=[];for(const x of [-RW/2,RW/2])for(const y of [0,2.03])for(const z of [-RD/2,RD/2])RACKPTS.push(V3(x,y,z));
+function guardPts(kf,gh){const p=RACKPTS.slice();const z=BP.position.z;for(const x of [-BPW/2,BPW/2])for(const y of [BPY0,BPY1+.3])p.push(V3(x,y,z));
+  if(kf>.02){for(const x of [COLX[0]-CW/2,dimX+.02])for(const y of [0,HA])for(const z of [COLZ-CW/2,COLZ+CW/2])p.push(V3(x,y,z));}
+  if(gh>.02){GH.forEach(o=>{const q=o.grp.position;for(const x of [-RW/2,RW/2])for(const y of [0,2.0])for(const z of [-RD/2,RD/2])p.push(V3(q.x+x,q.y+y,z));});}
+  return p;}
+function bounds(pts){let a=1e9,b=-1e9,c=1e9,d=-1e9;camera.updateMatrixWorld();
+  for(const p of pts){_v.copy(p).project(camera);if(_v.z>1)continue;const x=(_v.x+1)/2*vw,y=(1-_v.y)/2*H;a=Math.min(a,x);b=Math.max(b,x);c=Math.min(c,y);d=Math.max(d,y);}return {a,b,c,d};}
+function guard(pts){
+  const L=mobile?14:.465*vw, R=mobile?vw-14:vw-30, T=mobile?68:96, B=mobile?H-30:vh-44;
+  const ox=mobile?0:-(.63-.5)*vw, oy=0;
+  camera.setViewOffset(vw,H,ox,oy,vw,H);
+  const dir=cp.clone().sub(ct);
+  const at=f=>{camera.position.copy(ct).addScaledVector(dir,f);camera.lookAt(ct);return bounds(pts);};
+  const fits=b=>(b.b-b.a)<=R-L&&(b.d-b.c)<=B-T;
+  let bb=at(1);
+  if(!fits(bb)){let lo=1,hi=1.3;while(!fits(at(hi))&&hi<8)hi*=1.3;for(let i=0;i<12;i++){const m=(lo+hi)/2;if(fits(at(m)))hi=m;else lo=m;}bb=at(hi);}
+  let sx=0,sy=0;if(bb.a<L)sx=L-bb.a;else if(bb.b>R)sx=Math.max(R-bb.b,L-bb.a);
+  if(bb.c<T)sy=T-bb.c;else if(bb.d>B)sy=Math.max(B-bb.d,T-bb.c);
+  camera.setViewOffset(vw,H,ox-sx,oy-sy,vw,H);camera.updateMatrixWorld();
+}
+
+const on=(g,a,b)=>smooth(a-.2,a+.15,g)*(1-smooth(b-.15,b+.2,g));
+function frame(){
+  requestAnimationFrame(frame);
+  const dt=Math.min(clock.getDelta(),.05),time=clock.elapsedTime;
+  const mt=moreEl.getBoundingClientRect().top;
+  const endHud=mobile?mt<H+6:mt<vh*.96;
+  const endCanvas=mobile?mt<H+2:mt<=0;
+  hud.style.visibility=figcap.style.visibility=endHud?'hidden':'visible';hud.style.opacity=figcap.style.opacity=endHud?'0':'1';
+  canvas.style.visibility=endCanvas?'hidden':'visible';if(endCanvas)return;
+  const g=window.ART?window.ART.g:-1;
+
+  /* states */
+  const wHero=1-smooth(-.6,-.05,g),wLead=on(g,0,1),wS1=on(g,1,2),wS2=on(g,2,3),wKF=on(g,3,4),wS3=on(g,4,5),wS4=on(g,5,6.3);
+  const d1=smooth(2.02,2.2,g),d2=smooth(2.22,2.4,g),d3=smooth(2.42,2.6,g);
+  const sweepP=smooth(5.0,5.35,g), sweepY=lerp(.08,2.0,sweepP), sweepOn=smooth(4.9,5.02,g)*(1-smooth(5.36,5.46,g));
+  const fx=y=>smooth(y-.06,y+.06,sweepY)*smooth(4.95,5.05,g);
+  const f1=fx(uy(31,2)),f2=fx(uy(22,2)),f3=fx(cableCurve.getPoint(.5).y);
+  const recon=smooth(5.34,5.48,g);
+  const peel=Math.max(1-smooth(-.5,-.05,g), smooth(.85,1.3,g)*(1-smooth(5.46,5.66,g)));
+  const kf=smooth(3.0,3.45,g)*(1-smooth(3.9,4.15,g));
+  const ghA=smooth(4.1,4.45,g), ghB=smooth(4.25,4.6,g), ghOut=1-smooth(4.9,5.15,g);
+  const gh=Math.max(ghA,ghB)*ghOut;
+
+  // the plan plane: flush over the steel, or peeled forward for comparison
+  BP.position.z=lerp(ZFLUSH,ZPEEL,peel);
+  planB.material.opacity=recon;planA.material.opacity=1-recon*.98;
+  bpEdge.material.color.copy(COL.recInk).lerp(COL.linkInk,recon);
+  // the room drifts
+  OLD3.grp.position.z=OLD3.z0+.26*smooth(0,.45,d1);OLD3.grp.scale.setScalar(Math.max(1e-4,1-smooth(.4,.6,d1)));OLD3.grp.visible=d1<.6;
+  NEW3.grp.position.z=NEW3.z0+.26*(1-smooth(.55,1,d1));NEW3.grp.scale.setScalar(Math.max(1e-4,smooth(.4,.6,d1)));NEW3.grp.visible=d1>.4;
+  VND.grp.position.z=VND.z0+.28*(1-smooth(.25,1,d2));VND.grp.scale.setScalar(Math.max(1e-4,smooth(0,.3,d2)));VND.grp.visible=d2>.001;
+  cable.geometry.setDrawRange(0,Math.floor(d3*cableN/3)*3);cable.visible=d3>.001;
+  cableMat.color.copy(COL.drift).lerp(C('#2f7a52'),f3);cableMat.emissive.set(f3>.5?'#0b3a22':'#7a3800');cableMat.emissiveIntensity=.5;
+  // mismatch marks
+  const dd=[d1,d2],ff=[f1,f2],endFade=1-smooth(5.9,6.15,g);
+  SLOTS.forEach((s,i)=>{const d=smooth(.5,1,dd[i]),f=ff[i];
+    steelOut[i].material.color.copy(COL.drift).lerp(COL.link,f);steelOut[i].material.opacity=d*endFade;steelOut[i].visible=d*endFade>.01;
+    planOut[i].material.opacity=d*(1-f);planOut[i].visible=d*(1-f)>.01;slotFill[i].material.opacity=d*(1-f)*.22;
+    const zt=BP.position.z+.002,x0=-(RW-.06)/2,x1=(RW-.06)/2,ya=uy(s.u,s.h)-s.h*U/2,yb=uy(s.u,s.h)+s.h*U/2;
+    setProj(projMis[i],[[V3(x0,ya,zt),V3(x0,ya,FACE+.014)],[V3(x1,ya,zt),V3(x1,ya,FACE+.014)],[V3(x0,yb,zt),V3(x0,yb,FACE+.014)],[V3(x1,yb,zt),V3(x1,yb,FACE+.014)]]);
+    projMis[i].material.color.copy(COL.drift).lerp(COL.link,f);projMis[i].material.opacity=d*smooth(.25,.6,peel)*endFade;projMis[i].visible=projMis[i].material.opacity>.01;});
+  {const zt=BP.position.z,y0=Y0,y1=Y0+42*U,x=RW/2;setProj(projRack,[[V3(-x,y0,zt),V3(-x,y0,ZF)],[V3(x,y0,zt),V3(x,y0,ZF)],[V3(-x,y1,zt),V3(-x,y1,ZF)],[V3(x,y1,zt),V3(x,y1,ZF)]]);
+   projRack.material.opacity=.75*smooth(.25,.6,peel)*(1-wS3);projRack.visible=projRack.material.opacity>.01;}
+  // sweep
+  band.position.y=sweepY;band.material.opacity=sweepOn*(reduce||SNAP?.95:.8+.2*Math.sin(time*9));
+  wash.scale.y=Math.max(.001,sweepY-.08);wash.position.y=.08+(sweepY-.08)/2;wash.material.opacity=sweepOn*.1+recon*.05*(1-smooth(5.9,6.2,g));
+  // key figure
+  KF.visible=kf>.005;
+  {const a=Math.max(1e-3,HA*smooth(0,.7,kf)),b=Math.max(1e-3,HB*smooth(.15,.85,kf));colA.scale.y=colAe.scale.y=a;colA.position.y=colAe.position.y=a/2;colB.scale.y=b;colB.position.y=b/2;
+   const x=dimX,z=COLZ,t=.035;dimLine.geometry.setFromPoints([V3(x,b,z),V3(x,a,z),V3(x-t,a,z),V3(x+t,a,z),V3(x-t,b,z),V3(x+t,b,z)]);
+   dimDash.geometry.setFromPoints([V3(COLX[0]+CW/2,a,z),V3(x,a,z),V3(COLX[1]+CW/2,b,z),V3(x,b,z)]);dimDash.computeLineDistances();
+   dimLine.material.opacity=dimDash.material.opacity=smooth(.7,1,kf);}
+  // cost
+  GH.forEach((o,i)=>{const p=i?ghB:ghA;o.grp.position.y=(1-p)*1.3;o.fillm.material.opacity=.13*p*ghOut;o.e.material.opacity=p*ghOut;o.grp.visible=p*ghOut>.01;});
+  hatch.material.opacity=.55*smooth(4.35,4.6,g)*ghOut;hatch.visible=hatch.material.opacity>.01;
+
+  /* camera */
+  let Pp=V3(...CAMS[0][1]),Tt=V3(...CAMS[0][2]);
+  for(let i=1;i<CAMS.length;i++){const [gi,p,t]=CAMS[i];const gp=CAMS[i-1][0];const k=smooth(gp+(gi-gp)*.3,gi-(gi-gp)*.15,g);if(k>0){Pp.lerp(V3(...p),k);Tt.lerp(V3(...t),k);}}
+  if(!reduce&&!SNAP){const s=Math.sin(time*.12)*.05;Pp.sub(Tt).applyAxisAngle(V3(0,1,0),s).add(Tt);}
+  const f=(reduce||SNAP)?1:1-Math.pow(.02,dt);cp.lerp(Pp,f);ct.lerp(Tt,f);
+  guard(guardPts(kf,gh));
+
+  /* tags: fully on or off; hidden over the text column, off-screen, behind the camera, or colliding */
+  const vis={hP:wHero,hR:wHero,lP:wLead,lR:wLead,tS:wS1*smooth(.6,1,peel),tW:wS1*smooth(.6,1,peel),tC:wS1*smooth(.6,1,peel),tI:wS1,
+    d1:wS2*d1,d2:wS2*d2,d3:wS2*d3,dP:wS2,kA:wKF*smooth(.6,.9,kf),kB:wKF*smooth(.6,.9,kf),kG:wKF*smooth(.8,1,kf),
+    o1:wS3*ghB,o2:wS3*smooth(4.4,4.6,g),oP:wS3*ghA,sW:wS4*sweepOn,sP:wS4*recon,sA:wS4*smooth(5.58,5.66,g)};
+  const placed=[],colL=mobile?8:Math.max(.38*vw,(document.querySelector(".copy")?.getBoundingClientRect().right||0)+12),top=mobile?62:84,bot=mobile?H-28:vh-40;
+  for(const t of TG){let show=!endHud&&(vis[t.k]||0)>=.5&&(!mobile||t.keep);
+    if(show){const p=typeof t.pos==='function'?t.pos():t.pos;_v.copy(p).project(camera);
+      if(_v.z>1||_v.z<-1)show=false;
+      else{const x=(_v.x+1)/2*vw,y=(1-_v.y)/2*H,ew=t.el.offsetWidth,eh=t.el.offsetHeight;
+        const tx=t.left?x-ew+3.5:t.up?x-ew/2:x-3.5,ty=t.up?y-eh+3.5:y-eh/2;
+        if(tx<colL||tx+ew>vw-8||ty<top||ty+eh>bot)show=false;
+        else if(placed.some(r=>tx<r.x+r.w+6&&tx+ew+6>r.x&&ty<r.y+r.h+6&&ty+eh+6>r.y))show=false;
+        else{placed.push({x:tx,y:ty,w:ew,h:eh});t.el.style.transform=`translate3d(${tx.toFixed(1)}px,${ty.toFixed(1)}px,0)`;}}}
+    if(show!==t.on){t.on=show;t.el.style.opacity=show?'1':'0';}}
+  renderer.render(scene,camera);
+}
+function redrawText(){sheetMat.map.image=sheetCanvas();sheetMat.map.needsUpdate=true;
+  planA.material.map.image=planCanvas(false);planA.material.map.needsUpdate=true;planB.material.map.image=planCanvas(true);planB.material.map.needsUpdate=true;
+  [...DEV,NEW3,VND].forEach(o=>{o.fm.map.image=faceCanvas(o.d.k,o.d.id,o.d.h);o.fm.map.needsUpdate=true;});}
+document.fonts.ready.then(redrawText);
+{const hid=[];scene.traverse(o=>{if(!o.visible){hid.push(o);o.visible=true;}});try{renderer.compile(scene,camera);}catch(e){}hid.forEach(o=>o.visible=false);}
+requestAnimationFrame(frame);
+</script>
+<!--GLJS-END-->
+<script src="/design-system/nav.js" defer></script>
+</body>
+</html>

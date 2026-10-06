@@ -1,387 +1,1409 @@
 <!doctype html>
 <html lang="en">
-  <head>
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>RackTrack | Physical Infrastructure Intelligence</title>
-    <meta
-      name="description"
-      content="RackTrack turns one phone sweep of a data center rack into verified inventory, topology, ports, cables, and audit evidence."
-    >
-    <link rel="canonical" href="https://racktrack.ai/">
-    <meta property="og:type" content="website">
-    <meta property="og:site_name" content="RackTrack">
-    <meta property="og:title" content="RackTrack | Physical Infrastructure Intelligence">
-    <meta property="og:description" content="RackTrack turns one phone sweep of a data center rack into verified inventory, topology, ports, cables, and audit evidence.">
-    <meta property="og:url" content="https://racktrack.ai/">
-    <meta property="og:image" content="https://racktrack.ai/assets/logo.jpg">
-    <meta name="twitter:card" content="summary_large_image">
-    <meta name="twitter:title" content="RackTrack | Physical Infrastructure Intelligence">
-    <meta name="twitter:description" content="RackTrack turns one phone sweep of a data center rack into verified inventory, topology, ports, cables, and audit evidence.">
-    <meta name="twitter:image" content="https://racktrack.ai/assets/logo.jpg">
-    <script type="application/ld+json">
-    {
-      "@context": "https://schema.org",
-      "@type": "Organization",
-      "name": "RackTrack",
-      "url": "https://racktrack.ai/",
-      "logo": "https://racktrack.ai/assets/logo.jpg",
-      "email": "info@racktrack.ai",
-      "telephone": "+1-860-878-2448",
-      "address": {
-        "@type": "PostalAddress",
-        "streetAddress": "85 Felt Rd, Suite #604",
-        "addressLocality": "South Windsor",
-        "addressRegion": "CT",
-        "postalCode": "06074",
-        "addressCountry": "US"
-      },
-      "sameAs": [
-        "https://www.linkedin.com/company/racktrack/",
-        "https://www.instagram.com/racktrack_inc/",
-        "https://www.facebook.com/share/18depF5xzA/"
-      ]
-    }
-    </script>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>RackTrack Ground Truth</title>
+<meta name="description" content="RackTrack reads the physical rack from one phone sweep and checks every device, port and cable against your network and your records.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap">
+<link rel="stylesheet" href="/design-system/base.css">
+<style>
+/* ─────────────────────────────────────────────────────────────
+   RackTrack · "Ground Truth" identity
+   Colour, type, spacing and the vertical rhythm come from
+   design-system/base.css, shared with every other page. Only what is
+   specific to this scrolling 3D homepage is declared below.
+   One grotesk (Inter) for everything a person reads, one mono
+   (JetBrains Mono) only for what a machine prints: rack units,
+   device IDs, port counts, timestamps.
+   ───────────────────────────────────────────────────────────── */
+*{box-sizing:border-box}
+html{background:var(--bg)}
+body{margin:0;background:var(--bg);color:var(--fg);font:400 16px/1.5 var(--sans);-webkit-font-smoothing:antialiased;overflow-x:hidden}
+a{color:inherit}
+::selection{background:var(--link);color:#06140d}
+:focus-visible{outline:2px solid var(--link-ink);outline-offset:3px;border-radius:2px}
 
-    <link rel="icon" href="assets/logo.jpg">
-    <link rel="stylesheet" href="styles.css?v=world-redesign-91-static-mobile-animated-desktop-sticky-glass-nav-hero-gap-inter-navsm2-btngap-audit1b">
-    <script type="module" src="js/homepage.js?v=world-redesign-91-static-mobile-animated-desktop-reload-top"></script>
-    <script defer src="js/cookie-consent.js"></script>
+/* stage */
+#probe{position:fixed;left:0;top:0;width:var(--copy-w);height:var(--stage-drop);visibility:hidden;pointer-events:none;z-index:-1}
+#stage{position:fixed;inset:0;z-index:0;display:block;width:100%;height:100%;pointer-events:none}
+/* Readability wash behind the reading column. It is painted in --bg, so against
+   the flat page it is invisible; it only shows itself where the 3D would
+   otherwise run under the text. Solid to the column's own right edge, then
+   faded out across the gap so it clears before the stage box begins — the
+   animation keeps its full width and the copy always has a clean ground.
+   Opacity is held at 1 by the script rather than only in the dark chapters. */
+#scrim{position:fixed;inset:0;z-index:1;pointer-events:none;opacity:0;
+  background:linear-gradient(90deg,var(--bg),var(--bg) var(--bleed),transparent calc(var(--bleed) + var(--copy-w) + 10vw))}
+#hud{position:fixed;inset:0;z-index:3;pointer-events:none}
+main{position:relative;z-index:2}
+
+/* nav */
+.nav{position:fixed;left:0;right:0;top:0;z-index:10;display:flex;align-items:center;gap:var(--s8);
+  height:calc(var(--nav-h) + env(safe-area-inset-top,0px));
+  padding:env(safe-area-inset-top,0px) var(--bleed) 0;background:linear-gradient(var(--bg) 62%,transparent)}
+/* .brand and the .btn family come from base.css */
+.nav ul{display:flex;gap:var(--s6);list-style:none;margin:0 0 0 auto;padding:0}
+.nav ul a{font:500 var(--t-ui)/1 var(--sans);text-decoration:none;color:var(--fg-2)}
+.nav ul a:hover{color:var(--fg)}
+.nav .btn{height:38px;padding:0 var(--s4);margin-left:var(--s6)}
+/* with the link list hidden the button has no list to follow, so it takes
+   the free space itself — one auto margin in play at a time, never two */
+
+
+/* ── chapters ─────────────────────────────────────────────────────
+   Every band pads to --bleed, so the nav brand, each headline and the
+   footer share one left edge. The reading column is now the only thing
+   that sets a width — headings and ledes inherit it instead of carrying
+   their own ch-caps, which is what stopped them lining up before. */
+.ch{position:relative;padding-inline:var(--bleed)}
+/* The sticky reading column rides at the vertical centre of the stage box —
+   the same point the camera centres the rack on — so the copy and the animation
+   sit level with each other instead of the text pinning to the top while the
+   rack floats mid-screen. The nav's half-height biases it down by the amount
+   the stage box itself is pushed down. */
+.copy{position:sticky;top:calc(50vh + var(--nav-h)/2 - var(--stage-drop));transform:translateY(-50%);max-width:var(--copy-w)}
+/* h1/h2/h3 and .lede come from base.css */
+.actions{display:flex;flex-wrap:wrap;gap:var(--s3)}
+
+/* padding-bottom is twice --stage-drop so centring lifts the copy by exactly
+   --stage-drop — the same lift the script gives the 3D stage, keeping the two
+   level while closing the gap under the nav */
+#hero{min-height:100vh;display:flex;align-items:center;
+  padding-top:var(--nav-h);padding-bottom:calc(var(--stage-drop) * 2)}
+/* the hero and the closing CTA are centred by their own layout, so they opt out
+   of the sticky centring above */
+#hero .copy{position:relative;top:auto;transform:none}
+#drift{min-height:170vh}
+#sweep{min-height:240vh}
+#read{min-height:170vh}
+#reconcile{min-height:210vh}
+#fleet{min-height:220vh}
+#evidence{min-height:180vh}
+
+/* agreement meter */
+.meter{border-top:1px solid var(--line);padding-top:var(--s4);max-width:22rem}
+.meter .big{display:block;font:700 var(--t-h2)/1 var(--sans);letter-spacing:var(--tr-tight)}
+.meter small{display:block;margin-top:var(--s2);font-size:var(--t-ui);color:var(--fg-2)}
+
+
+
+/* ── supporting lists ───────────────────────────────────────────────────
+   Two patterns, both sharing the rule-separated language of .roles below:
+   .points — a named fact and its one-line gloss
+   .steps  — an ordered sequence, numbered in mono like a machine readout   */
+.points{margin:0;padding:0;max-width:26rem}
+.points dt{font:600 var(--t-body)/1.35 var(--sans);letter-spacing:var(--tr-tight);color:var(--fg)}
+.points dd{margin:var(--s1) 0 0;font-size:var(--t-body);line-height:var(--lh-relaxed);color:var(--fg-2)}
+/* the gap that separates one entry from the next */
+.points dd + dt{margin-top:var(--s5)}
+.points dt::before{content:"";display:inline-block;width:6px;height:6px;border-radius:50%;
+  background:var(--drift);margin-right:9px;vertical-align:middle}
+#read .points dt::before{background:var(--link)}
+
+.steps{list-style:none;counter-reset:s;margin:0;padding:0;max-width:26rem;
+  display:flex;flex-direction:column;gap:var(--s5)}
+.steps li{counter-increment:s;display:grid;grid-template-columns:1.9rem 1fr;gap:var(--s1) var(--s2)}
+.steps li::before{content:counter(s,decimal-leading-zero);grid-row:span 2;
+  font:400 var(--t-micro)/1.45 var(--mono);color:var(--link-ink)}
+.steps b{font:600 var(--t-body)/1.35 var(--sans);letter-spacing:var(--tr-tight)}
+.steps span{font-size:var(--t-body);line-height:var(--lh-relaxed);color:var(--fg-2)}
+
+/* roles (fleet) */
+.roles{list-style:none;margin:0;padding:0;border-top:1px solid var(--line);max-width:24rem}
+.roles button{all:unset;box-sizing:border-box;cursor:pointer;display:flex;justify-content:space-between;align-items:baseline;gap:var(--s3);width:100%;padding:var(--s3) 0;border-bottom:1px solid var(--line)}
+.roles b{font:600 var(--t-body)/1.4 var(--sans);letter-spacing:var(--tr-tight)}
+.roles em{font:400 var(--t-micro)/1 var(--mono);font-style:normal;color:var(--fg-2)}
+.roles button:hover b,.roles button:focus-visible b,.roles button[aria-pressed="true"] b,.roles button[aria-pressed="true"] em{color:var(--link)}
+
+/* 3D-anchored tags (projected every frame) */
+.tag{position:absolute;left:0;top:0;display:flex;align-items:center;gap:0;opacity:0;will-change:transform,opacity;white-space:nowrap}
+.tag::before{content:"";width:7px;height:7px;border-radius:50%;background:var(--c,var(--fg));transform:translate(-3.5px,0);box-shadow:0 0 0 3px color-mix(in oklab,var(--c,var(--fg)) 22%,transparent)}
+.tag i{display:block;width:30px;height:1px;background:var(--c,var(--fg))}
+.tag span{padding:7px 10px;background:var(--bg);border:1px solid var(--c,var(--fg));border-radius:2px;font:400 var(--t-ui)/1.4 var(--sans);color:var(--fg)}
+.tag span b{display:block;font:700 var(--t-h3)/1.15 var(--sans);letter-spacing:var(--tr-tight);margin-bottom:4px}
+.tag.left{flex-direction:row-reverse}
+.tag.left::before{transform:translate(3.5px,0)}
+.tag.drift{--c:var(--drift)} .tag.drift span b{color:var(--drift-ink)}
+.tag.rec{--c:var(--record)} .tag.link{--c:var(--link)}
+
+/* reticle — the cursor is a scanner */
+.reticle{position:fixed;left:0;top:0;z-index:5;pointer-events:none;opacity:0;transition:opacity .15s}
+.reticle .box{position:absolute;left:-16px;top:-16px;width:32px;height:32px;
+  background:
+   linear-gradient(var(--link),var(--link)) left top/8px 1.5px no-repeat,linear-gradient(var(--link),var(--link)) left top/1.5px 8px no-repeat,
+   linear-gradient(var(--link),var(--link)) right top/8px 1.5px no-repeat,linear-gradient(var(--link),var(--link)) right top/1.5px 8px no-repeat,
+   linear-gradient(var(--link),var(--link)) left bottom/8px 1.5px no-repeat,linear-gradient(var(--link),var(--link)) left bottom/1.5px 8px no-repeat,
+   linear-gradient(var(--link),var(--link)) right bottom/8px 1.5px no-repeat,linear-gradient(var(--link),var(--link)) right bottom/1.5px 8px no-repeat}
+.reticle .lbl{position:absolute;left:24px;top:14px;background:var(--hall);color:#DDE4DF;padding:7px 10px;border-radius:2px;font:400 11.5px/1.5 var(--mono);white-space:nowrap}
+.reticle .lbl b{color:var(--link);font-weight:500}
+.reticle .lbl .d{color:var(--drift)}
+
+/* phone capture dock — appears only while a sweep is running */
+.dock{position:fixed;right:var(--bleed);top:50%;z-index:6;width:236px;height:470px;margin-top:-235px;pointer-events:none;
+  transform:translate(140%,0);will-change:transform}
+.phone{position:absolute;inset:0;border-radius:38px;border:9px solid #151a18;box-shadow:0 0 0 1px #2a302d,0 40px 80px -30px rgba(12,17,16,.55),inset 0 0 0 1px #2a302d}
+.phone .notch{position:absolute;top:8px;left:50%;width:74px;height:20px;margin-left:-37px;border-radius:12px;background:#151a18;z-index:2}
+.screen{position:absolute;inset:0;border-radius:29px;overflow:hidden}
+.screen .top,.screen .bottom{position:absolute;left:0;right:0;padding:36px 14px 10px;color:#DDE4DF;font:400 10.5px/1.4 var(--mono);
+  background:linear-gradient(#0C1110f0,#0C111000)}
+.screen .top{display:flex;justify-content:space-between}
+.screen .top i{color:var(--link);font-style:normal}
+.screen .bottom{top:auto;bottom:0;padding:26px 14px 16px;background:linear-gradient(#0C111000,#0C1110f2)}
+.screen .grid{display:grid;grid-template-columns:repeat(3,1fr);gap:4px}
+.screen .grid b{display:block;font:600 20px/1 var(--sans);color:#fff;letter-spacing:-.03em;font-variant-numeric:tabular-nums}
+.screen .pbar{height:2px;background:#ffffff26;margin-top:10px}
+.screen .pbar i{display:block;height:100%;width:0;background:var(--link)}
+.screen .frame{position:absolute;left:14px;right:14px;top:40%;height:64px;margin-top:-32px;
+  background:
+   linear-gradient(var(--link),var(--link)) left top/14px 2px no-repeat,linear-gradient(var(--link),var(--link)) left top/2px 14px no-repeat,
+   linear-gradient(var(--link),var(--link)) right top/14px 2px no-repeat,linear-gradient(var(--link),var(--link)) right top/2px 14px no-repeat,
+   linear-gradient(var(--link),var(--link)) left bottom/14px 2px no-repeat,linear-gradient(var(--link),var(--link)) left bottom/2px 14px no-repeat,
+   linear-gradient(var(--link),var(--link)) right bottom/14px 2px no-repeat,linear-gradient(var(--link),var(--link)) right bottom/2px 14px no-repeat}
+.screen .frame::after{content:"";position:absolute;left:0;right:0;top:50%;height:1px;background:var(--link);box-shadow:0 0 10px var(--link)}
+.screen .done{position:absolute;inset:auto 14px 96px;padding:10px;border:1px solid var(--link);border-radius:3px;background:#0C1110e6;color:#DDE4DF;font:400 11px/1.45 var(--mono);opacity:0;transform:translateY(8px);transition:opacity .3s,transform .3s}
+.screen .done b{color:var(--link);font-weight:500}
+.dock.complete .done{opacity:1;transform:none}
+.dock.complete .frame{opacity:0}
+.dock-cap{position:absolute;left:0;right:0;bottom:-32px;text-align:center;font:400 13px/1 var(--sans);color:var(--fg-2)}
+
+
+
+/* final chapter: the rack in the middle, live analytics around it */
+#start{min-height:190vh;padding-inline:0}
+.stage{position:sticky;top:0;height:100vh;min-height:680px;display:grid;grid-template-columns:minmax(0,300px) minmax(0,1fr) minmax(0,300px);gap:var(--s8);
+  padding:calc(var(--nav-h) + var(--s4)) var(--bleed) var(--s6);box-sizing:border-box}
+.col{display:flex;flex-direction:column;gap:12px;min-width:0}
+.col-c{align-items:center}
+/* wide screens: the two card columns are placed by JS, flush against the rack's left and right edges */
+@media (min-width:1181px){
+  .stage{display:block}
+  .col-l,.col-r{position:absolute;left:0;top:0;width:296px;justify-content:flex-start;will-change:transform}
+  /* the headline is a compact band at the top; the rack gets the full height below it; the note sits under the rack */
+  #start .col-c{position:absolute;inset:calc(var(--nav-h) + var(--s2)) 0 var(--s4) 0;z-index:1;pointer-events:none}
+  #start .col-c .cta-copy{height:100%;max-width:none}
+  #start .col-c .cta-copy>*{pointer-events:auto}
+  #start .cta-copy h2{font-size:var(--t-h2);max-width:none;margin-bottom:var(--s3)}
+  #start .cta-copy .lede{margin-bottom:var(--s5);max-width:none}
+  #start .cta-copy .note{margin-top:auto}
+  /* the rack has gone, so the note no longer hangs off the bottom of the block;
+     centring itself is eased in from the script, not switched here */
+  #start .col-c.landed .cta-copy .note{margin-top:var(--s5)}
+}
+.card{position:relative}
+/* connectors: each card is patched to the unit it describes */
+#links{position:absolute;left:0;top:0;width:100%;height:100%;pointer-events:none;overflow:visible;z-index:0}
+.col-l,.col-r{z-index:1}
+#links .lk{fill:none;stroke:#04703F;stroke-width:1.25;stroke-dasharray:3 5;opacity:.55;animation:lkflow 1.4s linear infinite;transition:stroke .2s,opacity .2s,stroke-width .2s}
+#links .lk.hot{stroke:#1FD67C;opacity:1;stroke-width:2;stroke-dasharray:none}
+#links .end{fill:#1FD67C} #links .halo{fill:none;stroke:#1FD67C;stroke-width:1;opacity:.45}
+#links .jack{fill:#F4F6F3;stroke:#04703F;stroke-width:1.25}
+@keyframes lkflow{to{stroke-dashoffset:-16}}
+@media (max-width:1180px){ #links{display:none} }
+@media (prefers-reduced-motion:reduce){ #links .lk{animation:none} }
+/* the mount: a short green bar on the card's inner edge, level with the unit it describes */
+.card::after{content:"";position:absolute;top:var(--ny,50%);width:3px;height:18px;margin-top:-9px;background:var(--link);border-radius:2px;opacity:.55;transition:opacity .2s,height .2s}
+.col-l .card::after{right:-2px}
+.col-r .card::after{left:-2px}
+.card:hover::after,.card:focus-within::after{opacity:1;height:26px;margin-top:-13px}
+.card:hover{border-color:#B9C2BC}
+.cta-copy{position:relative;top:auto;transform:none;padding:0;max-width:var(--copy-w);text-align:center;display:flex;flex-direction:column;align-items:center}
+.cta-copy h2{font-size:var(--t-hero);line-height:var(--lh-tight);letter-spacing:var(--tr-tight);margin-bottom:var(--s4)}
+.cta-copy .lede{margin-bottom:var(--s5)}
+.cta-copy .actions{justify-content:center}
+.cta-copy .note{margin-top:var(--s4)}
+.note{margin:0;font:400 var(--t-micro)/1.4 var(--mono);color:var(--fg-2)}
+
+.card{background:var(--paper-2);color:var(--ink);border:1px solid var(--rule);border-radius:3px;padding:13px 14px 12px;display:flex;flex-direction:column;gap:8px;min-width:0;
+  will-change:transform,opacity;box-shadow:0 18px 40px -28px rgba(17,22,20,.35)}
+.card header{display:flex;justify-content:space-between;align-items:baseline;gap:8px}
+.card h3{margin:0;font:600 var(--t-ui)/1.3 var(--sans);letter-spacing:var(--tr-tight);display:flex;align-items:center;gap:7px}
+.live-dot{width:6px;height:6px;border-radius:50%;background:var(--link);flex:none;animation:pulse 1.6s infinite}
+@keyframes pulse{50%{opacity:.3}}
+.card .src{font:400 10.5px/1.3 var(--mono);color:var(--ink-2);white-space:nowrap}
+.card .fig{display:flex;align-items:baseline;gap:9px;flex-wrap:wrap}
+.card .fig b{font:700 1.75rem/1 var(--sans);letter-spacing:var(--tr-tight)}
+.card .fig span{font:400 11px/1.3 var(--mono);color:var(--ink-2)}
+.card .fig .up{color:var(--link-ink)}
+.card svg{display:block;width:100%;height:auto;overflow:visible}
+.card svg text{font-family:var(--mono);font-size:9px;fill:var(--ink-2)}
+.card svg .grid{stroke:#DCE0DC;stroke-width:1}
+.card svg path.live{transition:d .7s cubic-bezier(.2,.7,.2,1)}
+.card svg circle.live{transition:cx .7s,cy .7s cubic-bezier(.2,.7,.2,1)}
+.card svg .seg{transition:stroke-dasharray .8s cubic-bezier(.2,.7,.2,1),stroke-dashoffset .8s cubic-bezier(.2,.7,.2,1)}
+.card svg 
+.card svg .scan{fill:none;stroke:#1FD67C;stroke-width:1.5;transition:x .08s linear}
+.card svg .now{animation:pulse 2.4s infinite}
+.card .legend{display:flex;flex-wrap:wrap;gap:4px 14px;margin:0;padding:0;list-style:none;font:400 11px/1.3 var(--mono);color:var(--ink-2)}
+.card .legend li{display:flex;align-items:center;gap:6px}
+.card .legend i{width:9px;height:9px;border-radius:2px;display:block}
+.card .row2{display:flex;align-items:center;gap:14px}
+.card .row2 svg{width:40%;flex:none}
+.card .hit{fill:transparent;cursor:crosshair}
+.grow{transform-box:fill-box;transform-origin:left center;transition:transform .9s cubic-bezier(.2,.7,.2,1),width .8s cubic-bezier(.2,.7,.2,1)}
+.growy{transform-box:fill-box;transform-origin:center bottom;transition:transform .9s cubic-bezier(.2,.7,.2,1)}
+.fadein{transition:opacity .9s ease .2s}
+.armed .card:not(.in) .grow{transform:scaleX(0)}
+.armed .card:not(.in) .growy{transform:scaleY(0)}
+.armed .card:not(.in) .fadein{opacity:0}
+.tip{position:fixed;left:0;top:0;z-index:12;pointer-events:none;opacity:0;background:var(--hall);color:#DDE4DF;padding:6px 9px;border-radius:2px;font:400 11.5px/1.45 var(--mono);white-space:nowrap;transition:opacity .12s}
+.tip b{color:var(--link);font-weight:500}
+
+/* footer */
+/* the first column is exactly the reading column, so the footer brand sits
+   on the same left edge and the same width as every headline above it */
+.foot{position:relative;z-index:2;padding:var(--band-y) var(--bleed) calc(var(--s8) + env(safe-area-inset-bottom,0px));background:var(--bg);border-top:1px solid var(--line);
+  display:grid;grid-template-columns:var(--copy-w) repeat(3,minmax(0,1fr));gap:var(--s8);font-size:var(--t-ui);color:var(--fg-2)}
+.foot b{display:block;font:500 13px/1 var(--sans);color:var(--link-ink);margin-bottom:var(--s4)}
+.foot nav{display:flex;flex-direction:column;gap:var(--s3)}
+.foot nav a{color:var(--fg);text-decoration:none;font-size:var(--t-ui)}
+.foot nav a:hover{color:var(--link-ink)}
+.foot p{margin:0 0 var(--s3);color:var(--fg);font-size:var(--t-ui);line-height:var(--lh-normal)}
+.foot p a{text-decoration:none}.foot p a:hover{color:var(--link-ink)}
+.foot-brand .brand{margin-bottom:var(--s4)}
+.foot-brand p{color:var(--fg-2);max-width:20rem}
+.foot .fine{grid-column:1/-1;display:flex;justify-content:space-between;flex-wrap:wrap;gap:var(--s3);margin-top:var(--s4);padding-top:var(--s5);border-top:1px solid var(--line);font-size:var(--t-micro)}
+.foot .legal{display:flex;gap:18px;flex-wrap:wrap}.foot .legal a{color:var(--ink-2);text-decoration:none}.foot .legal a:hover{color:var(--link-ink)}
+.foot .social{display:flex;gap:18px}
+.foot .social a{color:var(--fg-2);text-decoration:none}
+.foot .social a:hover{color:var(--fg)}
+
+@media (max-width:1180px){
+  #start{min-height:auto;padding-inline:var(--bleed)}
+  .stage{position:relative;height:auto;display:flex;flex-direction:column;padding:12vh 0 10vh}
+  .col-c{order:0;min-height:88vh}
+  .col-l{order:1} .col-r{order:2}
+  .col-l,.col-r{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:var(--s3);margin-bottom:var(--s3)}
+  .card::after{display:none}
+}
+/* ── closing chapter on phones and tablets: no 3D ───────────────────────
+   Below the desktop breakpoint the analytics cards stack underneath the CTA
+   instead of flanking the rack, so the rack has stopped being the thing they
+   annotate — it is only a backdrop behind text. The script fades the canvas
+   out across this chapter (see `bare` in the frame loop) and the copy takes
+   back the 88vh that was being reserved for it. */
+@media (max-width:1024px){
+  /* .stage already carries the band padding — adding it again here stacked two
+     full bands above the CTA and left a dead screen where the rack used to be */
+  .col-c{min-height:auto;padding-block:0}
+  #start .stage{padding-block:var(--band-y-sm)}
+}
+/* the note names the rack only while the rack is actually on screen */
+.note .no-rack{display:none}
+@media (max-width:1024px){
+  .note .with-rack{display:none}
+  .note .no-rack{display:inline}
+}
+/* the nav link list and the button's auto margin flip at the same width, so
+   the row never has two competing auto margins */
+/* two columns all the way down — collapsing to one made the footer roughly
+   twice as tall as it needed to be on a phone */
+@media (max-width:899px){
+  .foot{grid-template-columns:repeat(2,minmax(0,1fr));gap:var(--s6) var(--s5);
+    padding-block:var(--band-y-sm) calc(var(--s6) + env(safe-area-inset-bottom,0px))}
+  .foot-brand p{max-width:none}
+  .foot .fine{margin-top:var(--s2);padding-top:var(--s4)}
+}
+@media (prefers-reduced-motion:reduce){ .grow,.growy,.fadein,.card svg path.live,.card svg .seg,.card svg  .live-dot,.card svg .now{animation:none} }
+
+.no-webgl #stage,.no-webgl .dock,.no-webgl #hud{display:none}
+
+/* ── narrow: the composition does not change, only its scale ──────────────
+   Copy stays beside the rack at every width. The column is a share of the
+   viewport (--copy-w) and the camera fits the rack into whatever is left,
+   constrained on width as well as height — so a phone and a tablet get the
+   same side-by-side reading as the desktop, just smaller. Nothing stacks and
+   nothing is hidden; only the phone dock and the 3D tags need resizing. */
+@media (max-width:899px){
+  .dock{width:104px;height:210px;margin-top:-105px;right:var(--gutter)}
+  .phone{border-radius:22px;border-width:5px} .screen{border-radius:17px}
+  .screen .grid b{font-size:11px} .screen .top{padding:24px 8px 8px;font-size:8px}
+  .screen .bottom{padding:18px 8px 10px} .screen .done{bottom:66px;font-size:8px;padding:7px}
+  .dock-cap{display:none}
+  /* Five floating annotations cannot share a ~150px stage — they pile on each
+     other and on the rack. They are also redundant here: the list beside the
+     stage already names the same three mismatches. The rack keeps the screen. */
+  #hud{display:none}
+  /* The chapter lengths are a desktop scroll budget. On a phone the same vh
+     counts mean a screen of empty scroll between one block fading out and the
+     next arriving — roughly two thirds reads the same and removes the gaps. */
+  #drift{min-height:118vh} #sweep{min-height:160vh} #read{min-height:118vh}
+  #reconcile{min-height:140vh} #fleet{min-height:150vh} #evidence{min-height:118vh}
+  /* the six-row roles list is the tallest block on the page; tightening its
+     rhythm gives the hall behind it room to read instead of being squeezed
+     to a sliver beside a full-height column */
+  .roles button{padding:var(--s2) 0}
+  .roles b{font-size:var(--t-micro)}
+  .roles em{font-size:10.5px}
+  .meter{padding-top:var(--s3)}
+  .meter .big{font-size:var(--t-h2)}
+}
+/* a scanner cursor is a mouse affordance, not a width one */
+@media (hover:none){ .reticle{display:none} }
+</style>
 </head>
-  <body>
-    <a class="skip-link" href="#main">Skip to content</a>
+<body class="stage-band">
 
-    <header class="site-header" aria-label="Primary navigation">
-      <a class="brand" href="index.html" aria-label="RackTrack home">
-        <span class="brand-mark">
-          <img src="assets/logo.jpg" alt="">
-        </span>
-        <span class="brand-name">RackTrack</span>
-      </a>
-      <input type="checkbox" id="nav-toggle" class="nav-toggle-input" autocomplete="off" /><label for="nav-toggle" class="nav-toggle-btn" aria-label="Menu"><span></span></label><nav class="site-nav" aria-label="Primary">
-        <a href="pages/why-racktrack.html">Why RackTrack</a>
-        <a href="pages/solutions.html">Solutions</a>
-        <div class="nav-item"><a href="pages/use-cases.html">Use Cases<svg class="nav-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg></a><input type="checkbox" id="nav-sub-usecases" class="nav-sub-toggle" autocomplete="off" /><label for="nav-sub-usecases" class="nav-sub-toggle-btn" aria-label="Expand Use Cases submenu"></label><div class="nav-dropdown"><a href="pages/use-case-infrastructure-data-center-leaders.html">Infrastructure &amp; Data Center Leaders</a><a href="pages/use-case-network-architects-engineers.html">Network Architects &amp; Engineers</a><a href="pages/use-case-security-vulnerability-teams.html">Security &amp; Vulnerability Teams</a><a href="pages/use-case-compliance-audit-owners.html">Compliance &amp; Audit Owners</a><a href="pages/use-case-incident-responders-on-call.html">Incident Responders &amp; On-Call</a><a href="pages/use-case-m-a-migration-teams.html">M&amp;A &amp; Migration Teams</a></div></div>
-        <div class="nav-item"><a href="pages/resources.html">Resources<svg class="nav-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg></a><input type="checkbox" id="nav-sub-resources" class="nav-sub-toggle" autocomplete="off" /><label for="nav-sub-resources" class="nav-sub-toggle-btn" aria-label="Expand Resources submenu"></label><div class="nav-dropdown"><a href="pages/resources.html">All articles</a><a href="pages/racktrack-guide.html">Knowledgebase</a><a href="pages/article-why-infrastructure-records-are-wrong.html">Why every CMDB is 40% wrong</a><a href="pages/article-what-network-verified-actually-means.html">What "network-verified" means</a><a href="pages/article-how-infrastructure-teams-prepare-for-soc-2-audits.html">Preparing for SOC 2</a><a href="pages/article-free-port-discovery-and-rack-capacity-planning.html">Free port discovery</a></div></div><a href="pages/trust-security.html">Trust &amp; Security</a> <a href="pages/contact.html">Contact Us</a>
-      </nav>
-      <a class="nav-cta" href="https://portal.racktrack.ai">Sign In</a>
-    </header>
+<canvas id="stage" aria-hidden="true"></canvas>
+<div id="scrim" aria-hidden="true"></div>
+<div id="hud" aria-hidden="true"></div>
 
-    <!-- The main nav fades out while a section is scroll-pinned (see
-         is-sequencing in js/homepage.js) — nearly the whole page on desktop.
-         This stays reachable the rest of the time so there's always a way
-         to Contact without scrolling back to the very top or bottom. -->
-    <a class="floating-demo-cta" href="pages/contact.html">Request Platform Brief</a>
+<!-- Layout probe: carries --copy-w and --stage-drop so the script can read them
+     already resolved to pixels. Keeps CSS the single source of truth for the
+     layout and stops the stylesheet and the WebGL framing drifting apart. -->
+<div id="probe" aria-hidden="true"></div>
 
-    <main id="main">
-      <section
-        class="sequence-story"
-        aria-label="RackTrack phone scan animation"
-        data-frame-sequence
-      >
-        <div class="sequence-pin">
-          <img
-            class="sequence-poster"
-            src="assets/homepage/hero-animation/frame-0005.webp"
-            alt=""
-            aria-hidden="true"
-          >
-          <canvas
-            class="sequence-canvas"
-            width="1280"
-            height="720"
-            aria-hidden="true"
-          ></canvas>
+<div class="reticle" id="reticle" aria-hidden="true"><div class="box"></div><div class="lbl" id="reticleLbl"></div></div>
 
-          <div class="sequence-scrim" aria-hidden="true"></div>
-
-          <div class="sequence-intro" data-sequence-intro>
-            <h1 id="hero-title">
-              <span>Turn Physical Racks Into Verified Infrastructure Data</span>
-            </h1>
-            <p class="hero-copy">
-              Capture racks, devices, ports, cables, topology, and audit evidence, directly from physical infrastructure, with one simple phone sweep.
-            </p>
-            <div class="hero-actions" aria-label="Primary actions">
-              <a class="button-primary" href="pages/contact.html">Request Platform Brief</a>
-              <button type="button" class="button-watch" data-video-trigger aria-haspopup="dialog">
-                Watch video
-                <svg viewBox="0 0 24 24" width="18" height="18" fill="none" aria-hidden="true">
-                  <rect x="1.5" y="4" width="16" height="16" rx="3.2" stroke="currentColor" stroke-width="1.6" />
-                  <path d="M7.6 8.9v6.2c0 .5.53.8.97.55l5.4-3.1a.63.63 0 0 0 0-1.1l-5.4-3.1c-.44-.25-.97.05-.97.55Z" fill="currentColor" />
-                  <path d="M17.5 9.5l5-2.7v10.4l-5-2.7" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round" />
-                </svg>
-              </button>
-            </div>
-          </div>
-
-          <div class="sequence-narrative" aria-live="polite">
-            <article class="sequence-note is-active" data-sequence-note>
-              <p>Captured</p>
-              <h2>Rack face detected</h2>
-              <span>Hardware and rack position separate from the scan.</span>
-            </article>
-            <article class="sequence-note" data-sequence-note>
-              <p>Extracted</p>
-              <h2>Ports become readable</h2>
-              <span>Port grids and cable ends move into structured fields.</span>
-            </article>
-            <article class="sequence-note" data-sequence-note>
-              <p>Structured</p>
-              <h2>Evidence gets organized</h2>
-              <span>Every observation keeps its source frame.</span>
-            </article>
-            <article class="sequence-note" data-sequence-note>
-              <p>Ready</p>
-              <h2>Rack facts are ready</h2>
-              <span>Enough structure to become a rack model.</span>
-            </article>
-          </div>
-
-          <div class="sequence-progress" aria-hidden="true"><span></span></div>
+<div class="dock" id="dock" aria-hidden="true">
+  <div class="phone"><div class="notch"></div>
+    <div class="screen" id="phoneScreen">
+      <div class="top"><span>RackTrack</span><i id="dkRec">● REC 00:00</i></div>
+      <div class="frame"></div>
+      <div class="done"><b>Rack captured.</b><br>22 devices · 168 ports</div>
+      <div class="bottom">
+        <div class="grid">
+          <div><b id="dkDev">0</b>devices</div>
+          <div><b id="dkPort">0</b>ports</div>
+          <div><b id="dkU">U42</b>unit</div>
         </div>
-      </section>
-
-      <section class="story-bridge" aria-labelledby="bridge-title" data-story-bridge>
-        <div class="bridge-pin">
-          <div class="bridge-copy">
-            <h2 id="bridge-title">Captured facts. Ready to verify</h2>
-            <p>
-              Every sweep becomes structured evidence: device, position, port, cable, and timestamp.
-            </p>
-
-            <aside class="proof-panel" aria-label="RackTrack proof points">
-              <div>
-                <span>40-60%</span>
-                <p>truth decay</p>
-              </div>
-              <div>
-                <span>3-6 weeks</span>
-                <p>audit exposure</p>
-              </div>
-              <div>
-                <span>20-40 min</span>
-                <p>response latency</p>
-              </div>
-            </aside>
-          </div>
-
-          <div class="bridge-card-deck" aria-hidden="true">
-            <article class="evidence-card evidence-card-scan">
-              <div class="evidence-visual">
-                <img src="assets/homepage/hero-animation/frame-0120.webp" alt="">
-                <span class="visual-chip">Rack video</span>
-              </div>
-              <p>Capture</p>
-              <h3>Phone sweep</h3>
-            </article>
-
-            <article class="evidence-card evidence-card-model">
-              <div class="evidence-visual">
-                <img src="assets/homepage/rack-exploded.jpeg" alt="">
-                <span class="visual-chip">Structured model</span>
-              </div>
-              <p>Extract</p>
-              <h3>Rack facts</h3>
-            </article>
-
-            <article class="evidence-card evidence-card-proof">
-              <div class="evidence-visual">
-                <img src="assets/homepage/evidence-record.jpg" alt="">
-                <span class="visual-chip">Verified record</span>
-              </div>
-              <p>Verify</p>
-              <h3>Evidence record</h3>
-            </article>
-          </div>
-
-        </div>
-      </section>
-
-      <section id="platform" class="world-story" aria-label="RackTrack continuous rack story" data-world>
-        <div class="world-pin">
-          <div class="world-scrim" aria-hidden="true"></div>
-          <div class="world-narrative" aria-live="polite">
-            <div class="world-beat is-current" data-beat="perceive">
-              <img class="world-beat-poster" src="assets/homepage/lower-animation/rack-open-frames-webp/frame-0001.webp" alt="">
-              <article class="world-note is-active" data-note data-at="0">
-                <p>Perceive</p><h2>Every device. Every rack unit</h2>
-                <span>A guided sweep separates chassis, ports, labels, and rack-unit position from the physical rack.</span>
-              </article>
-              <article class="world-note" data-note data-at="0.427">
-                <p>Cognize</p><h2>Structured, not guessed</h2>
-                <span>Switches, patch panels, PDUs, and controllers classify into asset records, with no manual transcription.</span>
-              </article>
-              <article class="world-note" data-note data-at="0.733">
-                <p>Evidence</p><h2>Ready for reconciliation</h2>
-                <span>A continuously reconciled record (inventory, ports, and evidence) from a single phone sweep.</span>
-              </article>
-            </div>
-            <div class="world-beat" data-beat="connect">
-              <img class="world-beat-poster" src="assets/homepage/lower-animation/cable-truth-frames-webp/frame-0001.webp" alt="">
-              <article class="world-note" data-note data-at="0">
-                <p>Connect</p><h2>Every cable, mapped</h2>
-                <span>Visible port usage, cable paths, and link indicators map against the physical rack evidence.</span>
-              </article>
-              <article class="world-note" data-note data-at="0.158">
-                <p>Topology</p><h2>Physical meets logical</h2>
-                <span>Observations are checked against CDP, LLDP, ARP, and neighbor data from the live network.</span>
-              </article>
-              <article class="world-note" data-note data-at="0.474">
-                <p>Live status</p><h2>Read from the switch, not the photo</h2>
-                <span>Port state, cable ends, and reachability come from the switch itself, so the record reflects what's live right now.</span>
-              </article>
-            </div>
-            <div class="world-beat" data-beat="reconcile">
-              <img class="world-beat-poster" src="assets/homepage/lower-animation/reconciliation-frames-webp/frame-0001.webp" alt="">
-              <article class="world-note" data-note data-at="0">
-                <p>Reconcile</p><h2>Checked against every system</h2>
-                <span>New scans compare against CMDB, DCIM, asset, and network records automatically.</span>
-              </article>
-              <article class="world-note" data-note data-at="0.4">
-                <p>Drift</p><h2>Drift doesn't hide</h2>
-                <span>A re-patched cable or a port that drops speed is flagged the moment it's seen, not at the next audit cycle.</span>
-              </article>
-              <article class="world-note" data-note data-at="0.769">
-                <p>Truth</p><h2>One verified source</h2>
-                <span>40-60% of enterprise CMDB records drift from physical reality. RackTrack closes that gap continuously.</span>
-              </article>
-            </div>
-            <div class="world-beat" data-beat="scale">
-              <img class="world-beat-poster" src="assets/homepage/lower-animation/scale-frames-webp/frame-0001.webp" alt="">
-              <article class="world-note" data-note data-at="0">
-                <p>Scale</p><h2>Start with one rack</h2>
-                <span>A single verified rack is the first proof point, not the ceiling.</span>
-              </article>
-              <article class="world-note" data-note data-at="0.111">
-                <p>Expand</p><h2>Then the next rack. Then the row</h2>
-                <span>Each additional rack confirms the same way: visually, then verified.</span>
-              </article>
-              <article class="world-note" data-note data-at="0.667">
-                <p>Footprint</p><h2>Continuous across the floor</h2>
-                <span>One workflow scales from a single cabinet to the full data center footprint.</span>
-              </article>
-            </div>
-            <div class="world-beat" data-beat="outcomes">
-              <img class="world-beat-poster" src="assets/homepage/lower-animation/outcomes-frames-webp/frame-0001.webp" alt="">
-              <article class="world-note" data-note data-at="0">
-                <p>Outcomes</p><h2>One model. Every team</h2>
-                <span>The same verified record powers different workflows for different teams.</span>
-              </article>
-              <article class="world-note" data-note data-at="0.105">
-                <p>Focus</p><h2>From footprint back to detail</h2>
-                <span>Capacity, connectivity, compliance, procurement, firmware currency, and incidents, all traceable to one rack.</span>
-              </article>
-              <article class="world-note" data-note data-at="0.632">
-                <p>Ready</p><h2>Six outcomes, one source</h2>
-                <span>Capacity intelligence, connectivity mapping, compliance evidence, procurement reconciliation, firmware currency, and incident location, all from the same verified model.</span>
-              </article>
-            </div>
-          </div>
-
-          <div class="world-visual" aria-hidden="true">
-            <img class="world-poster" src="assets/homepage/lower-animation/rack-open-frames-webp/frame-0001.webp" alt="">
-            <canvas class="world-canvas" width="1280" height="720"></canvas>
-          </div>
-        </div>
-      </section>
-
-      <!-- Mobile/tablet-only stand-in for .world-story above (see the
-           max-width: 980px rules in styles.css) — desktop's pinned canvas
-           story is untouched; this is just a plain 4-card grid. -->
-      <section class="world-simple" aria-label="RackTrack continuous rack story">
-        <div class="world-simple-grid">
-          <article class="world-simple-card">
-            <img src="assets/homepage/lower-animation/rack-open-frames-webp/frame-0001.webp" alt="">
-            <p>Perceive</p>
-            <h2>Every device. Every rack unit</h2>
-            <span>A guided sweep separates chassis, ports, labels, and rack-unit position from the physical rack.</span>
-          </article>
-          <article class="world-simple-card">
-            <img src="assets/homepage/lower-animation/cable-truth-frames-webp/frame-0001.webp" alt="">
-            <p>Connect</p>
-            <h2>Every cable, mapped</h2>
-            <span>Visible port usage, cable paths, and link indicators map against the physical rack evidence.</span>
-          </article>
-          <article class="world-simple-card">
-            <img src="assets/homepage/lower-animation/reconciliation-frames-webp/frame-0001.webp" alt="">
-            <p>Reconcile</p>
-            <h2>Checked against every system</h2>
-            <span>New scans compare against CMDB, DCIM, asset, and network records automatically.</span>
-          </article>
-          <article class="world-simple-card">
-            <img src="assets/homepage/lower-animation/scale-frames-webp/frame-0001.webp" alt="">
-            <p>Scale</p>
-            <h2>Start with one rack</h2>
-            <span>A single verified rack is the first proof point, not the ceiling.</span>
-          </article>
-        </div>
-      </section>
-
-      <section class="home-cta">
-        <h2>See your first verified rack</h2>
-        <p>Get a demo and walk through a real sweep, reconciled against your own records.</p>
-        <a class="button-primary" href="pages/contact.html">Request Platform Brief</a>
-      </section>
-
-    </main>
-
-    <footer class="site-footer">
-      <div class="footer-top">
-        <div class="footer-brand">
-          <a class="footer-brand-logo" href="index.html" aria-label="RackTrack home">
-            <img src="assets/logo.jpg" alt="RackTrack">
-          </a>
-          <p>Physical Infrastructure Intelligence for Data Centers.</p>
-        </div>
-
-        <nav class="footer-col" aria-label="Platform">
-          <p class="footer-label">Platform</p>
-          <a href="pages/why-racktrack.html">Why RackTrack</a>
-          <a href="pages/solutions.html">Solutions</a>
-          <a href="pages/use-cases.html">Use Cases</a>
-          <a href="pages/trust-security.html">Trust &amp; Security</a>
-        </nav>
-
-        <nav class="footer-col" aria-label="Company">
-          <p class="footer-label">Company</p>
-          <a href="pages/resources.html">Resources</a>
-          <a href="pages/about-us.html">About Us</a>
-          <a href="pages/contact.html">Contact Us</a>
-        </nav>
-
-        <div class="footer-col footer-contact">
-          <p class="footer-label">Contact</p>
-          <a href="mailto:info@racktrack.ai">info@racktrack.ai</a>
-          <a href="tel:+18608782448">+1 (860) 878 2448</a>
-          <span>85 Felt Rd, Suite #604<br>South Windsor, CT 06074</span>
-        </div>
-      </div>
-
-      <div class="footer-bottom">
-        <p>&copy; 2026 RackTrack Inc. &middot; Physical Infrastructure Intelligence for Data Centers &middot; Patent Pending</p>
-        <div class="footer-social">
-          <a href="https://www.linkedin.com/company/racktrack/" target="_blank" rel="noopener" aria-label="RackTrack on LinkedIn"><svg viewBox="0 0 24 24" width="18" height="18" fill="currentColor" aria-hidden="true"><path d="M20.45 20.45h-3.55v-5.57c0-1.33-.02-3.03-1.85-3.03-1.85 0-2.14 1.44-2.14 2.94v5.66H9.36V9h3.41v1.56h.05c.47-.9 1.63-1.85 3.36-1.85 3.6 0 4.27 2.37 4.27 5.45v6.29zM5.34 7.43a2.06 2.06 0 1 1 0-4.12 2.06 2.06 0 0 1 0 4.12zM7.12 20.45H3.56V9h3.56v11.45z"/></svg></a>
-          <a href="https://www.instagram.com/racktrack_inc/" target="_blank" rel="noopener" aria-label="RackTrack on Instagram"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.7" aria-hidden="true"><rect x="3" y="3" width="18" height="18" rx="5"/><circle cx="12" cy="12" r="4.2"/><circle cx="17.4" cy="6.6" r="1.1" fill="currentColor" stroke="none"/></svg></a>
-          <a href="https://www.facebook.com/share/18depF5xzA/" target="_blank" rel="noopener" aria-label="RackTrack on Facebook"><svg viewBox="0 0 24 24" width="18" height="18" fill="currentColor" aria-hidden="true"><path d="M14.5 21v-8.03h2.7l.4-3.13h-3.1V7.9c0-.9.25-1.52 1.55-1.52h1.66V3.56A22.6 22.6 0 0 0 15.2 3.4c-2.4 0-4.05 1.47-4.05 4.16v2.28H8.44v3.13h2.71V21h3.35z"/></svg></a>
-        </div>
-      </div>
-    </footer>
-
-    <div class="video-modal" data-video-modal hidden>
-      <div class="video-modal-panel" role="dialog" aria-modal="true" aria-labelledby="video-modal-title">
-        <div class="video-modal-head">
-          <p id="video-modal-title">Video</p>
-          <button type="button" class="video-modal-close" data-video-close aria-label="Close video">
-            <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18" stroke-linecap="round" /></svg>
-          </button>
-        </div>
-        <video class="video-modal-player" data-video-player controls playsinline preload="none">
-          <source src="assets/homepage/RACKTRACK.mp4" type="video/mp4">
-        </video>
+        <div class="pbar"><i id="dkBar"></i></div>
       </div>
     </div>
+  </div>
+  <div class="dock-cap">Technician's phone, live</div>
+</div>
 
-  </body>
+
+<nav class="nav" aria-label="Primary">
+  <a class="brand" href="#hero"><img alt="" src="/design-system/assets/Logos/racktrack-mark.jpg">RackTrack</a>
+  <ul>
+    <li><a href="/pages/why-racktrack/">Why RackTrack</a></li>
+    <li><a href="/pages/solutions/">Solutions</a></li>
+    <li><a href="/pages/use-cases/">Use cases</a></li>
+    <li><a href="/pages/resources/">Resources</a></li>
+    <li><a href="/pages/trust-security/">Trust</a></li>
+    <li><a href="/pages/about-us/">About</a></li>
+    <li><a href="/pages/sign-in/">Sign in</a></li>
+  </ul>
+  <a class="btn solid" href="/pages/contact-us/"><span class="led"></span>Book a sweep</a>
+</nav>
+
+<main>
+  <section class="ch" id="hero" data-ch="0">
+    <div class="copy">
+      <h1>Know what's really in the rack</h1>
+      <p class="lede">One phone sweep reads every device, port and cable, then checks it against your network and your records.</p>
+      <div class="actions">
+        <a class="btn solid" href="/pages/contact-us/"><span class="led"></span>Book a sweep</a>
+        <a class="btn" href="#sweep">See how it works</a>
+      </div>
+    </div>
+  </section>
+
+  <section class="ch" id="drift" data-ch="1">
+    <div class="copy">
+      <h2>Your records say one thing. The rack says another</h2>
+      <p class="lede">Amber marks where they disagree, and names the disagreement.</p>
+      <dl class="points">
+        <dt>Not in any record</dt><dd>Racked and running, nothing on file.</dd>
+        <dt>Moved or re-patched</dt><dd>The port on file isn't the port in use.</dd>
+        <dt>Different model on file</dt><dd>The record names hardware that's gone.</dd>
+      </dl>
+    </div>
+  </section>
+
+  <section class="ch" id="sweep" data-ch="2">
+    <div class="copy">
+      <h2>Walk past it once</h2>
+      <p class="lede">An ordinary phone reads the rack top to bottom. Minutes instead of days.</p>
+      <ol class="steps">
+        <li><b>Record</b><span>A short pan down the row.</span></li>
+        <li><b>Upload</b><span>The clearest frame of each rack is kept.</span></li>
+        <li><b>Read</b><span>Devices, units, ports and cables come off it.</span></li>
+      </ol>
+    </div>
+  </section>
+
+  <section class="ch" id="read" data-ch="3">
+    <div class="copy">
+      <h2>Every port, read</h2>
+      <p class="lede">Point at any device to see what RackTrack sees, and where it came from.</p>
+      <dl class="points">
+        <dt>From the sweep</dt><dd>Device, model, rack units, cable ends.</dd>
+        <dt>From the switch</dt><dd>Port state and link speed, asked live.</dd>
+        <dt>Held for review</dt><dd>Anything uncertain is flagged, not guessed.</dd>
+      </dl>
+    </div>
+  </section>
+
+  <section class="ch" id="reconcile" data-ch="4">
+    <div class="copy">
+      <h2>Checked three ways</h2>
+      <p class="lede">What the phone saw, what the switches report and what the CMDB claims. When all three agree, it's verified.</p>
+      <div class="meter">
+        <span class="big" id="agree">58.0%</span>
+        <small>Records matching the rack</small>
+      </div>
+    </div>
+  </section>
+
+  <section class="ch" id="fleet" data-ch="5">
+    <div class="copy">
+      <h2>Then every rack after it</h2>
+      <p class="lede">Each sweep updates the record, so drift is caught the week it happens.</p>
+      <ul class="roles" id="roles">
+        <li><button type="button" data-role="0" aria-pressed="false"><b>Infrastructure leaders</b><em>100% sites</em></button></li>
+        <li><button type="button" data-role="1" aria-pressed="false"><b>Network engineers</b><em>99.6% match</em></button></li>
+        <li><button type="button" data-role="2" aria-pressed="false"><b>Security teams</b><em>0 blind spots</em></button></li>
+        <li><button type="button" data-role="3" aria-pressed="false"><b>Compliance</b><em>&lt;1 day prep</em></button></li>
+        <li><button type="button" data-role="4" aria-pressed="false"><b>On-call</b><em>−35 min</em></button></li>
+        <li><button type="button" data-role="5" aria-pressed="false"><b>M&amp;A and migration</b><em>10 days</em></button></li>
+      </ul>
+    </div>
+  </section>
+
+  <section class="ch" id="evidence" data-ch="6">
+    <div class="copy">
+      <h2>Proof, already on file</h2>
+      <p class="lede">Every record is timestamped, located and ready for the auditor.</p>
+    </div>
+  </section>
+
+  <section class="ch" id="start" data-ch="7">
+    <div class="stage" id="stage2">
+      <svg id="links" aria-hidden="true"></svg>
+      <div class="col col-l">
+        <article class="card" id="cPorts" data-side="l" data-anchor="TOR-A">
+          <header><h3><i class="live-dot"></i>Port state</h3><span class="src">R07 · live</span></header>
+          <div class="row2">
+            <svg viewBox="0 0 120 120" role="img" aria-label="Donut chart of linked and free ports"></svg>
+            <div>
+              <div class="fig"><b id="portLinked">132</b><span id="portOf">of 168</span></div>
+              <ul class="legend" style="margin-top:8px;flex-direction:column"><li><i style="background:#04703F"></i><span id="lgLinked">Linked</span></li><li><i style="background:#D3D8D4"></i><span id="lgFree">Free</span></li></ul>
+            </div>
+          </div>
+        </article>
+        <article class="card" id="cTrend" data-side="l" data-anchor="U28">
+          <header><h3><i class="live-dot"></i>Records matching the rack</h3><span class="src">R07 · last 12</span></header>
+          <div class="fig"><b id="trendNow">99.6%</b><span class="up">+41.6 pts</span></div>
+          <svg viewBox="0 0 300 96" role="img" aria-label="Line chart: records matching the rack rose from 58% to 99.6%"></svg>
+        </article>
+        <article class="card" id="cCap" data-side="l" data-anchor="U12">
+          <header><h3><i class="live-dot"></i>Rack capacity</h3><span class="src">R07 · 42U</span></header>
+          <div class="fig"><b id="capFree">11U</b><span id="capUsed">free · 31 of 42 used</span></div>
+          <svg viewBox="0 0 300 44" role="img" aria-label="Strip of 42 rack units showing used and free units"></svg>
+          <ul class="legend"><li><i style="background:#2A302D"></i>Used</li><li><i style="background:#D3D8D4"></i>Free</li></ul>
+        </article>
+      </div>
+
+      <div class="col col-c">
+        <div class="copy cta-copy">
+          <h2>Start with one rack</h2>
+          <p class="lede">A guided 20-minute sweep, checked against your own records.</p>
+          <div class="actions">
+            <a class="btn solid" href="/pages/contact-us/"><span class="led"></span>Book a sweep</a>
+            <a class="btn" href="/pages/contact-us/">Talk to an engineer</a>
+          </div>
+          <p class="note"><span class="with-rack"></span><span class="no-rack"></span></p>
+         
+        </div>
+      </div>
+
+      <div class="col col-r">
+        <article class="card" id="cHeat" data-side="r" data-anchor="OOB-3">
+          <header><h3>Mismatches by row</h3><span class="src">Hall C · 8 weeks</span></header>
+          <div class="fig"><b>1</b><span>open, down from 41</span></div>
+          <svg viewBox="0 0 300 112" role="img" aria-label="Heatmap of mismatches per row per week, falling to near zero"></svg>
+        </article>
+        <article class="card" id="cTypes" data-side="r" data-anchor="DB-103">
+          <header><h3>What the first sweep found</h3><span class="src">Hall C</span></header>
+          <div class="fig"><b>18</b><span>mismatches</span></div>
+          <svg viewBox="0 0 300 116" role="img" aria-label="Bar chart of mismatch types"></svg>
+        </article>
+        <article class="card" id="cAudit" data-side="r" data-anchor="SAN-07">
+          <header><h3>Evidence coverage</h3><span class="src">Hall C · today</span></header>
+          <div class="fig"><b id="auditAll">99%</b><span id="auditNote">of records audit-ready</span></div>
+          <svg viewBox="0 0 300 116" role="img" aria-label="Evidence coverage per compliance framework"></svg>
+        </article>
+      </div>
+    </div>
+  </section>
+
+  <footer class="foot" id="siteFooter">
+    <div class="foot-brand">
+      <a class="brand" href="#hero"><img alt="" src="/design-system/assets/Logos/racktrack-mark.jpg">RackTrack</a>
+      <p>Physical infrastructure intelligence for data centers.</p>
+    </div>
+    <nav aria-label="Platform"><b>Platform</b>
+      <a href="/pages/why-racktrack/">Why RackTrack</a><a href="/pages/solutions/">Solutions</a><a href="/pages/use-cases/">Use cases</a><a href="/pages/trust-security/">Trust &amp; security</a></nav>
+    <nav aria-label="Company"><b>Company</b>
+      <a href="/pages/resources/">Resources</a><a href="/pages/about-us/">About us</a><a href="/pages/contact-us/">Contact us</a></nav>
+    <div><b>Contact</b>
+      <p><a href="mailto:info@racktrack.ai">info@racktrack.ai</a></p><p><a href="tel:+18608782448">+1 (860) 878 2448</a></p><p>85 Felt Rd, Suite #604<br>South Windsor, CT 06074</p></div>
+    <div class="fine">
+      <span>© 2026 RackTrack Inc. · Patent pending</span>
+      <span class="legal"><a href="/pages/legal/privacy-policy/">Privacy</a><a href="/pages/legal/terms-of-use/">Terms</a><a href="/pages/legal/cookie-policy/">Cookies</a><a href="/pages/legal/data-we-collect/">Data we collect</a><a href="/pages/legal/third-party-services/">Third parties</a></span>
+      <span class="social"><a href="https://www.linkedin.com/company/racktrack/" rel="noopener" target="_blank">LinkedIn</a><a href="https://www.instagram.com/racktrack_inc/" rel="noopener" target="_blank">Instagram</a><a href="https://www.facebook.com/share/18depF5xzA/" rel="noopener" target="_blank">Facebook</a></span>
+    </div>
+  </footer>
+</main>
+
+<script type="importmap">
+{ "imports": {
+  "three": "https://cdn.jsdelivr.net/npm/three@0.170.0/build/three.module.js",
+  "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.170.0/examples/jsm/"
+} }
+</script>
+<script type="module">
+import * as THREE from 'three';
+import { RoomEnvironment } from 'three/addons/environments/RoomEnvironment.js';
+
+/* ───────────── config ─────────────
+   Blender hand-off: set USE_BLENDER_MODELS = true and drop GLBs in ./models/.
+   Each GLB node named like the LAYOUT ids (e.g. "TOR-A", "SAN-07") replaces
+   that procedural device; "cabinet" replaces the shell. See HOME-STORY.md. */
+const USE_BLENDER_MODELS = false;
+const MODEL_URL = './models/rack.glb';
+
+const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
+const clamp=(x,a=0,b=1)=>Math.min(b,Math.max(a,x));
+const smooth=(a,b,x)=>{const t=clamp((x-a)/(b-a));return t*t*(3-2*t)};
+const lerp=(a,b,t)=>a+(b-a)*t;
+const COL={paper:new THREE.Color('#E9ECE8'),hall:new THREE.Color('#0C1110'),ink:new THREE.Color('#111614'),inkHall:new THREE.Color('#DDE4DF'),
+  ink2:new THREE.Color('#4A544F'),ink2Hall:new THREE.Color('#93A19A'),rule:new THREE.Color('#C6CCC7'),ruleHall:new THREE.Color('#26302C'),
+  link:new THREE.Color('#1FD67C'),drift:new THREE.Color('#FF9A2E'),record:new THREE.Color('#7C93A8'),off:new THREE.Color('#1c2220'),act:new THREE.Color('#8CF5BD')};
+
+/* ───────────── renderer ───────────── */
+const canvas=document.getElementById('stage');
+let renderer;
+try{ renderer=new THREE.WebGLRenderer({canvas,antialias:true,alpha:true,powerPreference:'high-performance'}); }
+catch(e){ document.documentElement.classList.add('no-webgl'); throw e; }
+renderer.setPixelRatio(Math.min(devicePixelRatio,2));
+renderer.setClearColor(0x000000,0);
+renderer.toneMapping=THREE.ACESFilmicToneMapping; renderer.toneMappingExposure=1.05;
+renderer.outputColorSpace=THREE.SRGBColorSpace;
+const scene=new THREE.Scene();
+const pmrem=new THREE.PMREMGenerator(renderer);
+scene.environment=pmrem.fromScene(new RoomEnvironment(),0.04).texture;
+const camera=new THREE.PerspectiveCamera(32,1,0.05,200);
+const phoneCam=new THREE.PerspectiveCamera(44,0.5,0.05,50);
+
+scene.add(new THREE.HemisphereLight(0xffffff,0x9aa39e,0.6));
+const key=new THREE.DirectionalLight(0xffffff,1.6); key.position.set(4,8,6); scene.add(key);
+const torch=new THREE.PointLight(0xdfffee,0,4,1.6); scene.add(torch); // follows the cursor
+
+/* ───────────── rack model (procedural stand-in for Blender) ───────────── */
+const U=0.1, RW=1.086, BASE=0.12, TOP=BASE+42*U, ZF=0.72, CAB_W=1.36, CAB_D=1.6;
+const yOf=(u,h)=>BASE+(u-1)*U+h*U/2;
+const LAYOUT=[
+ {u:42,h:1,kind:'patch',id:'PP-A1',name:'Patch panel A',ports:24},
+ {u:41,h:1,kind:'switch',id:'TOR-A',name:'ToR switch A',ports:48},
+ {u:40,h:1,kind:'mgr',id:'CM-1',name:'Cable manager'},
+ {u:39,h:1,kind:'switch',id:'TOR-B',name:'ToR switch B',ports:48},
+ {u:38,h:1,kind:'patch',id:'PP-B1',name:'Patch panel B',ports:24},
+ {u:37,h:1,kind:'oob',id:'OOB-3',name:'OOB mgmt switch',ports:24,drift:'Not in any record'},
+ {u:35,h:2,kind:'fw',id:'FW-02',name:'Firewall'},
+ {u:34,h:1,kind:'blank'},
+ {u:32,h:2,kind:'server',id:'APP-221',name:'2U compute'},
+ {u:27,h:2,kind:'server',id:'APP-219',name:'2U compute'},
+ {u:25,h:2,kind:'server',id:'APP-218',name:'2U compute'},
+ {u:24,h:1,kind:'server',id:'DB-106',name:'1U database'},
+ {u:23,h:1,kind:'server',id:'DB-105',name:'1U database'},
+ {u:22,h:1,kind:'server',id:'DB-104',name:'1U database'},
+ {u:21,h:1,kind:'server',id:'DB-103',name:'1U database',drift:'Model differs from CMDB'},
+ {u:20,h:1,kind:'server',id:'DB-102',name:'1U database'},
+ {u:19,h:1,kind:'server',id:'DB-101',name:'1U database'},
+ {u:15,h:4,kind:'storage',id:'SAN-07',name:'Storage array'},
+ {u:9,h:2,kind:'server',id:'BAK-31',name:'2U backup'},
+ {u:7,h:2,kind:'server',id:'BAK-32',name:'2U backup'},
+ {u:1,h:3,kind:'ups',id:'UPS-1',name:'Rack UPS'},
+];
+/* what the CMDB believes */
+const RECORDS=LAYOUT.filter(d=>d.id!=='OOB-3').concat([{u:30,h:2,kind:'server',id:'APP-220',phantom:true}]);
+const DEPTH={patch:.22,switch:.62,mgr:.14,oob:.4,fw:.7,blank:.03,server:1.0,storage:1.05,ups:.8};
+
+let seed=7; const rnd=()=>((seed=(seed*16807)%2147483647)/2147483647);
+
+function tex(canvas){const t=new THREE.CanvasTexture(canvas);t.colorSpace=THREE.SRGBColorSpace;t.anisotropy=8;return t;}
+function portLayout(d){
+  const o=[];
+  if(d.kind==='switch'){const p=.028,g=.012,x0=-RW/2+.17;for(let r=0;r<2;r++)for(let i=0;i<24;i++)o.push({x:x0+i*p+Math.floor(i/6)*g,y:r?-.021:.021,r,i});}
+  else if(d.kind==='patch'||d.kind==='oob'){const p=.03,g=.016,x0=-RW/2+.17;for(let i=0;i<24;i++)o.push({x:x0+i*p+Math.floor(i/6)*g,y:-.006,r:0,i});}
+  return o;
+}
+function faceCanvas(d){
+  const W=512,H=Math.round(47*d.h),c=document.createElement('canvas');c.width=W;c.height=H;const g=c.getContext('2d');
+  const base={switch:'#1f2523',patch:'#272d2a',server:'#232927',storage:'#202624',fw:'#1b201e',oob:'#1f2523',blank:'#1c211f',mgr:'#151918',ups:'#252b28'}[d.kind];
+  g.fillStyle=base;g.fillRect(0,0,W,H);
+  g.fillStyle='rgba(255,255,255,.06)';g.fillRect(0,0,16,H);g.fillRect(W-16,0,16,H);
+  g.fillStyle='rgba(0,0,0,.45)';[[8,H*.25],[8,H*.75],[W-8,H*.25],[W-8,H*.75]].forEach(([x,y])=>{g.beginPath();g.arc(x,y,3,0,7);g.fill();});
+  const X=x=>(x/RW+.5)*W, sticker=(x,y,txt)=>{g.fillStyle='#e9ece8';g.fillRect(x,y,78,13);g.fillStyle='#111614';g.font='500 9px JetBrains Mono, monospace';g.fillText(txt,x+4,y+10);};
+  if(d.kind==='server'||d.kind==='ups'){
+    g.strokeStyle='rgba(0,0,0,.5)';g.lineWidth=2;for(let x=26;x<(d.kind==='ups'?250:300);x+=6){g.beginPath();g.moveTo(x,H*.18);g.lineTo(x,H*.82);g.stroke();}
+    if(d.h>=2&&d.kind==='server'){for(let i=0;i<6;i++){g.fillStyle='#2e3532';g.fillRect(312+i*29,6,25,H-12);g.fillStyle='#3a423e';g.fillRect(314+i*29,H-16,21,5);}}
+    if(d.kind==='ups'){g.fillStyle='#0e1f16';g.fillRect(290,H*.25,120,H*.35);g.fillStyle='#46c985';g.font='500 16px JetBrains Mono, monospace';g.fillText('ON-LINE 42%',298,H*.25+22);}
+    sticker(d.h>=2?312:330,d.h>=2?H-30:17,d.id||'');
+  } else if(d.kind==='switch'||d.kind==='oob'||d.kind==='patch'){
+    const pl=portLayout(d); g.fillStyle='#0f1312';
+    const x0=X(pl[0].x)-10,x1=X(pl[pl.length-1].x)+10; g.fillRect(x0,5,x1-x0,H-10);
+    if(d.kind==='switch'){for(let i=0;i<4;i++){g.fillStyle='#0f1312';g.fillRect(X(.34)+i*22,12,18,22);g.strokeStyle='#58625d';g.strokeRect(X(.34)+i*22,12,18,22);}}
+    if(d.kind==='patch'){g.fillStyle='#b9c1bc';g.font='500 8px JetBrains Mono, monospace';pl.forEach(p=>g.fillText(String(p.i+1),X(p.x)-4,10));}
+    sticker(24,17,d.id);
+  } else if(d.kind==='storage'){
+    for(let r=0;r<3;r++)for(let i=0;i<4;i++){const x=100+i*96,y=10+r*((H-20)/3);g.fillStyle='#2d3431';g.fillRect(x,y,90,(H-20)/3-6);g.fillStyle='#3b4440';g.fillRect(x+4,y+4,60,4);}
+    sticker(22,10,d.id);
+  } else if(d.kind==='fw'){
+    g.fillStyle='#e9ece8';g.font='600 18px Inter, sans-serif';g.fillText('FW',30,H*.62);
+    for(let i=0;i<8;i++){g.fillStyle='#0f1312';g.fillRect(230+i*26,H*.3,20,H*.36);}
+    sticker(80,H*.36,d.id);
+  } else if(d.kind==='blank'){g.fillStyle='rgba(255,255,255,.04)';g.fillRect(16,H*.45,W-32,2);}
+  else if(d.kind==='mgr'){g.strokeStyle='rgba(255,255,255,.07)';for(let x=24;x<W-24;x+=3){g.beginPath();g.moveTo(x,6);g.lineTo(x,H-6);g.stroke();}}
+  return c;
+}
+
+const rack=new THREE.Group(); scene.add(rack);
+const devices=[]; const hitTargets=[];
+const chassisMat=new THREE.MeshStandardMaterial({color:'#2a302d',metalness:.55,roughness:.45});
+const portMat=new THREE.MeshStandardMaterial({color:'#070909',metalness:.2,roughness:.8});
+const ledGeo=new THREE.BoxGeometry(.007,.005,.004), portGeo=new THREE.BoxGeometry(.022,.018,.012);
+
+LAYOUT.forEach(d=>{
+  const g=new THREE.Group(); const h=d.h*U-.004, dep=DEPTH[d.kind];
+  d.y0=yOf(d.u,d.h); g.position.set(0,d.y0,ZF); rack.add(g); d.group=g;
+  const body=new THREE.Mesh(new THREE.BoxGeometry(RW-.02,h,dep),chassisMat); body.position.z=-dep/2-.002; g.add(body);
+  const faceMat=new THREE.MeshStandardMaterial({map:tex(faceCanvas(d)),metalness:.35,roughness:.55,emissive:new THREE.Color(0),emissiveIntensity:1});
+  const face=new THREE.Mesh(new THREE.PlaneGeometry(RW+.1,h),faceMat); g.add(face);
+  d.faceMat=faceMat;
+  if(d.kind!=='blank'&&d.kind!=='mgr'){ body.userData.dev=d; face.userData.dev=d; hitTargets.push(body,face); }
+  // outline (read / verified state)
+  const om=new THREE.LineBasicMaterial({color:COL.link,transparent:true,opacity:0,depthTest:true});
+  const ol=new THREE.LineSegments(new THREE.EdgesGeometry(new THREE.BoxGeometry(RW+.11,h+.004,dep+.01)),om); ol.position.z=-dep/2+.004; g.add(ol); d.outline=om;
+  // ports + LEDs
+  const pl=portLayout(d); d.ports=pl; d.leds=[];
+  if(pl.length){
+    const im=new THREE.InstancedMesh(portGeo,portMat,pl.length); const m=new THREE.Matrix4();
+    pl.forEach((p,i)=>{m.makeTranslation(p.x,p.y,.004);im.setMatrixAt(i,m);}); g.add(im);
+    pl.forEach(p=>{p.linked = d.kind==='patch' ? p.i<20 : rnd()<.86;});
+    if(d.kind!=='patch') pl.forEach(p=>d.leds.push({x:p.x,y:p.y+(p.r?-.016:.016),st:p.linked?(rnd()<.3?'act':'link'):'off'}));
+  }
+  if(d.kind==='server'){for(let i=0;i<2;i++)d.leds.push({x:RW/2-.07-i*.02,y:d.h>1?-.07:-.028,st:i?'act':'link'});}
+  if(d.kind==='storage'){for(let r=0;r<3;r++)for(let i=0;i<4;i++)d.leds.push({x:-RW/2+(100+i*96+80)/512*RW,y:(h/2-.02)-r*((h-.04)/3)-.01,st:rnd()<.5?'act':'link'});}
+  if(d.kind==='fw'||d.kind==='ups'){for(let i=0;i<3;i++)d.leds.push({x:RW/2-.09-i*.025,y:.03,st:'link'});}
+  if(d.leds.length){
+    const lm=new THREE.InstancedMesh(ledGeo,new THREE.MeshBasicMaterial({color:0xffffff,toneMapped:false}),d.leds.length); const m=new THREE.Matrix4();
+    d.leds.forEach((l,i)=>{m.makeTranslation(l.x,l.y,.008);lm.setMatrixAt(i,m);lm.setColorAt(i,COL.link);}); g.add(lm); d.ledMesh=lm;
+  }
+  d.top=d.y0+h/2; d.bot=d.y0-h/2;
+  devices.push(d);
+});
+const byId=Object.fromEntries(LAYOUT.filter(d=>d.id).map(d=>[d.id,d]));
+
+// vertical PDUs (0U) at the rear
+const pduMat=new THREE.MeshStandardMaterial({color:'#22282a',metalness:.5,roughness:.5,transparent:true});
+[-1,1].forEach((s,k)=>{
+  const d={kind:'pdu',id:k?'PDU-B':'PDU-A',name:'Vertical PDU',u:0,h:42};
+  const m=new THREE.Mesh(new THREE.BoxGeometry(.06,4.0,.08),pduMat);
+  m.position.set(s*(CAB_W/2-.1),BASE+2.1,-CAB_D/2+.18); m.userData.dev=d; rack.add(m); hitTargets.push(m);
+});
+
+// cabinet shell — pale aluminium, the one light object in a dark room
+const shellMat=new THREE.MeshStandardMaterial({color:'#dfe3df',metalness:.7,roughness:.32,transparent:true});
+const glassMat=new THREE.MeshStandardMaterial({color:'#cfd8d3',metalness:.1,roughness:.15,transparent:true,opacity:.14,side:THREE.DoubleSide,depthWrite:false});
+const shell=new THREE.Group(); rack.add(shell);
+const post=new THREE.BoxGeometry(.07,TOP-BASE+.1,.07);
+[[-1,1],[1,1],[-1,-1],[1,-1]].forEach(([sx,sz])=>{const p=new THREE.Mesh(post,shellMat);p.position.set(sx*(CAB_W/2-.035),BASE+(TOP-BASE)/2,sz*(CAB_D/2-.035));shell.add(p);});
+const cap=new THREE.Mesh(new THREE.BoxGeometry(CAB_W,.07,CAB_D),shellMat); cap.position.y=TOP+.06; shell.add(cap);
+const plinth=new THREE.Mesh(new THREE.BoxGeometry(CAB_W,BASE,CAB_D),shellMat); plinth.position.y=BASE/2; shell.add(plinth);
+[-1,1].forEach(s=>{const p=new THREE.Mesh(new THREE.PlaneGeometry(CAB_D,TOP-BASE),glassMat);p.rotation.y=Math.PI/2;p.position.set(s*CAB_W/2,BASE+(TOP-BASE)/2,0);shell.add(p);});
+// front rails with U numbering
+{
+  const c=document.createElement('canvas');c.width=48;c.height=42*40;const g=c.getContext('2d');
+  g.fillStyle='#d3d8d4';g.fillRect(0,0,48,c.height);
+  for(let u=1;u<=42;u++){const y=c.height-u*40;g.fillStyle='#8d9690';g.fillRect(0,y,48,1);
+    g.fillStyle='#262c29';for(let k=0;k<3;k++){g.fillRect(30,y+7+k*11,9,6);}
+    g.fillStyle='#3c4541';g.font='500 13px JetBrains Mono, monospace';g.fillText(String(u).padStart(2,'0'),4,y+24);}
+  const t=tex(c); const rm=new THREE.MeshStandardMaterial({map:t,metalness:.5,roughness:.4,transparent:true});
+  [-1,1].forEach(s=>{const r=new THREE.Mesh(new THREE.PlaneGeometry(.075,42*U),rm);r.position.set(s*(RW/2+.075),BASE+21*U,ZF+.003);shell.add(r);});
+  shell.userData.rail=rm;
+}
+
+// patch cables (front) — hidden while the rack is exploded
+const cableMats=[new THREE.MeshStandardMaterial({color:'#6d8397',roughness:.6,transparent:true}),new THREE.MeshStandardMaterial({color:'#2b3130',roughness:.6,transparent:true}),new THREE.MeshStandardMaterial({color:'#c9d1cc',roughness:.6,transparent:true})];
+const cables=new THREE.Group(); rack.add(cables); let cableCount=0;
+function cable(pts,mi){const c=new THREE.CatmullRomCurve3(pts.map(p=>new THREE.Vector3(...p)));cables.add(new THREE.Mesh(new THREE.TubeGeometry(c,24,.0055,5,false),cableMats[mi]));cableCount++;}
+function patch(panel,sw,row,mi){
+  const P=byId[panel],S=byId[sw]; const z=ZF+.012;
+  P.ports.forEach(p=>{ if(!p.linked) return; const q=S.ports.find(o=>o.r===row&&o.i===p.i); if(!q) return;
+    const y1=P.y0+p.y,y2=S.y0+q.y,mid=(y1+y2)/2; const out=.05+(p.i%6)*.008;
+    cable([[p.x,y1,z],[p.x+.004,y1-.01,z+out*.6],[lerp(p.x,q.x,.5)+.01,mid,z+out],[q.x-.004,y2+.01,z+out*.6],[q.x,y2,z]],mi);});
+}
+patch('PP-A1','TOR-A',0,0); patch('PP-B1','TOR-B',1,0);
+// uplinks down the right-hand side to servers
+['APP-221','APP-219','APP-218','DB-106','DB-104','DB-102','SAN-07','BAK-31'].forEach((id,k)=>{
+  const S=byId[k%2?'TOR-B':'TOR-A'], p=S.ports.filter(o=>o.r===1)[k+10], T=byId[id]; const z=ZF+.012, xr=RW/2+.035+(k%4)*.008;
+  const ys=S.y0+p.y, yt=T.y0+(T.h>1?.02:0);
+  cable([[p.x,ys,z],[p.x+.02,ys-.02,z+.07],[xr-.05,ys-.05,z+.06],[xr,ys-.2,z+.05],[xr,yt+.12,z+.05],[xr-.03,yt+.02,z+.05],[RW/2-.12,yt,z]],k%3===2?2:1);
+});
+// OOB feed
+{const O=byId['OOB-3'],F=byId['TOR-A'];const p=O.ports[3],q=F.ports.find(o=>o.r===1&&o.i===23);const z=ZF+.012;
+ cable([[p.x,O.y0+p.y,z],[p.x+.1,O.y0+.05,z+.1],[q.x-.05,F.y0-.12,z+.12],[q.x,F.y0+q.y,z]],2);}
+
+// contact shadow
+{const c=document.createElement('canvas');c.width=c.height=128;const g=c.getContext('2d');const gr=g.createRadialGradient(64,64,4,64,64,64);gr.addColorStop(0,'rgba(17,22,20,.42)');gr.addColorStop(1,'rgba(17,22,20,0)');g.fillStyle=gr;g.fillRect(0,0,128,128);
+ const s=new THREE.Mesh(new THREE.PlaneGeometry(3.4,3.6),new THREE.MeshBasicMaterial({map:new THREE.CanvasTexture(c),transparent:true,depthWrite:false}));s.rotation.x=-Math.PI/2;s.position.y=.002;scene.add(s);scene.userData.shadow=s;}
+
+/* ───────────── the "record" ghost: what the CMDB believes ───────────── */
+const ghost=new THREE.Group(); scene.add(ghost);
+const ghostLine=new THREE.LineDashedMaterial({color:COL.record,dashSize:.04,gapSize:.03,transparent:true,opacity:.7});
+const ghostFill=new THREE.MeshBasicMaterial({color:COL.record,transparent:true,opacity:.06,depthWrite:false});
+const phantomLine=new THREE.LineDashedMaterial({color:COL.drift,dashSize:.04,gapSize:.03,transparent:true,opacity:.9});
+function ghostBox(w,h,dp,x,y,z,mat){const e=new THREE.LineSegments(new THREE.EdgesGeometry(new THREE.BoxGeometry(w,h,dp)),mat);e.position.set(x,y,z);e.computeLineDistances();ghost.add(e);
+  const f=new THREE.Mesh(new THREE.BoxGeometry(w,h,dp),ghostFill);f.position.copy(e.position);ghost.add(f);return e;}
+ghostBox(CAB_W,TOP-BASE+.1,CAB_D,0,BASE+(TOP-BASE)/2,0,ghostLine);
+let phantom;
+RECORDS.forEach(d=>{const dep=DEPTH[d.kind],h=d.h*U-.01; const e=ghostBox(RW,h,dep,0,yOf(d.u,d.h),ZF-dep/2,d.phantom?phantomLine:ghostLine); if(d.phantom)phantom=e;});
+
+/* ───────────── sweep: laser sheet + phone frustum ───────────── */
+const sheetMat=new THREE.MeshBasicMaterial({color:COL.link,transparent:true,opacity:0,side:THREE.DoubleSide,depthWrite:false,blending:THREE.AdditiveBlending,toneMapped:false});
+const sheet=new THREE.Mesh(new THREE.PlaneGeometry(CAB_W+.5,1.3),sheetMat); sheet.rotation.x=-Math.PI/2; scene.add(sheet);
+const edgeMat=new THREE.LineBasicMaterial({color:COL.link,transparent:true,opacity:0,toneMapped:false});
+const edge=new THREE.Line(new THREE.BufferGeometry().setFromPoints([new THREE.Vector3(-CAB_W/2-.25,0,ZF+.02),new THREE.Vector3(CAB_W/2+.25,0,ZF+.02)]),edgeMat); scene.add(edge);
+const frGeo=new THREE.BufferGeometry(); frGeo.setAttribute('position',new THREE.Float32BufferAttribute(new Float32Array(8*3),3));
+const frustum=new THREE.LineSegments(frGeo,new THREE.LineBasicMaterial({color:COL.link,transparent:true,opacity:0,toneMapped:false})); scene.add(frustum);
+
+/* ───────────── network witness: LLDP/CDP neighbour signals ───────────── */
+const FABRIC=new THREE.Vector3(2.7,4.5,-1.0);
+const sigCurves=['TOR-A','TOR-B','OOB-3'].map((id,k)=>{const d=byId[id];const a=new THREE.Vector3(RW/2-.1,d.y0,ZF+.02);
+  return new THREE.CatmullRomCurve3([a,new THREE.Vector3(1.2,d.y0+.2+k*.1,ZF+.4),new THREE.Vector3(2.6,4.6+k*.15,0),FABRIC]);});
+const sigLines=new THREE.Group(); scene.add(sigLines);
+const sigLineMat=new THREE.LineDashedMaterial({color:COL.link,dashSize:.05,gapSize:.05,transparent:true,opacity:0,toneMapped:false});
+sigCurves.forEach(c=>{const l=new THREE.Line(new THREE.BufferGeometry().setFromPoints(c.getPoints(60)),sigLineMat);l.computeLineDistances();sigLines.add(l);});
+const NP=16; const sigPts=new THREE.Points(new THREE.BufferGeometry(),new THREE.PointsMaterial({color:COL.link,size:.06,transparent:true,opacity:0,toneMapped:false,depthWrite:false}));
+sigPts.geometry.setAttribute('position',new THREE.Float32BufferAttribute(new Float32Array(sigCurves.length*NP*3),3)); scene.add(sigPts);
+const fabricNode=new THREE.Mesh(new THREE.OctahedronGeometry(.12),new THREE.MeshBasicMaterial({color:COL.link,wireframe:true,transparent:true,opacity:0,toneMapped:false})); fabricNode.position.copy(FABRIC); scene.add(fabricNode);
+
+/* ───────────── the hall ───────────── */
+const HALL=[]; for(let r=0;r<4;r++)for(let i=-6;i<=6;i++){ if(r===0&&i===0) continue; HALL.push({x:i*1.46,z:-r*3.3,r,i,d:Math.hypot(i*1.46,r*3.3),drift:rnd()<.22,free:rnd()<.3}); }
+const HALL_LIGHT=new THREE.Color('#c3cac5'),HALL_DARK=new THREE.Color('#1b211f');
+const hallMat=new THREE.MeshStandardMaterial({color:'#1b211f',metalness:.6,roughness:.5});
+const hallMesh=new THREE.InstancedMesh(new THREE.BoxGeometry(CAB_W,TOP+.1,CAB_D),hallMat,HALL.length); scene.add(hallMesh);
+const LPR=10; const hallLeds=new THREE.InstancedMesh(new THREE.BoxGeometry(.34,.014,.01),new THREE.MeshBasicMaterial({color:0xffffff,toneMapped:false}),HALL.length*LPR); scene.add(hallLeds);
+const floorC=document.createElement('canvas'); floorC.width=floorC.height=256; {const g=floorC.getContext('2d');g.strokeStyle='rgba(221,228,223,.22)';g.lineWidth=2;g.strokeRect(0,0,256,256);}
+const floorT=new THREE.CanvasTexture(floorC); floorT.wrapS=floorT.wrapT=THREE.RepeatWrapping; floorT.repeat.set(60,60);
+const floor=new THREE.Mesh(new THREE.PlaneGeometry(36,36),new THREE.MeshBasicMaterial({map:floorT,transparent:true,opacity:0,depthWrite:false})); floor.rotation.x=-Math.PI/2; floor.position.set(0,.001,-6); scene.add(floor);
+const foot=new THREE.LineLoop(new THREE.BufferGeometry().setFromPoints([[-1,1],[1,1],[1,-1],[-1,-1]].map(([x,z])=>new THREE.Vector3(x*(CAB_W/2+.25),.02,z*(CAB_D/2+.25)))),new THREE.LineBasicMaterial({color:COL.link,transparent:true,opacity:0,toneMapped:false})); scene.add(foot);
+
+/* optional: swap in Blender models */
+if(USE_BLENDER_MODELS){
+  import('three/addons/loaders/GLTFLoader.js').then(({GLTFLoader})=>new GLTFLoader().load(MODEL_URL,gltf=>{
+    gltf.scene.traverse(o=>{const d=byId[o.name]; if(d&&o.isMesh){ d.group.children.slice(0,2).forEach(c=>c.visible=false); const m=o.clone(); m.position.set(0,0,0); m.userData.dev=d; d.group.add(m); hitTargets.push(m);} });
+    const cab=gltf.scene.getObjectByName('cabinet'); if(cab){ shell.visible=false; rack.add(cab.clone()); }
+  },undefined,()=>console.info('RackTrack: no Blender model found, using procedural rack.')));
+}
+
+/* ───────────── HUD tags anchored to 3D points ───────────── */
+const hud=document.getElementById('hud'); const TAGS=[];
+function tag(html,cls,pos,vis,left){const el=document.createElement('div');el.className='tag '+(cls||'')+(left?' left':'');el.innerHTML='<i></i><span>'+html+'</span>';hud.appendChild(el);TAGS.push({el,pos,vis,left});return el;}
+const wp=new THREE.Vector3();
+const devRight=(id,dx=0)=>()=>{const d=byId[id];d.group.updateWorldMatrix(true,false);return wp.set(RW/2+.1+dx,0,0).applyMatrix4(d.group.matrixWorld);};
+const window1=S=>smooth(.78,1.0,S)*(1-smooth(1.62,1.8,S));
+tag('<b>40–60%</b>of records are wrong<br>U37 isn\'t on file','drift',devRight('OOB-3'),window1);
+tag('<b>~30%</b>of outages start here<br>U30 is empty, not APP-220','drift',()=>wp.set(RW/2+.1,yOf(30,2),ZF).applyMatrix4(rack.matrixWorld),S=>smooth(.9,1.1,S)*(1-smooth(1.62,1.8,S)));
+tag('<b>20–40 min</b>lost per incident<br>U21 is a different model','drift',devRight('DB-103'),S=>smooth(1.0,1.2,S)*(1-smooth(1.62,1.8,S)));
+tag('Records','rec',()=>wp.set(0,TOP+.25,0).applyMatrix4(ghost.matrixWorld),S=>smooth(.7,.9,S)*(1-smooth(1.62,1.8,S)),true);
+tag('Reality','',()=>wp.set(0,TOP+.25,0).applyMatrix4(rack.matrixWorld),S=>smooth(.7,.9,S)*(1-smooth(1.62,1.8,S)));
+tag('<b>TOR-A</b>'+byId['TOR-A'].ports.filter(p=>p.linked).length+'/48 linked','link',devRight('TOR-A'),S=>smooth(3.2,3.4,S)*(1-smooth(3.72,3.85,S)));
+tag('<b>SAN-07</b>12 bays read','link',devRight('SAN-07'),S=>smooth(3.25,3.45,S)*(1-smooth(3.72,3.85,S)));
+tag('<b>APP-219</b>6 bays · label read','link',devRight('APP-219'),S=>smooth(3.3,3.5,S)*(1-smooth(3.72,3.85,S)));
+tag('Recorded · CMDB','rec',()=>wp.set(0,TOP+.25,0).applyMatrix4(ghost.matrixWorld),S=>smooth(4.0,4.15,S)*(1-smooth(4.5,4.65,S)),true);
+tag('Signalled · LLDP','link',()=>wp.copy(FABRIC),S=>smooth(4.0,4.15,S)*(1-smooth(4.75,4.9,S)));
+tag('Seen · phone','',devRight('FW-02',.05),S=>smooth(4.0,4.15,S)*(1-smooth(4.75,4.9,S)));
+tag('<b>R07 verified</b>22/22 devices','link',()=>wp.set(CAB_W/2+.25,.02,CAB_D/2+.25).applyMatrix4(rack.matrixWorld),S=>smooth(6.05,6.25,S)*(1-smooth(6.72,6.9,S)));
+
+/* ───────────── scroll → S (chapter index + progress) ───────────── */
+const chapters=[...document.querySelectorAll('[data-ch]')];
+const copyEls=chapters.map(c=>c.querySelector('.copy'));
+let tops=[],heights=[],vw=innerWidth,vh=innerHeight;
+
+/* ───────────── framing: one model for every viewport ─────────────
+   BOX is the on-screen rectangle the rack has to live in. It is derived
+   from the very tokens the stylesheet lays out with — --bleed, --copy-w,
+   --stage-drop, read off #probe and the nav already resolved to pixels — so
+   the gap between the reading column and the rack is a stated decision
+   rather than a per-chapter guess, and CSS and WebGL cannot drift apart.
+
+   Above BP_STACK the rack takes the space to the right of the column;
+   below it, the band above the column. Either way each chapter then says
+   what fraction of that box the rack should fill and the camera distance
+   is solved for it, which is what lets a phone and a 4K display frame the
+   same animation identically instead of needing a separate mobile path. */
+/* Below this width the closing chapter drops the 3D entirely — its cards stack
+   under the CTA rather than flanking the rack, so the rack is only a backdrop
+   there. Matches the width the nav switches to the drawer. */
+const BP_BARE=1024;
+const navEl=document.querySelector('.nav'), probeEl=document.getElementById('probe');
+const BOX={x:0,y:0,w:0,h:0,cx:.5,bleed:24,copyR:0};
+function measureBox(){
+  const bleed=BOX.bleed=parseFloat(getComputedStyle(navEl).paddingLeft)||14;
+  const navH=navEl.offsetHeight||72;
+  /* breathing room between column and rack. Scales with the viewport but never
+     collapses — on a phone it is the only thing separating the two. */
+  /* Clear air between the column and the stage. At 5vw a phone got only ~20px,
+     which read as the animation touching the text even though nothing actually
+     overlapped — 8vw with a 28px floor gives a visible channel. */
+  const gap=Math.max(28,Math.min(88,vw*.08));
+  BOX.y=navH;
+  /* The stage is always whatever is left of the shell once the reading column
+     has taken its share — the same composition at 390px as at 1920px. It ends
+     at the shell's right edge, not the viewport's, so on a wide display the
+     rack cannot drift off toward the bezel while the copy stays on the shell. */
+  BOX.copyR=bleed+probeEl.offsetWidth;        /* the reading column's right edge */
+  BOX.x=BOX.copyR+gap;
+  BOX.w=Math.max(84,vw-bleed-BOX.x);
+  /* --stage-drop (probe height) is reserved at the bottom so the stage centres
+     above true middle, matching the hero copy's own lift — see #hero */
+  BOX.h=Math.max(220,vh-navH-probeEl.offsetHeight*2);
+  BOX.cx=(BOX.x+BOX.w/2)/vw;
+}
+function measure(){vw=innerWidth;vh=innerHeight;tops=chapters.map(c=>c.offsetTop);heights=chapters.map(c=>c.offsetHeight);
+  measureBox(); renderer.setSize(vw,vh,false);}
+function targetS(){const c=scrollY+vh*.5;for(let i=chapters.length-1;i>=0;i--){if(c>=tops[i])return i+clamp((c-tops[i])/heights[i],0,.999);}return 0;}
+addEventListener('resize',measure); measure();
+/* Inter changes the nav height and the column's measure, so re-measure once
+   it lands rather than framing against fallback metrics */
+document.fonts.ready.then(measure);
+
+/* camera script, one entry per chapter:
+     p,t  camera position and aim — these carry the angle of the shot
+     z    how much of the stage box's height the rack should fill
+     w    how strongly to solve for z. 1 = a rack shot, fit it; 0 = a hall
+          shot, where the rack is not the subject, so keep the authored
+          distance and only step back far enough to still fit the hall in.
+     dx   a deliberate nudge off the box centre (room for the ghost record,
+          pulling the wide hall shots back toward the middle)
+     cx   an absolute override, for the closing chapter where the analytics
+          cards flank the rack and it has to sit centred */
+const CH=[
+ {p:[1.8,2.7,10.4], t:[0,2.3,0],      z:.833, w:1},
+ {p:[-.5,2.6,11.4], t:[-1.05,2.15,0], z:.769, w:1, dx:.03},
+ {p:[4.0,2.8,11.2], t:[0,2.2,.3],     z:.756, w:1},
+ {p:[5.6,3.7,12],   t:[0,2.45,0],     z:.661, w:1},
+ {p:[1.6,2.8,11.6], t:[.5,2.4,0],     z:.754, w:1},
+ {p:[9,7,13],       t:[1.4,.9,-3.6],  z:.754, w:0, dx:-.10},
+ {p:[4.5,27,4],     t:[2.5,0,-5],     z:.754, w:0, dx:-.14},
+ {p:[.8,2.4,14.6],  t:[0,2.25,0],     z:.60,  w:1, cx:.5},
+];
+const KEYS=[]; CH.forEach((c,i)=>{KEYS.push({s:i===0?0:i+.28,...c});KEYS.push({s:i+.7,...c});});
+const tmpP=new THREE.Vector3(),tmpT=new THREE.Vector3(),kp=new THREE.Vector3(),kt=new THREE.Vector3();
+const SHOT={cx:.5,z:.8,w:1};
+const cxOf=k=>(k.cx!=null?k.cx:BOX.cx)+(k.dx||0);
+function camAt(S){let a=KEYS[0],b=KEYS[KEYS.length-1];for(let k=0;k<KEYS.length-1;k++){if(S>=KEYS[k].s&&S<=KEYS[k+1].s){a=KEYS[k];b=KEYS[k+1];break;}}
+  if(S<KEYS[0].s)b=a; if(S>KEYS[KEYS.length-1].s)a=b;
+  const t=a===b?0:smooth(0,1,(S-a.s)/(b.s-a.s));
+  tmpP.set(...a.p).lerp(kp.set(...b.p),t); tmpT.set(...a.t).lerp(kt.set(...b.t),t);
+  SHOT.cx=lerp(cxOf(a),cxOf(b),t); SHOT.z=lerp(a.z,b.z,t); SHOT.w=lerp(a.w,b.w,t);
+  return SHOT;}
+
+/* ───────────── pointer: parallax, torch, and the reading reticle ───────────── */
+const mouse=new THREE.Vector2(0,0),ndc=new THREE.Vector2(9,9); let mx=0,my=0,hasPointer=false;
+const reticle=document.getElementById('reticle'),rLbl=document.getElementById('reticleLbl');
+addEventListener('pointermove',e=>{hasPointer=e.pointerType==='mouse';mouse.set(e.clientX/vw*2-1,-(e.clientY/vh)*2+1);ndc.copy(mouse);reticle.style.transform=`translate(${e.clientX}px,${e.clientY}px)`;},{passive:true});
+addEventListener('pointerleave',()=>ndc.set(9,9));
+const ray=new THREE.Raycaster(); let hovered=null;
+
+/* roles in the hall */
+let role=-1; document.querySelectorAll('#roles button').forEach(b=>{
+  const on=()=>{role=+b.dataset.role;document.querySelectorAll('#roles button').forEach(x=>x.setAttribute('aria-pressed',x===b?'true':'false'));};
+  b.addEventListener('mouseenter',on);b.addEventListener('focus',on);b.addEventListener('click',on);
+});
+
+/* ───────────── DOM refs ───────────── */
+const $=id=>document.getElementById(id);
+const dock=$('dock'),dkDev=$('dkDev'),dkPort=$('dkPort'),dkU=$('dkU'),dkBar=$('dkBar'),dkRec=$('dkRec');
+const scrim=$('scrim'),agree=$('agree'),agreeBar=$('agreeBar'),screenEl=$('phoneScreen'),frameEl=document.querySelector('#phoneScreen .frame'),footerEl=$('siteFooter');
+const CHNAMES=['Ground truth','Drift','Capture','Perceive','Reconcile','Continuous','Evidence','Start'];
+const totalDev=devices.filter(d=>d.id).length+2, totalPorts=devices.reduce((a,d)=>a+d.ports.length,0);
+const t0=performance.now();
+
+/* the space the rack may use in the final chapter: under the headline band, above the note (wide screens) */
+const BAND={t:0,b:0}, ctaActs=document.querySelector('#start .cta-copy .actions'), ctaNote=document.querySelector('#start .cta-copy .note');
+function measureBand(){ const st=document.getElementById('stage2'); const sr=st.getBoundingClientRect(); const a=ctaActs.getBoundingClientRect(), n=ctaNote.getBoundingClientRect();
+  BAND.t=a.bottom-sr.top+34; BAND.b=n.top-sr.top-18; if(BAND.b-BAND.t<200){BAND.t=vh*.3;BAND.b=vh-40;} }
+addEventListener('resize',measureBand); measureBand(); document.fonts.ready.then(measureBand);
+function fitY(y){ v.set(0,y,ZF).applyMatrix4(rack.matrixWorld).project(camera); return (-v.y*.5+.5)*vh; }
+/* The SUBJECT's projected bounding box: the rack, plus the ghost record while
+   it is on screen. The drift chapter's subject is the pair, not the rack —
+   measuring the rack alone let the pair overflow the stage and pushed the rack
+   itself off the edge on a narrow screen. The camera fit needs width as well as
+   height, because on a narrow stage it is the width that binds. */
+const RC={w:0,h:0,cx:0,cy:0};
+function subjectRect(gx,gOn){
+  let x0=1e9,x1=-1e9,y0=1e9,y1=-1e9;
+  const add=(wx,wy)=>{
+    v.set(wx,wy,ZF).applyMatrix4(rack.matrixWorld).project(camera);
+    const sx=(v.x*.5+.5)*vw, sy=(-v.y*.5+.5)*vh;
+    if(sx<x0)x0=sx; if(sx>x1)x1=sx; if(sy<y0)y0=sy; if(sy>y1)y1=sy; };
+  for(const cx of [-CAB_W/2,CAB_W/2]) for(const cy of [0,TOP+.1]) add(cx,cy);
+  if(gOn) for(const cx of [gx-CAB_W/2,gx+CAB_W/2]) for(const cy of [0,TOP+.1]) add(cx,cy);
+  RC.w=x1-x0; RC.h=y1-y0; RC.cx=(x0+x1)/2; RC.cy=(y0+y1)/2; return RC;
+}
+
+/* ───────────── frame ───────────── */
+let S=targetS(), last=performance.now(), blinkT=0, footFade=1, cardFocus=null;
+const root=document.documentElement.style, cA=new THREE.Color(), cB=new THREE.Color();
+const mtx=new THREE.Matrix4(), q=new THREE.Quaternion(), v=new THREE.Vector3(), sc=new THREE.Vector3();
+
+function frame(now){
+  const dt=Math.min(.1,(now-last)/1000); last=now;
+  const T=targetS(); S = reduce ? T : S+(T-S)*(1-Math.exp(-dt*5.5));
+  const time=now/1000;
+
+  /* One chapter's copy at a time. Every column is sticky in the same band, so
+     without this a departing block prints straight over the arriving one. The
+     last chapter is the closing CTA and never fades out. */
+  for(let i=0;i<copyEls.length;i++){
+    const el=copyEls[i]; if(!el) continue;
+    const last=i===copyEls.length-1;
+    /* The two windows meet rather than overlap: block i is fully out by i+.92,
+       which is exactly where block i+1 starts coming in. Overlapping them (the
+       old .82–.98 out against .72–.96 in) left both readable at once, printing
+       the arriving heading through the departing list. The block still holds
+       for most of its chapter — only the handoff is tightened. */
+    const o=smooth(i-.08,i,S)*(last?1:1-smooth(i+.84,i+.92,S));
+    el.style.opacity=o.toFixed(3);
+    el.style.visibility=o<.01?'hidden':'visible';
+  }
+
+  /* palette: lights go down in the hall */
+  const dark=smooth(4.68,5.0,S)*(1-smooth(5.72,6.08,S));
+  cA.copy(COL.paper).lerp(COL.hall,dark); root.setProperty('--bg','#'+cA.getHexString());
+  cB.copy(COL.ink).lerp(COL.inkHall,dark); root.setProperty('--fg','#'+cB.getHexString());
+  root.setProperty('--fg-2','#'+cB.copy(COL.ink2).lerp(COL.ink2Hall,dark).getHexString());
+  root.setProperty('--line','#'+cB.copy(COL.rule).lerp(COL.ruleHall,dark).getHexString());
+  scene.environmentIntensity=lerp(1,.25,dark); key.intensity=lerp(1.6,.35,dark);
+
+  /* ── camera: solve the framing against BOX, at every viewport ──────────
+     No mobile branch. The shot's angle comes from the script, its size and
+     placement come from the stage box, so the rack keeps the same share of
+     its box and the same clearance from the copy on a phone as on a 4K
+     display. */
+  const lift=Math.max(0,vh-footerEl.getBoundingClientRect().top);
+  /* The stage is fixed to the viewport, so the footer scrolls up over it
+     instead of pushing it off. Lifting the camera alone just slid the rack up
+     and left it and the cards cropped along the footer's top edge. Fade the
+     whole closing composition out as the footer arrives, so the page ends on
+     paper and the footer comes up clean. */
+  footFade=1-smooth(vh*.04,vh*.40,lift);
+  hud.style.opacity=footFade.toFixed(3);
+  /* Only the animation goes: the rack, the card columns and the leader lines.
+     The closing CTA is what the chapter is FOR, so it stays and takes the band
+     the animation vacates — fading it too left a screen of blank paper above
+     the footer, since the stage's last 100vh always lands there. */
+  if(colL){ colL.style.opacity=footFade.toFixed(3); colR.style.opacity=footFade.toFixed(3); }
+  const par=reduce?0:1, wide=vw>1180, wEnd=smooth(6.6,7.0,S);
+  /* Once #start releases its sticky pin the stage slides up and would carry the
+     CTA off the top with it. Hold the CTA back by however much of the stage has
+     already gone past, so it stays in view until the footer meets it. */
+  if(colC){
+    const sTop=stageEl.getBoundingClientRect().top;
+    const hidden=wide?Math.max(0,-sTop):0;
+    if(hidden>1){
+      /* It also has to stop at the footer rather than keep the stage's full
+         height, or the copy sits at the top of the band with the rest of it
+         still blank. Bounded and centred, the chapter closes on its CTA. */
+      const top=sTop+colC.offsetTop+hidden;
+      const boxH=Math.max(160,footerEl.getBoundingClientRect().top-top);
+      colC.style.transform=`translateY(${hidden.toFixed(1)}px)`;
+      colC.style.bottom='auto';
+      colC.style.height=boxH+'px';
+      /* Centre by easing padding in with the fade, not by switching alignment:
+         flipping justify-content moved the headline ~380px in a single scroll
+         step, which reads as a jolt right as the footer arrives. */
+      const kids=[...ctaCopy.children].filter(e=>e.offsetHeight>0);
+      const ch=kids.length?kids[kids.length-1].offsetTop+kids[kids.length-1].offsetHeight-kids[0].offsetTop:0;
+      ctaCopy.style.paddingTop=(Math.max(0,(boxH-ch)/2)*(1-footFade)).toFixed(1)+'px';
+      colC.classList.add('landed');
+    } else if(colC.classList.contains('landed')){
+      colC.style.transform=colC.style.bottom=colC.style.height='';
+      ctaCopy.style.paddingTop='';
+      colC.classList.remove('landed');
+    }
+  }
+  /* the closing chapter is text and cards only on phones and tablets */
+  const bare = vw<=BP_BARE ? smooth(6.45,6.9,S) : 0;
+
+  /* The ghost record is solved for here, before the camera, because in the
+     drift chapter it is half the subject. On a narrow stage the pair is drawn
+     closer together so neither has to shrink to fit — clamped at .66 so the two
+     never overlap (they are 1.36 units wide and 2.1 apart at full spread). */
+  const fix=smooth(4.28,4.72,S), driftAmt=smooth(.72,1.05,S)*(1-fix);
+  const gFar=-2.1*clamp(BOX.w/430,.66,1);
+  const gx = S<3 ? lerp(-.2,gFar,smooth(.55,1.1,S)) : lerp(gFar,0,smooth(4.12,4.62,S));
+  const gOp=(S<3? .8*(1-smooth(1.75,2.05,S)) : .8*smooth(3.85,4.1,S)*(1-smooth(4.6,4.8,S)));
+  const gOn=gOp>.01;
+
+  const shot=camAt(S);                       /* fills tmpP / tmpT */
+  const fx=clamp(shot.cx,.16,.88);
+  camera.aspect=vw/vh;
+  const aim=()=>{camera.position.copy(tmpP).add(v.set(mouse.x*.35*par,mouse.y*.2*par,0)); camera.lookAt(tmpT);};
+  const view=off=>{camera.setViewOffset(vw,vh,-(fx-.5)*vw,off,vw,vh);
+    camera.updateProjectionMatrix(); camera.updateMatrixWorld(); rack.updateMatrixWorld();};
+
+  /* hall shots aren't framing the rack, so they keep their authored distance
+     and only step back by what a narrower stage costs them — continuous, so
+     there's no jump at any width (REF_W is the box on a 1440pt desktop) */
+  if(shot.w<1){ const REF_W=720, k=Math.pow(Math.max(1,REF_W/BOX.w),.85);
+    /* A hall shot is framed by the viewport, not by the stage box — it is the
+       backdrop the copy sits on, so it has to reach both edges. At a fixed
+       distance a wider window just reveals more empty floor beside the hall,
+       which on a 1920 display reads as the hall having drifted off to the right
+       with a dead margin on the left. Pull in by the ratio the aspect grew, so
+       the hall keeps filling the frame at any width. */
+    const REF_A=1440/900, fit=clamp(REF_A/Math.max(vw/vh,REF_A),.7,1);
+    tmpP.sub(tmpT).multiplyScalar(lerp(k*fit,1,shot.w)).add(tmpT); }
+
+  /* the box to fit into: the stage box, or — once the analytics cards take
+     the flanks on a wide screen — the gap between the headline and the note.
+     That band is tighter than the stage box, so the target fill rises with it;
+     below 1180px the cards stack underneath instead and the stage box stands. */
+  let bt=BOX.y, bb=BOX.y+BOX.h, z=shot.z;
+  if(wide&&wEnd>0){ bt=lerp(bt,BAND.t,wEnd); bb=lerp(bb,BAND.b,wEnd); z=lerp(z,.94,wEnd); }
+
+  if(shot.w>.001){
+    /* solve the distance so the rack fills the box on BOTH axes: the height
+       target when the stage is wide, the width target once it is narrow (a
+       phone, or a tablet in portrait). Taking the larger ratio means whichever
+       axis is the binding one wins, so the rack never crosses into the copy. */
+    for(let pass=0;pass<3;pass++){
+      aim(); view(lift);
+      const r=subjectRect(gx,gOn), wantH=(bb-bt)*z, wantW=BOX.w*.88;
+      if(r.h>1&&wantH>1){
+        const k=Math.max(r.h/wantH, wantW>1 ? r.w/wantW : 0);
+        tmpP.sub(tmpT).multiplyScalar(lerp(1,k,shot.w)).add(tmpT); } }
+  }
+  aim(); view(lift);
+  /* Centre the whole subject in the stage box on both axes. Horizontal matters
+     because the camera aims at the shot's target, which in the drift chapter is
+     the midpoint between ghost and rack, not the rack — without this the rack
+     drifts out past the edge. Scaled by shot.w so the hall shots, which are not
+     framing the rack, keep the off-centre composition they were authored with. */
+  const sr=subjectRect(gx,gOn);
+  const endY=sr.cy-(bt+bb)/2;
+  /* Horizontal target: normally the stage box, beside the reading column. In
+     the closing chapter on a wide screen the analytics cards flank the rack and
+     the headline above it is page-centred, so the rack centres on the page
+     instead — otherwise it sits off to the right of its own headline. */
+  const cxTarget = (wide&&wEnd>0) ? lerp(BOX.x+BOX.w/2, vw/2, wEnd) : BOX.x+BOX.w/2;
+  const endX=(sr.cx-cxTarget)*shot.w;
+  aim();
+  camera.setViewOffset(vw,vh,-(fx-.5)*vw+endX,endY+lift,vw,vh); camera.updateProjectionMatrix();
+
+  /* rack pose + explode */
+  const e=smooth(2.95,3.35,S)*(1-smooth(3.72,4.05,S));
+  rack.rotation.y = .45*e + (reduce?0:mouse.x*.1*(1-e)) + (reduce?0:Math.sin(time*.35)*.025);
+  devices.forEach((d,i)=>{const pop={patch:1.25,switch:.95,oob:.8,fw:.6,server:.35,storage:.2,ups:.1,blank:0,mgr:0}[d.kind]*(1+(i%3)*.12);
+    d.group.position.y=d.y0+e*(d.y0-2.2)*.25; d.group.position.z=ZF+e*pop;});
+  shellMat.opacity=1-.88*e; shell.userData.rail.opacity=1-.9*e; glassMat.opacity=.14*(1-e); pduMat.opacity=1-.9*e;
+  const cabOp=1-smooth(2.95,3.15,S)*(1-smooth(3.8,4.05,S)); cableMats.forEach(m=>{m.opacity=cabOp;}); cables.visible=cabOp>.02;
+
+  /* drift → fixed. fix / driftAmt / gx / gOp are solved above, before the
+     camera, because the ghost is part of the subject the camera has to frame. */
+  ghost.position.set(gx, 0, S<.6? -.12:lerp(-.12,0,smooth(.6,1,S))); ghost.rotation.y = S<1.2 ? .05*(1-smooth(.6,1.1,S)) : 0;
+  ghostLine.opacity=gOp; ghostFill.opacity=gOp*.08; phantomLine.opacity=gOp*(S<3?1:1-fix); ghost.visible=gOn;
+  phantomLine.color.copy(COL.drift);
+
+  /* sweep */
+  const sp=clamp((S-2.12)/.7), scanVis=smooth(2.02,2.14,S)*(1-smooth(2.84,2.96,S));
+  const scanY=lerp(TOP+.05,BASE-.02,sp);
+  sheet.position.set(0,scanY,ZF+.35); sheetMat.opacity=.10*scanVis; edge.position.y=scanY; edgeMat.opacity=scanVis;
+  { const P=new THREE.Vector3(.35,scanY+.25,ZF+2.3), a=frGeo.attributes.position.array, cs=[[-CAB_W/2,scanY+.28],[CAB_W/2,scanY+.28],[CAB_W/2,scanY-.28],[-CAB_W/2,scanY-.28]];
+    cs.forEach(([x,y],k)=>{a.set([P.x,P.y,P.z],k*6);a.set([x,y,ZF+.02],k*6+3);}); frGeo.attributes.position.needsUpdate=true; frustum.material.opacity=.55*scanVis; }
+  let readDev=0,readPorts=0;
+  devices.forEach(d=>{
+    const read = S>=2.96 || (S>2.1 && d.top>=scanY);
+    if(read&&d.id){readDev++;readPorts+=d.ports.length;}
+    const readOp = S<2.05?0 : (read? (S<3.9?1:1-smooth(3.9,4.2,S)) : 0);
+    const isDrift=!!d.drift;
+    let op=readOp*.55, col=COL.link;
+    if(isDrift && S<4.8){ op=Math.max(op,driftAmt*.95, (S>3.9? smooth(3.95,4.1,S)*(1-fix)*.95:0)); if(driftAmt>.01 || (S>3.9&&fix<1)) col = fix>.5?COL.link:COL.drift; }
+    if(isDrift && fix>0 && S<5){ op=Math.max(op, fix*(1-smooth(4.85,5.0,S))); col = fix>.5?COL.link:COL.drift; }
+    if(cardFocus&&cardFocus.ids.includes(d.id)){op=Math.max(op,.95);col=cardFocus.col;}
+    if(hovered===d){op=1;col=COL.link;}
+    d.outline.opacity=op; d.outline.color.copy(col);
+    const em= isDrift? (fix>.5? COL.link:COL.drift) : COL.link;
+    const emAmt = isDrift ? Math.max(driftAmt*.32, fix*.18*(1-smooth(4.85,5.1,S))) : 0;
+    d.faceMat.emissive.copy(em).multiplyScalar(emAmt);
+  });
+  if(S>2.96) readDev=totalDev-2, readPorts=totalPorts;
+  if(S>2.96){readDev=totalDev;}
+
+  /* LEDs (blink activity; OOB goes amber while unrecorded) */
+  blinkT+=dt; if(blinkT>.09||reduce){ blinkT=0;
+    devices.forEach(d=>{ if(!d.ledMesh) return; const drift=!!d.drift&&driftAmt>.3;
+      d.leds.forEach((l,i)=>{ let c = l.st==='off'?COL.off : l.st==='act'&&!reduce&&Math.random()<.45?COL.off : COL.link; if(drift&&l.st!=='off') c=COL.drift; d.ledMesh.setColorAt(i,c); });
+      d.ledMesh.instanceColor.needsUpdate=true; }); }
+
+  /* network witness */
+  const nv=smooth(3.82,4.1,S)*(1-smooth(4.8,5.05,S));
+  sigLineMat.opacity=.6*nv; sigPts.material.opacity=nv; fabricNode.material.opacity=nv; fabricNode.rotation.y=time*.8; fabricNode.rotation.x=time*.4;
+  if(nv>0){const a=sigPts.geometry.attributes.position.array; sigCurves.forEach((c,k)=>{for(let j=0;j<NP;j++){const u=((reduce?0:time*.22)+j/NP+k*.13)%1;c.getPointAt(1-u,v);a.set([v.x,v.y,v.z],(k*NP+j)*3);}}); sigPts.geometry.attributes.position.needsUpdate=true;}
+  sigLines.visible=sigPts.visible=fabricNode.visible=nv>.01;
+  const ag=lerp(58,99.6,smooth(4.2,4.72,S)); agree.textContent=ag.toFixed(1)+'%'; if(agreeBar) agreeBar.style.width=ag+'%';
+
+  /* hall */
+  const grow=smooth(4.85,5.35,S)*(1-smooth(6.72,7.05,S)), wave=smooth(5.1,5.75,S)*26;
+  hallMesh.visible=hallLeds.visible=grow>.001;   /* The readability wash only earns its place where the column and the stage
+     are close enough to collide. On a wide screen they are ~90px apart and the
+     palette already flips the text to light in the hall, so painting over the
+     hall there buys nothing and visibly clips the animation. Narrow screens
+     keep it, and only while the hall is actually dark behind the copy. */
+  hallMat.color.copy(HALL_LIGHT).lerp(HALL_DARK,dark);
+  scrim.style.opacity = vw>1024 ? 0 : dark*.85;
+  if(grow>.001){
+    HALL.forEach((h,k)=>{const g=clamp(grow*1.8-h.d/22); const y=(TOP+.1)*g; mtx.compose(v.set(h.x,y/2,h.z),q.identity(),sc.set(1,Math.max(g,.001),1)); hallMesh.setMatrixAt(k,mtx);
+      for(let j=0;j<LPR;j++){const ly=(BASE+.3+j*.39)*g; mtx.compose(v.set(h.x,ly,h.z+CAB_D/2+.006),q,sc.set(1,1,1)); hallLeds.setMatrixAt(k*LPR+j,mtx);
+        const verified=h.d<wave; let c=cA.copy(verified?COL.link:(h.drift&&j%3===0?COL.drift:COL.off)); let k2=verified?.55:.9;
+        if(role===0) { if(h.free&&j<4) c=cB.copy(COL.link), k2=1.2; else k2*=.5; }
+        if(role===1) { if(j>=LPR-2) c=cB.copy(COL.link), k2=1.4; else k2*=.35; }
+        if(role===2) { if(j<2) c=cB.copy(COL.drift), k2=1.3; else k2*=.35; }
+        if(role===3) { c=cB.copy(COL.link); k2=.9; }
+        if(role===4) { if(h.r===0&&Math.abs(h.i)===2) c=cB.copy(COL.drift), k2=.6+.8*Math.abs(Math.sin(time*4)); else k2*=.3; }
+        if(role===5) { if(h.r===3) c=cB.copy(COL.link), k2=clamp(1.4-Math.abs(((time*6)%16)-(h.i+8))*.3,.3,1.4); else k2*=.35; }
+        hallLeds.setColorAt(k*LPR+j,cA.copy(c).multiplyScalar(k2*g)); }
+    });
+    hallMesh.instanceMatrix.needsUpdate=true; hallLeds.instanceMatrix.needsUpdate=true; hallLeds.instanceColor.needsUpdate=true;
+  }
+  floor.material.opacity=.9*dark + .25*smooth(5.9,6.2,S)*(1-smooth(6.7,7,S));
+  foot.material.opacity=smooth(5.95,6.2,S)*(1-smooth(6.7,6.95,S));
+  scene.userData.shadow.material.opacity=1-dark;
+
+  /* phone dock: slides in for the sweep, leaves upward once its job is done */
+  const din=smooth(1.9,2.12,S), dout=smooth(2.98,3.16,S);
+  /* parked off the viewport edge, not a fixed 140% — the dock sits at --bleed
+     now, which is wide on a large display, so the park distance has to clear it */
+  const park=1-din;
+  dock.style.transform=`translate(calc(${(park*100).toFixed(1)}% + ${(park*(BOX.bleed+8)).toFixed(1)}px), ${-dout*(vh+100)}px)`;
+  dock.classList.toggle('complete',sp>=1);
+  const dockOn=din>.01&&dout<.99;
+  if(dockOn){ dkDev.textContent=Math.min(readDev,totalDev); dkPort.textContent=readPorts; dkBar.style.width=(sp*100)+'%';
+    dkU.textContent='U'+Math.max(1,Math.round(42-sp*41)); const secs=Math.round(sp*47); dkRec.textContent='● REC 00:'+String(secs).padStart(2,'0'); }
+
+  /* cursor torch + reading reticle */
+  torch.intensity = hasPointer ? lerp(.6,3.2,dark) : 0;
+  ray.setFromCamera(mouse,camera); torch.position.copy(ray.ray.at(6.2,v));
+  hovered=null;
+  if(hasPointer && footFade>.5 && ndc.x<8 && grow<.4){ ray.setFromCamera(ndc,camera); const hit=ray.intersectObjects(hitTargets,false)[0]; if(hit) hovered=hit.object.userData.dev; }
+  if(hovered){ const d=hovered; const st = d.drift&&fix<.5 ? `<span class="d">▲ ${d.drift}</span>` : `<b>● verified</b>`;
+    const det = d.kind==='switch'?`${d.ports.filter(p=>p.linked).length}/${d.ports.length} linked`: d.kind==='patch'?`${d.ports.filter(p=>p.linked).length}/24 patched`: d.kind==='pdu'?'0U · A+B feed':`${d.h}U`;
+    rLbl.innerHTML=`${d.u?('U'+d.u+(d.h>1?'–'+(d.u+d.h-1):'')):'REAR'} · <b>${d.id}</b><br>${d.name} · ${det}<br>${st}`; reticle.style.opacity=1; }
+  else reticle.style.opacity=0;
+
+  /* the 3D steps back as the footer rises, so nothing sits behind it */
+
+  /* render main */
+  const stageOp=(1-bare)*footFade;
+  canvas.style.opacity = stageOp;
+  /* fully faded — in the closing chapter on a narrow screen, or once the footer
+     has come up — so skip the draw rather than render a frame nobody can see */
+  if(stageOp>.002){ renderer.setScissorTest(false); renderer.setViewport(0,0,vw,vh); renderer.setClearColor(0,0); renderer.render(scene,camera); }
+
+  /* render the phone's own viewfinder into the dock's screen */
+  if(dockOn){ const r=screenEl.getBoundingClientRect(); const x=r.left,y=vh-r.bottom,w=r.width,h=r.height;
+    if(x<vw&&w>0){ phoneCam.aspect=w/h; const py=clamp(scanY,BASE+1.45,TOP-1.45); phoneCam.position.set(.12,py+.1,ZF+3.9); phoneCam.lookAt(0,py,ZF); phoneCam.updateProjectionMatrix();
+      { const fy=v.set(0,scanY,ZF).project(phoneCam).y; frameEl.style.top=((-fy*.5+.5)*100)+'%'; }
+      frustum.visible=false; sheet.visible=false;
+      renderer.setScissorTest(true); renderer.setScissor(x,y,w,h); renderer.setViewport(x,y,w,h); renderer.setClearColor(0x0c1110,1); renderer.render(scene,phoneCam);
+      renderer.setScissorTest(false); frustum.visible=true; sheet.visible=true; } }
+
+  /* tags */
+  TAGS.forEach(t=>{const o=t.vis(S)*(1-bare); if(o<.01){t.el.style.opacity=0;return;} const p=t.pos().project(camera);
+    if(p.z>1){t.el.style.opacity=0;return;} const x=(p.x*.5+.5)*vw,y=(-p.y*.5+.5)*vh;
+    /* A label that would run off the right edge is flipped to the other side of
+       its anchor: the dot stays on the device it points at and the text turns
+       inward, instead of being clipped. Width is cached per viewport width —
+       the labels are static, so this costs one layout read each on resize. */
+    if(t.w===undefined||t.wv!==vw){ t.w=t.el.offsetWidth; t.wv=vw; }
+    const flip = t.left || (x + t.w > vw - 10);
+    t.el.classList.toggle('left', flip);
+    /* Fade on the painted box, not the anchor, and measure against the reading
+       column's right edge: a label may sit in the gap, never over the text.
+       Tags live above the scrim, so nothing else can protect the copy from them
+       — on a narrow stage it is better to drop a label than to print it on a
+       sentence. */
+    t.el.style.opacity=o*clamp(((flip? x-t.w : x)-BOX.copyR)/40);
+    t.el.style.transform= flip? `translate(calc(${x}px - 100%),${y}px) translateY(-50%)` : `translate(${x}px,${y}px) translateY(-50%)`; });
+
+  updateAnalytics(S,time,vw,vh,wide,lift);
+  requestAnimationFrame(frame);
+}
+
+
+/* ───────────── live analytics around the rack (inline SVG, example data) ───────────── */
+const AN = (()=>{
+  const NS='http://www.w3.org/2000/svg';
+  const el=(tag,attrs,parent)=>{const e=document.createElementNS(NS,tag);for(const k in attrs)e.setAttribute(k,attrs[k]);parent&&parent.appendChild(e);return e;};
+  const tip=document.createElement('div'); tip.className='tip'; document.body.appendChild(tip);
+  const showTip=(e,html)=>{tip.innerHTML=typeof html==='function'?html():html;tip.style.opacity=1;const x=Math.min(e.clientX+14,innerWidth-tip.offsetWidth-8);tip.style.transform=`translate(${x}px,${e.clientY-38}px)`;};
+  const hideTip=()=>{tip.style.opacity=0;};
+  const hover=(node,html)=>{node.addEventListener('pointermove',e=>showTip(e,html));node.addEventListener('pointerleave',hideTip);};
+  const INK2='#4A544F',LINK='#04703F',LINKF='#1FD67C',DRIFT='#FF9A2E',FREE='#D3D8D4',USED='#2A302D',PAPER='#F4F6F3',TRACK='#E2E6E2';
+  const live=!reduce; const ticks=[];
+
+  /* 1 · port state — donut, counted from the 3D rack; a port links or frees every few seconds */
+  { const svg=document.querySelector('#cPorts svg'); const all=devices.flatMap(d=>d.ports); let linked=all.filter(p=>p.linked).length; const total=all.length;
+    const R=46,C=2*Math.PI*R,g=3;
+    el('circle',{cx:60,cy:60,r:R,fill:'none',stroke:FREE,'stroke-width':14},svg);
+    const seg=el('circle',{cx:60,cy:60,r:R,fill:'none',stroke:LINK,'stroke-width':14,transform:'rotate(-90 60 60)',class:'seg fadein'},svg);
+    const set=()=>{const len=linked/total*C-g; seg.setAttribute('stroke-dasharray',`${len} ${C-len}`);
+      document.getElementById('portLinked').textContent=linked; document.getElementById('portOf').textContent='of '+total+' linked';
+      document.getElementById('lgLinked').textContent='Linked '+linked; document.getElementById('lgFree').textContent='Free '+(total-linked);};
+    set(); hover(svg,()=>`<b>${linked}</b> linked · ${total-linked} free`);
+    const base=linked; ticks.push([2600,()=>{ linked=Math.max(base-3,Math.min(base+2,linked+(Math.random()<.5?-1:1))); set(); }]);
+  }
+
+  /* 2 · records matching — line + area; a new sweep lands every few seconds */
+  { const svg=document.querySelector('#cTrend svg'); let D=[58,61.2,70.4,78.9,84.1,88.6,91.3,94,96.2,97.8,99.1,99.6];
+    const x0=22,x1=292,y0=78,y1=6,lo=50,hi=100, X=i=>x0+i*(x1-x0)/(D.length-1), Y=v=>y0-(v-lo)/(hi-lo)*(y0-y1);
+    [60,80,100].forEach(v=>{el('line',{x1:x0,x2:x1,y1:Y(v),y2:Y(v),class:'grid'},svg);el('text',{x:0,y:Y(v)+3},svg).textContent=v;});
+    el('text',{x:x0,y:94},svg).textContent='12 sweeps ago'; const t=el('text',{x:x1,y:94,'text-anchor':'end'},svg); t.textContent='now';
+    const area=el('path',{fill:LINKF,'fill-opacity':.14,class:'live fadein'},svg), line=el('path',{fill:'none',stroke:LINK,'stroke-width':2,'stroke-linejoin':'round','stroke-linecap':'round',class:'live fadein'},svg);
+    const end=el('circle',{r:4,fill:LINK,stroke:PAPER,'stroke-width':2,class:'live'},svg);
+    const draw=()=>{const pts=D.map((v,i)=>`${X(i).toFixed(1)},${Y(v).toFixed(1)}`); line.setAttribute('d','M'+pts.join(' L')); area.setAttribute('d',`M${X(0)},${y0} L${pts.join(' L')} L${X(D.length-1)},${y0} Z`);
+      end.setAttribute('cx',X(D.length-1)); end.setAttribute('cy',Y(D.at(-1))); document.getElementById('trendNow').textContent=D.at(-1).toFixed(1)+'%';};
+    draw();
+    const cross=el('line',{y1:y1,y2:y0,stroke:INK2,'stroke-width':1,opacity:0},svg), dot=el('circle',{r:4,fill:LINK,stroke:PAPER,'stroke-width':2,opacity:0},svg);
+    const hit=el('rect',{x:x0-8,y:0,width:x1-x0+16,height:y0+4,class:'hit'},svg);
+    hit.addEventListener('pointermove',e=>{const r=svg.getBoundingClientRect();const sx=(e.clientX-r.left)/r.width*300;const i=Math.max(0,Math.min(D.length-1,Math.round((sx-x0)/((x1-x0)/(D.length-1)))));
+      cross.setAttribute('x1',X(i));cross.setAttribute('x2',X(i));cross.setAttribute('opacity',.5);dot.setAttribute('cx',X(i));dot.setAttribute('cy',Y(D[i]));dot.setAttribute('opacity',1);
+      showTip(e,`${i===D.length-1?'Latest sweep':(D.length-1-i)+' sweeps ago'} · <b>${D[i].toFixed(1)}%</b>`);});
+    hit.addEventListener('pointerleave',()=>{cross.setAttribute('opacity',0);dot.setAttribute('opacity',0);hideTip();});
+    ticks.push([3400,()=>{ D=D.slice(1).concat([+(99.3+Math.random()*.6).toFixed(1)]); draw(); }]);
+  }
+
+  /* 3 · rack capacity — 42-unit strip from the same layout as the 3D rack; a scan head walks it */
+  { const svg=document.querySelector('#cCap svg'); const occ={}; LAYOUT.forEach(d=>{ if(d.kind==='blank') return; for(let u=d.u;u<d.u+d.h;u++) occ[u]=d; });
+    const used=Object.keys(occ).length; document.getElementById('capFree').textContent=(42-used)+'U'; document.getElementById('capUsed').textContent=`free · ${used} of 42 used`;
+    const gap=2,w=(300-41*gap)/42;
+    for(let u=1;u<=42;u++){ const d=occ[u]; const r=el('rect',{x:(u-1)*(w+gap),y:4,width:w,height:24,rx:1.5,fill:d?USED:FREE,class:'growy',style:`transition-delay:${u*12}ms`},svg);
+      hover(r,d?`U${u} · <b>${d.id||d.name}</b>`:`U${u} · free`); }
+    el('text',{x:0,y:42},svg).textContent='U1'; const t=el('text',{x:300,y:42,'text-anchor':'end'},svg); t.textContent='U42';
+    const scan=el('rect',{x:0,y:2.5,width:w+1,height:27,rx:2,class:'scan'},svg); let su=42;
+    ticks.push([90,()=>{ su=su<=1?42:su-1; scan.setAttribute('x',((su-1)*(w+gap)-.5).toFixed(1)); }]);
+  }
+
+  /* 4 · mismatches by row — heatmap, single-hue amber ramp; this week's column breathes */
+  { const svg=document.querySelector('#cHeat svg'); const H=[[6,4,3,1,0,0,0,0],[9,7,5,4,2,1,0,0],[12,10,9,6,4,2,1,0],[14,13,11,9,7,4,2,1]];
+    const ramp=v=>v===0?TRACK:v<=2?'#F6DDBB':v<=5?'#FBBE78':v<=9?'#EE8F2E':'#B35A00';
+    const lx=40,cw=(300-lx-7*3)/8,ch=18;
+    H.forEach((row,r)=>{ el('text',{x:0,y:r*(ch+3)+13},svg).textContent='Row '+(r+1);
+      row.forEach((v,c)=>{const q=el('rect',{x:lx+c*(cw+3),y:r*(ch+3),width:cw,height:ch,rx:2,fill:ramp(v),class:'fadein'+(c===7?' now':''),style:`transition-delay:${(c*4+r)*25}ms`},svg);
+        hover(q,`Row ${r+1} · week ${c+1} · <b>${v}</b> mismatch${v===1?'':'es'}`);}); });
+    [0,7].forEach(c=>{const t=el('text',{x:lx+c*(cw+3)+(c?cw:0),y:95,'text-anchor':c?'end':'start'},svg);t.textContent=c?'This week':'8 weeks ago';});
+    [0,2,5,9,14].forEach((v,i)=>el('rect',{x:300-5*14+i*14,y:102,width:12,height:6,rx:1,fill:ramp(v)},svg));
+    const lt=el('text',{x:300-5*14-4,y:108,'text-anchor':'end'},svg); lt.textContent='0 → 14';
+  }
+
+  /* 5 · what the first sweep found — horizontal bars */
+  { const svg=document.querySelector('#cTypes svg'); const B=[['Patched to a different port',9],['Retired but still recorded',4],['Not in any record',3],['Different model on file',2]];
+    B.forEach(([k,v],i)=>{const y=i*29; el('text',{x:0,y:y+9,style:'font-family:var(--sans);font-size:11px;fill:#111614'},svg).textContent=k;
+      const vt=el('text',{x:300,y:y+9,'text-anchor':'end',style:'fill:#111614'},svg); vt.textContent=v;
+      el('rect',{x:0,y:y+14,width:300,height:8,rx:4,fill:TRACK},svg);
+      const b=el('rect',{x:0,y:y+14,width:300*v/10,height:8,rx:4,fill:DRIFT,class:'grow',style:`transition-delay:${i*90}ms`},svg);
+      hover(b,`${k} · <b style="color:${DRIFT}">${v}</b>`);});
+  }
+
+  /* 6 · evidence coverage — progress bars; the last HIPAA records get re-swept and it closes to 100% */
+  { const svg=document.querySelector('#cAudit svg'); const F=[['SOC 2',100],['ISO 27001',100],['HIPAA',96],['PCI-DSS Req. 9',100]]; const bars=[],vals=[];
+    F.forEach(([k,v],i)=>{const y=i*29; el('text',{x:0,y:y+9,style:'font-family:var(--sans);font-size:11px;fill:#111614'},svg).textContent=k;
+      const vt=el('text',{x:300,y:y+9,'text-anchor':'end',style:'fill:#111614'},svg); vt.textContent=v+'%';
+      el('rect',{x:0,y:y+14,width:300,height:8,rx:4,fill:TRACK},svg);
+      const b=el('rect',{x:0,y:y+14,width:300*v/100,height:8,rx:4,fill:LINK,class:'grow bar',style:`transition-delay:${i*90}ms`},svg);
+      bars.push([b,vt]); vals.push(v);
+      hover(b,()=>`${k} · <b>${vals[i]}%</b>${vals[i]<100?' · '+Math.round((100-vals[i])/2)+' records await a re-sweep':' covered'}`);});
+    let step=0; ticks.push([2200,()=>{ step=(step+1)%8; const v=step<4?96+step:100; if(step===7){vals[2]=96;}else vals[2]=Math.min(100,v);
+      const [b,t]=bars[2]; b.setAttribute('width',300*vals[2]/100); t.textContent=vals[2]+'%';
+      const avg=Math.round(vals.reduce((a,c)=>a+c,0)/4); document.getElementById('auditAll').textContent=avg+'%';
+      document.getElementById('auditNote').textContent= vals[2]===100?'of records audit-ready · all covered':'of records audit-ready'; }]);
+  }
+
+  /* timers run only while the stage is on screen */
+  const timers=[]; let running=false;
+  const start=()=>{ if(running||!live) return; running=true; ticks.forEach(([ms,fn])=>timers.push(setInterval(fn,ms))); };
+  const stop=()=>{ running=false; timers.splice(0).forEach(clearInterval); };
+
+  const cards=[...document.querySelectorAll('#start .card')];
+  const ALL=LAYOUT.filter(d=>d.id).map(d=>d.id);
+  const FOCUS={cPorts:{ids:['TOR-A','TOR-B','OOB-3','PP-A1','PP-B1'],col:COL.link},cTrend:{ids:ALL,col:COL.link},cCap:{ids:ALL,col:COL.link},
+    cHeat:{ids:['OOB-3','DB-103'],col:COL.drift},cTypes:{ids:['OOB-3','DB-103','PP-A1'],col:COL.drift},cAudit:{ids:ALL,col:COL.link}};
+  cards.forEach(c=>{ c.addEventListener('mouseenter',()=>{cardFocus=FOCUS[c.id];}); c.addEventListener('mouseleave',()=>{cardFocus=null;}); });
+  const wrap=document.getElementById('start'); wrap.classList.add('armed');
+  return { cards, start, stop };
+})();
+
+const stageEl=document.getElementById('stage2'), colL=document.querySelector('#start .col-l'), colR=document.querySelector('#start .col-r'), colC=document.querySelector('#start .col-c'), ctaCopy=document.querySelector('#start .cta-copy');
+const ANCH={cPorts:()=>byId['TOR-A'].y0,cTrend:()=>yOf(28,1),cCap:()=>yOf(12,1),cHeat:()=>byId['OOB-3'].y0,cTypes:()=>byId['DB-103'].y0,cAudit:()=>byId['SAN-07'].y0};
+const pv=new THREE.Vector3();
+const LINK={}, linksSvg=document.getElementById('links'), NS='http://www.w3.org/2000/svg';
+const LK={};
+function drawLinks(show){
+  if(!show){linksSvg.style.opacity=0;return;} linksSvg.style.opacity=footFade;
+  const sr=stageEl.getBoundingClientRect();
+  AN.cards.forEach(c=>{const L=LINK[c.id]; if(!L) return;
+    let g=LK[c.id]; if(!g){g=LK[c.id]={p:document.createElementNS(NS,'path'),h:document.createElementNS(NS,'circle'),e:document.createElementNS(NS,'circle'),j:document.createElementNS(NS,'rect')};
+      g.p.setAttribute('class','lk');g.h.setAttribute('class','halo');g.h.setAttribute('r',6);g.e.setAttribute('class','end');g.e.setAttribute('r',2.6);g.j.setAttribute('class','jack');g.j.setAttribute('width',7);g.j.setAttribute('height',7);
+      linksSvg.append(g.p,g.h,g.e,g.j);}
+    const r=c.getBoundingClientRect(), x1=(L.side<0?r.right:r.left)-sr.left, y1=r.top+L.ny*r.height-sr.top, x2=L.ax-sr.left, y2=L.ay-sr.top, dx=(x2-x1)*.55;
+    g.p.setAttribute('d',`M${x1.toFixed(1)} ${y1.toFixed(1)} C${(x1+dx).toFixed(1)} ${y1.toFixed(1)} ${(x2-dx).toFixed(1)} ${y2.toFixed(1)} ${x2.toFixed(1)} ${y2.toFixed(1)}`);
+    const op=c.style.opacity===''?1:+c.style.opacity, hot=c.matches(':hover,:focus-within');
+    g.p.classList.toggle('hot',hot); g.p.style.opacity=hot?1:(op*.55).toFixed(3);
+    g.h.setAttribute('cx',x2);g.h.setAttribute('cy',y2);g.e.setAttribute('cx',x2);g.e.setAttribute('cy',y2);g.h.style.opacity=g.e.style.opacity=op;
+    g.j.setAttribute('x',x1-3.5);g.j.setAttribute('y',y1-3.5);g.j.style.opacity=op;
+  });
+}
+function placeColumns(vw){
+  /* the rack's front face on screen */
+  let x0=1e9,x1=-1e9,y0=1e9,y1=-1e9;
+  for(const cx of [-CAB_W/2,CAB_W/2]) for(const cy of [0,TOP+.1]){ pv.set(cx,cy,CAB_D/2).applyMatrix4(rack.matrixWorld).project(camera);
+    const sx=(pv.x*.5+.5)*vw, sy=(-pv.y*.5+.5)*vh; x0=Math.min(x0,sx);x1=Math.max(x1,sx);y0=Math.min(y0,sy);y1=Math.max(y1,sy); }
+  const sr=stageEl.getBoundingClientRect(), gap=Math.max(96,Math.min(176,vw*.085)), W=296, rackH=y1-y0, mid=(y0+y1)/2-sr.top;
+  const top0=BAND.t-6, bot0=vh-16;   /* the cards may use the band, a little past the rack's ends */
+  /* one scale and one height for both columns, so their tops and bottoms line up */
+  const sums=[colL,colR].map(c=>[...c.children].reduce((a,e)=>a+e.offsetHeight,0)), most=Math.max(...sums);
+  const k=clamp((bot0-top0)/(most+32),.72,1), Tn=Math.max(rackH/k,most+32), H=Tn*k, y=clamp(mid-H/2,top0,Math.max(top0,bot0-H));
+  [[colL,-1],[colR,1]].forEach(([col,side],ci)=>{
+    const cs=[...col.children], n=cs.length, g=Math.max(16,(Tn-sums[ci])/(n-1));
+    col.style.gap=g.toFixed(1)+'px';
+    let x= side<0 ? x0-sr.left-gap-W*k : x1-sr.left+gap; x=Math.max(20,Math.min(vw-20-W*k,x));
+    col.style.transformOrigin='left top';
+    col.style.transform=`translate(${x.toFixed(1)}px,${y.toFixed(1)}px) scale(${k.toFixed(3)})`;
+    cs.forEach(c=>{ const a=ANCH[c.id]; if(!a) return; pv.set(side*RW/2,a(),ZF).applyMatrix4(rack.matrixWorld).project(camera); const ay=(-pv.y*.5+.5)*vh, ax=(pv.x*.5+.5)*vw;
+      const r=c.getBoundingClientRect(); const ny=clamp((ay-r.top)/r.height,.12,.88); c.style.setProperty('--ny',(ny*100).toFixed(1)+'%'); LINK[c.id]={ax,ay,ny,side}; });
+  });
+}
+function updateAnalytics(S,time,vw,vh,wide,lift){
+  const vis=smooth(6.55,6.95,S);
+  if(vis>.02) AN.start(); else AN.stop();
+  if(wide && vis>.001) placeColumns(vw); else if(!wide){ colL.style.transform=''; colR.style.transform=''; colL.style.gap=''; colR.style.gap=''; }
+  AN.cards.forEach((c,i)=>{
+    const k=i%3, side=c.dataset.side==='l'?-1:1;
+    /* strictly sequential: card i finishes before card i+1 begins, rather than
+       six overlapping fades arriving almost together */
+    const t0=6.92+i*.062, p=smooth(t0,t0+.052,S);
+    if(p>.6) c.classList.add('in');
+    if(!wide){ c.style.transform=''; c.style.opacity=''; return; }
+    const fl=reduce?0:Math.sin(time*.9+i*1.3)*3, px=reduce?0:mouse.x*5*(side);
+    c.style.transform=`translate(${(-side*70*(1-p)+px).toFixed(1)}px,${(fl+(1-p)*14).toFixed(1)}px) scale(${(.94+.06*p).toFixed(3)})`;
+    c.style.opacity=p.toFixed(3);
+  });
+  drawLinks(wide&&vis>.001);
+}
+
+requestAnimationFrame(frame);
+</script>
+
+<script src="/design-system/nav.js" defer></script>
+</body>
 </html>

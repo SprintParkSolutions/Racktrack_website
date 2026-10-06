@@ -1,0 +1,1132 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Solutions · How RackTrack works</title>
+<meta name="description" content="Scan the rack. Get the record. How RackTrack turns one phone sweep into a verified record your team can use.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap">
+<link rel="stylesheet" href="/design-system/base.css">
+<style>
+/* RackTrack · Solutions — design-system/ tokens. Theme: paper throughout. Protagonist: the record, built from an open-frame cabinet (DC1-R3). */
+:root{
+  color-scheme: light;
+  
+}
+*{box-sizing:border-box}
+html{background:var(--paper)}
+body{margin:0;background:var(--paper);color:var(--fg);font:400 16px/1.5 var(--sans);-webkit-font-smoothing:antialiased;overflow-x:hidden}
+a{color:inherit}
+::selection{background:var(--link);color:#06140d}
+:focus-visible{outline:2px solid var(--link-ink);outline-offset:3px;border-radius:2px}
+.sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
+body::before{content:"";position:fixed;inset:0;z-index:0;pointer-events:none;background:radial-gradient(70% 60% at 68% 46%,rgba(255,255,255,.55),transparent 70%)}
+
+#stage{position:fixed;inset:0;z-index:1;display:block;width:100%;height:100%;pointer-events:none}
+main{position:relative;z-index:2}
+.view{position:absolute;inset:0;pointer-events:none}
+.hud{position:absolute;inset:0;overflow:hidden;pointer-events:none}
+
+/* nav */
+.nav{position:fixed;left:0;right:0;top:0;z-index:10;display:flex;align-items:center;gap:28px;height:calc(var(--nav-h) + env(safe-area-inset-top,0px));padding:env(safe-area-inset-top,0px) var(--bleed) 0;background:linear-gradient(var(--paper) 55%,transparent)}
+.brand{display:flex;align-items:center;gap:10px;text-decoration:none;font:700 17px/1 var(--sans);letter-spacing:-.02em;color:var(--ink)}
+.brand img{width:26px;height:26px;border-radius:5px;display:block}
+.nav ul{display:flex;gap:24px;list-style:none;margin:0 0 0 auto;padding:0}
+.nav ul a{font:500 14px/1 var(--sans);text-decoration:none;color:var(--ink-2)}
+.nav ul a:hover{color:var(--ink)}
+.nav ul a[aria-current="page"]{color:var(--ink);text-decoration:underline;text-decoration-color:var(--link);text-decoration-thickness:2px;text-underline-offset:6px}
+.btn{display:inline-flex;align-items:center;gap:10px;height:46px;padding:0 20px;border-radius:3px;border:1px solid var(--fg);font:500 15px/1 var(--sans);text-decoration:none;cursor:pointer;background:transparent;color:var(--fg);transition:background .2s,color .2s,border-color .2s}
+.btn.solid{background:var(--fg);color:var(--bg)}
+.btn.solid:hover{background:var(--link-ink);border-color:var(--link-ink);color:#fff}
+.btn:not(.solid){border-color:var(--line)}
+.btn:not(.solid):hover{border-color:var(--fg)}
+.btn .led{width:7px;height:7px;border-radius:50%;background:var(--link);box-shadow:0 0 8px var(--link)}
+.nav .btn{height:38px;padding:0 16px;font-size:14px}
+
+
+/* type */
+.ch{position:relative;padding-inline:var(--bleed)}
+.copy{max-width:28rem;}
+h1,h2,h3{margin:0 0 20px;text-wrap:balance}
+h1{max-width:10ch}
+h2{max-width:13ch}
+h3{margin:0 0 8px}
+.lede{color:var(--fg-2);max-width:26rem;margin:0 0 28px}
+.actions{display:flex;flex-wrap:wrap;gap:12px}
+.k{margin:0 0 14px;font:400 12px/1 var(--mono);color:var(--link-ink)}
+.sec{padding-block:var(--band-y)}
+
+/* tags */
+.tag{position:absolute;left:0;top:0;display:flex;align-items:center;opacity:0;will-change:transform,opacity;white-space:nowrap}
+.tag::before{content:"";width:7px;height:7px;border-radius:50%;background:var(--c,var(--ink));transform:translate(-3.5px,0);box-shadow:0 0 0 3px color-mix(in oklab,var(--c,var(--ink)) 22%,transparent)}
+.tag i{display:block;width:26px;height:1px;background:var(--c,var(--ink))}
+.tag span{padding:6px 9px;background:var(--paper-2);border:1px solid var(--c,var(--ink));border-radius:2px;font:400 11.5px/1.35 var(--mono);color:var(--ink)}
+.tag span b{display:block;font:600 15px/1.15 var(--sans);letter-spacing:-.02em;margin-bottom:2px}
+.tag.left{flex-direction:row-reverse}.tag.left::before{transform:translate(3.5px,0)}
+.tag.up{flex-direction:column-reverse}.tag.up i{width:1px;height:20px}.tag.up::before{transform:translate(0,3.5px)}
+.tag.down{flex-direction:column}.tag.down i{width:1px;height:20px}.tag.down::before{transform:translate(0,-3.5px)}
+.tag.link{--c:var(--link)} .tag.link span b{color:var(--link-ink)}
+.tag.drift{--c:var(--drift)} .tag.drift span b{color:var(--drift-ink)}
+.tag.rec{--c:var(--record)} .tag.rec span b{color:var(--record-ink)}
+.tag.ink{--c:var(--ink)}
+.tag.flat::before,.tag.flat i{display:none}
+.tag.flat span{background:transparent;border:0;padding:0}
+
+/* 00 · hero */
+#hero{--hero-copy:min(26rem,54vw);min-height:100svh;display:flex;align-items:center;padding-top:var(--nav-h);padding-bottom:calc(var(--stage-drop) * 2)}
+#hero .copy{position:relative;z-index:2;max-width:var(--hero-copy)}
+/* the hero 3D takes the right of the shell, the copy the left. This stage
+   carries a wide record panel beside the rack, so it is given a larger share
+   than the homepage's --copy-w split would leave it. */
+#hero .view{position:absolute;top:0;bottom:0;right:var(--bleed);left:calc(var(--bleed) + var(--hero-copy) + 3vw)}
+.hero-foot{margin-top:40px;display:flex;gap:10px;align-items:center;font:400 12px/1.4 var(--mono);color:var(--fg-2)}
+.hero-foot i{width:8px;height:8px;border-radius:50%;background:var(--link);box-shadow:0 0 0 3px rgba(31,214,124,.2);animation:pulse 1.6s ease-in-out infinite}
+@keyframes pulse{50%{box-shadow:0 0 0 6px rgba(31,214,124,0)}}
+
+/* 01 · three steps */
+#steps .head{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,26rem);gap:40px;align-items:end;margin-bottom:44px}
+#steps .head .lede{margin:0}
+.flowx{display:grid;grid-template-columns:minmax(0,31rem) minmax(0,880px);justify-content:space-between;gap:48px;align-items:center;max-width:1720px;margin-inline:auto}
+.fcopy .lede{margin-bottom:32px}
+.fl{list-style:none;margin:0;padding:0;border-top:1px solid var(--rule)}
+.fl li{border-bottom:1px solid var(--rule)}
+.fl button{all:unset;box-sizing:border-box;display:grid;grid-template-columns:34px 1fr;gap:8px;width:100%;padding:20px 0 22px;cursor:pointer;position:relative}
+.fl button:focus-visible{outline:2px solid var(--link-ink);outline-offset:2px}
+.fl .n{font:400 12px/1.6 var(--mono);color:var(--ink-2)}
+.fl b{display:block;font:500 24px/1.1 var(--sans);letter-spacing:-.025em;color:var(--ink-2);transition:color .3s}
+.fl small{display:block;font:400 15px/1.45 var(--sans);color:var(--ink-2);max-height:0;opacity:0;overflow:hidden;transition:max-height .5s var(--ease),opacity .4s,margin .4s}
+.fl [aria-selected="true"] b{color:var(--ink)} .fl [aria-selected="true"] .n{color:var(--link-ink)}
+.fl [aria-selected="true"] small{max-height:6em;opacity:1;margin-top:8px}
+.fl button:hover b{color:var(--ink)}
+.fl .bar{position:absolute;left:0;right:0;bottom:-1px;height:2px;background:transparent}
+.fl .bar i{display:block;height:100%;width:0;background:var(--link-ink)}
+.fstage{position:relative;aspect-ratio:3/2;width:100%;max-height:78vh;border-radius:4px;overflow:hidden;background:#1a1f1d;box-shadow:0 40px 80px -48px rgba(17,22,20,.55)}
+.fs{position:absolute;inset:0;margin:0;opacity:0;transition:opacity .7s var(--ease);pointer-events:none}
+.fs.on{opacity:1;pointer-events:auto}
+.fs img{width:100%;height:100%;object-fit:cover;display:block;filter:saturate(.82) contrast(1.04);transform:scale(1.08);transition:transform 7s linear}
+.fs.on img{transform:scale(1)}
+.fs::after{content:"";position:absolute;inset:0;background:linear-gradient(180deg,rgba(12,17,16,0) 55%,rgba(12,17,16,.45));pointer-events:none}
+.vf{position:absolute;z-index:2;opacity:0;transform:scale(1.06);transition:opacity .5s .3s,transform .7s .3s var(--ease);
+  background:linear-gradient(var(--link),var(--link)) left top/22px 2px no-repeat,linear-gradient(var(--link),var(--link)) left top/2px 22px no-repeat,
+  linear-gradient(var(--link),var(--link)) right top/22px 2px no-repeat,linear-gradient(var(--link),var(--link)) right top/2px 22px no-repeat,
+  linear-gradient(var(--link),var(--link)) left bottom/22px 2px no-repeat,linear-gradient(var(--link),var(--link)) left bottom/2px 22px no-repeat,
+  linear-gradient(var(--link),var(--link)) right bottom/22px 2px no-repeat,linear-gradient(var(--link),var(--link)) right bottom/2px 22px no-repeat;overflow:hidden}
+.vf.soft{background-color:rgba(31,214,124,.07)}
+.fs.on .vf{opacity:1;transform:none}
+.vf .sl{position:absolute;left:0;right:0;top:0;height:2px;background:var(--link);box-shadow:0 0 16px 3px rgba(31,214,124,.6);animation:vscan 2.6s ease-in-out infinite alternate}
+@keyframes vscan{to{top:calc(100% - 2px)}}
+.pt{position:absolute;z-index:2;width:22px;height:22px;margin:-11px 0 0 -11px;border:1.5px solid var(--link);border-radius:2px;opacity:0;transform:scale(1.8);transition:opacity .3s,transform .5s var(--ease);transition-delay:var(--d)}
+.fs.on .pt{opacity:1;transform:none}
+.chip{position:absolute;z-index:3;font:400 12px/1 var(--mono);background:rgba(12,17,16,.84);color:#DDE4DF;padding:8px 10px;border-radius:2px;backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px);display:flex;align-items:center;gap:8px}
+.chip b{color:var(--link);font-weight:500}
+.chip .rec{width:7px;height:7px;border-radius:50%;background:#ff5a4a;animation:rec 1.4s steps(2) infinite}
+@keyframes rec{50%{opacity:.2}}
+.diff{position:absolute;z-index:3;right:4%;top:8%;width:min(330px,44%);background:var(--paper-2);border:1px solid var(--rule);border-radius:3px;box-shadow:0 30px 60px -30px rgba(0,0,0,.6);font:400 12px/1.4 var(--mono);color:var(--ink);
+  opacity:0;transform:translateY(16px);transition:opacity .5s .2s,transform .6s .2s var(--ease)}
+.fs.on .diff{opacity:1;transform:none}
+.diff header{display:flex;justify-content:space-between;padding:10px 12px;border-bottom:1px dashed var(--rule);color:var(--ink-2)}
+.diff header b{color:var(--ink);font-weight:500}
+.diff p{margin:0;display:grid;grid-template-columns:18px 1fr auto;gap:6px;padding:9px 12px;border-bottom:1px solid #e3e7e3;opacity:0;transform:translateX(-8px);transition:opacity .35s,transform .45s var(--ease);transition-delay:var(--d)}
+.diff p:last-child{border-bottom:0}
+.fs.on .diff p{opacity:1;transform:none}
+.diff i{font-style:normal;color:var(--drift-ink)} .diff i.ok{color:var(--link-ink)}
+.diff em{font-style:normal;color:var(--link-ink)} .diff p.dr{background:rgba(255,154,46,.1)} .diff p.dr em{color:var(--drift-ink)}
+.dest{position:absolute;z-index:3;display:flex;flex-direction:column;gap:2px;background:var(--paper-2);border:1px solid var(--link);border-radius:2px;padding:8px 11px 8px 26px;font:400 11.5px/1.3 var(--mono);color:var(--ink-2);
+  box-shadow:0 20px 40px -24px rgba(0,0,0,.6);opacity:0;transform:translateY(14px);transition:opacity .4s,transform .6s var(--ease);transition-delay:var(--d)}
+.dest b{font:600 15px/1.1 var(--sans);letter-spacing:-.02em;color:var(--link-ink)}
+.dest i{position:absolute;left:10px;top:13px;width:8px;height:8px;border-radius:50%;background:var(--link);box-shadow:0 0 0 3px rgba(31,214,124,.25)}
+.fs.on .dest{opacity:1;transform:none}
+.fcount{position:absolute;right:16px;bottom:14px;z-index:3;font:400 12px/1 var(--mono);color:#DDE4DF}
+.fcount b{color:var(--link);font-weight:500}
+
+/* 02 · schematic (pinned 3D) */
+#machine{min-height:460vh}
+.pin{position:sticky;top:0;height:100vh;overflow:hidden}
+.pin .scrim{position:absolute;inset:0;pointer-events:none;background:linear-gradient(90deg,var(--paper) 0,rgba(233,236,232,.9) 27%,rgba(233,236,232,0) 48%)}
+/* left:0 is the band edge, which is the one left edge the nav and every other
+   section sit on — an extra gutter here put this copy out of line with them */
+.pin .steps{position:absolute;left:0;top:max(120px,22vh);width:min(28rem,40vw);height:380px}
+.st{position:absolute;inset:0 0 auto 0;opacity:0;transform:translateY(14px);transition:opacity .45s,transform .45s var(--ease);pointer-events:none}
+.st.on{opacity:1;transform:none;pointer-events:auto}
+.stepbar{position:absolute;left:18px;bottom:0;display:flex;gap:6px;align-items:center;font:400 11px/1 var(--mono);color:var(--fg-2)}
+.stepbar i{display:block;width:34px;height:3px;background:var(--line);position:relative;overflow:hidden}
+.stepbar i b{position:absolute;inset:0 auto 0 0;width:0;background:var(--link-ink)}
+.stepbar span{margin-left:8px}
+.fig{position:absolute;right:var(--gutter);bottom:28px;font:400 11.5px/1.5 var(--mono);color:var(--ink-2);text-align:right}
+.fig b{color:var(--ink);font-weight:500}
+.keys{display:flex;gap:16px;justify-content:flex-end;margin-top:6px}
+.keys span{display:flex;align-items:center;gap:6px}
+.keys i{width:10px;height:10px;border-radius:2px}
+.fact{margin-top:-8px;display:inline-flex;gap:10px;align-items:center;font:400 12px/1 var(--mono);color:var(--fg-2);border:1px solid var(--line);padding:8px 10px;border-radius:2px;background:color-mix(in oklab,var(--paper) 70%,transparent)}
+.fact i{width:8px;height:8px;border-radius:1px;background:var(--link)}
+.fact i.a{background:var(--drift)} .fact i.r{background:var(--record)}
+
+/* 03 · cabinet reader */
+#reader>*{max-width:var(--shell);margin-inline:auto}
+#reader .head{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,26rem);gap:40px;align-items:end;margin-bottom:40px}
+#reader .head .lede{margin:0}
+.panel{display:grid;grid-template-columns:minmax(300px,380px) minmax(0,1fr);border:1px solid var(--rule);border-radius:3px;overflow:hidden;min-height:680px}
+.pside{background:var(--paper-2)}
+.pside{display:flex;flex-direction:column;border-right:1px solid var(--rule)}
+.pbar{display:flex;justify-content:space-between;align-items:center;padding:14px 18px;border-bottom:1px solid var(--rule);font:400 12px/1.3 var(--mono);color:var(--ink-2)}
+.pbar b{color:var(--ink);font-weight:500}
+.pbar .ok{display:flex;align-items:center;gap:7px;color:var(--link-ink)}
+.pbar .ok::before{content:"";width:7px;height:7px;border-radius:50%;background:var(--link)}
+.modes{list-style:none;margin:0;padding:10px}
+.modes button{all:unset;box-sizing:border-box;display:grid;grid-template-columns:22px 1fr auto;gap:10px;align-items:center;width:100%;padding:13px 12px;border-radius:2px;cursor:pointer;position:relative}
+.modes button:hover{background:rgba(17,22,20,.04)}
+.modes button:focus-visible{outline:2px solid var(--link-ink);outline-offset:-2px}
+.modes button .ix{font:400 11px/1 var(--mono);color:var(--ink-2)}
+.modes button b{display:block;font:500 16px/1.2 var(--sans);letter-spacing:-.01em}
+.modes button small{display:block;font:400 13px/1.4 var(--sans);color:var(--ink-2);margin-top:3px;max-height:0;overflow:hidden;opacity:0;transition:max-height .4s var(--ease),opacity .3s}
+.modes button[aria-pressed="true"]{background:var(--paper)}
+.modes button[aria-pressed="true"] small{max-height:3em;opacity:1}
+.modes button[aria-pressed="true"] .ix{color:var(--link-ink)}
+.modes button .go{font:400 11px/1 var(--mono);color:var(--link-ink);opacity:0}
+.modes button[aria-pressed="true"] .go{opacity:1}
+.modes button .pg{position:absolute;left:12px;right:12px;bottom:0;height:2px;background:var(--rule);opacity:0}
+.modes button .pg i{display:block;height:100%;width:0;background:var(--link-ink)}
+.modes button[aria-pressed="true"] .pg{opacity:1}
+.readout{margin-top:auto;border-top:1px solid var(--rule);padding:14px 18px 18px;font:400 12px/1.5 var(--mono)}
+.readout .cap{color:var(--ink-2);margin-bottom:10px;display:flex;justify-content:space-between}
+.readout table{width:100%;border-collapse:collapse}
+.readout td{padding:6px 0;border-bottom:1px dashed var(--rule);vertical-align:top}
+.readout td:first-child{color:var(--ink-2);width:4.8rem}
+.readout td:last-child{text-align:right;white-space:nowrap}
+.readout tr{opacity:.35;transition:opacity .3s}
+.readout tr.on{opacity:1}
+.st-ok{color:var(--link-ink)} .st-dr{color:var(--drift-ink)} .st-rec{color:var(--record-ink)}
+.pview{position:relative;min-height:560px}
+.pview .view{z-index:1}
+.pview .corner{position:absolute;z-index:2;font:400 11.5px/1.4 var(--mono);color:var(--ink-2)}
+.pview .legend{right:12px;bottom:10px;display:flex;gap:14px;background:rgba(244,246,243,.92);padding:7px 10px;border-radius:2px}
+.pview .legend span{display:flex;align-items:center;gap:6px}
+.pview .legend i{width:9px;height:9px;border-radius:2px}
+.hint{left:12px;bottom:10px;background:rgba(244,246,243,.92);padding:7px 10px;border-radius:2px}
+
+/* 04 · six surfaces (pinned 3D stack) */
+#surfaces{min-height:620vh}
+.slist{list-style:none;margin:0;padding:0;border-top:1px solid var(--rule);max-width:26rem}
+.slist li{border-bottom:1px solid var(--rule);padding:12px 0 12px 18px;position:relative}
+.slist li::before{content:"";position:absolute;left:0;top:12px;bottom:12px;width:2px;background:var(--rule)}
+.slist li .fill{position:absolute;left:0;top:12px;bottom:12px;width:2px;background:var(--link-ink);transform:scaleY(0);transform-origin:top}
+.slist .ix{display:block;font:400 11.5px/1 var(--mono);color:var(--ink-2);margin-bottom:6px}
+.slist b{display:block;font:500 18px/1.2 var(--sans);letter-spacing:-.02em;color:var(--ink-2);transition:color .3s}
+.slist p{margin:0;max-height:0;overflow:hidden;opacity:0;color:var(--ink-2);font-size:15px;line-height:1.45;transition:max-height .5s var(--ease),opacity .4s,margin .4s}
+.slist li.on .ix{color:var(--link-ink)} .slist li.on b{color:var(--ink)}
+.slist li.on p{max-height:6em;opacity:1;margin-top:6px}
+.slist li.done b{color:var(--ink)}
+#surfaces .copy{position:absolute;left:0;top:max(110px,16vh);width:min(28rem,40vw)}
+
+/* 05 · cta */
+#cta{padding-block:var(--band-y);text-align:center}
+#cta h2{margin-inline:auto;max-width:13ch}
+#cta .lede{margin-inline:auto}
+#cta .actions{justify-content:center}
+
+/* footer */
+.foot{position:relative;z-index:2;padding:var(--band-y) var(--bleed) calc(var(--s8) + env(safe-area-inset-bottom,0px));background:var(--paper);border-top:1px solid var(--rule);display:grid;grid-template-columns:var(--copy-w) repeat(3,minmax(0,1fr));gap:28px;font-size:14px;color:var(--ink-2)}
+.foot b{display:block;font:500 13px/1 var(--sans);color:var(--link-ink);margin-bottom:16px}
+.foot nav{display:flex;flex-direction:column;gap:11px}
+.foot nav a{color:var(--ink);text-decoration:none;font-size:15px}
+.foot nav a:hover{color:var(--link-ink)}
+.foot p{margin:0 0 11px;color:var(--ink);font-size:15px;line-height:1.45}
+.foot p a{text-decoration:none}.foot p a:hover{color:var(--link-ink)}
+.foot-brand .brand{margin-bottom:16px}
+.foot-brand p{color:var(--ink-2);max-width:18rem}
+.foot .fine{grid-column:1/-1;display:flex;justify-content:space-between;flex-wrap:wrap;gap:12px;margin-top:16px;padding-top:18px;border-top:1px solid var(--rule);font-size:13px}
+.foot .legal{display:flex;gap:18px;flex-wrap:wrap}.foot .legal a{color:var(--ink-2);text-decoration:none}.foot .legal a:hover{color:var(--link-ink)}
+.foot .social{display:flex;gap:18px}
+.foot .social a{color:var(--ink-2);text-decoration:none}
+
+.no-webgl #stage{display:none}
+@media (max-width:1180px){ .foot{grid-template-columns:repeat(2,minmax(0,1fr))} }
+@media (max-width:960px){
+  #steps .head,#reader .head{grid-template-columns:1fr}
+  .flowx{grid-template-columns:1fr}
+  .panel{grid-template-columns:1fr}
+  .pside{border-right:0;border-bottom:1px solid var(--rule)}
+  .pview{min-height:520px}
+  .modes{display:grid;grid-template-columns:1fr 1fr;gap:4px}
+  .modes button small{display:none}
+  .readout{display:none}
+  
+}
+@media (max-width:760px){
+  /* the hero was a full 100svh with ~290px of copy centred in it, which left
+     a screen of dead space under the block — trim the band it reserves */
+  /* The rack is sized by the column WIDTH, not the hero height, so shortening
+     the band costs it nothing — it only removes the dead screen between the
+     hero copy and the next section. */
+  #hero{min-height:62svh;padding-bottom:0}
+
+  .pin .scrim{background:linear-gradient(0deg,var(--paper) 0,rgba(233,236,232,.9) 34%,rgba(233,236,232,0) 55%)}
+  .hud .tag:not(.keep){display:none}
+  #hero .actions{display:grid;grid-template-columns:1fr;gap:10px}
+  #hero .actions .btn{justify-content:center}
+  .hero-foot{margin-top:22px}
+  .pin .steps,#surfaces .copy{left:var(--gutter);right:var(--gutter);width:auto;top:auto;bottom:6vh}
+  .pin .steps{height:280px}
+  .pin .steps .copy,#surfaces .copy{background:color-mix(in oklab,var(--paper) 90%,transparent);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);padding:16px 18px;border-radius:3px}
+  .slist li:not(.on){display:none}
+  /* Past the last surface the script marks every item done and none active —
+     on desktop that is the finale, all six lit at once. Here only the active
+     item is shown, so that ending used to render as a blank screen for the
+     last stretch of the section. Show the completed set instead: the items
+     keep their collapsed paragraphs, so it reads as a compact recap of the
+     six surfaces, which a phone never gets to see side by side otherwise. */
+  .slist:has(li:last-child.done) li{display:block}
+  .slist:has(li:last-child.done) li .fill{transform:scaleY(1)}
+  #surfaces .copy{transition:opacity .3s}
+  #surfaces .copy:not(:has(.slist li.on)):not(:has(li:last-child.done)){opacity:0}
+  .fig{display:none}
+  /* the reader's hint and legend sit bottom-left and bottom-right — at phone
+     width they meet in the middle, so stack them instead */
+  .pview .legend{left:12px;right:12px;bottom:10px;justify-content:flex-start;flex-wrap:wrap;gap:6px 14px}
+  .hint{bottom:48px}
+  /* the "reading" badge squeezes the mode label onto two lines at this width */
+  .modes button .go{display:none}
+}
+@media (max-width:560px){ .foot{grid-template-columns:repeat(2,minmax(0,1fr));gap:var(--s6) var(--s5);padding-block:var(--band-y-sm) calc(var(--s6) + env(safe-area-inset-bottom,0px))} }
+@media (prefers-reduced-motion:reduce){ .st,.slist p,.fs img,.fs,.vf,.pt,.diff,.diff p,.dest{transition:none!important} .vf .sl,.chip .rec,.hero-foot i{animation:none!important} }
+</style>
+</head>
+<body>
+
+<canvas id="stage" aria-hidden="true"></canvas>
+
+<nav class="nav" aria-label="Primary">
+  <a class="brand" href="/"><img alt="" src="/design-system/assets/Logos/racktrack-mark.jpg">RackTrack</a>
+  <ul>
+    <li><a href="/pages/why-racktrack/">Why RackTrack</a></li>
+    <li><a href="/pages/solutions/" aria-current="page">Solutions</a></li>
+    <li><a href="/pages/use-cases/">Use cases</a></li>
+    <li><a href="/pages/resources/">Resources</a></li>
+    <li><a href="/pages/trust-security/">Trust</a></li>
+    <li><a href="/pages/about-us/">About</a></li>
+    <li><a href="/pages/sign-in/">Sign in</a></li>
+  </ul>
+  <a class="btn solid" href="/pages/contact-us/"><span class="led"></span>Book a sweep</a>
+</nav>
+
+<main>
+  <!-- 00 · hero: the rack becomes its record -->
+  <section class="ch" id="hero">
+    <div class="view" id="vHero" data-view="hero"><div class="hud"></div></div>
+    <div class="copy">
+      <h1>Scan the rack. Get the record</h1>
+      <p class="lede">Walk the aisle with your phone. RackTrack checks what it sees against your records and hands your team a record it can use.</p>
+      <div class="actions">
+        <a class="btn solid" href="#steps">See how it works ↓</a>
+        <a class="btn" href="#reader">Try the cabinet reader</a>
+      </div>
+      <p class="hero-foot"><i></i>DC1-R3 · one sweep · 17 devices, 1 to check</p>
+    </div>
+  </section>
+
+  <!-- 01 · three steps -->
+  <section class="ch sec" id="steps">
+    <div class="flowx" id="flowx">
+      <div class="fcopy">
+      <h2>Three steps. No mystery</h2>
+      <p class="lede">First RackTrack sees the rack. Then it checks that view against your records. Then your team uses the result.</p>
+      <ol class="fl" role="tablist" aria-label="The three steps">
+        <li><button role="tab" aria-selected="true" aria-controls="fs0" data-i="0"><span class="n">01</span><span class="t"><b>Capture</b><small>A guided phone sweep records device faces, labels, rack units, ports, LEDs and the cable paths you can see.</small></span><i class="bar"><i></i></i></button></li>
+        <li><button role="tab" aria-selected="false" aria-controls="fs1" data-i="1"><span class="n">02</span><span class="t"><b>Check</b><small>The capture is compared with your CMDB, DCIM, network and asset records, so every difference shows.</small></span><i class="bar"><i></i></i></button></li>
+        <li><button role="tab" aria-selected="false" aria-controls="fs2" data-i="2"><span class="n">03</span><span class="t"><b>Use</b><small>The verified record feeds planning, troubleshooting, security, migration and audit work.</small></span><i class="bar"><i></i></i></button></li>
+      </ol>
+      </div>
+      <div class="fstage" id="fstage">
+        <figure class="fs on" id="fs0" role="tabpanel"><img src="/assets/solutions/capture.jpg" alt="A phone held up to a rack during a RackTrack sweep" loading="lazy">
+          <div class="vf" style="left:30%;top:26%;width:39%;height:63%"><span class="sl"></span></div>
+          <i class="pt" style="left:2.5%;top:20%;--d:.5s"></i><i class="pt" style="left:35.5%;top:15.5%;--d:.8s"></i><i class="pt" style="left:42.5%;top:14.5%;--d:1.1s"></i><i class="pt" style="left:48.5%;top:13.5%;--d:1.4s"></i><i class="pt" style="left:13%;top:88%;--d:1.7s"></i>
+          <span class="chip" style="left:16px;bottom:16px"><span class="rec"></span>reading R03 · <b id="capCnt">0</b> ports</span>
+        </figure>
+        <figure class="fs" id="fs1" role="tabpanel"><img src="/assets/solutions/check.jpg" alt="Two engineers review the reconciled record on a tablet" loading="lazy">
+          <div class="vf soft" style="left:26%;top:37%;width:24%;height:55%"></div>
+          <div class="diff"><header><span>R03 · rack vs CMDB</span><b>4 checked</b></header>
+            <p style="--d:.4s"><i class="ok">✓</i>SW-A · 30 ports linked<em>agrees</em></p>
+            <p style="--d:.9s" class="dr"><i>▲</i>SRV-05 · serial<em>changed</em></p>
+            <p style="--d:1.4s" class="dr"><i>▲</i>PP-C · 3 patches<em>missing</em></p>
+            <p style="--d:1.9s"><i class="ok">✓</i>STC-1 · U19<em>agrees</em></p></div>
+        </figure>
+        <figure class="fs" id="fs2" role="tabpanel"><img src="/assets/solutions/use.jpg" alt="An operations room using the verified record on a wall display" loading="lazy">
+          <div class="vf soft" style="left:1%;top:25%;width:98%;height:34%"></div>
+          <span class="dest" style="left:5%;top:66%;--d:.4s"><i></i><b>CMDB</b>record updated</span>
+          <span class="dest" style="left:37%;top:74%;--d:.8s"><i></i><b>DCIM</b>5U free in R03</span>
+          <span class="dest" style="left:67%;top:64%;--d:1.2s"><i></i><b>Audit pack</b>evidence dated</span>
+        </figure>
+        <span class="fcount" aria-hidden="true"><b id="fNum">01</b> / 03</span>
+      </div>
+    </div>
+  </section>
+
+  <!-- 02 · the same process, drawn as a machine -->
+  <section class="ch" id="machine">
+    <div class="pin">
+      <div class="view" id="vMachine" data-view="machine"><div class="hud"></div></div>
+      <div class="scrim"></div>
+      <div class="steps" id="mSteps">
+        <div class="st on"><div class="copy"><h2>Two sources, read together</h2><p class="lede">The phone sweep sees the rack. Live switch data says what each port is talking to.</p><span class="fact"><i class="r"></i>sweep&nbsp;&nbsp;<i></i>LLDP · CDP</span></div></div>
+        <div class="st"><div class="copy"><h2>Checked in one pass</h2><p class="lede">Perceive, reconcile, cognize: every device, port and label is read, matched and compared with the last sweep.</p><span class="fact"><i></i>3 stages</span></div></div>
+        <div class="st"><div class="copy"><h2>Differences wait for a person</h2><p class="lede">Nothing is written back until someone on your team approves the change.</p><span class="fact"><i class="a"></i>SRV-05 · serial differs</span></div></div>
+        <div class="st"><div class="copy"><h2>Then it lands where you work</h2><p class="lede">The CMDB is updated, DCIM gets true U-space, and the audit pack gets dated evidence.</p><span class="fact"><i></i>CMDB · DCIM · audit pack</span></div></div>
+        <div class="stepbar" aria-hidden="true"><i><b></b></i><i><b></b></i><i><b></b></i><i><b></b></i><span id="mLbl">1 / 4</span></div>
+      </div>
+      <div class="fig"><b>Fig. 2</b> · system schematic · DWG RT-SYS-001 · rev B
+        <div class="keys"><span><i style="background:#7C93A8"></i>sweep</span><span><i style="background:#1FD67C"></i>verified</span><span><i style="background:#FF9A2E"></i>needs approval</span></div></div>
+    </div>
+  </section>
+
+  <!-- 03 · cabinet reader -->
+  <section class="ch sec" id="reader">
+    <div class="head">
+      <h2>Try it yourself. Pick a reading</h2>
+      <p class="lede">A cabinet reconciled the same way RackTrack reconciles yours. Choose a reading and watch the rack answer.</p>
+    </div>
+    <div class="panel">
+      <div class="pside">
+        <div class="pbar"><span><b>Cabinet DC1-R3</b> · 42U</span><span class="ok">sweep verified</span></div>
+        <ul class="modes" id="modes">
+          <li><button type="button" aria-pressed="true" data-m="sweep"><span class="ix">01</span><span><b>Rack sweep</b><small>Read the cabinet top to bottom. Each device registers as the sweep passes it.</small></span><span class="go">reading</span><span class="pg"><i></i></span></button></li>
+          <li><button type="button" aria-pressed="false" data-m="ports"><span class="ix">02</span><span><b>Port inspection</b><small>Find every port on the patch panels and switches, and whether it's in use.</small></span><span class="go">reading</span><span class="pg"><i></i></span></button></li>
+          <li><button type="button" aria-pressed="false" data-m="leds"><span class="ix">03</span><span><b>Live LEDs</b><small>Read link, activity and fault lights as they are, not as the record says.</small></span><span class="go">reading</span><span class="pg"><i></i></span></button></li>
+          <li><button type="button" aria-pressed="false" data-m="trace"><span class="ix">04</span><span><b>Cable trace</b><small>Follow one visible cable from patch panel to switch port, end to end.</small></span><span class="go">reading</span><span class="pg"><i></i></span></button></li>
+        </ul>
+        <div class="readout" aria-live="polite"><div class="cap"><span id="roCap">Registered devices</span><span id="roCount"></span></div><table><tbody id="roBody"></tbody></table></div>
+      </div>
+      <div class="pview" id="pview">
+        <div class="view" id="vReader" data-view="reader"><div class="hud"></div></div>
+        <span class="corner hint">drag to turn · example data</span>
+        <span class="corner legend" id="pLegend"></span>
+      </div>
+    </div>
+  </section>
+
+  <!-- 04 · six surfaces, one record -->
+  <section class="ch" id="surfaces">
+    <div class="pin">
+      <div class="view" id="vStack" data-view="stack"><div class="hud"></div></div>
+      <div class="scrim"></div>
+      <div class="copy">
+        <ol class="slist" id="slist">
+          <li><span class="fill"></span><span class="ix">01 · Perceive</span><b>Visual rack intelligence</b><p>Device placement, rack units, labels, ports and front-panel state, captured from one guided sweep.</p></li>
+          <li><span class="fill"></span><span class="ix">02 · Cognize</span><b>Autonomous asset identification</b><p>Switches, servers, patch panels, PDUs and labels become structured asset records. Nobody types them in.</p></li>
+          <li><span class="fill"></span><span class="ix">03 · Connect</span><b>Connectivity intelligence</b><p>Port usage, cable paths and link lights, mapped against what's physically in the rack.</p></li>
+          <li><span class="fill"></span><span class="ix">04 · Twin</span><b>Topology intelligence</b><p>Rack position, device relationships, ports and cabling joined into one topology you can inspect.</p></li>
+          <li><span class="fill"></span><span class="ix">05 · Reconcile</span><b>Continuous reconciliation</b><p>Every new sweep is compared with CMDB, DCIM, asset and network records, so drift stays visible.</p></li>
+          <li><span class="fill"></span><span class="ix">06 · Audit</span><b>Audit &amp; firmware intelligence</b><p>Firmware currency against vendor releases, low-confidence findings that need a second look, and audit gaps such as unregistered racks, drawn from the verified record.</p></li>
+        </ol>
+      </div>
+    </div>
+  </section>
+
+  <!-- 05 · cta -->
+  <section class="ch" id="cta">
+    <h2>Start with one cabinet. See the whole stack</h2>
+    <p class="lede">We'll sweep one rack or row and show the reconciled output next to your CMDB and network records, live.</p>
+    <div class="actions">
+      <a class="btn solid" href="/pages/contact-us/"><span class="led"></span>Book a sweep</a>
+      <a class="btn" href="/pages/why-racktrack/">Why RackTrack</a>
+    </div>
+  </section>
+
+  <footer class="foot">
+    <div class="foot-brand">
+      <a class="brand" href="/"><img alt="" src="/design-system/assets/Logos/racktrack-mark.jpg">RackTrack</a>
+      <p>Physical infrastructure intelligence for data centers.</p>
+    </div>
+    <nav aria-label="Platform"><b>Platform</b>
+      <a href="/pages/why-racktrack/">Why RackTrack</a><a href="/pages/solutions/">Solutions</a><a href="/pages/use-cases/">Use cases</a><a href="/pages/trust-security/">Trust &amp; security</a></nav>
+    <nav aria-label="Company"><b>Company</b>
+      <a href="/pages/resources/">Resources</a><a href="/pages/about-us/">About us</a><a href="/pages/contact-us/">Contact us</a></nav>
+    <div><b>Contact</b>
+      <p><a href="mailto:info@racktrack.ai">info@racktrack.ai</a></p><p><a href="tel:+18608782448">+1 (860) 878 2448</a></p><p>85 Felt Rd, Suite #604<br>South Windsor, CT 06074</p></div>
+    <div class="fine">
+      <span>© 2026 RackTrack Inc. · Patent pending</span>
+      <span class="legal"><a href="/pages/legal/privacy-policy/">Privacy</a><a href="/pages/legal/terms-of-use/">Terms</a><a href="/pages/legal/cookie-policy/">Cookies</a><a href="/pages/legal/data-we-collect/">Data we collect</a><a href="/pages/legal/third-party-services/">Third parties</a></span>
+      <span class="social"><a href="https://www.linkedin.com/company/racktrack/" rel="noopener" target="_blank">LinkedIn</a><a href="https://www.instagram.com/racktrack_inc/" rel="noopener" target="_blank">Instagram</a><a href="https://www.facebook.com/share/18depF5xzA/" rel="noopener" target="_blank">Facebook</a></span>
+    </div>
+  </footer>
+</main>
+
+<script type="importmap">
+{ "imports": {
+  "three": "https://cdn.jsdelivr.net/npm/three@0.170.0/build/three.module.js",
+  "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.170.0/examples/jsm/"
+} }
+</script>
+<!--DOMJS-START-->
+<script>
+/* ───── Solutions: page logic without WebGL (ruler, step copy, reveal, reader controls + readouts, surfaces list) ───── */
+(()=>{
+const reduce=matchMedia('(prefers-reduced-motion: reduce)').matches;
+const clamp=(x,a=0,b=1)=>Math.min(b,Math.max(a,x));
+const $=s=>document.querySelector(s), $$=s=>[...document.querySelectorAll(s)];
+const RT=window.RT={mode:'sweep',t0:performance.now(),auto:true,prog:(el)=>{const r=el.getBoundingClientRect();return clamp(-r.top/(r.height-innerHeight));}};
+
+// reveal
+const io=(el,th,fn)=>{const o=new IntersectionObserver(es=>es.forEach(e=>{if(e.isIntersecting){fn();o.disconnect();}}),{threshold:th});o.observe(el);};
+// three steps: one stage, auto-advancing, click to choose
+const fBtns=$$('#flowx .fl button'), fFigs=$$('#fstage .fs'), fNum=$('#fNum'), capCnt=$('#capCnt');
+const F={i:0,t0:performance.now(),vis:false,hold:false,dur:6500};
+function fSet(i){F.i=i;F.t0=performance.now();fBtns.forEach((b,k)=>b.setAttribute('aria-selected',String(k===i)));fFigs.forEach((f,k)=>f.classList.toggle('on',k===i));fNum.textContent='0'+(i+1);}
+fBtns.forEach(b=>b.addEventListener('click',()=>{fSet(+b.dataset.i);F.hold=true;}));
+$('#flowx').addEventListener('pointerenter',()=>F.pause=true);$('#flowx').addEventListener('pointerleave',()=>{F.pause=false;F.t0=performance.now()-(F.el||0);});
+new IntersectionObserver(es=>es.forEach(e=>{F.vis=e.isIntersecting;if(F.vis)fSet(F.i);}),{threshold:.4}).observe($('#fstage'));
+function fTick(now){
+  if(F.pause){F.t0=now-(F.el||0);} F.el=now-F.t0;
+  const k=Math.min(1,F.el/F.dur);
+  fBtns.forEach((b,j)=>b.querySelector('.bar i').style.width=(j===F.i?(F.hold||reduce?100:k*100):0)+'%');
+  if(F.vis&&!F.hold&&!reduce&&k>=1) fSet((F.i+1)%3);
+  capCnt.textContent=F.i===0?Math.round(612*Math.min(1,(reduce?1:F.el/2600))):'612';
+  requestAnimationFrame(fTick);}
+requestAnimationFrame(fTick);
+
+// reader
+const MODES=['sweep','ports','leds','trace'], DUR=8000;
+const DATA={
+ sweep:{cap:'Registered devices',legend:[['#1FD67C','registered'],['#7C93A8','not yet read']],
+   rows:[['U42–38','Patch panels · 3 × 48 port','registered',0],['U37–34','ToR · 2 × NX-9336C + OOB','verified',.12],['U33–20','Compute · 7 × 2U server','registered',.24],['U19–06','Storage · controller + 3 arrays','registered',.58],['U05–01','Available · 5U','free',.9]]},
+ ports:{cap:'Ports in use',legend:[['#1FD67C','in use'],['#9DB2C5','free']],
+   rows:[['PP-A','U42 · 48 port','40 / 48',0],['PP-B','U40 · 48 port','44 / 48',.1],['PP-C','U38 · 48 port','31 / 48',.2],['SW-A','U37 · 36 × QSFP28','30 / 36',.3],['SW-B','U35 · 36 × QSFP28','28 / 36',.4],['OOB-1','U34 · 24 port','18 / 24',.5]]},
+ leds:{cap:'Front-panel lights',legend:[['#1FD67C','link'],['#9CF7C6','activity'],['#FF9A2E','fault']],
+   rows:[['link','steady green','142',0],['activity','blinking','37',.1],['fault','SRV-05 · PSU 2','1',.2],['dark','U05–01 · no device','5U',.3]]},
+ trace:{cap:'Cable C-0147',legend:[['#1FD67C','traced'],['#C6CCC7','other cables']],
+   rows:[['from','PP-B · port 07','U40',0],['cable','C-0147 · 1.5 m','seen',.25],['to','SW-A · Eth1/13','U37',.5],['check','LLDP agrees · APP-219 eth0','✓',.75]]},
+};
+const btns=$$('#modes button'), roBody=$('#roBody'), roCap=$('#roCap'), roCount=$('#roCount'), legend=$('#pLegend');
+function setMode(m,user){ RT.mode=m; RT.t0=performance.now(); if(user) RT.auto=false;
+  btns.forEach(b=>b.setAttribute('aria-pressed',String(b.dataset.m===m)));
+  const d=DATA[m]; roCap.textContent=d.cap;
+  roBody.innerHTML=d.rows.map(r=>{const cls=/fault|drift/.test(r[0]+r[2])?'st-dr':/free|dark/.test(r[2]+r[0])?'st-rec':'st-ok';return `<tr data-at="${r[3]}"><td>${r[0]}</td><td>${r[1]}</td><td class="${cls}">${r[2]}</td></tr>`}).join('');
+  legend.innerHTML=d.legend.map(([c,l])=>`<span><i style="background:${c}"></i>${l}</span>`).join('');
+}
+btns.forEach(b=>b.addEventListener('click',()=>setMode(b.dataset.m,true)));
+setMode('sweep');
+let readerVisible=false;
+new IntersectionObserver(es=>es.forEach(e=>{readerVisible=e.isIntersecting; if(e.isIntersecting&&RT.auto) RT.t0=performance.now();}),{threshold:.35}).observe($('#pview'));
+
+// scroll-driven copy
+const mSteps=$$('#mSteps .st'), mBars=$$('#mSteps .stepbar i b'), mLbl=$('#mLbl'), machine=$('#machine');
+const sLis=$$('#slist li'), surfaces=$('#surfaces');
+let curM=-1,curS=-2;
+function frame(now){
+  const vh=innerHeight;
+  const S=scrollY/(document.documentElement.scrollHeight-vh||1);
+  // machine
+  const mp=RT.prog(machine); const m=Math.min(3,Math.floor(mp*4));
+  if(m!==curM){curM=m;mSteps.forEach((e,i)=>e.classList.toggle('on',i===m));mLbl.textContent=(m+1)+' / 4';}
+  mBars.forEach((b,i)=>b.style.width=(clamp(mp*4-i)*100)+'%');
+  // surfaces
+  const sp=RT.prog(surfaces); const k=Math.min(5,Math.floor(sp*6.6)); const all=sp>.93;
+  sLis.forEach((li,i)=>{li.classList.toggle('on',i===k&&!all);li.classList.toggle('done',i<k||all);
+    li.querySelector('.fill').style.transform=`scaleY(${i<k||all?1:i===k?clamp(sp*6.6-k):0})`;});
+  // reader: autoplay + readout
+  const el=now-RT.t0;
+  if(readerVisible&&RT.auto&&!reduce&&el>DUR){ setMode(MODES[(MODES.indexOf(RT.mode)+1)%4]); }
+  const pg=$(`#modes button[data-m="${RT.mode}"] .pg i`); if(pg) pg.style.width=(RT.auto?clamp(el/DUR)*100:100)+'%';
+  const rp=reduce?1:clamp(el/(RT.mode==='sweep'?4500:3000));
+  let n=0; roBody.querySelectorAll('tr').forEach(tr=>{const on=rp>=+tr.dataset.at;tr.classList.toggle('on',on);if(on)n++;});
+  roCount.textContent=n+' / '+roBody.children.length;
+  requestAnimationFrame(frame);
+}
+requestAnimationFrame(frame);
+})();
+</script>
+<!--DOMJS-END-->
+<!--GLJS-START-->
+<script type="module">
+/* ═════════════ Solutions · 3D ═════════════
+   One fixed canvas, four scissored views (hero · machine · reader · stack).
+   Objects: DC1-R3, an open-frame 42U cabinet (hero + reader); a drawing-sheet diorama of the reconciliation
+   machine (sources → engine → approval arch → systems of record, joined by cable trays); six record plates.   */
+import * as THREE from 'three';
+import { RoomEnvironment } from 'three/addons/environments/RoomEnvironment.js';
+import { RoundedBoxGeometry } from 'three/addons/geometries/RoundedBoxGeometry.js';
+import { mergeGeometries } from 'three/addons/utils/BufferGeometryUtils.js';
+
+const RT=window.RT;
+const reduce=matchMedia('(prefers-reduced-motion: reduce)').matches;
+const SNAP=location.search.includes('snap'); // screenshot mode: cameras jump, no easing lag
+const clamp=(x,a=0,b=1)=>Math.min(b,Math.max(a,x));
+const smooth=(a,b,x)=>{const t=clamp((x-a)/(b-a));return t*t*(3-2*t)};
+const lerp=(a,b,t)=>a+(b-a)*t;
+const C=h=>new THREE.Color(h);
+const COL={link:C('#1FD67C'),linkInk:C('#04703F'),drift:C('#FF9A2E'),record:C('#7C93A8'),recLight:C('#9DB2C5'),off:C('#1b211f'),act:C('#9CF7C6'),black:C('#000'),ink:C('#111614'),pale:C('#c9d1cc')};
+const MONO='"JetBrains Mono", monospace', SANS='"Inter", sans-serif';
+
+/* renderer */
+const canvas=document.getElementById('stage');
+let renderer;
+try{ renderer=new THREE.WebGLRenderer({canvas,antialias:true,alpha:true,powerPreference:'high-performance'}); }
+catch(e){ document.documentElement.classList.add('no-webgl'); throw e; }
+renderer.setPixelRatio(Math.min(devicePixelRatio,2));
+renderer.toneMapping=THREE.ACESFilmicToneMapping; renderer.toneMappingExposure=1.0;
+renderer.outputColorSpace=THREE.SRGBColorSpace; renderer.autoClear=false;
+const ENV=new THREE.PMREMGenerator(renderer).fromScene(new RoomEnvironment(),0.04).texture;
+const MAXA=renderer.capabilities.getMaxAnisotropy();
+function tex(c){const t=new THREE.CanvasTexture(c);t.colorSpace=THREE.SRGBColorSpace;t.anisotropy=Math.min(8,MAXA);return t;}
+function cnv(w,h){const c=document.createElement('canvas');c.width=w;c.height=h;return [c,c.getContext('2d')];}
+const GLOW=(()=>{const [c,g]=cnv(64,64);const r=g.createRadialGradient(32,32,0,32,32,32);r.addColorStop(0,'rgba(255,255,255,1)');r.addColorStop(.3,'rgba(255,255,255,.4)');r.addColorStop(1,'rgba(255,255,255,0)');g.fillStyle=r;g.fillRect(0,0,64,64);return new THREE.CanvasTexture(c);})();
+const glowBlend={blending:THREE.CustomBlending,blendEquation:THREE.AddEquation,blendSrc:THREE.SrcAlphaFactor,blendDst:THREE.OneFactor,blendSrcAlpha:THREE.ZeroFactor,blendDstAlpha:THREE.OneFactor};
+let sd=7; const rnd=()=>((sd=(sd*16807)%2147483647)/2147483647);
+function mkScene(){const s=new THREE.Scene();s.environment=ENV;s.environmentIntensity=.85;
+  s.add(new THREE.HemisphereLight(0xffffff,0x8d9690,.6));const k=new THREE.DirectionalLight(0xffffff,1.6);k.position.set(4,7,6);s.add(k);
+  const r=new THREE.DirectionalLight(0xcfe3ff,.6);r.position.set(-5,3,-4);s.add(r);return s;}
+function shadowDisc(w,d,a=.35){const [c,g]=cnv(128,128);const gr=g.createRadialGradient(64,64,4,64,64,64);gr.addColorStop(0,`rgba(17,22,20,${a})`);gr.addColorStop(1,'rgba(17,22,20,0)');g.fillStyle=gr;g.fillRect(0,0,128,128);
+  const m=new THREE.Mesh(new THREE.PlaneGeometry(w,d),new THREE.MeshBasicMaterial({map:new THREE.CanvasTexture(c),transparent:true,depthWrite:false}));m.rotation.x=-Math.PI/2;return m;}
+function rgbaLines(verts){const g=new THREE.BufferGeometry();g.setAttribute('position',new THREE.Float32BufferAttribute(verts,3));
+  g.setAttribute('color',new THREE.Float32BufferAttribute(new Float32Array(verts.length/3*4),4));
+  return new THREE.LineSegments(g,new THREE.LineBasicMaterial({vertexColors:true,transparent:true,depthWrite:false,toneMapped:false}));}
+const rect=(x,y,w,h,z)=>[x-w/2,y-h/2,z,x+w/2,y-h/2,z, x+w/2,y-h/2,z,x+w/2,y+h/2,z, x+w/2,y+h/2,z,x-w/2,y+h/2,z, x-w/2,y+h/2,z,x-w/2,y-h/2,z];
+
+/* tags, per view */
+function Tags(view){const list=[];return {list,
+  add(html,cls,pos,parent){const el=document.createElement('div');el.className='tag '+cls;el.innerHTML=`<i></i><span>${html}</span>`;view.hud.appendChild(el);
+    const t={el,pos:new THREE.Vector3(...pos),parent,cur:0,target:0};list.push(t);return t;},
+  update(cam,w,h,dt){const v=new THREE.Vector3();for(const t of list){t.cur=reduce?t.target:lerp(t.cur,t.target,1-Math.pow(.001,dt));
+    if(t.cur<.01){t.el.style.opacity=0;continue;}
+    v.copy(t.pos); if(t.parent) t.parent.localToWorld(v); v.project(cam);
+    const x=(v.x+1)/2*w, y=(1-v.y)/2*h, cl=t.el.classList, ew=t.el.offsetWidth, eh=t.el.offsetHeight;
+    let tx=cl.contains('left')?x-ew+3.5:(cl.contains('up')||cl.contains('down'))?x-ew/2:x-3.5, ty=cl.contains('up')?y-eh+3.5:cl.contains('down')?y-3.5:y-eh/2;
+    // keep the label inside its view — narrow boxes would otherwise clip it at the edge
+    tx=Math.max(0,Math.min(w-ew,tx)); ty=Math.max(0,Math.min(h-eh,ty));
+    t.el.style.transform=`translate3d(${tx.toFixed(1)}px,${ty.toFixed(1)}px,0)`;t.el.style.opacity=t.cur.toFixed(3);}}};}
+
+/* ═════════════ DC1-R3: open-frame 42U cabinet ═════════════ */
+const U=.1, BASE=.16, RW=1.0, ZF=.46, TOPY=BASE+42*U;
+const yC=(top,h)=>BASE+(top-h)*U+h*U/2;
+const R3=[
+ {top:42,h:1,kind:'patch',id:'PP-A',name:'Patch panel · 48 port',ports:48,used:40},
+ {top:41,h:1,kind:'mgr'},
+ {top:40,h:1,kind:'patch',id:'PP-B',name:'Patch panel · 48 port',ports:48,used:44},
+ {top:39,h:1,kind:'mgr'},
+ {top:38,h:1,kind:'patch',id:'PP-C',name:'Patch panel · 48 port',ports:48,used:31},
+ {top:37,h:1,kind:'switch',id:'SW-A',name:'ToR switch · NX-9336C',ports:36,used:30},
+ {top:36,h:1,kind:'mgr'},
+ {top:35,h:1,kind:'switch',id:'SW-B',name:'ToR switch · NX-9336C',ports:36,used:28},
+ {top:34,h:1,kind:'oob',id:'OOB-1',name:'Mgmt switch · 24 port',ports:24,used:18},
+ ...[0,1,2,3,4,5,6].map(i=>({top:33-2*i,h:2,kind:'server',id:'SRV-0'+(i+1),name:'2U compute',drift:i===4})),
+ {top:19,h:2,kind:'ctrl',id:'STC-1',name:'Storage controller'},
+ {top:17,h:4,kind:'array',id:'ST-1',name:'Disk shelf · 12 × LFF'},
+ {top:13,h:4,kind:'array',id:'ST-2',name:'Disk shelf · 12 × LFF'},
+ {top:9,h:4,kind:'array',id:'ST-3',name:'Disk shelf · 12 × LFF'},
+];
+const DEPTH={patch:.14,mgr:.1,switch:.62,oob:.4,server:.92,ctrl:.8,array:.95};
+function portLayout(d){
+  const o=[];
+  if(d.kind==='patch'){const p=.031,g=.014;for(let r=0;r<2;r++)for(let i=0;i<24;i++)o.push({x:-.39+i*p+Math.floor(i/6)*g,y:r?-.022:.022,i:r*24+i,w:.022,h:.016});}
+  else if(d.kind==='switch'){const p=.041,g=.016;for(let r=0;r<2;r++)for(let i=0;i<18;i++)o.push({x:-.40+i*p+Math.floor(i/6)*g,y:r?-.021:.021,i:i*2+r,w:.033,h:.015});}
+  else if(d.kind==='oob'){const p=.03,g=.014;for(let i=0;i<24;i++)o.push({x:-.38+i*p+Math.floor(i/6)*g,y:-.004,i,w:.022,h:.016});}
+  o.sort((a,b)=>a.i-b.i); return o;
+}
+function usedSet(n,u,seed){let s=seed;const r=()=>((s=(s*16807)%2147483647)/2147483647);const take=Math.min(n,u+4);const a=[...Array(take).keys()];
+  while(a.length>u){a.splice(Math.floor(r()*a.length),1);}return new Set(a);}
+function faceCanvas(d){
+  const W=512,H=Math.round(47*d.h);const [c,g]=cnv(W,H);
+  const base={switch:'#1c2220',patch:'#262c29',server:'#252b28',array:'#222826',ctrl:'#1f2523',oob:'#1f2523',mgr:'#151918'}[d.kind];
+  g.fillStyle=base;g.fillRect(0,0,W,H);
+  for(let i=0;i<60;i++){g.fillStyle=`rgba(255,255,255,${.01+rnd()*.02})`;g.fillRect(rnd()*W,rnd()*H,30+rnd()*120,1);}
+  g.fillStyle='rgba(255,255,255,.07)';g.fillRect(0,0,W,1.5);g.fillStyle='rgba(0,0,0,.4)';g.fillRect(0,H-2,W,2);
+  const X=x=>(x/RW+.5)*W, Y=y=>(.5-y/(d.h*U))*H;
+  const sticker=(x,y,t)=>{g.fillStyle='#e9ece8';g.fillRect(x,y,70,12);g.fillStyle='#111614';g.font=`500 9px ${MONO}`;g.fillText(t,x+4,y+9.5);};
+  if(d.kind==='patch'||d.kind==='switch'||d.kind==='oob'){
+    const pl=portLayout(d);g.fillStyle='#101413';
+    const x0=X(pl[0].x)-12,x1=X(pl.reduce((m,p)=>Math.max(m,p.x),-1))+14;g.fillRect(x0,3,x1-x0,H-6);
+    pl.forEach(p=>{g.fillStyle=d.kind==='switch'?'#07090a':'#060808';g.fillRect(X(p.x-p.w/2),Y(p.y+p.h/2),p.w/RW*W,p.h/(d.h*U)*H);
+      if(d.kind==='switch'){g.strokeStyle='#6d7772';g.lineWidth=1;g.strokeRect(X(p.x-p.w/2)+.5,Y(p.y+p.h/2)+.5,p.w/RW*W-1,p.h/(d.h*U)*H-1);}});
+    sticker(22,d.kind==='patch'?17:17,d.id);
+    if(d.kind==='switch'){g.fillStyle='#c3cac5';g.font=`600 10px ${SANS}`;g.fillText('N9K',X(.43)-10,H*.6);}
+  } else if(d.kind==='server'){
+    for(let i=0;i<12;i++){const x=150+i*26;g.fillStyle='#2f3633';g.fillRect(x,6,22,H-12);g.fillStyle='#3b4440';g.fillRect(x+3,H-20,16,4);}
+    g.strokeStyle='rgba(0,0,0,.45)';g.lineWidth=2;for(let x=26;x<130;x+=6){g.beginPath();g.moveTo(x,H*.2);g.lineTo(x,H*.8);g.stroke();}
+    sticker(440,10,d.id);
+  } else if(d.kind==='array'){
+    for(let r=0;r<3;r++)for(let i=0;i<4;i++){const x=60+i*100,y=8+r*((H-16)/3);g.fillStyle='#2e3532';g.fillRect(x,y,94,(H-16)/3-6);g.fillStyle='#454e4a';g.fillRect(x+6,y+6,56,4);g.fillStyle='#171b1a';g.fillRect(x+80,y+4,8,(H-16)/3-14);}
+    sticker(8,8,d.id);
+  } else if(d.kind==='ctrl'){
+    g.fillStyle='#0d1f16';g.fillRect(40,H*.25,110,H*.4);g.fillStyle='#46c985';g.font=`500 12px ${MONO}`;g.fillText('HA · OK',50,H*.25+18);
+    g.strokeStyle='rgba(0,0,0,.45)';for(let x=190;x<420;x+=6){g.beginPath();g.moveTo(x,H*.2);g.lineTo(x,H*.8);g.stroke();}
+    sticker(430,10,d.id);
+  } else if(d.kind==='mgr'){ for(let i=0;i<14;i++){g.fillStyle='#0c0f0e';g.fillRect(24+i*34,4,20,H-8);} }
+  return c;
+}
+function buildRack(opts={}){
+  const grp=new THREE.Group();
+  const frameMat=new THREE.MeshStandardMaterial({color:'#2b312e',metalness:.6,roughness:.42});
+  const aluMat=new THREE.MeshStandardMaterial({color:'#dfe3df',metalness:.72,roughness:.3});
+  const PX=.6, PZF=.52, PZR=-.56, H=TOPY-BASE+.12;
+  [[-1,PZF],[1,PZF],[-1,PZR],[1,PZR]].forEach(([sx,z])=>{const p=new THREE.Mesh(new THREE.BoxGeometry(.05,H,.05),frameMat);p.position.set(sx*PX,BASE+H/2-.06,z);grp.add(p);});
+  [TOPY+.05,BASE-.02].forEach(y=>{[PZF,PZR].forEach(z=>{const b=new THREE.Mesh(new THREE.BoxGeometry(PX*2+.05,.05,.05),frameMat);b.position.set(0,y,z);grp.add(b);});
+    [-1,1].forEach(sx=>{const b=new THREE.Mesh(new THREE.BoxGeometry(.05,.05,PZF-PZR),frameMat);b.position.set(sx*PX,y,(PZF+PZR)/2);grp.add(b);});});
+  [[-1,PZF],[1,PZF],[-1,PZR],[1,PZR]].forEach(([sx,z])=>{const f=new THREE.Mesh(new THREE.CylinderGeometry(.035,.04,.1,14),frameMat);f.position.set(sx*PX,BASE-.1,z);grp.add(f);});
+  // front rails with U numbers
+  {const [c,g]=cnv(48,42*40);g.fillStyle='#d6dbd7';g.fillRect(0,0,48,c.height);
+   for(let u=1;u<=42;u++){const y=c.height-u*40;g.fillStyle='#8d9690';g.fillRect(0,y,48,1);g.fillStyle='#262c29';for(let k=0;k<3;k++)g.fillRect(32,y+7+k*11,8,6);
+     g.fillStyle='#3c4541';g.font=`500 14px ${MONO}`;g.fillText(String(u).padStart(2,'0'),3,y+25);}
+   const rm=new THREE.MeshStandardMaterial({map:tex(c),metalness:.5,roughness:.4});
+   [-1,1].forEach(s=>{const r=new THREE.Mesh(new THREE.BoxGeometry(.07,42*U,.012),[aluMat,aluMat,aluMat,aluMat,rm,aluMat]);r.position.set(s*(RW/2+.06),BASE+21*U,ZF+.01);grp.add(r);});}
+  const devices=[], leds=[], ports=[], plugPos=[];
+  const chassis=new THREE.MeshStandardMaterial({color:'#2a302d',metalness:.55,roughness:.45});
+  R3.forEach((d0,ix)=>{const d={...d0};const h=d.h*U-.004,dep=DEPTH[d.kind];d.y=yC(d.top,d.h);d.hh=h;d.dep=dep;
+    const g=new THREE.Group();g.position.set(0,d.y,ZF);grp.add(g);d.g=g;
+    const body=new THREE.Mesh(new THREE.BoxGeometry(RW-.02,h,dep),chassis);body.position.z=-dep/2-.002;g.add(body);
+    const fm=new THREE.MeshStandardMaterial({map:tex(faceCanvas(d)),metalness:.35,roughness:.55,color:0xffffff});d.faceMat=fm;
+    const face=new THREE.Mesh(new THREE.PlaneGeometry(RW+.1,h),fm);g.add(face);
+    if(d.kind!=='mgr'){const om=new THREE.LineBasicMaterial({color:COL.link,transparent:true,opacity:0,toneMapped:false,depthWrite:false});
+      const ol=new THREE.LineSegments(new THREE.EdgesGeometry(new THREE.BoxGeometry(RW+.12,h+.006,dep+.012)),om);ol.position.z=-dep/2+.006;g.add(ol);d.outline=om;}
+    if(d.ports){const pl=portLayout(d);const us=usedSet(d.ports,d.used,11+ix*97);d.pl=pl;
+      pl.forEach(p=>{p.used=us.has(p.i);p.dev=d;p.wx=p.x;p.wy=d.y+p.y;ports.push(p);
+        if(p.used)plugPos.push([p.x,d.y+p.y,ZF+.018,d.kind]);
+        if(d.kind!=='patch')leds.push({x:p.x+(d.kind==='switch'?.0:.0),y:d.y+p.y+(p.y>0?.013:-.013)+(d.kind==='oob'?.024:0),st:p.used?(rnd()<.3?'act':'link'):'off',dev:d});});}
+    if(d.kind==='server'){for(let i=0;i<12;i++){const pop=i<8;leds.push({x:-RW/2+(150+i*26+11)/512*RW,y:d.y-h/2+.012,st:pop?(rnd()<.5?'act':'link'):'off',dev:d});}
+      leds.push({x:RW/2-.09,y:d.y+.03,st:'link',dev:d});leds.push({x:RW/2-.07,y:d.y+.03,st:d.drift?'fault':'link',dev:d,fault:!!d.drift});}
+    if(d.kind==='array'){for(let r=0;r<3;r++)for(let i=0;i<4;i++)leds.push({x:-RW/2+(60+i*100+84)/512*RW,y:d.y+h/2-.03-r*((h-.03)/3),st:rnd()<.45?'act':'link',dev:d});}
+    if(d.kind==='ctrl'){for(let i=0;i<4;i++)leds.push({x:RW/2-.2+i*.025,y:d.y+.05,st:i===3?'act':'link',dev:d});}
+    devices.push(d);});
+  const by=Object.fromEntries(devices.filter(d=>d.id).map(d=>[d.id,d]));
+  // plugs
+  const plugs=new THREE.InstancedMesh(new THREE.BoxGeometry(.022,.016,.036),new THREE.MeshStandardMaterial({color:'#e3e8e4',roughness:.3}),plugPos.length);
+  {const m=new THREE.Matrix4();plugPos.forEach((p,i)=>{m.makeTranslation(p[0],p[1],p[2]);plugs.setMatrixAt(i,m);});grp.add(plugs);}
+  // cables
+  const zc=ZF+.036, geoms={pale:[],steel:[],dark:[]};
+  const P=(d,i)=>{const p=d.pl.find(q=>q.i===i);return new THREE.Vector3(p.x,d.y+p.y,zc);};
+  const link=(a,b,k)=>{const mid=a.clone().lerp(b,.5);mid.z=zc+.045+rnd()*.025;mid.x+=(a.x-b.x)*.08;
+    return new THREE.CatmullRomCurve3([a,a.clone().add(new THREE.Vector3(0,-.012,.04)),mid,b.clone().add(new THREE.Vector3(0,.012,.04)),b]);};
+  const drop=(a,side)=>new THREE.CatmullRomCurve3([a,a.clone().add(new THREE.Vector3(0,-.01,.05)),new THREE.Vector3(side*(RW/2+.03),a.y-.1,zc+.07),new THREE.Vector3(side*(RW/2+.05),a.y-.7,zc+.02),new THREE.Vector3(side*(RW/2+.03),Math.max(1.2,a.y-1.8),ZF-.15)]);
+  const tube=c=>new THREE.TubeGeometry(c,18,.0055,4,false);
+  const pair=(pp,sw,kind,skip=[])=>{const A=[...by[pp].pl.filter(p=>p.used&&!skip.includes(pp+p.i))],B=[...by[sw].pl.filter(p=>p.used&&!skip.includes(sw+p.i))];
+    B.forEach((q,k)=>{const a=A[k];if(!a)return;geoms[kind].push(tube(link(new THREE.Vector3(a.x,by[pp].y+a.y,zc),new THREE.Vector3(q.x,by[sw].y+q.y,zc))));a.linked=true;});
+    A.forEach((a,k)=>{if(!a.linked)geoms.dark.push(tube(drop(new THREE.Vector3(a.x,by[pp].y+a.y,zc),a.x>0?1:-1)));});};
+  // the traced cable: PP-B port 07 → SW-A Eth1/13
+  by['PP-B'].pl[6].used=true; by['SW-A'].pl[12].used=true;
+  const traceCurve=link(P(by['PP-B'],6),P(by['SW-A'],12));
+  pair('PP-A','SW-A','pale',['SW-A12']); pair('PP-B','SW-B','pale',['PP-B6']); pair('PP-C','OOB-1','steel');
+  const cmats={pale:new THREE.MeshStandardMaterial({color:'#c9d1cc',roughness:.6,transparent:true}),steel:new THREE.MeshStandardMaterial({color:'#6d8397',roughness:.6,transparent:true}),dark:new THREE.MeshStandardMaterial({color:'#39403d',roughness:.6,transparent:true})};
+  const cableMeshes=Object.entries(geoms).filter(([k,a])=>a.length).map(([k,a])=>{const m=new THREE.Mesh(mergeGeometries(a),cmats[k]);grp.add(m);return m;});
+  const traceMat=new THREE.MeshStandardMaterial({color:'#c9d1cc',roughness:.5,emissive:new THREE.Color(0),toneMapped:true});
+  const traceMesh=new THREE.Mesh(new THREE.TubeGeometry(traceCurve,40,.0085,8,false),traceMat);traceMesh.renderOrder=6;grp.add(traceMesh);
+  // LEDs
+  const ledMesh=new THREE.InstancedMesh(new THREE.PlaneGeometry(.008,.006),new THREE.MeshBasicMaterial({color:0xffffff,toneMapped:false}),leds.length);
+  const glowMesh=new THREE.InstancedMesh(new THREE.PlaneGeometry(.045,.045),new THREE.MeshBasicMaterial({map:GLOW,transparent:true,depthWrite:false,toneMapped:false,...glowBlend}),leds.length);
+  {const m=new THREE.Matrix4();leds.forEach((l,i)=>{l.ph=rnd()*10;l.sp=1+rnd()*3;m.makeTranslation(l.x,l.y,ZF+.003);ledMesh.setMatrixAt(i,m);ledMesh.setColorAt(i,COL.off);m.makeTranslation(l.x,l.y,ZF+.005);glowMesh.setMatrixAt(i,m);glowMesh.setColorAt(i,COL.black);});}
+  grp.add(ledMesh,glowMesh);
+  // port boxes (ports reading)
+  const pv=[];ports.forEach(p=>pv.push(...rect(p.x,p.wy,p.w+.01,p.h+.01,ZF+.05)));
+  const portBoxes=rgbaLines(pv);portBoxes.renderOrder=5;portBoxes.material.depthTest=false;grp.add(portBoxes);
+  const sh=shadowDisc(3.2,3.2,.3);sh.position.y=.002;grp.add(sh);
+  const tmpC=new THREE.Color();
+  function updateLeds(time,boost=0,dimOff=false){
+    leds.forEach((l,i)=>{let c=COL.off,g=0;
+      if(l.st==='link'){c=COL.link;g=.35;} else if(l.st==='act'){const on=reduce||Math.sin(time*l.sp*5+l.ph)>0;c=on?COL.act:COL.link;g=on?.55:.2;}
+      else if(l.st==='fault'){c=COL.drift;g=.6+.3*Math.sin(time*5);}
+      ledMesh.setColorAt(i,c);glowMesh.setColorAt(i,tmpC.copy(c).multiplyScalar(c===COL.off?0:g*(1+boost)));});
+    ledMesh.instanceColor.needsUpdate=glowMesh.instanceColor.needsUpdate=true;}
+  return {grp,devices,by,ports,leds,portBoxes,cableMeshes,cmats,traceMesh,traceMat,traceCurve,plugs,updateLeds};
+}
+
+/* ═════════════ views ═════════════ */
+const views=[];
+function View(id,scene,fov=30){const el=document.getElementById(id);const v={el,hud:el.querySelector('.hud'),scene,camera:new THREE.PerspectiveCamera(fov,1,.05,200),fx:.5,fy:0,clear:null};v.tags=Tags(v);views.push(v);return v;}
+const mouse={x:0,y:0,sx:0,sy:0};
+addEventListener('pointermove',e=>{mouse.x=e.clientX/innerWidth*2-1;mouse.y=e.clientY/innerHeight*2-1;},{passive:true});
+const camTo=(v,p,t,f)=>{if(SNAP)f=1;v.cp=v.cp||p.clone();v.ct=v.ct||t.clone();v.cp.lerp(p,f);v.ct.lerp(t,f);v.camera.position.copy(v.cp);v.camera.lookAt(v.ct);};
+const V3=(x,y,z)=>new THREE.Vector3(x,y,z);
+let mobile=innerWidth<760;
+
+/* ───────── HERO: the rack becomes its record ───────── */
+const hero=View('vHero',mkScene());
+const hR=buildRack(); hero.scene.add(hR.grp);
+hR.grp.rotation.y=-.42;
+const cardsG=new THREE.Group(); hero.scene.add(cardsG);
+const recDevs=hR.devices.filter(d=>d.id);
+function cardCanvas(d){const [c,g]=cnv(900,110);g.fillStyle='#F4F6F3';g.fillRect(0,0,900,110);g.strokeStyle='#C6CCC7';g.lineWidth=3;g.strokeRect(1.5,1.5,897,107);
+  g.fillStyle=d.drift?'#FF9A2E':'#1FD67C';g.fillRect(0,0,10,110);
+  g.fillStyle='#4A544F';g.font=`400 30px ${MONO}`;g.fillText(`U${String(d.top).padStart(2,'0')}${d.h>1?'–'+String(d.top-d.h+1).padStart(2,'0'):''}`,34,68);
+  g.fillStyle='#111614';g.font=`500 34px ${MONO}`;g.fillText(d.id,210,68);
+  g.fillStyle='#4A544F';g.font=`400 28px ${SANS}`;g.fillText(d.name,360,68);
+  g.font=`500 28px ${MONO}`;g.fillStyle=d.drift?'#9C4C00':'#04703F';const s=d.drift?'▲ serial differs':'✓ read';g.fillText(s,885-g.measureText(s).width,68);return c;}
+function headCanvas(){const [c,g]=cnv(900,150);g.fillStyle='#111614';g.fillRect(0,0,900,150);g.fillStyle='#DDE4DF';g.font=`500 44px ${SANS}`;g.fillText('DC1-R3 · the record',30,64);
+  g.fillStyle='#93A19A';g.font=`400 26px ${MONO}`;g.fillText('sweep 12 · 17 devices · 1 to check',30,112);g.fillStyle='#1FD67C';g.beginPath();g.arc(860,48,9,0,7);g.fill();return c;}
+const CW=1.75, CH=CW*110/900, GAP=.045;
+const cards=recDevs.map((d,i)=>{const m=new THREE.Mesh(new THREE.PlaneGeometry(1,1),new THREE.MeshBasicMaterial({map:tex(cardCanvas(d)),transparent:true,opacity:0,toneMapped:false,side:THREE.DoubleSide}));cardsG.add(m);return {m,d,i};});
+const head=new THREE.Mesh(new THREE.PlaneGeometry(CW,CW*150/900),new THREE.MeshBasicMaterial({map:tex(headCanvas()),transparent:true,opacity:0,toneMapped:false}));cardsG.add(head);
+const COLX=2.15, COLTOP=TOPY-.2;
+const slot=i=>V3(COLX,COLTOP-.26-i*(CH+GAP),.35);
+// light sheet
+const sheet=new THREE.Group();hR.grp.add(sheet);
+{const pl=new THREE.Mesh(new THREE.PlaneGeometry(1.5,1.4),new THREE.MeshBasicMaterial({color:COL.link,transparent:true,opacity:.1,depthWrite:false,side:THREE.DoubleSide,toneMapped:false}));pl.rotation.x=-Math.PI/2;sheet.add(pl);
+ const edge=new THREE.Mesh(new THREE.BoxGeometry(1.5,.006,.006),new THREE.MeshBasicMaterial({color:COL.link,toneMapped:false}));edge.position.z=.7;sheet.add(edge);sheet.userData={pl,edge};}
+hero.tags.add('<b>One phone sweep</b>top to bottom','link left keep',[-.66,0,.6],sheet);
+const hT=hero.tags.list[0];
+const LOOP=11;
+function heroUpdate(dt,time,w,h){
+  const cyc=reduce?7.5:(time%LOOP);
+  const sy=lerp(TOPY+.1,BASE-.05,smooth(.4,6.6,cyc));
+  sheet.position.set(0,sy,ZF-.35); sheet.userData.pl.material.opacity=.1*(1-smooth(6.6,7,cyc)); sheet.userData.edge.visible=cyc<6.8;
+  const fade=1-smooth(10.2,10.9,cyc);
+  head.position.copy(slot(0)).add(V3(0,CH*.5+.2,0)); head.material.opacity=smooth(.2,.8,cyc)*fade; head.quaternion.copy(hero.camera.quaternion);
+  const wp=new THREE.Vector3();
+  cards.forEach(({m,d,i})=>{
+    const passAt=lerp(.4,6.6,clamp((TOPY+.1-(d.y+d.hh/2))/(TOPY+.1-BASE+.05)));
+    const k=reduce?1:smooth(passAt,passAt+1.1,cyc);
+    d.outline.opacity=(smooth(passAt,passAt+.15,cyc)*(1-smooth(passAt+.6,passAt+1.6,cyc))*.9+ (d.drift?smooth(passAt+.5,passAt+.8,cyc)*.9:0))*fade;
+    d.outline.color.copy(d.drift?COL.drift:COL.link);
+    wp.set(0,d.y,ZF+.02); hR.grp.localToWorld(wp);
+    const to=slot(i); const p=wp.clone().lerp(to,k); p.z+=Math.sin(Math.PI*k)*.55; p.y+=Math.sin(Math.PI*k)*.08;
+    m.position.copy(p); m.scale.set(lerp(RW*.95,CW,k),lerp(d.hh,CH,k),1);
+    m.quaternion.copy(hR.grp.quaternion).slerp(hero.camera.quaternion,k);
+    m.material.opacity=smooth(passAt,passAt+.2,cyc)*fade;
+  });
+  hT.target=cyc<6.6&&!mobile?1:0;
+  hR.updateLeds(time);
+  const f=reduce?1:1-Math.pow(.02,dt);
+  mouse.sx=lerp(mouse.sx,mouse.x,f*.5);mouse.sy=lerp(mouse.sy,mouse.y,f*.5);
+  hero.scene.rotation.y=reduce?0:mouse.sx*.06; hero.scene.rotation.x=reduce?0:mouse.sy*.02;
+  // The view is a column beside the copy, so frame against ITS width, not the
+  // window's. The full shot is the rack plus the record sheet — about 5 units
+  // wide. Below ~320px of stage that cannot read at any distance, so the sheet
+  // drops and the camera frames the rack alone, the way the homepage does.
+  const slim = w < 320;
+  cardsG.visible = !slim;
+  // pull back in proportion to how narrow the column actually is, so the rack
+  // fits its width instead of being cropped by it
+  const md = slim ? Math.min(3.2, 0.55 * (300 / Math.max(w, 90))) : (w < 520 ? 1.2 : 1);
+  camTo(hero, V3(3.6*md, 3.0, 11.2*md), V3(slim ? 0 : 1.0, 2.2, 0), 1);
+  hero.fx = slim ? .5 : (w < 520 ? .54 : .66); hero.fy = 0;
+}
+
+/* ───────── MACHINE: drawing-sheet diorama ───────── */
+const mac=View('vMachine',mkScene(),26);
+const M=new THREE.Group(); mac.scene.add(M);
+const graph=new THREE.MeshStandardMaterial({color:'#2a302d',metalness:.55,roughness:.45});
+const alu=new THREE.MeshStandardMaterial({color:'#dfe3df',metalness:.7,roughness:.32});
+const paperM=new THREE.MeshStandardMaterial({color:'#F4F6F3',roughness:.9});
+// base sheet
+{const [c,g]=cnv(2600,1300);const sx=2600/13,sz=1300/6.5;g.fillStyle='#F4F6F3';g.fillRect(0,0,2600,1300);
+ for(let x=0;x<=13;x+=.25){g.fillStyle=x%1===0?'rgba(17,22,20,.12)':'rgba(17,22,20,.05)';g.fillRect(x*sx,0,x%1===0?2:1,1300);}
+ for(let z=0;z<=6.5;z+=.25){g.fillStyle=z%1===0?'rgba(17,22,20,.12)':'rgba(17,22,20,.05)';g.fillRect(0,z*sz,2600,z%1===0?2:1);}
+ g.strokeStyle='#111614';g.lineWidth=4;g.strokeRect(20,20,2560,1260);
+ g.fillStyle='#4A544F';g.font=`400 30px ${MONO}`;
+ g.fillText('sources',(6.5-4.9)*sx,70);g.fillText('reconciliation',(6.5-1.1)*sx,70);g.fillText('systems of record',(6.5+3.6)*sx,70);
+ g.fillStyle='#111614';g.fillRect(2600-620,1300-130,600,110);g.fillStyle='#DDE4DF';g.font=`500 30px ${MONO}`;g.fillText('DWG RT-SYS-001 · rev B',2600-600,1300-78);g.fillStyle='#93A19A';g.font=`400 24px ${MONO}`;g.fillText('reconciliation data flow · not to scale',2600-600,1300-40);
+ const base=new THREE.Mesh(new THREE.BoxGeometry(13,.08,6.5),[paperM,paperM,new THREE.MeshStandardMaterial({map:tex(c),roughness:.9}),paperM,paperM,paperM]);base.position.y=-.04;M.add(base);
+ const sh=shadowDisc(16,9,.22);sh.position.y=-.09;M.add(sh);}
+const mlabel=(txt,sub)=>`<b>${txt}</b>${sub}`;
+// A · rack sweep: mini cabinet + phone with frustum
+const srcA=new THREE.Group();srcA.position.set(-4.7,0,-1.3);M.add(srcA);
+{const [c,g]=cnv(128,256);g.fillStyle='#232927';g.fillRect(0,0,128,256);for(let i=0;i<14;i++){g.fillStyle=i%3?'#2f3633':'#1a1f1d';g.fillRect(10,10+i*17,108,13);g.fillStyle=i%4?'#1FD67C':'#9CF7C6';g.fillRect(104,15+i*17,4,3);}
+ const cab=new THREE.Mesh(new RoundedBoxGeometry(.6,1.3,.6,2,.02),[graph,graph,graph,graph,new THREE.MeshStandardMaterial({map:tex(c),metalness:.3,roughness:.6}),graph]);cab.position.y=.65;srcA.add(cab);
+ const phone=new THREE.Mesh(new RoundedBoxGeometry(.24,.48,.03,4,.03),new THREE.MeshStandardMaterial({color:'#15191a',metalness:.4,roughness:.35}));phone.position.set(.25,.75,1.0);phone.rotation.set(0,-.25,0);srcA.add(phone);
+ const [sc,sg]=cnv(120,240);sg.fillStyle='#0c1110';sg.fillRect(0,0,120,240);sg.strokeStyle='#1FD67C';sg.lineWidth=3;sg.strokeRect(20,40,80,150);for(let i=0;i<6;i++){sg.fillStyle='rgba(31,214,124,.35)';sg.fillRect(26,48+i*24,68,14);}
+ const scr=new THREE.Mesh(new THREE.PlaneGeometry(.21,.44),new THREE.MeshBasicMaterial({map:tex(sc),toneMapped:false}));scr.position.set(0,0,-.016);scr.rotation.y=Math.PI;phone.add(scr);
+ const fr=[];const ap=new THREE.Vector3(.25,.75,.98);[[-.3,1.25],[.3,1.25],[-.3,.1],[.3,.1]].forEach(([x,y])=>fr.push(ap.x,ap.y,ap.z,x,y,.31));
+ const fl=new THREE.LineSegments(new THREE.BufferGeometry().setAttribute('position',new THREE.Float32BufferAttribute(fr,3)),new THREE.LineBasicMaterial({color:COL.link,transparent:true,opacity:.45,toneMapped:false}));srcA.add(fl);srcA.userData.fr=fl;}
+// B · network telemetry: two switches on a small stand
+const srcB=new THREE.Group();srcB.position.set(-4.7,0,1.25);M.add(srcB);
+const bLeds=[];
+{for(let k=0;k<2;k++){const [c,g]=cnv(512,56);g.fillStyle='#1c2220';g.fillRect(0,0,512,56);g.fillStyle='#0a0d0c';g.fillRect(40,8,380,40);for(let i=0;i<18;i++){g.fillStyle='#050707';g.fillRect(48+i*20,12,14,14);g.fillRect(48+i*20,30,14,14);}
+  g.fillStyle='#e9ece8';g.fillRect(432,18,64,18);g.fillStyle='#111614';g.font=`500 13px ${MONO}`;g.fillText(k?'TOR-B':'TOR-A',436,32);
+  const sw=new THREE.Mesh(new THREE.BoxGeometry(1.1,.12,.7),[graph,graph,graph,graph,new THREE.MeshStandardMaterial({map:tex(c),metalness:.35,roughness:.5}),graph]);sw.position.set(0,.1+k*.14,0);srcB.add(sw);
+  for(let i=0;i<18;i++){const l=new THREE.Mesh(new THREE.PlaneGeometry(.014,.01),new THREE.MeshBasicMaterial({color:COL.link,toneMapped:false}));l.position.set(-.55+(48+i*20+7)/512*1.1,.1+k*.14+.045,.352);srcB.add(l);bLeds.push({m:l,ph:rnd()*9,sp:1+rnd()*3});}}
+ const ant=[];for(let i=0;i<3;i++){const r=new THREE.Mesh(new THREE.TorusGeometry(.12+i*.1,.006,6,40,Math.PI*.6),new THREE.MeshBasicMaterial({color:COL.link,transparent:true,opacity:.6,toneMapped:false}));r.rotation.set(0,0,Math.PI*.2);r.position.set(0,.42,0);srcB.add(r);ant.push(r);}srcB.userData.ant=ant;}
+// C · engine: three glass bays on a graphite block
+const eng=new THREE.Group();eng.position.set(-.15,0,0);M.add(eng);
+const bays=[];
+{const [c,g]=cnv(1600,280);g.fillStyle='#1b201e';g.fillRect(0,0,1600,280);g.fillStyle='rgba(255,255,255,.08)';g.fillRect(0,0,1600,3);
+ ['01 perceive','02 reconcile','03 cognize'].forEach((t,i)=>{const x=80+i*500;g.fillStyle='#DDE4DF';g.font=`500 44px ${MONO}`;g.fillText(t,x,120);g.fillStyle='#93A19A';g.font=`400 28px ${MONO}`;g.fillText(['read from the sweep','checked against the switch','compared with last sweep'][i],x,175);});
+ g.fillStyle='#93A19A';g.font=`400 26px ${MONO}`;g.fillText('RackTrack engine · 3 stages',80,245);
+ const face=new THREE.MeshStandardMaterial({map:tex(c),metalness:.3,roughness:.55});
+ const blk=new THREE.Mesh(new RoundedBoxGeometry(3.3,.5,1.7,2,.03),[graph,graph,graph,graph,face,graph]);blk.position.y=.25;eng.add(blk);
+ const trim=new THREE.Mesh(new THREE.BoxGeometry(3.34,.03,1.74),alu);trim.position.y=.51;eng.add(trim);
+ const glass=new THREE.MeshPhysicalMaterial({color:'#d7e2dc',metalness:0,roughness:.08,transmission:0,transparent:true,opacity:.28,depthWrite:false,side:THREE.DoubleSide});
+ for(let i=0;i<3;i++){const b=new THREE.Group();b.position.set(-1.08+i*1.08,.53,0);eng.add(b);
+   const gb=new THREE.Mesh(new THREE.BoxGeometry(.92,.42,1.42),glass);gb.position.y=.21;b.add(gb);
+   const edges=new THREE.LineSegments(new THREE.EdgesGeometry(new THREE.BoxGeometry(.92,.42,1.42)),new THREE.LineBasicMaterial({color:'#9aa39e',transparent:true,toneMapped:false}));edges.position.y=.21;b.add(edges);
+   const inner=new THREE.Group();b.add(inner);
+   if(i===0){const pl=new THREE.Mesh(new THREE.PlaneGeometry(.8,.36),new THREE.MeshBasicMaterial({color:COL.link,transparent:true,opacity:.5,side:THREE.DoubleSide,toneMapped:false,depthWrite:false}));pl.position.y=.2;inner.add(pl);inner.userData.p=pl;
+     for(let r=0;r<5;r++){const s=new THREE.Mesh(new THREE.BoxGeometry(.5,.035,.5),graph);s.position.set(0,.05+r*.07,0);inner.add(s);}}
+   if(i===1){const a=new THREE.Mesh(new THREE.BoxGeometry(.5,.02,.7),new THREE.MeshStandardMaterial({color:'#9DB2C5',roughness:.5}));const bb=new THREE.Mesh(new THREE.BoxGeometry(.5,.02,.7),new THREE.MeshStandardMaterial({color:'#1FD67C',roughness:.5,emissive:'#0a5a32',emissiveIntensity:.4}));
+     a.position.y=.12;bb.position.y=.3;inner.add(a,bb);inner.userData={a,b:bb};}
+   if(i===2){const cs=[];for(let r=0;r<4;r++){const s=new THREE.Mesh(new THREE.BoxGeometry(.55,.018,.75),new THREE.MeshStandardMaterial({color:r===3?'#F4F6F3':'#c6ccc7',roughness:.7}));s.position.y=.05+r*.05;inner.add(s);cs.push(s);}inner.userData.cs=cs;}
+   bays.push({b,edges,inner});}}
+// D · approval arch
+const arch=new THREE.Group();arch.position.set(2.35,0,0);M.add(arch);
+{[-1,1].forEach(s=>{const p=new THREE.Mesh(new THREE.BoxGeometry(.07,.62,.07),alu);p.position.set(0,.31,s*.34);arch.add(p);});
+ const top=new THREE.Mesh(new THREE.BoxGeometry(.1,.07,.76),alu);top.position.y=.64;arch.add(top);
+ const lamp=new THREE.Mesh(new THREE.BoxGeometry(.04,.03,.5),new THREE.MeshBasicMaterial({color:COL.drift,toneMapped:false}));lamp.position.set(-.05,.6,0);arch.add(lamp);arch.userData.lamp=lamp;
+ const beam=new THREE.Mesh(new THREE.PlaneGeometry(.6,.56),new THREE.MeshBasicMaterial({color:COL.drift,transparent:true,opacity:.12,side:THREE.DoubleSide,depthWrite:false,toneMapped:false}));beam.rotation.y=Math.PI/2;beam.position.y=.3;arch.add(beam);arch.userData.beam=beam;}
+// E · systems of record
+const outs=[];
+{const z=[-1.55,0,1.55];
+ // CMDB: stacked discs
+ const cm=new THREE.Group();cm.position.set(4.6,0,z[0]);M.add(cm);for(let i=0;i<3;i++){const d=new THREE.Mesh(new THREE.CylinderGeometry(.42,.42,.2,40),alu);d.position.y=.12+i*.24;cm.add(d);const r=new THREE.Mesh(new THREE.TorusGeometry(.42,.008,6,60),new THREE.MeshBasicMaterial({color:'#8d9690'}));r.rotation.x=Math.PI/2;r.position.y=.225+i*.24;cm.add(r);}
+ const ring=new THREE.Mesh(new THREE.TorusGeometry(.5,.012,8,64),new THREE.MeshBasicMaterial({color:COL.link,transparent:true,opacity:0,toneMapped:false}));ring.rotation.x=Math.PI/2;ring.position.y=.02;cm.add(ring);cm.userData.ring=ring;outs.push(cm);
+ // DCIM: U-space block
+ const dc=new THREE.Group();dc.position.set(4.6,0,z[1]);M.add(dc);{const [c,g]=cnv(128,256);g.fillStyle='#dfe3df';g.fillRect(0,0,128,256);for(let i=0;i<21;i++){g.fillStyle=i<5?'#1FD67C':i%3?'#2a302d':'#4a544f';g.fillRect(14,8+i*11.6,100,8);}
+   const b=new THREE.Mesh(new RoundedBoxGeometry(.55,1.0,.55,2,.02),[alu,alu,alu,alu,new THREE.MeshStandardMaterial({map:tex(c),roughness:.5}),alu]);b.position.y=.5;dc.add(b);b.rotation.y=-Math.PI/2+.001;}
+ const ring2=ring.clone();ring2.material=ring.material.clone();dc.add(ring2);dc.userData.ring=ring2;outs.push(dc);
+ // audit pack: paper stack + stamp
+ const au=new THREE.Group();au.position.set(4.6,0,z[2]);M.add(au);for(let i=0;i<7;i++){const s=new THREE.Mesh(new THREE.BoxGeometry(.7,.025,.5),paperM);s.position.y=.02+i*.027;s.rotation.y=(rnd()-.5)*.08;au.add(s);}
+ {const [c,g]=cnv(256,180);g.fillStyle='#F4F6F3';g.fillRect(0,0,256,180);g.fillStyle='#111614';g.font=`500 22px ${MONO}`;g.fillText('RT-EV-0419',16,36);g.fillStyle='#4A544F';g.font=`400 16px ${MONO}`;['seen · frame #0412','signalled · LLDP','time · 14:02 UTC','SOC 2 · ISO 27001'].forEach((t,i)=>g.fillText(t,16,70+i*26));
+  const top=new THREE.Mesh(new THREE.PlaneGeometry(.7,.5),new THREE.MeshStandardMaterial({map:tex(c),roughness:.9}));top.rotation.x=-Math.PI/2;top.position.y=.2;au.add(top);}
+ const ring3=ring.clone();ring3.material=ring.material.clone();au.add(ring3);au.userData.ring=ring3;outs.push(au);}
+// F · cable trays
+const trayMat=new THREE.MeshStandardMaterial({color:'#c9cfcb',metalness:.6,roughness:.4});
+function tray(pts,w=.2){const g=new THREE.Group();for(let i=0;i<pts.length-1;i++){const a=V3(...pts[i]),b=V3(...pts[i+1]);const L=a.distanceTo(b),mid=a.clone().lerp(b,.5),ang=Math.atan2(b.x-a.x,b.z-a.z);
+  const s=new THREE.Group();s.position.copy(mid);s.rotation.y=ang;g.add(s);
+  const bot=new THREE.Mesh(new THREE.BoxGeometry(w,.012,L+w*.9),trayMat);s.add(bot);
+  [-1,1].forEach(k=>{const lip=new THREE.Mesh(new THREE.BoxGeometry(.012,.05,L+w*.9),trayMat);lip.position.set(k*w/2,.025,0);s.add(lip);});}
+  M.add(g);return pts.map(p=>V3(p[0],.045,p[2]));}
+const PA=tray([[-4.35,0,-1.3],[-3.2,0,-1.3],[-2.4,0,-.4],[-1.84,0,-.4]]);
+const PB=tray([[-4.15,0,1.25],[-3.2,0,1.25],[-2.4,0,.4],[-1.84,0,.4]]);
+const PO=tray([[1.54,0,0],[3.3,0,0]]);
+const PO2=[tray([[3.3,0,0],[3.75,0,-1.55],[4.18,0,-1.55]]),tray([[3.3,0,0],[4.25,0,0]]),tray([[3.3,0,0],[3.75,0,1.55],[4.18,0,1.55]])];
+const PR=[V3(4.6,.04,-1.1),V3(3.0,.04,-2.3),V3(-.15,.04,-2.3),V3(-.15,.04,-.9)];
+{const g=new THREE.BufferGeometry().setFromPoints(PR);const l=new THREE.Line(g,new THREE.LineDashedMaterial({color:COL.record,dashSize:.1,gapSize:.07}));l.computeLineDistances();M.add(l);}
+function pathLen(p){let L=[0];for(let i=1;i<p.length;i++)L.push(L[i-1]+p[i].distanceTo(p[i-1]));return L;}
+function along(p,L,u){const d=u*L[L.length-1];let i=1;while(i<L.length-1&&L[i]<d)i++;const t=(d-L[i-1])/((L[i]-L[i-1])||1);return p[i-1].clone().lerp(p[i],clamp(t));}
+const routes={A:{p:PA},B:{p:PB},O0:{p:[...PO,...PO2[0].slice(1)]},O1:{p:[...PO,...PO2[1].slice(1)]},O2:{p:[...PO,...PO2[2].slice(1)]}};
+Object.values(routes).forEach(r=>{r.p.forEach(v=>v.y=.075);r.L=pathLen(r.p);});
+const PK=60;
+const pk=new THREE.InstancedMesh(new RoundedBoxGeometry(.1,.07,.1,2,.015),new THREE.MeshStandardMaterial({color:0xffffff,roughness:.45,metalness:.1}),PK);
+pk.instanceMatrix.setUsage(THREE.DynamicDrawUsage);M.add(pk);
+const packets=[...Array(PK)].map((_,i)=>({r:['A','B','O0','O1','O2'][i%5],u:(i/PK*5)%1,sp:.08+rnd()*.02}));
+const COLA=C('#e4e9e5'),COLB=C('#6d8397');
+const amber=new THREE.Mesh(new RoundedBoxGeometry(.13,.09,.13,2,.02),new THREE.MeshStandardMaterial({color:COL.drift,roughness:.4,emissive:COL.drift,emissiveIntensity:.25}));M.add(amber);
+const mt={
+  A:mac.tags.add(mlabel('Rack sweep','images · labels · ports'),'rec up',[0,1.45,0],srcA),
+  B:mac.tags.add(mlabel('Network telemetry','LLDP · CDP · neighbours'),'rec up',[0,.55,0],srcB),
+  E:mac.tags.add(mlabel('RackTrack engine','perceive · reconcile · cognize'),'ink up',[0,1.02,0],eng),
+  G:mac.tags.add(mlabel('Write-back','on approval only'),'drift up',[0,.72,0],arch),
+  am:mac.tags.add(mlabel('SRV-05','serial on label ≠ CMDB'),'drift left',[0,0,0]),
+  ok:mac.tags.add(mlabel('Approved','change CHG-2231'),'link down',[0,-.02,.4],arch),
+  O0:mac.tags.add(mlabel('CMDB','record updated'),'link up',[0,.8,0],outs[0]),
+  O1:mac.tags.add(mlabel('DCIM','capacity · U-space'),'link up',[0,1.1,0],outs[1]),
+  O2:mac.tags.add(mlabel('Audit pack','evidence · dated'),'link up',[0,.34,0],outs[2]),
+  R:mac.tags.add(mlabel('Reads current record','CMDB → engine'),'rec',[1.5,.04,-2.3]),
+};
+const MCAM=[[V3(-8.6,5.4,7.4),V3(-3.2,.45,0),.64],[V3(-2.4,5.6,6.9),V3(-.1,.45,0),.64],[V3(6.2,3.4,5.6),V3(3.1,.35,0),.62],[V3(3.0,12.0,13.2),V3(1.2,-.2,.2),.62]];
+const tmpM=new THREE.Matrix4(), tq=new THREE.Quaternion(), ts=new THREE.Vector3(1,1,1);
+function machineUpdate(dt,time,w,h){
+  const p=RT.prog(document.getElementById('machine'));const q=p*4;
+  // camera through the four stations
+  let cp=MCAM[0][0].clone(),ct=MCAM[0][1].clone(),fx=MCAM[0][2];
+  for(let i=1;i<4;i++){const k=smooth(i-.62,i-.08,q);cp.lerp(MCAM[i][0],k);ct.lerp(MCAM[i][1],k);fx=lerp(fx,MCAM[i][2],k);}
+  if(mobile){cp.sub(ct).multiplyScalar(1.75).add(ct);}
+  camTo(mac,cp,ct,reduce?1:1-Math.pow(.004,dt)); mac.fx=mobile?.5:fx; mac.fy=mobile?h*.2:0;
+  const s0=1-smooth(.9,1.2,q)*.6, s1=smooth(.7,1,q), s2=smooth(1.7,2,q), s3=smooth(2.7,3,q);
+  // sources alive
+  srcA.userData.fr.material.opacity=.25+.35*(.5+.5*Math.sin(time*3));
+  bLeds.forEach(l=>{l.m.material.color.copy(Math.sin(time*l.sp*4+l.ph)>.1?COL.link:COL.act);});
+  srcB.userData.ant.forEach((r,i)=>{r.material.opacity=reduce?.5:.7*Math.max(0,Math.sin(time*2.4-i*.9));});
+  // bays: sequential pulse
+  bays.forEach((b,i)=>{const act=reduce?1:.5+.5*Math.sin(time*2.2-i*2.1);const on=Math.max(s1*act,.25);b.edges.material.color.copy(COL.pale).lerp(COL.link,on);});
+  bays[0].inner.userData.p.position.y=.05+.32*(.5+.5*Math.sin(time*1.8));
+  {const u=bays[1].inner.userData,t=.5+.5*Math.sin(time*1.4);u.b.position.y=lerp(.32,.15,t);u.b.position.x=lerp(.12,0,t);}
+  bays[2].inner.userData.cs.forEach((c,i)=>{c.position.y=.05+i*.05+(i===3?.08*(.5+.5*Math.sin(time*1.6)):0);});
+  // packets
+  packets.forEach((k,i)=>{k.u=(k.u+dt*k.sp*(reduce?0:1))%1;const r=routes[k.r];const pos=along(r.p,r.L,k.u);
+    const isOut=k.r[0]==='O';const vis=isOut?smooth(.6,1.1,q):1;
+    tmpM.compose(pos,tq,ts.setScalar(vis*(k.u<.04?k.u/.04:k.u>.96?(1-k.u)/.04:1)));pk.setMatrixAt(i,tmpM);
+    pk.setColorAt(i,isOut?COL.link:k.r==='A'?COLA:COLB);});
+  pk.instanceMatrix.needsUpdate=true;pk.instanceColor.needsUpdate=true;
+  // the one that needs a person
+  const held=smooth(1.35,1.75,q), rel=smooth(2.45,2.9,q);
+  const gateStop=V3(2.05,.09,0);
+  let ap=V3(1.54,.09,0).lerp(gateStop,held);
+  if(rel>0){ap=along(routes.O0.p,routes.O0.L,lerp(.28,1,rel));ap.y=.09;}
+  amber.position.copy(ap); amber.visible=held>.01&&rel<.995; amber.material.color.copy(COL.drift).lerp(COL.link,smooth(2.3,2.45,q)); amber.material.emissive.copy(amber.material.color);
+  arch.userData.lamp.material.color.copy(COL.drift).lerp(COL.link,smooth(2.3,2.45,q)); arch.userData.beam.material.color.copy(arch.userData.lamp.material.color);
+  arch.userData.beam.material.opacity=.1+.08*Math.sin(time*4);
+  outs.forEach((o,i)=>{o.userData.ring.material.opacity=s3*(i===0?(.6+.4*Math.sin(time*3)):.7);});
+  // tags
+  mt.A.target=s0; mt.B.target=s0; mt.E.target=clamp(s1+.25); mt.G.target=clamp(s2+.0)*(1-s3*.5)||(q>1.3?.6:0);
+  mt.am.pos.copy(amber.position).add(V3(0,.07,-.07)); mt.am.target=held*(1-smooth(2.3,2.45,q))*(1-smooth(2.9,3,q));
+  mt.ok.target=smooth(2.3,2.45,q)*(1-s3); mt.O0.target=Math.max(s3,rel>.98?1:0); mt.O1.target=s3; mt.O2.target=s3; mt.R.target=s1*(1-s2)+s3*.8;
+}
+
+/* ───────── READER: interactive DC1-R3 ───────── */
+const rd=View('vReader',mkScene(),28); rd.clear=C('#F4F6F3');
+const rR=buildRack(); rd.scene.add(rR.grp);
+{const [c,g]=cnv(1024,1024);g.fillStyle='#F4F6F3';g.fillRect(0,0,1024,1024);for(let i=0;i<=32;i++){g.fillStyle=i%4?'rgba(17,22,20,.05)':'rgba(17,22,20,.1)';g.fillRect(i*32,0,1.5,1024);g.fillRect(0,i*32,1024,1.5);}
+ const gr=g.createRadialGradient(512,512,100,512,512,512);gr.addColorStop(0,'rgba(244,246,243,0)');gr.addColorStop(1,'rgba(244,246,243,1)');g.fillStyle=gr;g.fillRect(0,0,1024,1024);
+ const fl=new THREE.Mesh(new THREE.PlaneGeometry(9,9),new THREE.MeshBasicMaterial({map:tex(c),toneMapped:false}));fl.rotation.x=-Math.PI/2;fl.position.y=-.001;rd.scene.add(fl);}
+const rSheet=new THREE.Mesh(new THREE.PlaneGeometry(1.5,1.5),new THREE.MeshBasicMaterial({color:COL.link,transparent:true,opacity:0,side:THREE.DoubleSide,depthWrite:false,toneMapped:false}));rSheet.rotation.x=-Math.PI/2;rR.grp.add(rSheet);
+const rEdge=new THREE.Mesh(new THREE.BoxGeometry(1.4,.008,.008),new THREE.MeshBasicMaterial({color:COL.link,toneMapped:false,transparent:true}));rR.grp.add(rEdge);
+const pulse=new THREE.Mesh(new THREE.PlaneGeometry(.12,.12),new THREE.MeshBasicMaterial({map:GLOW,color:COL.link,transparent:true,depthWrite:false,toneMapped:false,...glowBlend}));rR.grp.add(pulse);
+const rt={
+  cnt:rd.tags.add('<b>0 / 17</b>devices registered','link left keep',[-.62,TOPY,ZF]),
+  pA:rd.tags.add(`<b>PP-A</b>40 / 48 in use`,'link left',[-.5,yC(42,1),ZF+.04]),
+  sA:rd.tags.add(`<b>SW-A</b>30 / 36 linked`,'link',[.5,yC(37,1),ZF+.04]),
+  pC:rd.tags.add(`<b>PP-C</b>31 / 48 in use`,'link left',[-.5,yC(38,1),ZF+.04]),
+  flt:rd.tags.add('<b>SRV-05</b>PSU 2 · fault light','drift',[RW/2-.07,yC(25,2)+.03,ZF+.01]),
+  free:rd.tags.add('<b>U05–01</b>5U free · dark','rec left',[-.5,yC(5,5),ZF]),
+  t0:rd.tags.add('<b>PP-B · 07</b>cable C-0147','link left keep',[0,0,0]),
+  t1:rd.tags.add('<b>SW-A · Eth1/13</b>LLDP agrees','link keep',[0,0,0]),
+};
+const RCAM={sweep:[V3(3.4,3.1,9.4),V3(0,2.2,0)],ports:[V3(1.3,4.4,3.7),V3(-.05,3.82,.4)],leds:[V3(2.4,2.7,6.6),V3(0,2.1,.3)],trace:[V3(1.0,4.35,3.1),V3(0,3.86,.45)]};
+let drag={on:false,x:0,rot:.32,vel:0};
+{const pv=document.getElementById('pview');pv.addEventListener('pointerdown',e=>{drag.on=true;drag.x=e.clientX;pv.setPointerCapture(e.pointerId);});
+ pv.addEventListener('pointermove',e=>{if(!drag.on)return;const d=(e.clientX-drag.x)/220;drag.x=e.clientX;drag.rot=clamp(drag.rot+d,-1.1,1.1);});
+ pv.addEventListener('pointerup',()=>drag.on=false);pv.addEventListener('pointercancel',()=>drag.on=false);pv.style.cursor='grab';pv.style.touchAction='pan-y';}
+const pbC=rR.portBoxes.geometry.attributes.color;
+function readerUpdate(dt,time,w,h){
+  const m=RT.mode, el=(performance.now()-RT.t0)/1000;
+  const f=reduce?1:1-Math.pow(.02,dt);
+  rR.grp.rotation.y=lerp(rR.grp.rotation.y,drag.rot+(m==='sweep'&&!drag.on&&!reduce?Math.sin(time*.3)*.08:0),f);
+  const [cp,ct]=RCAM[m]; const md=mobile||w<620?1.35:1; camTo(rd,ct.clone().add(cp.clone().sub(ct).multiplyScalar(md)),ct,reduce?1:1-Math.pow(.05,dt)); rd.fx=.5; rd.fy=0;
+  // sweep
+  const sp=reduce?1:clamp(el/4.5), sy=lerp(TOPY+.05,BASE,sp); let reg=0;
+  rSheet.position.set(0,sy,ZF-.3); rSheet.material.opacity=m==='sweep'&&sp<1?.1:0; rEdge.position.set(0,sy,ZF+.45); rEdge.material.opacity=m==='sweep'&&sp<1?1:0;
+  rR.devices.forEach(d=>{if(!d.outline)return;const passed=sy<d.y+d.hh/2;if(passed)reg++;
+    const a=m==='sweep'?(passed?(d.drift?.95:.75):0):m==='leds'&&d.drift?.9:0;d.outline.opacity=lerp(d.outline.opacity,a,f);d.outline.color.copy(d.drift?COL.drift:COL.link);
+    d.faceMat.color.setScalar(lerp(d.faceMat.color.r,m==='leds'?.38:1,f));});
+  rt.cnt.el.querySelector('span').innerHTML=`<b>${reg} / 17</b>devices registered`; rt.cnt.pos.set(-.64,Math.max(sy,BASE+.2),ZF); rt.cnt.target=m==='sweep'?1:0;
+  // ports
+  const wave=reduce?9:el*1.4;
+  rR.ports.forEach((p,i)=>{const a=m==='ports'?smooth(p.x+.5,p.x+.8,wave-(42-p.dev.top)*.12):0;const c=p.used?COL.link:COL.recLight;
+    for(let j=0;j<8;j++)pbC.setXYZW(i*8+j,c.r,c.g,c.b,a*(p.used?.95:.8));});
+  pbC.needsUpdate=true;
+  rt.pA.target=rt.sA.target=rt.pC.target=m==='ports'?smooth(.8,1.3,el):0;
+  // leds
+  rR.updateLeds(time,m==='leds'?1.6:0);
+  rt.flt.target=m==='leds'?smooth(.6,1,el):0; rt.free.target=m==='leds'?smooth(1,1.4,el):0;
+  // trace
+  const tr=m==='trace';
+  rR.cableMeshes.forEach(c=>{c.material.opacity=lerp(c.material.opacity,tr?.14:1,f);c.material.depthWrite=!tr;});
+  rR.traceMat.color.lerp(tr?COL.link:COL.pale,f); rR.traceMat.emissive.copy(COL.link).multiplyScalar(tr?.6:0); rR.traceMat.depthTest=!tr; pulse.renderOrder=7; pulse.material.depthTest=!tr;
+  const tu=reduce?.5:(el*.35)%1; pulse.position.copy(rR.traceCurve.getPoint(tu)); pulse.position.z+=.01; pulse.material.opacity=tr?1:0; pulse.visible=tr;
+  rt.t0.pos.copy(rR.traceCurve.getPoint(0)).add(V3(-.02,0,0)); rt.t0.parent=rR.grp; rt.t0.target=tr?smooth(.3,.7,el):0;
+  rt.t1.pos.copy(rR.traceCurve.getPoint(1)).add(V3(.02,0,0)); rt.t1.parent=rR.grp; rt.t1.target=tr?smooth(1.2,1.6,el):0;
+}
+[rt.pA,rt.sA,rt.pC,rt.flt,rt.free,rt.cnt].forEach(t=>t.parent=rR.grp);
+
+/* ───────── STACK: six plates, one record ───────── */
+const stk=View('vStack',mkScene(),28);
+const PW=3.3,PD=2.2,PT=.07,GAPY=.13;
+function plateCanvas(i){
+  const W=1650,H=1100;const [c,g]=cnv(W,H);
+  g.fillStyle='#F4F6F3';g.fillRect(0,0,W,H);g.strokeStyle='#C6CCC7';g.lineWidth=4;g.strokeRect(2,2,W-4,H-4);
+  const T=['01 · perceive','02 · cognize','03 · connect','04 · twin','05 · reconcile','06 · audit'][i];
+  g.fillStyle='#04703F';g.font=`500 34px ${MONO}`;g.fillText(T,56,78);g.fillStyle='#4A544F';g.font=`400 30px ${MONO}`;const r='DC1-R3 · sweep 12';g.fillText(r,W-56-g.measureText(r).width,78);
+  g.fillStyle='#C6CCC7';g.fillRect(56,104,W-112,2);
+  const ink='#111614',ink2='#4A544F',G='#1FD67C',GI='#04703F',A='#FF9A2E',AI='#9C4C00',R='#7C93A8';
+  g.lineWidth=3;
+  if(i===0){ // rack elevation with a scan band
+    const x0=180,y0=150,rw=420,uh=20;g.strokeStyle=ink;g.strokeRect(x0,y0,rw,uh*42);
+    for(let u=0;u<=42;u++){g.fillStyle='rgba(17,22,20,.12)';g.fillRect(x0-30,y0+u*uh,20,1.5);}
+    R3.forEach(d=>{const y=y0+(42-d.top)*uh;g.fillStyle=d.kind==='mgr'?'#3a423e':'#2a302d';g.fillRect(x0+6,y+2,rw-12,d.h*uh-4);});
+    g.fillStyle='rgba(31,214,124,.22)';g.fillRect(x0-40,y0+300,rw+80,70);g.fillStyle=G;g.fillRect(x0-40,y0+368,rw+80,4);
+    [[37,1,'SW-A · U37'],[33,2,'SRV-01 · U33–32'],[40,1,'PP-B · U40']].forEach(([t,hh,l],k)=>{const y=y0+(42-t)*uh;g.strokeStyle=G;g.strokeRect(x0-6,y-3,rw+12,hh*uh+6);g.fillStyle=ink;g.font=`400 30px ${MONO}`;g.fillText(l,x0+rw+60,y+hh*uh/2+10);g.fillStyle=G;g.fillRect(x0+rw+10,y+hh*uh/2-1,40,2);});
+    g.fillStyle=ink2;g.font=`400 30px ${MONO}`;['17 devices','42 U · 5 U free','612 ports','14 labels read'].forEach((t,k)=>g.fillText(t,1100,300+k*64));
+  }
+  if(i===1){ // asset chips
+    const rows=[['SW-A','switch','NX-9336C','FDO2231X0KZ'],['SW-B','switch','NX-9336C','FDO2231X0LM'],['OOB-1','switch','C9200-24T','JAE24410R2Q'],['SRV-01','server','R750 · 2U','7XQK2M3'],['SRV-05','server','R750 · 2U','J4X1P93'],['STC-1','storage','ME5024','CN0R2X1'],['PP-B','patch','48 × Cat6A','—']];
+    g.font=`400 30px ${MONO}`;g.fillStyle=ink2;['id','class','model','serial on label'].forEach((t,k)=>g.fillText(t,[70,330,600,960][k],180));
+    rows.forEach((r,k)=>{const y=250+k*110;g.fillStyle='#E9ECE8';g.fillRect(56,y-60,W-112,90);g.fillStyle=ink;g.font=`500 36px ${MONO}`;g.fillText(r[0],70,y);
+      g.fillStyle=GI;g.fillRect(330,y-30,18,18);g.fillStyle=ink2;g.font=`400 32px ${MONO}`;g.fillText(r[1],360,y);g.fillStyle=ink;g.fillText(r[2],600,y);g.fillText(r[3],960,y);});
+  }
+  if(i===2){ // two port strips with links
+    const drawStrip=(y,n,lab,used)=>{g.fillStyle=ink;g.font=`500 32px ${MONO}`;g.fillText(lab,70,y-40);for(let k=0;k<n;k++){const x=70+k*(1500/n);const u=used(k);g.strokeStyle=u?GI:R;g.lineWidth=3;if(!u)g.setLineDash([6,6]);g.strokeRect(x,y,1500/n-10,36);g.setLineDash([]);if(u){g.fillStyle=G;g.fillRect(x+4,y+4,1500/n-18,28);}}};
+    drawStrip(260,48,'PP-B · U40',k=>k%11!==3&&k<46);drawStrip(820,36,'SW-B · U35',k=>k<28);
+    g.strokeStyle='rgba(4,112,63,.55)';g.lineWidth=2.5;for(let k=0;k<28;k++){const x1=70+k*(1500/48)+(1500/48-10)/2,x2=70+k*(1500/36)+(1500/36-10)/2;g.beginPath();g.moveTo(x1,300);g.bezierCurveTo(x1,540,x2,580,x2,818);g.stroke();}
+    g.fillStyle=ink2;g.font=`400 30px ${MONO}`;g.fillText('44 / 48 in use · 28 linked to SW-B · 16 to hosts',70,960);
+  }
+  if(i===3){ // topology
+    const N=(x,y,t,c=ink)=>{g.fillStyle='#F4F6F3';g.strokeStyle=c;g.lineWidth=3;g.fillRect(x-110,y-36,220,72);g.strokeRect(x-110,y-36,220,72);g.fillStyle=c;g.font=`500 30px ${MONO}`;g.fillText(t,x-g.measureText(t).width/2,y+10);};
+    const L=(a,b)=>{g.strokeStyle='rgba(17,22,20,.45)';g.lineWidth=2.5;g.beginPath();g.moveTo(a[0],a[1]);g.lineTo(b[0],b[1]);g.stroke();};
+    const core=[[560,230],[1090,230]],tor=[[460,470],[1190,470]],hosts=[...Array(7)].map((_,k)=>[170+k*220,760]),st=[[825,960]];
+    core.forEach(c=>tor.forEach(t=>L(c,t)));tor.forEach((t,ti)=>hosts.forEach((h,k)=>{if((k+ti)%2===0||k===3)L(t,h);}));tor.forEach(t=>L(t,st[0]));
+    core.forEach((c,k)=>N(c[0],c[1],'core-'+(k+1),ink2));tor.forEach((t,k)=>N(t[0],t[1],k?'SW-B':'SW-A',GI));hosts.forEach((h,k)=>N(h[0],h[1],'SRV-0'+(k+1),k===4?AI:ink));N(st[0][0],st[0][1],'STC-1');
+  }
+  if(i===4){ // reconcile table
+    g.font=`400 30px ${MONO}`;g.fillStyle=ink2;['device · field','in the rack','in the CMDB',''].forEach((t,k)=>g.fillText(t,[70,560,960,1400][k],180));
+    const rows=[['SW-A · ports linked','30','30',1],['SRV-02 · position','U31–30','U31–30',1],['SRV-05 · serial','J4X1P93','J4X7P93',0],['PP-C · ports in use','31','28',0],['STC-1 · model','ME5024','ME5024',1],['U05–01 · status','free','reserved',0],['OOB-1 · uplink','Gi1/0/24','Gi1/0/24',1]];
+    rows.forEach((r,k)=>{const y=260+k*108;if(!r[3]){g.fillStyle='rgba(255,154,46,.14)';g.fillRect(56,y-58,W-112,90);}
+      g.fillStyle=ink;g.font=`500 32px ${MONO}`;g.fillText(r[0],70,y);g.font=`400 32px ${MONO}`;g.fillText(r[1],560,y);g.fillStyle=r[3]?ink:AI;g.fillText(r[2],960,y);
+      g.fillStyle=r[3]?GI:AI;g.font=`500 32px ${MONO}`;g.fillText(r[3]?'✓ agrees':'▲ differs',1360,y);g.fillStyle='#C6CCC7';g.fillRect(56,y+32,W-112,1.5);});
+  }
+  if(i===5){ // audit & firmware
+    const rows=[['SW-A','NX-OS 9.3(8) · end of support Dec 2026',0],['SRV-05','serial change awaiting approval',0],['SW-B','firmware current · evidence dated',1],['STC-1','HA pair healthy · evidence dated',1],['PP-C','3 patches added since last sweep',0],['OOB-1','uplink verified · evidence dated',1]];
+    rows.forEach((r,k)=>{const y=210+k*104;g.fillStyle=r[2]?G:A;g.fillRect(70,y-26,20,20);g.fillStyle=ink;g.font=`500 34px ${MONO}`;g.fillText(r[0],120,y);g.fillStyle=ink2;g.font=`400 30px ${SANS}`;g.fillText(r[1],330,y);});
+    g.fillStyle=ink;g.font=`500 80px ${SANS}`;g.fillText('82%',70,960);g.fillStyle=ink2;g.font=`400 30px ${MONO}`;g.fillText('of devices fully evidenced · 3 to act on',260,950);
+    for(let k=0;k<17;k++){g.fillStyle=k<14?GI:A;g.fillRect(70+k*88,990,78,24);}
+  }
+  return c;
+}
+const plates=[];
+const plateEdge=new THREE.MeshStandardMaterial({color:'#c6ccc7',metalness:.3,roughness:.5});
+for(let i=0;i<6;i++){const top=new THREE.MeshBasicMaterial({map:tex(plateCanvas(i)),toneMapped:false});
+  const m=new THREE.Mesh(new RoundedBoxGeometry(PW,PT,PD,2,.012),[plateEdge,plateEdge,top,plateEdge,plateEdge,plateEdge]);
+  // RoundedBox groups: use a separate top plane for the texture so UVs are clean
+  m.material=plateEdge; const tp=new THREE.Mesh(new THREE.PlaneGeometry(PW-.03,PD-.03),top);tp.rotation.x=-Math.PI/2;tp.position.y=PT/2+.001;m.add(tp);
+  const eg=new THREE.LineSegments(new THREE.EdgesGeometry(new THREE.BoxGeometry(PW+.02,PT+.01,PD+.02)),new THREE.LineBasicMaterial({color:COL.link,transparent:true,opacity:0,toneMapped:false}));m.add(eg);m.userData.edge=eg;
+  stk.scene.add(m);plates.push(m);}
+const stSh=shadowDisc(6,4.4,.32);stk.scene.add(stSh);
+const stT=stk.tags.add('<b>DC1-R3 · one verified record</b>six surfaces · sweep 12','link up keep',[0,6*GAPY+.2,0]);
+const presented=V3(0,1.25,.6);
+const _n=new THREE.Vector3(),_x=new THREE.Vector3(),_z=new THREE.Vector3(),_m=new THREE.Matrix4(),_cw=new THREE.Vector3();
+function faceQ(pos){ // plate top (+y) turned 80% toward the camera, long edge kept level
+  _cw.copy(stk.camera.position); stk.scene.worldToLocal(_cw); _n.copy(_cw).sub(pos).normalize();
+  _x.set(0,1,0).cross(_n).normalize(); _z.copy(_x).cross(_n).normalize();
+  const q=new THREE.Quaternion().setFromRotationMatrix(_m.makeBasis(_x,_n,_z)); return new THREE.Quaternion().slerp(q,.8);}
+function stackUpdate(dt,time,w,h){
+  const sp=RT.prog(document.getElementById('surfaces')); const q=sp*6.6; const all=smooth(6.15,6.5,q);
+  plates.forEach((m,i)=>{
+    const arrive=reduce?(q>=i-.2?1:0):smooth(i-.45,i+.05,q), settle=reduce?(q>=i+.85?1:0):smooth(i+.7,i+1.0,q);
+    const slotY=i*GAPY+PT/2, lift=presented.y+i*GAPY;
+    const off=V3(0,lift+3.2,.2);
+    const pres=V3(presented.x,lift,presented.z);
+    const pos=off.clone().lerp(pres,arrive).lerp(V3(0,slotY,0),settle);
+    m.position.copy(pos);
+    const qFace=faceQ(m.position); const qIn=new THREE.Quaternion().setFromEuler(new THREE.Euler(.5,.4,0));
+    m.quaternion.copy(qIn).slerp(qFace,arrive).slerp(new THREE.Quaternion(),settle);
+    m.visible=arrive>.001;
+    m.userData.edge.material.opacity=Math.max(all*(.5+.4*Math.sin(time*2-i*.6)),(arrive*(1-settle))*.9);
+  });
+  stSh.position.y=-.01;
+  stk.scene.rotation.y=reduce?-.35:-.35+Math.sin(time*.18)*.05+mouse.sx*.04;
+  const md=mobile?1.45:1;
+  camTo(stk,V3(5.6*md,6.2*md,9.0*md),V3(0,1.35,0),reduce?1:1-Math.pow(.02,dt)); stk.fx=mobile?.5:.66; stk.fy=mobile?h*.24:0;
+  stT.target=all;
+}
+
+/* ═════════════ loop ═════════════ */
+const UPD=new Map([[hero,heroUpdate],[mac,machineUpdate],[rd,readerUpdate],[stk,stackUpdate]]);
+let vw=0,vh=0; const clock=new THREE.Clock(); let time=0;
+function resize(){vw=innerWidth;vh=innerHeight;mobile=vw<760;renderer.setSize(vw,vh,false);}
+addEventListener('resize',resize);resize();
+function frame(){
+  requestAnimationFrame(frame);
+  const dt=Math.min(clock.getDelta(),.05); time=clock.elapsedTime;
+  renderer.setScissorTest(false); renderer.setClearColor(0x000000,0); renderer.clear();
+  for(const v of views){
+    const r=v.el.getBoundingClientRect();
+    const vis=r.bottom>0&&r.top<vh&&r.width>2&&r.height>2;
+    v.hud.style.visibility=vis?'visible':'hidden';
+    if(!vis) continue;
+    const w=r.width,h=r.height;
+    UPD.get(v)(dt,time,w,h);
+    v.camera.aspect=w/h; v.camera.setViewOffset(w,h,-(v.fx-.5)*w,v.fy||0,w,h); v.camera.updateProjectionMatrix();
+    const y=vh-r.bottom;
+    renderer.setViewport(r.left,y,w,h); renderer.setScissor(r.left,y,w,h); renderer.setScissorTest(true);
+    if(v.clear){renderer.setClearColor(v.clear,1);renderer.clear();}
+    renderer.render(v.scene,v.camera);
+    v.tags.update(v.camera,w,h,dt);
+  }
+}
+document.fonts.ready.then(()=>{ /* redraw text-bearing textures with real fonts */
+  cards.forEach(c=>{c.m.material.map.image=cardCanvas(c.d);c.m.material.map.needsUpdate=true;});
+  head.material.map.image=headCanvas();head.material.map.needsUpdate=true;
+  plates.forEach((m,i)=>{const t=m.children[0].material.map;t.image=plateCanvas(i);t.needsUpdate=true;});
+});
+requestAnimationFrame(frame);
+</script>
+<!--GLJS-END-->
+<script src="/design-system/nav.js" defer></script>
+</body>
+</html>

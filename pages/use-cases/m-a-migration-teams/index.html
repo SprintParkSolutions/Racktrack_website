@@ -1,0 +1,761 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>M&amp;A &amp; migration teams · RackTrack</title>
+<meta name="description" content="Turn an inherited site into a clear baseline. RackTrack helps migration teams understand what is physically present before they plan moves, consolidation, or cutover work.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap">
+<link rel="stylesheet" href="/design-system/base.css">
+<style>
+/* RackTrack · Use case 06 · M&A & migration teams — design-system/ tokens.
+   Protagonist: one inherited row of five cabinets, drawn twice in the same place: the seller's record (blue-grey wireframe) and the real row (solid). */
+:root{
+  color-scheme: light;
+  
+}
+*{box-sizing:border-box}
+html{background:var(--paper)}
+body{margin:0;background:var(--paper);color:var(--fg);font:400 16px/1.5 var(--sans);-webkit-font-smoothing:antialiased;overflow-x:hidden}
+a{color:inherit}
+::selection{background:var(--link);color:#06140d}
+:focus-visible{outline:2px solid var(--link-ink);outline-offset:3px;border-radius:2px}
+body::before{content:"";position:fixed;inset:0;z-index:0;pointer-events:none;background:radial-gradient(60% 55% at 64% 50%,rgba(255,255,255,.6),transparent 72%)}
+#stage{position:fixed;inset:0;z-index:1;display:block;width:100%;height:100%;pointer-events:none}
+#scrim{position:fixed;inset:0;z-index:1;pointer-events:none;background:linear-gradient(90deg,var(--paper) 0,rgba(233,236,232,.92) 24%,rgba(233,236,232,0) 45%)}
+#hud{position:fixed;inset:0;z-index:3;pointer-events:none;overflow:hidden}
+main{position:relative;z-index:2}
+
+/* nav */
+.nav{position:fixed;left:0;right:0;top:0;z-index:10;display:flex;align-items:center;gap:28px;height:calc(var(--nav-h) + env(safe-area-inset-top,0px));padding:env(safe-area-inset-top,0px) var(--bleed) 0;background:linear-gradient(var(--paper) 55%,transparent)}
+.brand{display:flex;align-items:center;gap:10px;text-decoration:none;font:700 17px/1 var(--sans);letter-spacing:-.02em;color:var(--ink)}
+.brand img{width:26px;height:26px;border-radius:5px;display:block}
+.nav ul{display:flex;gap:24px;list-style:none;margin:0 0 0 auto;padding:0}
+.nav ul a{font:500 14px/1 var(--sans);text-decoration:none;color:var(--ink-2)}
+.nav ul a:hover{color:var(--ink)}
+.nav ul a[aria-current="page"]{color:var(--ink);text-decoration:underline;text-decoration-color:var(--link);text-decoration-thickness:2px;text-underline-offset:6px}
+.btn{display:inline-flex;align-items:center;gap:10px;height:46px;padding:0 20px;border-radius:3px;border:1px solid var(--fg);font:500 15px/1 var(--sans);text-decoration:none;cursor:pointer;background:transparent;color:var(--fg);transition:background .2s,color .2s,border-color .2s}
+.btn.solid{background:var(--fg);color:var(--bg)}
+.btn.solid:hover{background:var(--link-ink);border-color:var(--link-ink);color:#fff}
+.btn:not(.solid){border-color:var(--line)}
+.btn:not(.solid):hover{border-color:var(--fg)}
+.btn .led{width:7px;height:7px;border-radius:50%;background:var(--link);box-shadow:0 0 8px var(--link)}
+.nav .btn{height:38px;padding:0 16px;font-size:14px}
+
+/* type */
+.ch{position:relative;padding-inline:var(--bleed)}
+.copy{max-width:33rem;}
+h1,h2,h3{margin:0 0 20px;text-wrap:balance}
+h1{max-width:11ch}
+h2{max-width:16ch}
+h3{margin:0 0 12px}
+.lede{color:var(--fg-2);max-width:27rem;margin:0 0 28px}
+.k{margin:0 0 14px;font:400 12px/1 var(--mono);color:var(--link-ink)}
+.k.back{margin-bottom:26px}
+.k.back a{color:var(--ink-2);text-decoration:none;border-bottom:1px solid var(--rule);padding-bottom:3px}
+.k.back a:hover{color:var(--ink);border-color:var(--ink)}
+.actions{display:flex;flex-wrap:wrap;gap:12px}
+
+/* legend (drawing-sheet key) */
+.legend{display:flex;flex-wrap:wrap;gap:8px 20px;margin-top:34px;font:400 11.5px/1.2 var(--mono);color:var(--ink-2)}
+.legend span{display:flex;align-items:center;gap:8px}
+.legend i{display:block;width:22px;height:10px;border:1.5px solid var(--c);background:color-mix(in oklab,var(--c) 14%,transparent)}
+.legend .r{--c:var(--record)} .legend .r i{border-style:dashed;background:transparent}
+.legend .g{--c:var(--link)} .legend .a{--c:var(--drift)}
+
+/* tags */
+.tag{position:absolute;left:0;top:0;display:flex;align-items:center;opacity:0;will-change:transform,opacity;white-space:nowrap}
+.tag::before{content:"";width:7px;height:7px;border-radius:50%;background:var(--c,var(--ink));transform:translate(-3.5px,0);box-shadow:0 0 0 3px color-mix(in oklab,var(--c,var(--ink)) 22%,transparent)}
+.tag i{display:block;width:24px;height:1px;background:var(--c,var(--ink))}
+.tag span{padding:6px 9px;background:var(--paper-2);border:1px solid var(--c,var(--ink));border-radius:2px;font:400 11.5px/1.35 var(--mono);color:var(--ink);box-shadow:0 14px 28px -20px rgba(17,22,20,.45)}
+.tag span b{display:block;font:600 15px/1.15 var(--sans);letter-spacing:-.02em;margin-bottom:2px}
+.tag.left{flex-direction:row-reverse}.tag.left::before{transform:translate(3.5px,0)}
+.tag.up{flex-direction:column-reverse}.tag.up i{width:1px;height:22px}.tag.up::before{transform:translate(0,3.5px)}
+.tag.link{--c:var(--link)} .tag.link span b{color:var(--link-ink)}
+.tag.drift{--c:var(--drift)} .tag.drift span b{color:var(--drift-ink)}
+.tag.rec{--c:var(--record)} .tag.rec span b{color:var(--record-ink)}
+.tag.ink{--c:var(--ink)}
+
+/* hero */
+#hero{min-height:100vh;display:flex;align-items:center;padding-top:90px}
+
+/* pinned chapters */
+.pinsec{position:relative}
+#how{min-height:520vh} #sees{min-height:400vh} #decide{min-height:400vh}
+.pin{position:sticky;top:0;height:100vh}
+.scopy{position:absolute;left:var(--gutter);top:50%;transform:translateY(-50%);width:min(31rem,40vw);}
+.scopy .h{margin-bottom:28px}
+.scopy .h .lede{margin:0}
+.stack{position:relative;height:250px}
+#how .stack{height:400px}
+.st{position:absolute;inset:0;opacity:0;transform:translateY(14px);transition:opacity .45s,transform .55s var(--ease);pointer-events:none}
+.st.on{opacity:1;transform:none;pointer-events:auto}
+.st .no{font:400 12px/1 var(--mono);color:var(--ink-2);margin:0 0 12px;display:flex;gap:10px;align-items:center}
+.chip{font:500 11px/1 var(--mono);padding:5px 7px;border-radius:2px;border:1px solid var(--link);color:var(--link-ink);background:rgba(31,214,124,.08)}
+.chip.a{border-color:var(--drift);color:var(--drift-ink);background:rgba(255,154,46,.1)}
+.chip.r{border-color:var(--record);color:var(--record-ink);background:rgba(124,147,168,.1)}
+.st p{margin:0 0 14px;color:var(--ink-2);max-width:27rem}
+.st ul{list-style:none;margin:0;padding:0;font:400 12.5px/1.4 var(--mono);max-width:25rem}
+.st li{display:flex;gap:10px;padding:7px 0;border-top:1px dashed var(--rule);align-items:center}
+.st li b{font-weight:500;color:var(--ink);min-width:12rem}
+.st li em{font-style:normal;margin-left:auto;color:var(--ink)}
+.st li .sw{width:10px;height:10px;flex:none;border:1.5px solid var(--c);background:color-mix(in oklab,var(--c) 30%,transparent)}
+.st figure{margin:4px 0 0;max-width:19rem}
+.st figure img{display:block;width:100%;height:auto;aspect-ratio:16/8;object-fit:cover;object-position:50% 45%;border-radius:2px;border:1px solid var(--rule);filter:saturate(.35) contrast(1.02)}
+.st figcaption{margin-top:8px;font:400 11.5px/1.3 var(--mono);color:var(--ink-2)}
+.prog{display:flex;gap:5px;align-items:center;margin-top:18px;font:400 11px/1 var(--mono);color:var(--ink-2)}
+.prog i{width:28px;height:3px;background:var(--rule);position:relative;overflow:hidden}
+.prog i b{position:absolute;inset:0 auto 0 0;width:0;background:var(--link-ink)}
+.prog span{margin-left:8px}
+
+/* decisions */
+#decide .scopy{width:min(32rem,41vw)}
+.dlabel{margin:0 0 10px;font:400 12px/1 var(--mono);color:var(--ink-2)}
+.dec{list-style:none;margin:0;padding:0;border-top:1px solid var(--ink)}
+.dec li{display:grid;grid-template-columns:2rem 1fr auto;align-items:center;gap:12px;padding:14px 0;border-bottom:1px solid var(--rule);font:500 clamp(17px,1.4vw,21px)/1.2 var(--sans);letter-spacing:-.02em;color:var(--ink-2);transition:color .4s}
+.dec li .n{font:400 11px/1 var(--mono);color:var(--ink-2)}
+.dec li .s{font:500 11px/1 var(--mono);padding:5px 7px;border-radius:2px;border:1px dashed var(--rule);color:var(--ink-2);transition:all .4s}
+.dec li.ans{color:var(--ink)}
+.dec li.ans .s{border:1px solid var(--link);color:var(--link-ink);background:rgba(31,214,124,.1)}
+
+/* cta */
+#cta{padding-block:var(--band-y);text-align:center;background:var(--paper);position:relative;z-index:2;border-top:1px solid var(--rule)}
+#cta h2{margin-inline:auto;max-width:16ch}
+#cta .lede{margin-inline:auto}
+#cta .actions{justify-content:center}
+
+/* footer */
+.foot{position:relative;z-index:2;padding:var(--band-y) var(--bleed) calc(var(--s8) + env(safe-area-inset-bottom,0px));background:var(--paper);border-top:1px solid var(--rule);display:grid;grid-template-columns:var(--copy-w) repeat(3,minmax(0,1fr));gap:28px;font-size:14px;color:var(--ink-2)}
+.foot b{display:block;font:500 13px/1 var(--sans);color:var(--link-ink);margin-bottom:16px}
+.foot nav{display:flex;flex-direction:column;gap:11px}
+.foot nav a{color:var(--ink);text-decoration:none;font-size:15px}
+.foot nav a:hover{color:var(--link-ink)}
+.foot p{margin:0 0 11px;color:var(--ink);font-size:15px;line-height:1.45}
+.foot p a{text-decoration:none}.foot p a:hover{color:var(--link-ink)}
+.foot-brand .brand{margin-bottom:16px}
+.foot-brand p{color:var(--ink-2);max-width:18rem}
+.foot .fine{grid-column:1/-1;display:flex;justify-content:space-between;flex-wrap:wrap;gap:12px;margin-top:16px;padding-top:18px;border-top:1px solid var(--rule);font-size:13px}
+.foot .legal{display:flex;gap:18px;flex-wrap:wrap}.foot .legal a{color:var(--ink-2);text-decoration:none}.foot .legal a:hover{color:var(--link-ink)}
+.foot .social{display:flex;gap:18px}
+.foot .social a{color:var(--ink-2);text-decoration:none}
+
+.no-webgl #stage,.no-webgl #hud{display:none}
+@media (max-width:1180px){ .foot{grid-template-columns:repeat(2,minmax(0,1fr))} }
+@media (max-width:760px){
+  #scrim{background:linear-gradient(0deg,var(--paper) 0,rgba(233,236,232,.94) 46%,rgba(233,236,232,0) 64%)}
+  #hud .tag:not(.keep){display:none}
+  #hero{align-items:flex-end;padding-top:46vh;padding-bottom:5vh}
+  #hero .lede,.legend{display:none}
+  h1{}
+  .scopy,#decide .scopy{left:var(--gutter);right:var(--gutter);width:auto;top:auto;bottom:4vh;transform:none;padding-left:0}
+  .scopy .h h2{margin-bottom:8px} .scopy .h .lede{display:none} .scopy .h{margin-bottom:12px}
+  .stack,#how .stack{height:200px} .st ul,.st figure{display:none}
+  #how .st:first-child p{font-size:14.5px}
+  .dec li{padding:9px 0;font-size:15px}
+}
+@media (max-width:560px){ .foot{grid-template-columns:repeat(2,minmax(0,1fr));gap:var(--s6) var(--s5);padding-block:var(--band-y-sm) calc(var(--s6) + env(safe-area-inset-bottom,0px))} }
+@media (prefers-reduced-motion:reduce){ .st,.dec li,.dec li .s{transition:none!important} }
+.snap .st,.snap .dec li,.snap .dec li .s{transition:none!important}
+</style>
+</head>
+<body>
+
+<canvas id="stage" aria-hidden="true"></canvas>
+<div id="scrim" aria-hidden="true"></div>
+<div id="hud" aria-hidden="true"></div>
+
+<nav class="nav" aria-label="Primary">
+  <a class="brand" href="/"><img alt="" src="/design-system/assets/Logos/racktrack-mark.jpg">RackTrack</a>
+  <ul>
+    <li><a href="/pages/why-racktrack/">Why RackTrack</a></li>
+    <li><a href="/pages/solutions/">Solutions</a></li>
+    <li><a href="/pages/use-cases/" aria-current="page">Use cases</a></li>
+    <li><a href="/pages/resources/">Resources</a></li>
+    <li><a href="/pages/trust-security/">Trust</a></li>
+    <li><a href="/pages/about-us/">About</a></li>
+    <li><a href="/pages/sign-in/">Sign in</a></li>
+  </ul>
+  <a class="btn solid" href="/pages/contact-us/"><span class="led"></span>Book a sweep</a>
+</nav>
+
+<main>
+  <section class="ch" id="hero">
+    <div class="copy">
+      <p class="k back"><a href="/pages/use-cases/">← All use cases</a></p>
+      <h1>Turn an inherited site into a clear baseline</h1>
+      <p class="lede">RackTrack helps migration teams understand what is physically present before they plan moves, consolidation, or cutover work.</p>
+      <div class="actions">
+        <a class="btn solid" href="/pages/contact-us/"><span class="led"></span>Get a demo</a>
+        <a class="btn" href="#how">See how it works ↓</a>
+      </div>
+      <p class="legend" aria-hidden="true"><span class="r"><i></i>inherited record</span><span class="g"><i></i>verified</span><span class="a"><i></i>disagrees</span></p>
+    </div>
+  </section>
+
+  <section class="ch pinsec" id="how" data-steps="4">
+    <div class="pin">
+      <div class="scopy">
+        <div class="h"><h2>The inherited row, and the real row</h2></div>
+        <div class="stack">
+          <div class="st on"><p class="no">00 · In plain English <span class="chip r">M&amp;A &amp; migration teams</span></p><h3>A practical starting point</h3><p>Inherited environments rarely match the documents that come with them. RackTrack gives the team a practical starting point: capture the floor, compare it with the seller or legacy record, and identify what disagrees.</p></div>
+          <div class="st"><p class="no">01 · Before <span class="chip a">unverified</span></p><h3>Inherited environments rarely match the documents that came with them</h3><p>A deal closes and the environment changes hands, but nobody is fully sure which devices are still installed or connected.</p>
+            <figure><img src="/assets/use-cases/migration-frame.jpg" alt="An inherited rack frame, densely cabled, during a migration assessment" loading="lazy" width="1400" height="875"><figcaption>Rack frame during a migration assessment.</figcaption></figure></div>
+          <div class="st"><p class="no">02 · During the sweep <span class="chip">capture</span></p><h3>RackTrack captures the real cabinet</h3><p>RackTrack captures cabinets, labels, rack position, visible devices, ports, and cable context across the inherited footprint.</p></div>
+          <div class="st"><p class="no">03 · After <span class="chip">verified baseline</span></p><h3>The team gets a record it can use</h3><p>The migration team can separate known equipment from unknown equipment and plan from the verified baseline.</p></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="ch pinsec" id="sees" data-steps="3">
+    <div class="pin">
+      <div class="scopy">
+        <div class="h"><h2>Clear rack evidence, not another mystery report</h2></div>
+        <div class="stack">
+          <div class="st on"><p class="no">01 · Baseline <span class="chip">physically present</span></p><h3>A baseline of what is physically present</h3><p>Every cabinet, device and rack position in the inherited row, as it stands today.</p></div>
+          <div class="st"><p class="no">02 · Deltas <span class="chip a">record gaps</span></p><h3>A clear list of record gaps and deltas</h3>
+            <ul><li><span class="sw" style="--c:var(--drift)"></span><b>In the documents, not in the rack</b><em>2</em></li><li><span class="sw" style="--c:var(--drift)"></span><b>In the rack, not in the documents</b><em>2</em></li><li><span class="sw" style="--c:var(--drift)"></span><b>Moved since the record</b><em>1</em></li></ul></div>
+          <div class="st"><p class="no">03 · Sort <span class="chip">plan from the baseline</span></p><h3>A better way to decide what to keep, move, replace, or retire</h3>
+            <ul><li><span class="sw" style="--c:var(--ink-2)"></span><b>Keep</b><em>10</em></li><li><span class="sw" style="--c:var(--link)"></span><b>Move</b><em>9</em></li><li><span class="sw" style="--c:var(--ink)"></span><b>Replace</b><em>5</em></li><li><span class="sw" style="--c:var(--drift)"></span><b>Retire</b><em>3</em></li></ul></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="ch pinsec" id="decide" data-steps="3">
+    <div class="pin">
+      <div class="scopy">
+        <div class="h"><h2>A clearer inherited data center footprint</h2><p class="lede">Start with one inherited row and turn uncertainty into a migration baseline.</p></div>
+        <p class="dlabel">Primary decisions</p>
+        <ol class="dec">
+          <li><span class="n">01</span>Which equipment was inherited<span class="s">answered</span></li>
+          <li><span class="n">02</span>Which records disagree with the rack<span class="s">answered</span></li>
+          <li><span class="n">03</span>Which system should move first<span class="s">answered</span></li>
+        </ol>
+      </div>
+    </div>
+  </section>
+
+  <section class="ch" id="cta">
+    <h2>Bring one inherited site. We'll show you the real baseline</h2>
+    <div class="actions">
+      <a class="btn solid" href="/pages/contact-us/"><span class="led"></span>Get a demo</a>
+      <a class="btn" href="/pages/use-cases/">All use cases</a>
+    </div>
+  </section>
+
+  <footer class="foot">
+    <div class="foot-brand">
+      <a class="brand" href="/"><img alt="" src="/design-system/assets/Logos/racktrack-mark.jpg">RackTrack</a>
+      <p>Physical infrastructure intelligence for data centers.</p>
+    </div>
+    <nav aria-label="Platform"><b>Platform</b>
+      <a href="/pages/why-racktrack/">Why RackTrack</a><a href="/pages/solutions/">Solutions</a><a href="/pages/use-cases/">Use cases</a><a href="/pages/trust-security/">Trust &amp; security</a></nav>
+    <nav aria-label="Company"><b>Company</b>
+      <a href="/pages/resources/">Resources</a><a href="/pages/about-us/">About us</a><a href="/pages/contact-us/">Contact us</a></nav>
+    <div><b>Contact</b>
+      <p><a href="mailto:info@racktrack.ai">info@racktrack.ai</a></p><p><a href="tel:+18608782448">+1 (860) 878 2448</a></p><p>85 Felt Rd, Suite #604<br>South Windsor, CT 06074</p></div>
+    <div class="fine">
+      <span>© 2026 RackTrack Inc. · Patent pending</span>
+      <span class="legal"><a href="/pages/legal/privacy-policy/">Privacy</a><a href="/pages/legal/terms-of-use/">Terms</a><a href="/pages/legal/cookie-policy/">Cookies</a><a href="/pages/legal/data-we-collect/">Data we collect</a><a href="/pages/legal/third-party-services/">Third parties</a></span>
+      <span class="social"><a href="https://www.linkedin.com/company/racktrack/" rel="noopener" target="_blank">LinkedIn</a><a href="https://www.instagram.com/racktrack_inc/" rel="noopener" target="_blank">Instagram</a><a href="https://www.facebook.com/share/18depF5xzA/" rel="noopener" target="_blank">Facebook</a></span>
+    </div>
+  </footer>
+</main>
+
+<script type="importmap">
+{ "imports": {
+  "three": "https://cdn.jsdelivr.net/npm/three@0.170.0/build/three.module.js",
+  "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.170.0/examples/jsm/"
+} }
+</script>
+<!--DOMJS-START-->
+<script>
+/* ───── M&A & migration teams: pinned step copy, decisions answered, ruler (no WebGL needed) ───── */
+(()=>{
+if(location.search.includes('snap'))document.documentElement.classList.add('snap');
+const clamp=(x,a=0,b=1)=>Math.min(b,Math.max(a,x));
+const $=s=>document.querySelector(s), $$=s=>[...document.querySelectorAll(s)];
+const secs=$$('.pinsec').map(el=>({el,n:+el.dataset.steps,st:[...el.querySelectorAll('.st')],bars:[...el.querySelectorAll('.prog i b')],lbl:el.querySelector('.prog .n'),dec:[...el.querySelectorAll('.dec li')],cur:-1}));
+const prog=el=>{const r=el.getBoundingClientRect();return -r.top/(r.height-innerHeight);};
+function frame(){
+  const vh=innerHeight,S=scrollY/(document.documentElement.scrollHeight-vh||1);
+  secs.forEach(s=>{const p=clamp(prog(s.el));const x=p*s.n;const k=Math.min(s.n-1,Math.floor(x));
+    if(k!==s.cur){s.cur=k;s.st.forEach((e,i)=>e.classList.toggle('on',i===k));if(s.lbl)s.lbl.textContent=(k+1)+' / '+s.n;}
+    s.dec.forEach((li,i)=>{const a=x>i+.5;if(li.classList.contains('ans')!==a||!li.dataset.i){li.dataset.i=1;li.classList.toggle('ans',a);li.querySelector('.s').textContent=a?'answered':'open';}});
+    s.bars.forEach((b,i)=>b.style.width=(clamp(x-i)*100)+'%');});
+  requestAnimationFrame(frame);
+}
+requestAnimationFrame(frame);
+})();
+</script>
+<!--DOMJS-END-->
+<!--GLJS-START-->
+<script type="module">
+/* ═════════════ Use case 06 · M&A & migration teams · 3D ═════════════
+   One inherited row (C01–C05) drawn twice in the same place on a drawing sheet:
+   the seller's record as a blue-grey wireframe ghost row, and the real row (solid, hazy until captured).
+   Before: the handover binder; only the ghost is known; the real row is haze and question marks.
+   During: a phone sweep runs along the row; the real row resolves; deltas turn amber
+           (in docs, not in rack · in rack, not in docs · moved).
+   After: a delta ledger lands next to the binder.
+   What the team sees: baseline (front elevation) · deltas (macro) · keep/move/replace/retire bays (plan).
+   Decisions: inherited footprint outlined · deltas pulse · the first system lifts and glides to the new site. */
+import * as THREE from 'three';
+import { RoomEnvironment } from 'three/addons/environments/RoomEnvironment.js';
+import { RoundedBoxGeometry } from 'three/addons/geometries/RoundedBoxGeometry.js';
+
+const reduce=matchMedia('(prefers-reduced-motion: reduce)').matches;
+const SNAP=location.search.includes('snap');
+const clamp=(x,a=0,b=1)=>Math.min(b,Math.max(a,x));
+const smooth=(a,b,x)=>{const t=clamp((x-a)/(b-a));return t*t*(3-2*t)};
+const lerp=(a,b,t)=>a+(b-a)*t;
+const C=h=>new THREE.Color(h);
+const COL={link:C('#1FD67C'),linkInk:C('#04703F'),drift:C('#FF9A2E'),record:C('#7C93A8'),recInk:C('#3F5871'),ink:C('#111614'),ink2:C('#4A544F')};
+const MONO='"JetBrains Mono", monospace', SANS='"Inter", sans-serif';
+const V3=(x,y,z)=>new THREE.Vector3(x,y,z);
+
+const canvas=document.getElementById('stage');
+let renderer;
+try{ renderer=new THREE.WebGLRenderer({canvas,antialias:true,alpha:true,powerPreference:'high-performance'}); }
+catch(e){ document.documentElement.classList.add('no-webgl'); throw e; }
+renderer.setPixelRatio(SNAP?1:Math.min(devicePixelRatio,2));
+renderer.setClearColor(0,0);
+renderer.toneMapping=THREE.ACESFilmicToneMapping; renderer.toneMappingExposure=1.02;
+renderer.outputColorSpace=THREE.SRGBColorSpace;
+renderer.shadowMap.enabled=true; renderer.shadowMap.type=SNAP?THREE.PCFShadowMap:THREE.PCFSoftShadowMap;
+const scene=new THREE.Scene();
+scene.environment=new THREE.PMREMGenerator(renderer).fromScene(new RoomEnvironment(),.04).texture; scene.environmentIntensity=.85;
+const camera=new THREE.PerspectiveCamera(28,1,.05,300);
+scene.add(new THREE.HemisphereLight(0xffffff,0x9aa39e,.55));
+const sun=new THREE.DirectionalLight(0xffffff,1.7);sun.position.set(-4,11,7);sun.castShadow=true;
+sun.shadow.mapSize.set(SNAP?1024:2048,SNAP?1024:2048);Object.assign(sun.shadow.camera,{left:-5,right:5,top:5,bottom:-5,near:1,far:30});sun.shadow.bias=-.0005;sun.shadow.radius=4;scene.add(sun);
+const fill=new THREE.DirectionalLight(0xdfe9ff,.55);fill.position.set(7,4,-5);scene.add(fill);
+const front=new THREE.DirectionalLight(0xffffff,.4);front.position.set(1,2,8);scene.add(front);
+
+function cnv(w,h){const c=document.createElement('canvas');c.width=w;c.height=h;return [c,c.getContext('2d')];}
+function tex(c){const t=new THREE.CanvasTexture(c);t.colorSpace=THREE.SRGBColorSpace;t.anisotropy=Math.min(8,renderer.capabilities.getMaxAnisotropy());return t;}
+const alu=new THREE.MeshStandardMaterial({color:'#dfe3df',metalness:.72,roughness:.3});
+const graph=new THREE.MeshStandardMaterial({color:'#2a302d',metalness:.55,roughness:.45});
+const add=(m,p,parent=scene)=>{if(p)m.position.set(...p);parent.add(m);return m;};
+const lineMat=(col,dashed,o={})=>dashed?new THREE.LineDashedMaterial({color:col,dashSize:o.d||.03,gapSize:o.g||.022,transparent:true,toneMapped:false,depthWrite:false}):new THREE.LineBasicMaterial({color:col,transparent:true,toneMapped:false,depthWrite:false});
+function edges(w,h,d,mat,pos,parent=scene){const l=new THREE.LineSegments(new THREE.EdgesGeometry(new THREE.BoxGeometry(w,h,d)),mat);l.position.set(...pos);if(mat.isLineDashedMaterial)l.computeLineDistances();parent.add(l);return l;}
+
+/* ─────────── layout ─────────── */
+const CX=[-1.68,-1.04,-.4,.24,.88], CN=['C01','C02','C03','C04','C05'];
+const ZR=-.9, RW=.6, RD=1.0, FZ=ZR+RD/2, U=.044, Y0=.1;
+const uy=(u,h=1)=>Y0+(u-1)*U+h*U/2;
+const DZ=FZ-.03-.4;                                  // device body centre z (face at FZ-.03)
+const NX=[2.4,3.04];                                 // new site cabinets (N01, N02)
+const BAYX=[-1.66,-.82,.02,.86], BAYZ=.9, BAYW=.76, BAYD=1.1;
+const BAYS=[{k:'keep',c:'#4A544F'},{k:'move',c:'#1FD67C'},{k:'replace',c:'#111614'},{k:'retire',c:'#FF9A2E'}];
+const BINDER=V3(2.05,0,.95), LEDGER=V3(3.1,0,.95);
+
+/* ─────────── drawing sheet ─────────── */
+const SX=.8, BW=6.8, BD=4.2;
+function sheetCanvas(){const W=2048,H=Math.round(W*BD/BW),s=W/BW;const [c,g]=cnv(W,H);const X=x=>(x-SX+BW/2)*s,Z=z=>(z+BD/2)*s;
+  g.fillStyle='#F4F6F3';g.fillRect(0,0,W,H);
+  for(let x=-BW/2;x<=BW/2+.01;x+=.2){g.fillStyle='rgba(17,22,20,.05)';g.fillRect((x+BW/2)*s,0,1.2,H);} for(let z=-BD/2;z<=BD/2+.01;z+=.2){g.fillStyle='rgba(17,22,20,.05)';g.fillRect(0,Z(z),W,1.2);}
+  g.strokeStyle='#111614';g.lineWidth=3;g.strokeRect(16,16,W-32,H-32);
+  // row footprint
+  g.strokeStyle='#4A544F';g.lineWidth=2;g.fillStyle='#4A544F';g.font=`400 19px ${MONO}`;
+  CX.forEach((x,i)=>{g.strokeRect(X(x-RW/2),Z(ZR-RD/2),RW*s,RD*s);g.fillText(CN[i],X(x-RW/2)+4,Z(ZR-RD/2)-10);});
+  g.fillText('row C · inherited',X(CX[0]-RW/2),Z(ZR-RD/2)-40);
+  // dimension line along the row
+  const zd=Z(ZR-RD/2)-64;g.setLineDash([]);g.beginPath();g.moveTo(X(CX[0]-RW/2),zd);g.lineTo(X(CX[4]+RW/2),zd);g.stroke();
+  [CX[0]-RW/2,CX[4]+RW/2].forEach(x=>{g.beginPath();g.moveTo(X(x),zd-8);g.lineTo(X(x),zd+8);g.stroke();});
+  g.fillText('5 × 600',X(CX[2])-36,zd-10);
+  // sorting bays
+  BAYS.forEach((b,i)=>{const x0=X(BAYX[i]-BAYW/2),z0=Z(BAYZ-BAYD/2);g.setLineDash([10,8]);g.strokeStyle='#4A544F';g.lineWidth=2;g.strokeRect(x0,z0,BAYW*s,BAYD*s);g.setLineDash([]);
+    g.fillStyle=b.c;g.fillRect(x0,z0,BAYW*s,7);
+    g.fillStyle='#111614';g.font=`500 26px ${SANS}`;g.fillText(b.k[0].toUpperCase()+b.k.slice(1),x0+10,z0+38);});
+  g.fillStyle='#4A544F';g.font=`400 19px ${MONO}`;g.fillText('migration plan · sorted from the verified baseline',X(BAYX[0]-BAYW/2),Z(BAYZ+BAYD/2)+30);
+  // break line → new site
+  g.strokeStyle='#4A544F';g.lineWidth=2;g.beginPath();let zz=Z(-1.75);g.moveTo(X(1.62),zz);
+  for(let z=-1.75;z<-.1;z+=.2){g.lineTo(X(1.62),Z(z+.06));g.lineTo(X(1.58),Z(z+.09));g.lineTo(X(1.66),Z(z+.13));g.lineTo(X(1.62),Z(z+.16));}g.stroke();
+  g.setLineDash([12,9]);g.strokeStyle='#4A544F';NX.forEach(x=>g.strokeRect(X(x-RW/2),Z(ZR-RD/2),RW*s,RD*s));g.setLineDash([]);
+  g.fillStyle='#4A544F';g.font=`400 19px ${MONO}`;g.fillText('N01',X(NX[0]-RW/2)+4,Z(ZR-RD/2)-10);g.fillText('N02',X(NX[1]-RW/2)+4,Z(ZR-RD/2)-10);
+  g.fillText('new site · target',X(NX[0]-RW/2),Z(ZR-RD/2)-40);
+  // handover + ledger captions
+  g.fillText('seller handover',X(BINDER.x-.27),Z(BINDER.z+.42));g.fillText('verified',X(LEDGER.x-.42),Z(LEDGER.z+.42));
+  // title block
+  g.fillStyle='#111614';g.fillRect(W-560,H-120,540,100);g.fillStyle='#DDE4DF';g.font=`500 28px ${MONO}`;g.fillText('inherited site · row C',W-540,H-74);
+  g.fillStyle='#93A19A';g.font=`400 20px ${MONO}`;g.fillText('record vs rack · baseline · 1:20',W-540,H-40);
+  return c;}
+const sheetMat=new THREE.MeshStandardMaterial({map:tex(sheetCanvas()),roughness:.9});
+const base=add(new THREE.Mesh(new THREE.BoxGeometry(BW,.2,BD),[alu,alu,sheetMat,alu,alu,alu]),[SX,-.1,0]);base.receiveShadow=true;
+add(new THREE.Mesh(new THREE.BoxGeometry(BW+.14,.04,BD+.14),graph),[SX,-.22,0]);
+
+/* ─────────── the inherited row: data ─────────── */
+// c: cabinet index · u,h: rack units · k: kind · s: sort bay (0 keep,1 move,2 replace,3 retire) · d: delta
+const REAL=[
+ {c:0,u:41,h:1,k:'patch',n:'PP-01'},{c:0,u:39,h:1,k:'switch',n:'SW-01',s:0},{c:0,u:33,h:2,k:'server',n:'WEB-01',s:1},{c:0,u:24,h:4,k:'storage',n:'ST-A',s:0},{c:0,u:12,h:2,k:'server',n:'BKP-01',s:2},{c:0,u:3,h:3,k:'ups',n:'UPS-A',s:0},
+ {c:1,u:41,h:1,k:'patch',n:'PP-02'},{c:1,u:39,h:1,k:'switch',n:'SW-02',s:0},{c:1,u:37,h:1,k:'switch',n:'no label',s:3,d:'undoc'},{c:1,u:33,h:2,k:'server',n:'APP-01',s:1},{c:1,u:30,h:2,k:'server',n:'APP-02',s:1},{c:1,u:26,h:2,k:'server',n:'DB-01',s:1,first:1},{c:1,u:16,h:4,k:'storage',n:'ST-B',s:0},{c:1,u:3,h:3,k:'ups',n:'UPS-B',s:0},
+ {c:2,u:41,h:1,k:'patch',n:'PP-03'},{c:2,u:39,h:1,k:'switch',n:'SW-03',s:0},{c:2,u:33,h:2,k:'server',n:'ESX-01',s:1},{c:2,u:30,h:2,k:'server',n:'ESX-02',s:1},{c:2,u:22,h:2,k:'server',n:'ESX-03',s:1},{c:2,u:12,h:4,k:'storage',n:'ST-C',s:2},
+ {c:3,u:41,h:1,k:'patch',n:'PP-04'},{c:3,u:38,h:2,k:'switch',n:'CORE-01',s:0},{c:3,u:34,h:1,k:'server',n:'LB-01',s:2},{c:3,u:22,h:2,k:'server',n:'WEB-02',s:1,d:'moved'},{c:3,u:16,h:2,k:'server',n:'DB-02',s:1},{c:3,u:6,h:4,k:'storage',n:'ST-D',s:2},
+ {c:4,u:41,h:1,k:'patch',n:'PP-05'},{c:4,u:37,h:1,k:'switch',n:'FW-01',s:0},{c:4,u:32,h:1,k:'server',n:'MGMT-01',s:2},{c:4,u:20,h:2,k:'server',n:'LEG-01',s:3},{c:4,u:14,h:2,k:'server',n:'NAS-?',s:3,d:'undoc'},{c:4,u:3,h:3,k:'ups',n:'UPS-C',s:0}];
+// what the seller's documents claim: everything except the undocumented, plus two that are gone, and WEB-02 where it used to be
+const GH=REAL.filter(d=>d.d!=='undoc'&&d.d!=='moved').map(d=>({c:d.c,u:d.u,h:d.h,n:d.n}));
+GH.push({c:2,u:26,h:2,n:'SRV-12',d:'missing'},{c:4,u:35,h:1,n:'FW-02',d:'missing'},{c:0,u:30,h:2,n:'WEB-02',d:'moved'});
+
+/* ─────────── real cabinets ─────────── */
+const CAB=CX.map((x,ci)=>{const grp=new THREE.Group();grp.position.set(x,0,ZR);scene.add(grp);
+  const gm=graph.clone(),sm=new THREE.MeshStandardMaterial({color:'#262c2a',metalness:.5,roughness:.5}),bm=new THREE.MeshStandardMaterial({color:'#1a1f1d',metalness:.4,roughness:.55}),am=alu.clone(),cm=new THREE.MeshStandardMaterial({color:'#6f8599',roughness:.6,metalness:.1});
+  const mats=[gm,sm,bm,am,cm];mats.forEach(m=>{m.transparent=true;});
+  const meshes=[];const M=(geo,mat,pos)=>{const m=add(new THREE.Mesh(geo,mat),pos,grp);m.castShadow=true;m.receiveShadow=true;meshes.push(m);return m;};
+  [[-1,-1],[1,-1],[-1,1],[1,1]].forEach(([sx,sz])=>M(new THREE.BoxGeometry(.035,2.0,.035),gm,[sx*(RW/2-.018),1.0,sz*(RD/2-.018)]));
+  [-1,1].forEach(sx=>M(new THREE.BoxGeometry(.012,1.9,RD-.04),sm,[sx*(RW/2-.006),1.0,0]));
+  M(new THREE.BoxGeometry(RW,.05,RD),gm,[0,2.0,0]);M(new THREE.BoxGeometry(RW,.08,RD),gm,[0,.04,0]);
+  M(new THREE.BoxGeometry(RW-.02,1.9,.01),bm,[0,1.0,-RD/2+.02]);
+  [-1,1].forEach(sx=>M(new THREE.BoxGeometry(.022,42*U,.012),am,[sx*(RW/2-.045),Y0+21*U,RD/2-.026]));
+  return {grp,mats,meshes,x,rev:0};});
+// cabinet top labels (captured labels)
+function capLabel(n){const [c,g]=cnv(256,64);g.fillStyle='#F4F6F3';g.fillRect(0,0,256,64);g.fillStyle='#111614';g.font=`500 34px ${MONO}`;g.fillText(n,18,45);return c;}
+CAB.forEach((cb,i)=>{const m=new THREE.MeshBasicMaterial({map:tex(capLabel(CN[i]+' · row C')),transparent:true,toneMapped:false});cb.mats.push(m);
+  add(new THREE.Mesh(new THREE.PlaneGeometry(.3,.075),m),[-.1,1.985,RD/2+.001],cb.grp);});
+
+function faceCanvas(k,n,h){const W=512,H=Math.max(40,Math.round(h*37));const [c,g]=cnv(W,H);
+  const bg={patch:'#1d2321',switch:'#2a302d',server:'#2f3633',storage:'#262c29',ups:'#2b312e'}[k];
+  g.fillStyle=bg;g.fillRect(0,0,W,H);g.fillStyle='rgba(255,255,255,.06)';g.fillRect(0,0,W,2);g.fillStyle='rgba(0,0,0,.35)';g.fillRect(0,H-2,W,2);
+  g.fillStyle='#DDE4DF';g.font=`500 ${h>1?15:13}px ${MONO}`;
+  if(k==='patch'||k==='switch'){g.fillText(n,14,H/2+5);}
+  if(k==='server'){g.fillStyle='#262c29';for(let i=0;i<8;i++)g.fillRect(140+i*36,6,30,H-12);g.fillStyle='#DDE4DF';g.fillText(n,14,h>1?22:H/2+5);
+    g.fillStyle='#1FD67C';g.fillRect(14,H-14,6,6);g.fillStyle='#1a1f1d';for(let y=8;y<H-6;y+=6)g.fillRect(W-72,y,56,3);}
+  if(k==='storage'){g.fillText(n,14,22);for(let r=0;r<3;r++)for(let i=0;i<4;i++){const x=90+i*100,y=10+r*(H-20)/3;g.fillStyle='#343b38';g.fillRect(x,y,92,(H-20)/3-6);g.fillStyle=(r+i)%5?'#1FD67C':'#7C93A8';g.fillRect(x+80,y+6,5,5);}}
+  if(k==='ups'){g.fillText(n,14,22);g.fillStyle='#0c1110';g.fillRect(W-170,16,140,44);g.fillStyle='#1FD67C';g.font=`500 16px ${MONO}`;g.fillText('230V 38%',W-160,44);g.fillStyle='#1a1f1d';for(let y=12;y<H-8;y+=7)g.fillRect(40,y,W-240,3);}
+  return c;}
+const DEVS=REAL.map(d=>{const cb=CAB[d.c];const hh=d.h*U-.003;
+  const fm=new THREE.MeshStandardMaterial({map:tex(faceCanvas(d.k,d.n,d.h)),metalness:.35,roughness:.55,transparent:true});
+  const body=cb.mats[2];
+  const grp=new THREE.Group();grp.position.set(0,uy(d.u,d.h),DZ-ZR);cb.grp.add(grp);
+  const mesh=add(new THREE.Mesh(new THREE.BoxGeometry(RW-.1,hh,.8),[body,body,body,body,fm,body]),null,grp);mesh.castShadow=mesh.receiveShadow=true;
+  cb.mats.push(fm);cb.meshes.push(mesh);
+  const tabM=d.s!=null?new THREE.MeshBasicMaterial({color:BAYS[d.s].c,transparent:true,opacity:0,toneMapped:false,depthWrite:false}):null;
+  const tab=tabM?add(new THREE.Mesh(new THREE.PlaneGeometry(.02,hh-.006),tabM),[-(RW-.1)/2-.018,0,.402],grp):null;
+  return {...d,grp,mesh,tab,home:grp.position.clone(),wx:cb.x};});
+const DEV=Object.fromEntries(DEVS.map(d=>[d.n,d]));
+const devWorld=(d,dz=0)=>V3(CX[d.c],uy(d.u,d.h),FZ-.03+dz);
+
+// ports on patch panels + switches
+const PORTS=[];DEVS.forEach(d=>{if(d.k!=='patch'&&!(d.k==='switch'&&d.h===1))return;for(let i=0;i<24;i++)PORTS.push({c:d.c,x:CX[d.c]-.19+i*.0165,y:uy(d.u),used:(i*7+d.c*3)%10<7,patch:d.k==='patch'});});
+const ports=new THREE.InstancedMesh(new THREE.PlaneGeometry(.011,.0075),new THREE.MeshBasicMaterial({color:0xffffff,toneMapped:false}),PORTS.length);ports.frustumCulled=false;scene.add(ports);
+{const m=new THREE.Matrix4();PORTS.forEach((p,i)=>{m.makeTranslation(p.x,p.y,FZ-.028);ports.setMatrixAt(i,m);ports.setColorAt(i,C('#101413'));});}
+// patch cords (cable context) + overhead tray
+function cord(a,b){const z=FZ-.026;const sag=.02+Math.abs(a.x-b.x)*.3;return new THREE.CatmullRomCurve3([V3(a.x,a.y,z),V3(a.x,a.y-.004,z+.03),V3((a.x+b.x)/2,(a.y+b.y)/2-sag*.4,z+.06),V3(b.x,b.y+.004,z+.03),V3(b.x,b.y,z)]);}
+CAB.forEach((cb,ci)=>{const pp=PORTS.filter(p=>p.c===ci&&p.patch),sw=PORTS.filter(p=>p.c===ci&&!p.patch);if(!sw.length)return;
+  for(let i=0;i<7;i++){const a=pp[3+i*2],b=sw[(2+i*3)%24];const t=new THREE.Mesh(new THREE.TubeGeometry(cord(a,b),20,.0028,6,false),cb.mats[4]);t.position.set(-CX[ci],0,-ZR);cb.grp.add(t);}});
+const TRAYM=graph.clone();TRAYM.transparent=true;
+const tray=add(new THREE.Mesh(new THREE.BoxGeometry(3.3,.05,.28),TRAYM),[-.4,2.26,ZR]);tray.castShadow=true;
+const bundles=CX.map((x,i)=>{const m=CAB[i].mats[4];const c=new THREE.CatmullRomCurve3([V3(x+.16,2.26,ZR+.02),V3(x+.17,2.16,ZR+.02),V3(x+.16,2.03,ZR+.02)]);const t=add(new THREE.Mesh(new THREE.TubeGeometry(c,8,.022,8,false),m));return t;});
+const trayRun=add(new THREE.Mesh(new THREE.BoxGeometry(3.2,.03,.2),new THREE.MeshStandardMaterial({color:'#6f8599',roughness:.6,transparent:true})),[-.4,2.3,ZR]);
+
+/* ─────────── the ghost row (what the documents claim) ─────────── */
+const gCab=lineMat(C('#5d7690'),false), gDev=lineMat(C('#6d869e'),false);
+const gFill=new THREE.MeshBasicMaterial({color:COL.record,transparent:true,opacity:.16,toneMapped:false,depthWrite:false,side:THREE.DoubleSide});
+const GHOSTC=CX.map(x=>{const o=edges(RW+.012,2.03,RD+.012,gCab,[x,1.015,ZR]);return o;});
+const GHOSTD=GH.map(d=>{const dl=!!d.d;const lm=dl?lineMat(COL.record,true,{d:.018,g:.012}):gDev;const fm=dl?gFill.clone():gFill;
+  const y=uy(d.u,d.h),x=CX[d.c];
+  const o=edges(RW-.08,d.h*U-.002,.82,lm,[x,y,DZ+.005]);
+  const f=add(new THREE.Mesh(new THREE.PlaneGeometry(RW-.08,d.h*U-.004),fm),[x,y,FZ+.004]);
+  return {...d,o,f,lm,fm,x,y};});
+// ghost labels drawn on the documents' own faces
+function ghostLabel(n){const [c,g]=cnv(256,40);g.fillStyle='#3F5871';g.font=`500 22px ${MONO}`;g.fillText(n,6,28);return c;}
+// hatch for "in docs, not in rack"
+function hatch(){const [c,g]=cnv(256,64);g.strokeStyle='rgba(255,154,46,.9)';g.lineWidth=5;for(let i=-80;i<300;i+=18){g.beginPath();g.moveTo(i,64);g.lineTo(i+64,0);g.stroke();}return c;}
+const hatchTex=tex(hatch());
+const MISSING=GHOSTD.filter(d=>d.d==='missing').map(d=>{const m=new THREE.MeshBasicMaterial({map:hatchTex,transparent:true,opacity:0,toneMapped:false,depthWrite:false});
+  const p=add(new THREE.Mesh(new THREE.PlaneGeometry(RW-.08,d.h*U-.004),m),[d.x,d.y,FZ+.006]);return {d,p,m};});
+// "in rack, not in docs": amber outline around the real device
+const UNDOC=DEVS.filter(d=>d.d==='undoc').map(d=>{const m=lineMat(COL.drift,false);const o=edges(RW-.07,d.h*U+.006,.03,m,[CX[d.c],uy(d.u,d.h),FZ-.02]);return {d,o,m};});
+// moved: dashed arc from the ghost position to the real one
+const MV=GHOSTD.find(d=>d.d==='moved'), MVR=DEV['WEB-02'];
+const mvA=V3(CX[MV.c]+.12,MV.y,FZ+.01), mvB=V3(CX[MVR.c]-.12,uy(MVR.u,MVR.h),FZ+.01);
+const mvCurve=new THREE.QuadraticBezierCurve3(mvA,V3((mvA.x+mvB.x)/2,(mvA.y+mvB.y)/2+.15,FZ+.55),mvB);
+const mvMat=lineMat(COL.drift,true,{d:.035,g:.025});
+const mvLine=new THREE.Line(new THREE.BufferGeometry().setFromPoints(mvCurve.getPoints(64)),mvMat);mvLine.computeLineDistances();scene.add(mvLine);
+const mvHead=add(new THREE.Mesh(new THREE.ConeGeometry(.018,.05,14),new THREE.MeshBasicMaterial({color:COL.drift,transparent:true,toneMapped:false,depthWrite:false})),null);
+{const t=mvCurve.getTangent(1);mvHead.position.copy(mvB).addScaledVector(t,-.02);mvHead.quaternion.setFromUnitVectors(V3(0,1,0),t);}
+const mvOutline=(()=>{const m=lineMat(COL.drift,false);return {m,o:edges(RW-.07,MVR.h*U+.006,.03,m,[CX[MVR.c],uy(MVR.u,MVR.h),FZ-.02])};})();
+// question marks over the unknown real row
+function qCanvas(){const [c,g]=cnv(128,128);g.fillStyle='rgba(244,246,243,.92)';g.beginPath();g.arc(64,64,52,0,7);g.fill();g.strokeStyle='#4A544F';g.lineWidth=3;g.setLineDash([8,6]);g.beginPath();g.arc(64,64,52,0,7);g.stroke();
+  g.fillStyle='#111614';g.font=`500 64px ${SANS}`;g.textAlign='center';g.fillText('?',64,86);return c;}
+const qTex=tex(qCanvas());
+const QS=CX.map((x,i)=>{const s=new THREE.Sprite(new THREE.SpriteMaterial({map:qTex,transparent:true,depthWrite:false,depthTest:false,toneMapped:false}));s.position.set(x,[1.35,.95,1.2,.8,1.1][i],FZ+.3);s.scale.setScalar(.16);scene.add(s);return s;});
+
+/* ─────────── the seller's handover: binder + document stack ─────────── */
+const HAND=new THREE.Group();HAND.position.copy(BINDER);HAND.rotation.y=-.14;scene.add(HAND);
+const paper=new THREE.MeshStandardMaterial({color:'#f4f6f3',roughness:.85});
+[[0,.004,0,.05],[.02,.01,-.015,-.06],[-.015,.016,.01,.02]].forEach(([x,y,z,r])=>{const p=add(new THREE.Mesh(new THREE.BoxGeometry(.46,.006,.62),paper),[x,y,z],HAND);p.rotation.y=r;p.castShadow=p.receiveShadow=true;});
+function binderCanvas(){const [c,g]=cnv(512,700);g.fillStyle='#7C93A8';g.fillRect(0,0,512,700);g.fillStyle='rgba(17,22,20,.12)';g.fillRect(0,0,34,700);
+  g.fillStyle='#F4F6F3';g.fillRect(70,70,380,190);g.fillStyle='#111614';g.font=`500 40px ${SANS}`;g.fillText('Seller handover',92,130);
+  g.fillStyle='#3F5871';g.font=`400 22px ${MONO}`;g.fillText('site inventory · row C',94,176);g.fillText('as documented',94,210);g.fillText('rev. 2019',94,242);
+  g.fillStyle='rgba(244,246,243,.55)';for(let i=0;i<9;i++)g.fillRect(70,320+i*36,i%3===2?220:380,10);return c;}
+const binderTop=new THREE.MeshStandardMaterial({map:tex(binderCanvas()),roughness:.7});
+const bside=new THREE.MeshStandardMaterial({color:'#5f7488',roughness:.6});
+const binder=add(new THREE.Mesh(new THREE.BoxGeometry(.5,.07,.68),[bside,bside,binderTop,bside,bside,bside]),[0,.056,0],HAND);binder.castShadow=true;binder.receiveShadow=true;
+// the ledger RackTrack hands back
+function ledgerCanvas(){const W=1024,H=740;const [c,g]=cnv(W,H);g.fillStyle='#F4F6F3';g.fillRect(0,0,W,H);g.strokeStyle='#04703F';g.lineWidth=8;g.strokeRect(4,4,W-8,H-8);
+  g.fillStyle='#111614';g.font=`500 56px ${SANS}`;g.fillText('Delta ledger',44,86);g.fillStyle='#04703F';g.font=`400 24px ${MONO}`;g.fillText('row C · verified baseline · 32 devices',46,128);
+  const rows=[['C03 U26','SRV-12','in docs, not in rack'],['C05 U35','FW-02','in docs, not in rack'],['C02 U37','no label','in rack, not in docs'],['C05 U14','NAS-?','in rack, not in docs'],['C01→C04','WEB-02','moved U30 → U22']];
+  g.font=`400 26px ${MONO}`;rows.forEach((r,i)=>{const y=204+i*80;g.fillStyle='rgba(17,22,20,.08)';g.fillRect(44,y+26,W-88,2);
+    g.fillStyle='#FF9A2E';g.fillRect(44,y-20,16,16);g.fillStyle='#4A544F';g.fillText(r[0],78,y);g.fillStyle='#111614';g.fillText(r[1],290,y);g.fillStyle='#9C4C00';g.fillText(r[2],500,y);});
+  g.fillStyle='#04703F';g.font=`500 28px ${MONO}`;g.fillText('29 match the record · 5 deltas',44,H-48);return c;}
+const ledgerTop=new THREE.MeshBasicMaterial({map:tex(ledgerCanvas()),transparent:true,opacity:0,toneMapped:false});
+const ledgerSide=new THREE.MeshStandardMaterial({color:'#e6ece7',transparent:true,opacity:0});
+const LEDG=new THREE.Group();LEDG.position.copy(LEDGER);LEDG.rotation.y=.06;scene.add(LEDG);
+const ledger=add(new THREE.Mesh(new THREE.BoxGeometry(.84,.02,.61),[ledgerSide,ledgerSide,ledgerTop,ledgerSide,ledgerSide,ledgerSide]),[0,.01,0],LEDG);ledger.castShadow=true;
+const ledgerEdge=edges(.846,.024,.616,lineMat(COL.link,false),[0,.01,0],LEDG);
+
+/* ─────────── the sweep: phone, band, frustum ─────────── */
+/* ─────────── the capture phone (shared model): aluminium frame, glass front with a live sweep viewfinder, camera bump ─────────── */
+function makePhone(parent,W,label){
+  const H=W*2.06, D=W*.105, R=W*.15;
+  const frameM=new THREE.MeshStandardMaterial({color:'#c9cfcb',metalness:.85,roughness:.22});
+  const backM=new THREE.MeshStandardMaterial({color:'#2a302d',metalness:.35,roughness:.28});
+  const body=new THREE.Mesh(new RoundedBoxGeometry(W,H,D,6,R*.55),frameM);body.castShadow=true;parent.add(body);
+  // back glass + camera bump with three lenses and a flash
+  const back=new THREE.Mesh(new RoundedBoxGeometry(W*.965,H*.975,D*.2,5,R*.5),backM);back.position.z=-D/2+D*.06;parent.add(back);
+  const bump=new THREE.Mesh(new RoundedBoxGeometry(W*.46,W*.46,D*.5,5,W*.09),backM);bump.position.set(-W*.2,H*.34,-D/2-D*.14);parent.add(bump);
+  const lensM=new THREE.MeshStandardMaterial({color:'#0b0e0d',metalness:.6,roughness:.08}),ringM=new THREE.MeshStandardMaterial({color:'#9aa39e',metalness:.9,roughness:.25});
+  [[-.3,.1],[-.1,.1],[-.2,-.1]].forEach(([x,y])=>{const r=new THREE.Mesh(new THREE.CylinderGeometry(W*.085,W*.085,D*.28,24),ringM);r.rotation.x=Math.PI/2;r.position.set(W*x,H*.34+W*y,-D/2-D*.42);parent.add(r);
+    const l=new THREE.Mesh(new THREE.CircleGeometry(W*.062,24),lensM);l.rotation.y=Math.PI;l.position.set(W*x,H*.34+W*y,-D/2-D*.57);parent.add(l);});
+  // side buttons
+  [[W/2+D*.02,H*.18,H*.12],[-W/2-D*.02,H*.24,H*.06],[-W/2-D*.02,H*.14,H*.06]].forEach(([x,y,h])=>{const b=new THREE.Mesh(new THREE.BoxGeometry(D*.28,h,D*.42),frameM);b.position.set(x,y,0);parent.add(b);});
+  // screen: canvas with rounded corners, live viewfinder UI
+  const cw=420,ch=Math.round(cw*2.06);
+  function draw(t){const c=document.createElement('canvas');c.width=cw;c.height=ch;const g=c.getContext('2d');const r=58;
+    g.beginPath();g.roundRect(0,0,cw,ch,r);g.clip();g.fillStyle='#050706';g.fillRect(0,0,cw,ch);
+    const b=10;g.save();g.beginPath();g.roundRect(b,b,cw-2*b,ch-2*b,r-b);g.clip();
+    // viewfinder: the cabinet seen by the camera
+    g.fillStyle='#cfd5d0';g.fillRect(0,0,cw,ch);g.fillStyle='#b9c0bb';g.fillRect(0,ch*.62,cw,ch*.38);
+    const rx=cw*.2,rw=cw*.6,ry=ch*.12,rh=ch*.6;g.fillStyle='#1d2321';g.fillRect(rx,ry,rw,rh);
+    for(let i=0;i<16;i++){const y=ry+10+i*(rh-20)/16;g.fillStyle=i%4===1?'#343b38':'#2a302d';g.fillRect(rx+12,y,rw-24,(rh-20)/16-5);for(let k=0;k<6;k++){g.fillStyle=(i+k)%3?'#1FD67C':'#56605b';g.fillRect(rx+rw-60+k*7,y+6,4,3);}}
+    // detections
+    g.strokeStyle='#1FD67C';g.lineWidth=4;[[2,2],[7,1],[11,3]].forEach(([i,n])=>{const y=ry+10+i*(rh-20)/16;g.strokeRect(rx+8,y-3,rw-16,n*(rh-20)/16+1);});
+    const sy=ry+rh*(.25+.5*t);g.fillStyle='rgba(31,214,124,.9)';g.fillRect(rx-18,sy,rw+36,4);g.fillStyle='rgba(31,214,124,.16)';g.fillRect(rx,ry,rw,sy-ry);
+    g.fillStyle='rgba(12,17,16,.78)';g.fillRect(rx+rw-8,ry+10+7*(rh-20)/16-34,150,28);g.fillStyle='#DDE4DF';g.font='500 17px "JetBrains Mono", monospace';g.fillText('SW-12 · U39',rx+rw,ry+10+7*(rh-20)/16-14);
+    // status bar + dynamic island
+    g.fillStyle='rgba(0,0,0,.28)';g.fillRect(0,0,cw,78);g.fillStyle='#fff';g.font='600 24px "Inter", sans-serif';g.fillText('9:41',40,50);
+    g.fillRect(cw-78,34,34,16);g.fillRect(cw-116,38,6,12);g.fillRect(cw-106,34,6,16);g.fillRect(cw-96,30,6,20);
+    g.fillStyle='#000';g.beginPath();g.roundRect(cw/2-62,22,124,36,18);g.fill();
+    // top chip
+    g.fillStyle='rgba(12,17,16,.8)';g.beginPath();g.roundRect(cw/2-110,92,220,40,20);g.fill();g.fillStyle='#1FD67C';g.beginPath();g.arc(cw/2-84,112,7,0,7);g.fill();
+    g.fillStyle='#fff';g.font='500 18px "JetBrains Mono", monospace';g.fillText(label,cw/2-66,118);
+    // bottom camera controls
+    g.fillStyle='rgba(5,7,6,.88)';g.fillRect(0,ch-230,cw,230);
+    g.font='600 17px "Inter", sans-serif';g.fillStyle='#93A19A';g.fillText('photo',64,ch-190);g.fillText('video',cw-116,ch-190);g.fillStyle='#1FD67C';g.fillText('SWEEP',cw/2-30,ch-190);
+    g.strokeStyle='#fff';g.lineWidth=6;g.beginPath();g.arc(cw/2,ch-104,46,0,7);g.stroke();g.fillStyle='#1FD67C';g.beginPath();g.roundRect(cw/2-20,ch-124,40,40,8);g.fill();
+    g.fillStyle='#6d7772';g.beginPath();g.roundRect(56,ch-130,52,52,10);g.fill();g.strokeStyle='#DDE4DF';g.lineWidth=2;g.beginPath();g.arc(cw-82,ch-104,24,0,7);g.stroke();
+    g.fillStyle='#fff';g.beginPath();g.roundRect(cw/2-70,ch-30,140,7,4);g.fill();
+    g.restore();return c;}
+  const tx=new THREE.CanvasTexture(draw(.5));tx.colorSpace=THREE.SRGBColorSpace;tx.anisotropy=8;
+  const scr=new THREE.Mesh(new THREE.PlaneGeometry(W*.965,H*.975),new THREE.MeshBasicMaterial({map:tx,transparent:true,toneMapped:false}));scr.position.z=D/2+.0004*W/.08;parent.add(scr);
+  let last=-1;parent.userData.phoneTick=t=>{const k=Math.round(((t%1)+1)%1*24)/24;if(k===last)return;last=k;tx.image=draw(k);tx.needsUpdate=true;};
+  document.fonts&&document.fonts.ready.then(()=>{tx.image=draw(.5);tx.needsUpdate=true;});
+  return parent;}
+const PHONE=new THREE.Group();scene.add(PHONE);makePhone(PHONE,.17,'row C · sweep');
+const band=add(new THREE.Mesh(new THREE.PlaneGeometry(.018,1.96),new THREE.MeshBasicMaterial({color:COL.link,transparent:true,opacity:0,toneMapped:false,depthWrite:false})),[0,1.0,FZ+.02]);
+const wash=add(new THREE.Mesh(new THREE.PlaneGeometry(1,1.96),new THREE.MeshBasicMaterial({color:COL.link,transparent:true,opacity:0,toneMapped:false,depthWrite:false})),[0,1.0,FZ+.015]);
+const frustum=new THREE.LineSegments(new THREE.BufferGeometry(),new THREE.LineBasicMaterial({color:COL.link,transparent:true,opacity:0,toneMapped:false,depthWrite:false}));scene.add(frustum);
+// verified outline per cabinet (green, after capture)
+const VER=CX.map(x=>{const m=lineMat(COL.link,false);return {m,o:edges(RW+.02,2.04,.02,m,[x,1.02,FZ+.012])};});
+
+/* ─────────── sorting cards → four bays ─────────── */
+function cardCanvas(n,bi){const [c,g]=cnv(320,140);g.fillStyle='#F4F6F3';g.fillRect(0,0,320,140);g.fillStyle=BAYS[bi].c;g.fillRect(0,0,18,140);
+  g.strokeStyle='#C6CCC7';g.lineWidth=3;g.strokeRect(1.5,1.5,317,137);g.fillStyle='#111614';g.font=`600 46px ${SANS}`;g.fillText(n,38,72);g.fillStyle='#4A544F';g.font=`400 22px ${MONO}`;g.fillText(BAYS[bi].k,40,114);return c;}
+const SORTED=DEVS.filter(d=>d.s!=null);
+const perBay=[0,0,0,0];
+const CARDS=SORTED.map((d,i)=>{const bi=d.s,slot=perBay[bi]++;const col=slot%2,row=Math.floor(slot/2);
+  const end=V3(BAYX[bi]+(col?.18:-.18),.012,BAYZ-BAYD/2+.2+row*.19);
+  const m=new THREE.MeshBasicMaterial({map:tex(cardCanvas(d.n,bi)),toneMapped:false});
+  const mesh=add(new THREE.Mesh(new THREE.BoxGeometry(.32,.012,.14),[paper,paper,m,paper,paper,paper]),null);mesh.castShadow=true;mesh.visible=false;
+  return {d,bi,end,mesh,i};});
+CARDS.sort((a,b)=>a.d.c-b.d.c||b.d.u-a.d.u).forEach((c,i)=>c.ord=i);
+const firstCard=CARDS.find(c=>c.d.first);
+const fcRing=edges(.35,.02,.17,lineMat(COL.link,false),firstCard.end.toArray());
+
+/* ─────────── new site + the first move ─────────── */
+const nsMat=lineMat(COL.ink2,true,{d:.05,g:.035});
+const NEWC=NX.map(x=>edges(RW,2.0,RD,nsMat,[x,1.0,ZR]));
+const nsSlot=edges(RW-.07,2*U,.82,lineMat(COL.link,true,{d:.02,g:.014}),[NX[0],uy(26,2),DZ]);
+const FIRST=DEV['DB-01'];
+const fHome=devWorld(FIRST).setZ(DZ);
+const fPath=new THREE.CatmullRomCurve3([fHome.clone(),V3(CX[1],fHome.y,FZ+.45),V3(CX[1]+.3,2.55,FZ+.6),V3(.9,2.78,FZ+.6),V3(NX[0]-.2,2.55,FZ+.6),V3(NX[0],fHome.y,FZ+.45),V3(NX[0],fHome.y,DZ)],false,'catmullrom',.35);
+const trail=add(new THREE.Mesh(new THREE.TubeGeometry(fPath,160,.005,6,false),new THREE.MeshBasicMaterial({color:COL.link,toneMapped:false,transparent:true,opacity:.9})));
+const trailN=trail.geometry.index.count;trail.geometry.setDrawRange(0,0);
+// inherited footprint (green, on the sheet)
+const fpMat=lineMat(COL.link,false);
+const fp=add(new THREE.Line(new THREE.BufferGeometry().setFromPoints([V3(-2.03,.006,-1.45),V3(1.23,.006,-1.45),V3(1.23,.006,-.35),V3(-2.03,.006,-.35),V3(-2.03,.006,-1.45)]),fpMat));
+const fpFill=add(new THREE.Mesh(new THREE.PlaneGeometry(3.26,1.1),new THREE.MeshBasicMaterial({color:COL.link,transparent:true,opacity:0,toneMapped:false,depthWrite:false})),[-.4,.004,-.9]);fpFill.rotation.x=-Math.PI/2;
+
+/* ─────────── tags ─────────── */
+const hud=document.getElementById('hud');const TG={};
+function tag(k,html,cls,pos,follow){const el=document.createElement('div');el.className='tag '+cls;el.innerHTML=`<i></i><span>${html}</span>`;hud.appendChild(el);TG[k]={el,pos:pos.clone?pos:V3(...pos),cur:0,t:0,follow};}
+const top=(ci)=>V3(CX[ci]+RW/2,2.02,FZ);
+const gd=n=>GHOSTD.find(d=>d.n===n&&(d.d||true));
+tag('hRec','<b>What the documents claim</b>the seller\'s record · row C','rec keep',top(4));
+tag('hReal','<b>What is really there</b>not yet known','ink',V3(CX[4]+RW/2,.55,FZ));
+tag('hBind','<b>Handover binder</b>site inventory · as documented','rec up',V3(BINDER.x,.1,BINDER.z));
+tag('pGhost','<b>Inherited record</b>5 cabinets · 32 devices on paper','rec keep',top(4));
+tag('pReal','<b>Physical row</b>unverified','ink',V3(CX[4]+RW/2,.6,FZ));
+tag('bQ','<b>Still installed? Still connected?</b>nobody is fully sure','drift keep',V3(CX[2]+RW/2,1.25,FZ));
+tag('bBind','<b>The seller\'s record</b>all the team has on day one','rec up',V3(BINDER.x,.1,BINDER.z));
+tag('cap','<b>One sweep</b>cabinet by cabinet','link keep',V3(),()=>PHONE.position.clone().add(V3(.1,.2,0)));
+tag('cLab','<b>Labels</b>read from the cabinet','link',V3(CX[0]+.05,1.99,FZ));
+tag('cPos','<b>Rack positions</b>U01 – U42','link',V3(CX[0]+RW/2-.05,.45,FZ));
+tag('cPort','<b>Ports &amp; cable context</b>patch to switch','link',V3(CX[1]+.1,uy(40),FZ));
+tag('dMiss','<b>In docs, not in rack</b>SRV-12 · C03 U26','drift keep',V3(CX[2]+RW/2-.04,uy(26,2),FZ));
+tag('dUnd','<b>In rack, not in docs</b>unlabelled switch · C02 U37','drift',V3(CX[1]+RW/2-.04,uy(37),FZ));
+tag('dMov','<b>Moved</b>WEB-02 · C01 U30 → C04 U22','drift',mvCurve.getPoint(.5));
+tag('aLed','<b>Verified baseline</b>29 match · 5 deltas','link keep',V3(LEDGER.x+.3,.03,LEDGER.z-.3));
+tag('aKnown','<b>Known</b>matches the record','link',V3(CX[3]+RW/2,uy(38,2),FZ));
+tag('aUnk','<b>Unknown</b>no record for it','drift',V3(CX[4]+RW/2-.04,uy(14,2),FZ));
+tag('sBase','<b>Physically present</b>5 cabinets · 32 devices','link up keep',V3(CX[2],2.34,ZR));
+tag('sPos','<b>Every rack position</b>as it stands today','ink',V3(CX[4]+RW/2,.35,FZ));
+tag('sMiss','<b>SRV-12</b>in the documents, not in the rack','drift keep',V3(CX[2]-RW/2+.05,uy(26,2)+.02,FZ));
+tag('sMov','<b>WEB-02</b>moved, not missing','drift',mvB.clone().add(V3(.3,0,0)));
+BAYS.forEach((b,i)=>tag('bay'+i,`<b>${b.k[0].toUpperCase()+b.k.slice(1)}</b>${[10,9,5,3][i]} devices`,(i===1?'link':i===3?'drift':'ink')+' up'+(i===1?' keep':''),V3(BAYX[i],.02,BAYZ-BAYD/2)));
+tag('dInh','<b>Inherited</b>5 cabinets · 32 devices · verified','link keep',V3(1.23,.01,-.9));
+tag('dRec','<b>5 records disagree</b>listed, located, evidenced','drift keep',V3(CX[2]+RW/2-.04,uy(26,2),FZ));
+tag('dFirst','<b>Moves first</b>DB-01 · C02 U26 → N01','link keep',V3(),()=>FIRST.grp.getWorldPosition(V3()).add(V3(RW/2-.05,0,.4)));
+tag('dSite','<b>New site</b>target cabinets','ink',V3(NX[1]+RW/2,2.0,FZ));
+
+/* ─────────── scroll → global g ─────────── */
+const secEls=['how','sees','decide'].map(id=>document.getElementById(id));
+function G(){const y=scrollY,vh=innerHeight;const r=secEls.map(e=>{const t=e.offsetTop;return [t,t+e.offsetHeight-vh];});
+  const K=[[0,-1],[r[0][0],0],[r[0][1],4],[r[1][0],4.5],[r[1][1],7.5],[r[2][0],8],[r[2][1],11]];
+  for(let i=0;i<K.length-1;i++){if(y<=K[i+1][0])return lerp(K[i][1],K[i+1][1],clamp((y-K[i][0])/((K[i+1][0]-K[i][0])||1)));}return 11;}
+const on=(g,a,b)=>smooth(a-.2,a+.15,g)*(1-smooth(b-.15,b+.2,g));
+const Z_=(p,t,k)=>[[t[0]+(p[0]-t[0])*k,t[1]+(p[1]-t[1])*k,t[2]+(p[2]-t[2])*k],t];
+const CAMS=[[-1,null],
+  [.5,[-.25,1.2,8.2],[-.25,1.05,-.9]],            // plain English: front elevation, ghost and real overlap exactly
+  [1.5,...Z_([4.1,2.5,4.9],[.7,.75,-.2],1.42)],               // before: the binder and the row behind it
+  [2.5,...Z_([2.4,1.7,3.9],[-.5,1.0,-.8],1.38)],            // during: 3/4 along the row with the sweep
+  [3.5,...Z_([5.0,3.6,5.6],[.8,.7,-.1],1.25)],               // after: wider, ledger lands
+  [5,[-.1,.5,9.6],[-.3,1.12,-.9]],              // baseline: low front elevation
+  [6,[2.35,1.62,2.15],[-.3,1.16,-.4]],             // deltas: macro on the empty slot and the moved arrow
+  [7,[-.3,8.7,2.95],[-.3,0,.5]],                // bays: top-down plan
+  [8.5,...Z_([1.8,4.6,5.8],[-.3,.6,-.5],1.3)],             // inherited: from the front-left, footprint on the sheet
+  [9.5,...Z_([2.4,2.6,5.2],[-.2,1.0,-.7],1.45)],             // records that disagree
+  [10.6,...Z_([5.6,4.4,6.4],[1.95,1.0,-.35],1.4)],            // first move → new site
+  [11,...Z_([6.6,5.2,7.4],[1.2,.8,-.1],1.32)]];               // final wide
+const FIT_S={z:1,sh:0};let GFIT=0;
+const FITPTS=()=>{const a=[];const x1=GFIT>10?NX[1]+RW/2:CX[4]+RW/2;[CX[0]-RW/2,x1].forEach(x=>[ZR-RD/2,ZR+RD/2].forEach(z=>[0,2.3].forEach(y=>a.push(new THREE.Vector3(x,y,z)))));return a;};
+const FITON=()=>true;
+let vw=0,vh=0,mobile=false;
+function resize(){vw=innerWidth;vh=innerHeight;mobile=vw<760;renderer.setSize(vw,vh,false);camera.aspect=vw/vh;camera.updateProjectionMatrix();}
+addEventListener('resize',resize);resize();
+const cp=V3(5.4,4.2,7.4),ct=V3(.3,1,-.2);
+const clock=new THREE.Clock();const cta=document.getElementById('cta');
+const P_OFF=C('#0d1110'),P_DIM=C('#56605b'),P_PATCH=C('#9aa6a0');
+
+function frame(){
+  requestAnimationFrame(frame);
+  const dt=Math.min(clock.getDelta(),.05),time=clock.elapsedTime;
+  const show=cta.getBoundingClientRect().top>0;{const _c=document.getElementById('cta');const _t=_c?_c.getBoundingClientRect().top:1e9;{const _o=Math.min(1,Math.max(0,(_t-innerHeight*.35)/(innerHeight*.3)));hud.style.opacity=String(_o);hud.style.visibility=_o<.01?'hidden':'visible';}}/*HUDFADE*/
+  canvas.style.visibility=hud.style.visibility=show?'visible':'hidden';if(!show)return;
+  const g=G();GFIT=g;
+  // camera
+  const sway=reduce?0:Math.sin(time*.12)*.12;
+  let Pp=V3(Math.sin(.6+sway)*9.8+.7,5.4,Math.cos(.6+sway)*9.8),Tt=V3(.7,.75,-.05);
+  for(let i=1;i<CAMS.length;i++){const [gi,p,t]=CAMS[i];const gp=CAMS[i-1][0];const k=smooth(gp+(gi-gp)*.3,gi-(gi-gp)*.15,g);if(k>0){Pp.lerp(V3(...p),k);Tt.lerp(V3(...t),k);}}
+  if(mobile){const hx=-.75*(1-smooth(-.5,.3,g));Tt.x+=hx;Pp.x+=hx;Pp.sub(Tt).multiplyScalar(1.55).add(Tt);}
+  const f=(reduce||SNAP)?1:1-Math.pow(.02,dt);cp.lerp(Pp,f);ct.lerp(Tt,f);camera.position.copy(cp);camera.lookAt(ct);camera.updateMatrixWorld();
+  camera.setViewOffset(vw,vh,mobile?0:-(.63-.5)*vw,mobile?vh*.2:0,vw,vh);
+
+  // desktop framing guard: keep the model right of the text column (zoom out / shift if needed)
+  if(!mobile&&FITON()){camera.zoom=1;camera.updateProjectionMatrix();camera.updateMatrixWorld();let mn=1e9,mx=-1e9;const fv=new THREE.Vector3();
+    for(const p of FITPTS()){fv.copy(p).project(camera);if(fv.z>1||fv.z<-1)continue;const x=(fv.x+1)/2*vw;mn=Math.min(mn,x);mx=Math.max(mx,x);}
+    let z=1,sh=0;const L=vw*.45,R=vw*.975,cx=vw/2;if(mx>mn){if(mx-mn>R-L)z=Math.max(.5,(R-L)/(mx-mn));const mn2=cx+(mn-cx)*z,mx2=cx+(mx-cx)*z;if(mn2<L)sh=Math.min(L-mn2,Math.max(0,R-mx2)+vw*.04);}
+    FIT_S.z=lerp(FIT_S.z,z,SNAP||reduce?1:.12);FIT_S.sh=lerp(FIT_S.sh,sh,SNAP||reduce?1:.12);}
+  else{FIT_S.z=lerp(FIT_S.z,1,SNAP||reduce?1:.12);FIT_S.sh=lerp(FIT_S.sh,0,SNAP||reduce?1:.12);}
+  camera.zoom=FIT_S.z;camera.updateProjectionMatrix();
+  camera.setViewOffset(vw,vh,mobile?0:-(.63-.5)*vw-FIT_S.sh,mobile?vh*.2:0,vw,vh);camera.updateMatrixWorld();
+
+  // weights
+  const wHero=1-smooth(-.6,-.05,g);
+  const wPl=on(g,0,1),wBef=on(g,1,2),wDur=on(g,2,3),wAft=on(g,3,4.2);
+  const wS1=on(g,4.5,5.5),wS2=on(g,5.5,6.5),wS3=on(g,6.5,7.7);
+  const wD1=on(g,8,9),wD2=on(g,9,10),wD3=on(g,10,11.4);
+
+  // the sweep
+  const sp=smooth(2.05,2.8,g);const sweepX=lerp(-2.15,1.35,sp);
+  const wSw=smooth(1.9,2.1,g)*(1-smooth(2.8,2.95,g));
+  CAB.forEach((cb,i)=>{cb.rev=smooth(cb.x-.32,cb.x+.28,sweepX);const o=.06+.94*cb.rev;
+    cb.mats.forEach(m=>{m.opacity=o;m.depthWrite=o>.6;});cb.meshes.forEach(m=>m.castShadow=o>.5);
+    VER[i].m.opacity=smooth(.7,1,cb.rev)*(wDur*.9+wAft*.6+wS1*.9+wD1*.9);
+    QS[i].material.opacity=(1-cb.rev)*.95;QS[i].visible=cb.rev<.99;
+    if(!reduce)QS[i].position.y+=Math.sin(time*1.3+i)*.0006;});
+  TRAYM.opacity=trayRun.material.opacity=.06+.94*Math.min(...CAB.map(c=>c.rev));
+  PHONE.visible=wSw>.01;if(PHONE.visible&&PHONE.userData.phoneTick)PHONE.userData.phoneTick(reduce?.5:time*.35);PHONE.scale.setScalar(Math.max(.0001,wSw));
+  PHONE.position.set(clamp(sweepX,-2.1,1.3),1.12+Math.sin(sp*Math.PI*5)*.05,FZ+.62);PHONE.rotation.set(-.08,Math.atan2(camera.position.x-PHONE.position.x,camera.position.z-PHONE.position.z)*.85,0);
+  band.position.x=clamp(sweepX,-2.0,1.2);band.material.opacity=wSw*(reduce?.9:.75+.25*Math.sin(time*9));
+  {const x0=CX[0]-RW/2,x1=clamp(sweepX,x0,CX[4]+RW/2);wash.scale.x=Math.max(.001,x1-x0);wash.position.x=(x0+x1)/2;wash.material.opacity=wSw*.08;}
+  {const a=PHONE.position,z=FZ+.02,pts=[];if(wSw>.02){[[band.position.x-.14,2.0],[band.position.x+.14,2.0],[band.position.x-.14,.1],[band.position.x+.14,.1]].forEach(([x,y])=>pts.push(a.clone(),V3(x,y,z)));}
+   frustum.geometry.setFromPoints(pts.length?pts:[V3(),V3()]);frustum.material.opacity=wSw*.5;}
+  // ports
+  PORTS.forEach((p,i)=>{const r=CAB[p.c].rev;let c=p.patch?(p.used?P_PATCH:P_OFF):(p.used?(r>.6?COL.link:P_DIM):P_OFF);ports.setColorAt(i,c);});ports.instanceColor.needsUpdate=true;
+
+  // the ghost row
+  const gOn=1-.72*smooth(2.95,3.45,g)-.18*smooth(4.2,4.6,g)-.1*smooth(7.8,8.3,g)*(1-wD2*0);
+  gCab.opacity=gDev.opacity=.95*gOn;gFill.opacity=.24*gOn;
+  // deltas: turn amber once their cabinet is captured
+  const dSec=Math.max(1-smooth(4.15,4.5,g),.3,wS2,wD2);
+  const pulse=wD2*(reduce?1:.65+.35*Math.sin(time*4));
+  GHOSTD.forEach(d=>{if(!d.d)return;const r=smooth(.6,1,CAB[d.c].rev)*smooth(2.1,2.4,g);d.lm.color.copy(COL.record).lerp(COL.drift,r);d.lm.opacity=Math.max(.95*gOn,r*dSec);d.fm.color.copy(COL.record).lerp(COL.drift,r);d.fm.opacity=.24*gOn*(1-r);});
+  MISSING.forEach(m=>{const r=smooth(.6,1,CAB[m.d.c].rev)*smooth(2.1,2.4,g);m.m.opacity=r*dSec*.55*(1+pulse*.6);});
+  UNDOC.forEach(u=>{const r=smooth(.6,1,CAB[u.d.c].rev)*smooth(2.1,2.4,g);u.m.opacity=r*dSec;});
+  {const r=smooth(.6,1,CAB[3].rev)*smooth(2.1,2.4,g);mvMat.opacity=r*dSec;mvHead.material.opacity=r*dSec;mvOutline.m.opacity=r*dSec;}
+
+  // ledger
+  const lg=smooth(2.85,3.3,g);ledgerTop.opacity=lg;ledgerSide.opacity=lg;ledgerEdge.material.opacity=lg;LEDG.position.y=(1-lg)*.25;ledger.castShadow=lg>.5;
+
+  // sorting: cards fly from each device face into its bay; a coloured tab lands on the device
+  const sortP=smooth(6.2,6.95,g);
+  CARDS.forEach(c=>{const k=reduce||SNAP?(sortP>.02?smooth(0,1,clamp((sortP-c.ord/CARDS.length*.5)/.5)):0):clamp((sortP-c.ord/CARDS.length*.5)/.5);
+    if(c.d.tab)c.d.tab.material.opacity=k;
+    if(k<=0){c.mesh.visible=false;return;}c.mesh.visible=true;
+    const s=devWorld(c.d,.08),e=c.end;const m=s.clone().lerp(e,.5);m.y=Math.max(s.y,e.y)+.45;
+    const a=s.clone().lerp(m,k),b=m.clone().lerp(e,k);c.mesh.position.copy(a.lerp(b,k));
+    c.mesh.rotation.set((1-k)*-Math.PI/2*.9,(1-k)*.6,0);c.mesh.scale.setScalar(.5+.5*k);});
+  const firstHi=Math.max(wD3,0);fcRing.material.opacity=smooth(7,7.4,g)*.35+firstHi*.65;
+
+  // new site + the first move
+  nsMat.opacity=smooth(6.2,6.9,g)*.55+wD3*.45;
+  const mp=smooth(10.05,10.85,g);
+  FIRST.grp.position.copy(fPath.getPointAt(mp)).sub(V3(CX[1],0,ZR));
+  trail.geometry.setDrawRange(0,Math.floor(mp*trailN/6)*6);trail.visible=mp>0&&mp<1||wD3>.3&&mp>=1;trail.material.opacity=.9*(1-smooth(.92,1,mp)*.6);
+  nsSlot.material.opacity=wD3*(1-smooth(.9,1,mp))*.9;
+  // inherited footprint
+  const fpo=Math.max(wD1,smooth(8,8.5,g)*.35);fpMat.opacity=fpo;fpFill.material.opacity=wD1*.07;
+
+  // tags
+  const dv=smooth(2.45,2.75,g);
+  const vis={hRec:wHero,hReal:wHero,hBind:wHero,pGhost:wPl,pReal:wPl,bQ:wBef,bBind:wBef,
+    cap:wDur*(1-smooth(2.7,2.85,g)),cLab:wDur*smooth(2.12,2.2,g)*(1-smooth(2.6,2.7,g)),cPos:wDur*smooth(2.1,2.18,g)*(1-smooth(2.6,2.7,g)),cPort:wDur*smooth(2.22,2.3,g)*(1-smooth(2.6,2.7,g)),
+    dMiss:wDur*dv,dUnd:wDur*dv,dMov:wDur*dv,aLed:wAft,aKnown:wAft,aUnk:wAft,
+    sBase:wS1,sPos:wS1,sMiss:wS2,sMov:wS2,bay0:wS3,bay1:wS3,bay2:wS3,bay3:wS3,
+    dInh:wD1,dRec:wD2,dFirst:wD3*smooth(10.1,10.3,g),dSite:wD3};
+  const v=V3();
+  const _pl=[];for(const [n,t] of Object.entries(TG)){t.t=(vis[n]||0)>.5?1:0;t.cur=(reduce||SNAP)?t.t:lerp(t.cur,t.t,1-Math.pow(.001,dt));
+    if(t.cur<.01){t.el.style.opacity=0;continue;}
+    if(t.follow)t.pos.copy(t.follow());
+    v.copy(t.pos);v.project(camera);if(v.z>1){t.el.style.opacity=0;continue;}const x=(v.x+1)/2*vw,y=(1-v.y)/2*vh;if(x<(mobile?4:vw*.4)||x>vw-4||y<70||y>vh-8){t.el.style.opacity=0;continue;}const cl=t.el.classList,ew=t.el.offsetWidth,eh=t.el.offsetHeight;
+    const tx=clamp(cl.contains('left')?x-ew+3.5:cl.contains('up')?x-ew/2:x-3.5,8,vw-ew-8),ty=clamp(cl.contains('up')?y-eh+3.5:y-eh/2,70,vh-eh-8);
+    {if(!mobile&&tx<vw*.38){t.el.style.opacity=0;continue;}const _b=[tx,ty,tx+ew,ty+eh];if(_pl.some(q=>_b[0]<q[2]+6&&_b[2]>q[0]-6&&_b[1]<q[3]+6&&_b[3]>q[1]-6)){t.el.style.opacity=0;continue;}_pl.push(_b);}t.el.style.transform=`translate3d(${tx.toFixed(1)}px,${ty.toFixed(1)}px,0)`;t.el.style.opacity=t.cur.toFixed(3);}
+  renderer.render(scene,camera);
+}
+function redrawText(){sheetMat.map.image=sheetCanvas();sheetMat.map.needsUpdate=true;
+  ledgerTop.map.image=ledgerCanvas();ledgerTop.map.needsUpdate=true;binderTop.map.image=binderCanvas();binderTop.map.needsUpdate=true;
+  CARDS.forEach(c=>{const m=c.mesh.material[2];m.map.image=cardCanvas(c.d.n,c.bi);m.map.needsUpdate=true;});
+  DEVS.forEach(d=>{const m=d.mesh.material[4];m.map.image=faceCanvas(d.k,d.n,d.h);m.map.needsUpdate=true;});
+  qTex.image=qCanvas();qTex.needsUpdate=true;}
+document.fonts.ready.then(redrawText);
+requestAnimationFrame(frame);
+</script>
+<!--GLJS-END-->
+<script src="/design-system/nav.js" defer></script>
+</body>
+</html>

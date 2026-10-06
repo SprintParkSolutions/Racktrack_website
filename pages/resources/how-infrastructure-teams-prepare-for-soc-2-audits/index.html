@@ -1,0 +1,714 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Getting ready for a SOC 2 audit without the scramble · RackTrack</title>
+<meta name="description" content="Auditors want continuous proof of asset control, not a snapshot from last quarter. Here's how teams generate it as they go.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap">
+<link rel="stylesheet" href="/design-system/base.css">
+<style>
+/* RackTrack · Resources · File no. 005 · CMP·01 — design-system/ tokens.
+   Concept: the evidence calendar. One quarter (the SOC 2 observation window, Q3, illustrative) is machined into a calendar
+   plate on the drawing sheet: 13 week rows × Mon–Fri columns, W01 at the back, audit week W13 nearest the reader.
+   Hero      wide establishing: the quarter plate, audit week outlined amber, a flag on its Friday.
+   Lead      low, in front of audit week: 23:58, three-week-old spreadsheets on the audit-week cells.
+   Beat 1    top-down plan: one clean spreadsheet (record blue) sits in audit week; weeks 1–12 hatched amber, nothing on file.
+   Beat 2    three scattered sources (an inbox, someone else's spreadsheet, a folder) throw sheets in arcs onto audit week.
+   Key 48 h  low front: the pile towers over two amber day cells (Wed + Thu) with a 48 h dimension line; the quarter behind, empty.
+   Beat 3    the pile clears; a green sweep line walks W01 → W13 toward the reader; one dated, photographed tile lands per sweep.
+   Plain     the last tile lifts off its cell, grows and turns to face the reader: dated, photographed, done.
+   Beat 4    low calm angle: the calendar is full, the flag turns green as the request lands, three sampled tiles rise to be opened.
+   Camera    wide oblique → low front → top-down plan → high front-right (sources) → low front macro → oblique → tile close-up → low hero.
+   Customers' own audits only. RackTrack's own SOC 2 Type II is in progress; nothing here implies RackTrack is certified. */
+:root{
+  color-scheme: light;
+  
+}
+*{box-sizing:border-box}
+html{background:var(--paper)}
+body{margin:0;background:var(--paper);color:var(--fg);font:400 16px/1.5 var(--sans);-webkit-font-smoothing:antialiased;overflow-x:hidden}
+a{color:inherit}
+::selection{background:var(--link);color:#06140d}
+:focus-visible{outline:2px solid var(--link-ink);outline-offset:3px;border-radius:2px}
+body::before{content:"";position:fixed;inset:0;z-index:0;pointer-events:none;background:radial-gradient(60% 55% at 66% 52%,rgba(255,255,255,.6),transparent 72%)}
+#stage{position:fixed;inset:0;z-index:1;display:block;width:100%;height:100%;pointer-events:none}
+#scrim{position:fixed;inset:0;z-index:1;pointer-events:none;background:linear-gradient(90deg,var(--paper) 0,var(--paper) var(--scA,40vw),rgba(233,236,232,0) var(--scB,46.5vw))}
+#hud{position:fixed;inset:0;z-index:3;pointer-events:none;overflow:hidden;transition:opacity .3s}
+#hud.off{opacity:0;visibility:hidden}
+main{position:relative;z-index:2}
+
+/* nav */
+.nav{position:fixed;left:0;right:0;top:0;z-index:10;display:flex;align-items:center;gap:28px;height:calc(var(--nav-h) + env(safe-area-inset-top,0px));padding:env(safe-area-inset-top,0px) var(--bleed) 0;background:linear-gradient(var(--paper) 55%,transparent)}
+.brand{display:flex;align-items:center;gap:10px;text-decoration:none;font:700 17px/1 var(--sans);letter-spacing:-.02em;color:var(--ink)}
+.brand img{width:26px;height:26px;border-radius:5px;display:block}
+.nav ul{display:flex;gap:24px;list-style:none;margin:0 0 0 auto;padding:0}
+.nav ul a{font:500 14px/1 var(--sans);text-decoration:none;color:var(--ink-2)}
+.nav ul a:hover{color:var(--ink)}
+.nav ul a[aria-current="page"]{color:var(--ink);text-decoration:underline;text-decoration-color:var(--link);text-decoration-thickness:2px;text-underline-offset:6px}
+.btn{display:inline-flex;align-items:center;gap:10px;height:46px;padding:0 20px;border-radius:3px;border:1px solid var(--fg);font:500 15px/1 var(--sans);text-decoration:none;cursor:pointer;background:transparent;color:var(--fg);transition:background .2s,color .2s,border-color .2s}
+.btn.solid{background:var(--fg);color:var(--bg)}
+.btn.solid:hover{background:var(--link-ink);border-color:var(--link-ink);color:#fff}
+.btn:not(.solid){border-color:var(--line)}
+.btn:not(.solid):hover{border-color:var(--fg)}
+.btn .led{width:7px;height:7px;border-radius:50%;background:var(--link);box-shadow:0 0 8px var(--link)}
+.nav .btn{height:38px;padding:0 16px;font-size:14px}
+
+/* type */
+.ch{position:relative;padding-inline:var(--bleed)}
+.copy{max-width:36rem;}
+h1,h2,h3{margin:0 0 20px;text-wrap:balance}
+h2{max-width:17ch}
+.lede{color:var(--fg-2);max-width:29rem;margin:0 0 28px}
+.k{margin:0 0 14px;font:400 12px/1 var(--mono);color:var(--link-ink)}
+.actions{display:flex;flex-wrap:wrap;gap:12px}
+.chip{font:500 11px/1 var(--mono);padding:5px 7px;border-radius:2px;border:1px solid var(--rule);color:var(--ink);background:rgba(244,246,243,.8)}
+.chip.c-compliance{border-color:var(--link-ink);color:var(--link-ink)}
+.chip.c-strategy{border-color:var(--record);color:var(--record-ink);background:rgba(124,147,168,.1)}
+.chip.c-infrastructure{border-color:var(--link);color:var(--link-ink);background:rgba(31,214,124,.08)}
+
+/* tags */
+.tag{position:absolute;left:0;top:0;display:flex;align-items:center;opacity:0;will-change:transform,opacity;white-space:nowrap;transition:opacity .18s}
+.tag::before{content:"";width:7px;height:7px;border-radius:50%;background:var(--c,var(--ink));transform:translate(-3.5px,0);box-shadow:0 0 0 3px color-mix(in oklab,var(--c,var(--ink)) 22%,transparent)}
+.tag i{display:block;width:24px;height:1px;background:var(--c,var(--ink))}
+.tag span{padding:6px 9px;background:var(--paper-2);border:1px solid var(--c,var(--ink));border-radius:2px;font:400 11.5px/1.35 var(--mono);color:var(--ink);box-shadow:0 14px 28px -20px rgba(17,22,20,.45)}
+.tag span b{display:block;font:600 15px/1.15 var(--sans);letter-spacing:-.02em;margin-bottom:2px}
+.tag.left{flex-direction:row-reverse}.tag.left::before{transform:translate(3.5px,0)}
+.tag.up{flex-direction:column-reverse}.tag.up i{width:1px;height:22px}.tag.up::before{transform:translate(0,3.5px)}
+.tag.link{--c:var(--link)} .tag.link span b{color:var(--link-ink)}
+.tag.drift{--c:var(--drift)} .tag.drift span b{color:var(--drift-ink)}
+.tag.rec{--c:var(--record)} .tag.rec span b{color:var(--record-ink)}
+.tag.ink{--c:var(--ink)}
+.note{position:absolute;right:var(--gutter);bottom:18px;font:400 11px/1.3 var(--mono);color:var(--ink-2);background:rgba(244,246,243,.85);padding:5px 8px;border:1px dashed var(--rule);border-radius:2px}
+
+/* hero */
+#hero{min-height:100vh;display:flex;align-items:center;padding-top:90px}
+#hero h1{max-width:12.5ch}
+.back{display:inline-block;margin:0 0 26px;font:500 14px/1 var(--sans);color:var(--link-ink);text-decoration:none;border-bottom:1px solid transparent;padding-bottom:3px}
+.back:hover{border-bottom-color:var(--link-ink)}
+.file{display:flex;flex-wrap:wrap;gap:8px 10px;align-items:center;margin:0 0 18px;font:400 12px/1 var(--mono);color:var(--ink-2)}
+.file .sep{color:var(--rule)}
+
+/* reading beats */
+.beat{position:relative;min-height:185vh}
+.beat .pin{position:sticky;top:0;height:100vh;display:flex;align-items:center;padding-inline:var(--bleed)}
+.col{width:min(38rem,36vw);}
+.col .no{font:400 12px/1 var(--mono);color:var(--ink-2);margin:0 0 16px;display:flex;gap:10px;align-items:center}
+.col .no b{font-weight:500;color:var(--link-ink)}
+.col p.body{font-size:clamp(17px,1.25vw,19.5px);line-height:1.6;color:var(--ink-2);margin:0 0 18px;max-width:34rem;letter-spacing:-.003em}
+.col p.lead{font-size:clamp(20px,1.7vw,26px);line-height:1.38;color:var(--ink);letter-spacing:-.018em;margin:0;max-width:34rem}
+.toc{margin:0 0 36px;padding:0;list-style:none;border-top:1px solid var(--ink);max-width:24rem;counter-reset:t}
+.toc li{counter-increment:t;border-bottom:1px solid var(--rule)}
+.toc a{display:flex;gap:14px;padding:10px 0;text-decoration:none;font:500 15px/1.3 var(--sans);color:var(--ink)}
+.toc a::before{content:"0" counter(t);font:400 11.5px/1.7 var(--mono);color:var(--link-ink);width:1.4rem;flex:none}
+.toc a:hover{color:var(--link-ink)}
+.tochead{font:400 12px/1 var(--mono);color:var(--ink-2);margin:0 0 10px}
+blockquote.pq{margin:26px 0 0;padding:4px 0 4px 20px;border-left:2px solid var(--link);font:500 clamp(20px,1.65vw,25px)/1.3 var(--sans);letter-spacing:-.018em;color:var(--ink);max-width:31rem}
+.col figure{margin:8px 0 0;max-width:21rem}
+.col figure img{display:block;width:100%;height:auto;aspect-ratio:16/8.2;object-fit:cover;object-position:50% 62%;border-radius:2px;border:1px solid var(--rule)}
+.col figcaption{margin-top:8px;font:400 11.5px/1.3 var(--mono);color:var(--ink-2)}
+/* key figure */
+.keyfig{border-top:1px solid var(--ink);border-bottom:1px solid var(--rule);padding:18px 0 22px;max-width:30rem}
+.keyfig .n{margin:0;font:500 clamp(104px,11.5vw,184px)/.86 var(--sans);letter-spacing:-.065em;color:var(--drift-ink);display:flex;align-items:baseline;gap:14px}
+.keyfig .n small{font:500 clamp(28px,2.6vw,40px)/1 var(--sans);letter-spacing:-.03em;color:var(--ink)}
+.keyfig p.body{margin:18px 0 0}
+/* in plain terms */
+.plain{position:relative;margin:0;border:1px solid var(--ink);background:var(--paper-2);border-radius:2px;padding:30px 28px 26px;max-width:31rem;box-shadow:0 24px 40px -34px rgba(17,22,20,.5)}
+.plain .hd{position:absolute;top:-11px;left:22px;background:var(--link-ink);color:#fff;font:500 11.5px/1 var(--mono);padding:5px 8px;border-radius:2px}
+.plain p{margin:0;font:500 clamp(20px,1.6vw,24px)/1.36 var(--sans);letter-spacing:-.016em;color:var(--ink)}
+
+/* progress rail */
+.rail{position:fixed;left:16px;top:50%;transform:translateY(-50%);z-index:4;display:flex;flex-direction:column;gap:6px;opacity:0;transition:opacity .3s}
+.rail.on{opacity:1}
+.rail a{display:block;width:26px;padding:6px 0;text-decoration:none;font:400 10.5px/1 var(--mono);color:var(--ink-2)}
+.rail a i{display:block;width:12px;height:2px;background:var(--rule);margin-bottom:5px;transition:width .3s,background .3s}
+.rail a.on{color:var(--link-ink)}
+.rail a.on i{width:22px;background:var(--link-ink)}
+
+/* keep reading */
+#more{position:relative;z-index:2;background:var(--paper);padding:var(--band-y) var(--bleed);border-top:1px solid var(--rule)}
+.mwrap{max-width:1180px;margin-inline:auto;}
+.mwrap h2{margin-bottom:34px}
+.cards{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:clamp(18px,2.4vw,32px)}
+.card{position:relative;display:flex;flex-direction:column;gap:12px;padding:30px 26px 24px;background:var(--paper-2);border:1px solid var(--rule);border-radius:2px;text-decoration:none;color:var(--ink);transition:border-color .2s,transform .3s var(--ease)}
+.card::before{content:"";position:absolute;top:-1px;left:26px;width:72px;height:6px;background:var(--cc);border-radius:0 0 2px 2px}
+.card:hover{border-color:var(--ink);transform:translateY(-3px)}
+.card .file{margin:0}
+.card h3{margin:0;max-width:22ch}
+.card p{margin:0;color:var(--ink-2);font-size:15.5px;line-height:1.45;max-width:30rem}
+.card .go{margin-top:auto;padding-top:10px;font:500 15px/1 var(--sans);color:var(--link-ink)}
+
+/* cta */
+#cta{padding-block:var(--band-y);text-align:center;background:var(--paper);position:relative;z-index:2;border-top:1px solid var(--rule)}
+#cta h2{margin-inline:auto;max-width:13ch}
+#cta .actions{justify-content:center;margin-top:34px}
+
+/* footer */
+.foot{position:relative;z-index:2;padding:var(--band-y) var(--bleed) calc(var(--s8) + env(safe-area-inset-bottom,0px));background:var(--paper);border-top:1px solid var(--rule);display:grid;grid-template-columns:var(--copy-w) repeat(3,minmax(0,1fr));gap:28px;font-size:14px;color:var(--ink-2)}
+.foot b{display:block;font:500 13px/1 var(--sans);color:var(--link-ink);margin-bottom:16px}
+.foot nav{display:flex;flex-direction:column;gap:11px}
+.foot nav a{color:var(--ink);text-decoration:none;font-size:15px}
+.foot nav a:hover{color:var(--link-ink)}
+.foot p{margin:0 0 11px;color:var(--ink);font-size:15px;line-height:1.45}
+.foot p a{text-decoration:none}.foot p a:hover{color:var(--link-ink)}
+.foot-brand .brand{margin-bottom:16px}
+.foot-brand p{color:var(--ink-2);max-width:18rem}
+.foot .fine{grid-column:1/-1;display:flex;justify-content:space-between;flex-wrap:wrap;gap:12px;margin-top:16px;padding-top:18px;border-top:1px solid var(--rule);font-size:13px}
+.foot .legal{display:flex;gap:18px;flex-wrap:wrap}.foot .legal a{color:var(--ink-2);text-decoration:none}.foot .legal a:hover{color:var(--link-ink)}
+.foot .social{display:flex;gap:18px}
+.foot .social a{color:var(--ink-2);text-decoration:none}
+
+.no-webgl #stage,.no-webgl #hud{display:none}
+@media (max-width:1180px){ .foot{grid-template-columns:repeat(2,minmax(0,1fr))} }
+@media (max-width:960px){ .rail{display:none} }
+@media (max-width:760px){
+  #scrim{background:linear-gradient(0deg,var(--paper) 0,rgba(233,236,232,.95) 50%,rgba(233,236,232,0) 60%)}
+  #hud .tag:not(.keep){display:none}
+  .note{right:var(--gutter);bottom:auto;top:calc(47vh - 26px);font-size:10px;padding:3px 6px}
+  #hero{align-items:flex-end;padding-top:50vh;padding-bottom:5vh}
+  #hero h1{max-width:14ch;margin-bottom:14px}
+  #hero .lede{margin-bottom:0}
+  .back{margin-bottom:14px}
+  .file{margin-bottom:12px}
+  .beat{min-height:165vh}
+  .beat .pin{align-items:flex-end;padding-bottom:var(--band-y)}
+  .col{width:auto;padding-left:0}
+  h2{margin-bottom:12px}
+  .col .no{margin-bottom:10px}
+  .col p.body{font-size:15.5px;line-height:1.5;margin-bottom:10px}
+  .col p.lead{font-size:17px}
+  .toc{margin-bottom:18px}.toc a{padding:6px 0;font-size:14px}
+  blockquote.pq{font-size:16.5px;margin-top:12px;padding-left:14px}
+  .col figure{display:none}
+  .keyfig{padding:12px 0 14px}.keyfig .n{font-size:88px}.keyfig .n small{font-size:26px}.keyfig p.body{margin-top:10px}
+  .plain{padding:24px 20px 20px}.plain p{font-size:18px}
+  #more{padding-top:var(--band-y)}
+  .cards{grid-template-columns:1fr}
+}
+@media (max-width:560px){ .foot{grid-template-columns:repeat(2,minmax(0,1fr));gap:var(--s6) var(--s5);padding-block:var(--band-y-sm) calc(var(--s6) + env(safe-area-inset-bottom,0px))} }
+@media (prefers-reduced-motion:reduce){ .tag,#hud,.rail,.rail a i,.card{transition:none!important} }
+.snap .tag,.snap #hud,.snap .rail,.snap .rail a i{transition:none!important}
+</style>
+</head>
+<body>
+
+<canvas id="stage" aria-hidden="true"></canvas>
+<div id="scrim" aria-hidden="true"></div>
+<div id="hud" aria-hidden="true"><p class="note">illustrative scene · dates, sweeps and counts are examples</p></div>
+
+<nav class="nav" aria-label="Primary">
+  <a class="brand" href="/"><img alt="" src="/design-system/assets/Logos/racktrack-mark.jpg">RackTrack</a>
+  <ul>
+    <li><a href="/pages/why-racktrack/">Why RackTrack</a></li>
+    <li><a href="/pages/solutions/">Solutions</a></li>
+    <li><a href="/pages/use-cases/">Use cases</a></li>
+    <li><a href="/pages/resources/" aria-current="page">Resources</a></li>
+    <li><a href="/pages/trust-security/">Trust</a></li>
+    <li><a href="/pages/about-us/">About</a></li>
+    <li><a href="/pages/sign-in/">Sign in</a></li>
+  </ul>
+  <a class="btn solid" href="/pages/contact-us/"><span class="led"></span>Book a sweep</a>
+</nav>
+
+<nav class="rail" aria-label="On this page">
+  <a href="#what-auditors-want" title="What auditors actually ask for"><i></i>01</a>
+  <a href="#why-scramble" title="Why the scramble happens"><i></i>02</a>
+  <a href="#continuous-evidence" title="What continuous evidence looks like"><i></i>03</a>
+  <a href="#showing-up-ready" title="Showing up ready"><i></i>04</a>
+</nav>
+
+<main>
+  <article>
+  <header class="ch" id="hero">
+    <div class="copy">
+      <a class="back" href="/pages/resources/">← All resources</a>
+      <p class="file"><span>File no. 005</span><span class="sep">·</span><span>CMP·01</span><span class="sep">·</span><span class="chip c-compliance">Compliance</span><span class="sep">·</span><span>5 min read</span></p>
+      <h1>Getting ready for a SOC 2 audit without the scramble</h1>
+      <p class="lede">Auditors want continuous proof of asset control, not a snapshot from last quarter. Here's how teams generate it as they go.</p>
+    </div>
+  </header>
+
+  <section class="beat" id="lead" aria-label="Introduction">
+    <div class="pin"><div class="col">
+      <p class="tochead">On this page</p>
+      <ol class="toc">
+        <li><a href="#what-auditors-want">What auditors actually ask for</a></li>
+        <li><a href="#why-scramble">Why the scramble happens</a></li>
+        <li><a href="#continuous-evidence">What continuous evidence looks like</a></li>
+        <li><a href="#showing-up-ready">Showing up ready</a></li>
+      </ol>
+      <p class="lead">Every SOC 2 cycle ends the same way for most teams: someone stitching together three-week-old spreadsheets at midnight, the night before the auditor's call.</p>
+    </div></div>
+  </section>
+
+  <section class="beat" id="what-auditors-want">
+    <div class="pin"><div class="col">
+      <p class="no"><b>01</b> What auditors ask for</p>
+      <h2>What a SOC 2 Type II audit actually asks for</h2>
+      <p class="body">It isn't asking for a snapshot. It wants evidence that your controls held up continuously, over months, which means one clean-looking spreadsheet from audit week proves almost nothing by itself.</p>
+      <blockquote class="pq">“SOC 2 Type II isn't asking “do you have controls.” It's asking “can you prove they worked, every day, for months.””</blockquote>
+    </div></div>
+  </section>
+
+  <section class="beat" id="why-scramble">
+    <div class="pin"><div class="col">
+      <p class="no"><b>02</b> Why the scramble happens</p>
+      <h2>Why the scramble happens every time</h2>
+      <p class="body">Evidence usually lives scattered: in someone's inbox, someone else's spreadsheet, a folder nobody's opened since the last audit. It only gets assembled the moment someone finally asks for it. Which is exactly when there's the least time to do it carefully.</p>
+      <figure><img src="/assets/resources/audit-magnifier.jpg" alt="Printed statements spread across a desk, one read through a magnifying glass" loading="lazy" width="1400" height="875"><figcaption>Evidence checked by hand, on paper.</figcaption></figure>
+    </div></div>
+  </section>
+
+  <section class="beat" id="key48" aria-label="Key figure">
+    <div class="pin"><div class="col">
+      <p class="no"><b>Key figure</b> The last-minute window</p>
+      <div class="keyfig">
+        <p class="n">48<small>hours</small></p>
+        <p class="body">is a common last-minute scramble window teams report before handing evidence over to an auditor.</p>
+      </div>
+    </div></div>
+  </section>
+
+  <section class="beat" id="continuous-evidence">
+    <div class="pin"><div class="col">
+      <p class="no"><b>03</b> What continuous evidence looks like</p>
+      <h2>What continuous evidence actually looks like</h2>
+      <p class="body">Instead of a story told to the auditor after the fact, each rack sweep becomes a timestamped, photographed record the auditor can open and review directly, evidence that already existed before anyone requested it.</p>
+    </div></div>
+  </section>
+
+  <section class="beat" id="plain" aria-label="In plain terms">
+    <div class="pin"><div class="col">
+      <aside class="plain"><span class="hd">In plain terms</span>
+        <p>Rather than promising an auditor “we check this regularly,” a team can hand over a running log that already proves it: dated, photographed, done.</p>
+      </aside>
+    </div></div>
+  </section>
+
+  <section class="beat" id="showing-up-ready">
+    <div class="pin"><div class="col">
+      <p class="no"><b>04</b> Showing up ready</p>
+      <h2>Showing up ready instead of scrambling</h2>
+      <p class="body">That evidence trail builds itself as a side effect of sweeps already happening for other reasons. By the time the audit request lands, the proof is sitting there, ready, instead of needing to be assembled overnight.</p>
+    </div></div>
+  </section>
+  </article>
+
+  <section id="more" aria-labelledby="more-h">
+    <div class="mwrap">
+      <h2 id="more-h">Keep reading</h2>
+      <div class="cards">
+        <a class="card" href="/pages/resources/from-audit-to-autonomy/" style="--cc:#7C93A8">
+          <p class="file"><span>File no. 003</span><span class="sep">·</span><span>STR·01</span><span class="chip c-strategy">Strategy</span></p>
+          <h3>From once-a-year audits to always-on records</h3>
+          <p>A trustworthy inventory starts with proof you can trace back to a photo and a timestamp, not a spreadsheet someone updated by hand.</p>
+          <span class="go">Read file 003 →</span>
+        </a>
+        <a class="card" href="/pages/resources/the-hidden-cost-of-unreconciled-infrastructure/" style="--cc:#1FD67C">
+          <p class="file"><span>File no. 002</span><span class="sep">·</span><span>INF·01</span><span class="chip c-infrastructure">Infrastructure</span></p>
+          <h3>What it actually costs when nobody checks the rack</h3>
+          <p>Manual audits are slow and go stale fast. Here's a plain way to put a number on what that gap costs your team.</p>
+          <span class="go">Read file 002 →</span>
+        </a>
+      </div>
+    </div>
+  </section>
+
+  <section class="ch" id="cta">
+    <h2>Read the theory. Then verify your own rack</h2>
+    <div class="actions">
+      <a class="btn solid" href="/pages/contact-us/"><span class="led"></span>Request a platform brief</a>
+      <a class="btn" href="/pages/resources/">All resources</a>
+    </div>
+  </section>
+
+  <footer class="foot">
+    <div class="foot-brand">
+      <a class="brand" href="/"><img alt="" src="/design-system/assets/Logos/racktrack-mark.jpg">RackTrack</a>
+      <p>Physical infrastructure intelligence for data centers.</p>
+    </div>
+    <nav aria-label="Platform"><b>Platform</b>
+      <a href="/pages/why-racktrack/">Why RackTrack</a><a href="/pages/solutions/">Solutions</a><a href="/pages/use-cases/">Use cases</a><a href="/pages/trust-security/">Trust &amp; security</a></nav>
+    <nav aria-label="Company"><b>Company</b>
+      <a href="/pages/resources/">Resources</a><a href="/pages/about-us/">About us</a><a href="/pages/contact-us/">Contact us</a></nav>
+    <div><b>Contact</b>
+      <p><a href="mailto:info@racktrack.ai">info@racktrack.ai</a></p><p><a href="tel:+18608782448">+1 (860) 878 2448</a></p><p>85 Felt Rd, Suite #604<br>South Windsor, CT 06074</p></div>
+    <div class="fine">
+      <span>© 2026 RackTrack Inc. · Patent pending</span>
+      <span class="legal"><a href="/pages/legal/privacy-policy/">Privacy</a><a href="/pages/legal/terms-of-use/">Terms</a><a href="/pages/legal/cookie-policy/">Cookies</a><a href="/pages/legal/data-we-collect/">Data we collect</a><a href="/pages/legal/third-party-services/">Third parties</a></span>
+      <span class="social"><a href="https://www.linkedin.com/company/racktrack/" rel="noopener" target="_blank">LinkedIn</a><a href="https://www.instagram.com/racktrack_inc/" rel="noopener" target="_blank">Instagram</a><a href="https://www.facebook.com/share/18depF5xzA/" rel="noopener" target="_blank">Facebook</a></span>
+    </div>
+  </footer>
+</main>
+
+<script type="importmap">
+{ "imports": {
+  "three": "https://cdn.jsdelivr.net/npm/three@0.170.0/build/three.module.js",
+  "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.170.0/examples/jsm/"
+} }
+</script>
+<!--DOMJS-START-->
+<script>
+/* ───── reading progress rail (no WebGL needed) ───── */
+(()=>{
+const rail=document.querySelector('.rail'),links=[...rail.querySelectorAll('a')];
+const ids=['what-auditors-want','why-scramble','continuous-evidence','showing-up-ready'];
+const els=ids.map(i=>document.getElementById(i)),lead=document.getElementById('lead'),more=document.getElementById('more');
+let cur=-2;
+function tick(){const mid=innerHeight*.5;let k=-1;els.forEach((e,i)=>{if(e.getBoundingClientRect().top<=mid)k=i;});
+  const show=lead.getBoundingClientRect().top<mid&&more.getBoundingClientRect().top>mid;rail.classList.toggle('on',show);
+  if(k!==cur){cur=k;links.forEach((a,i)=>{a.classList.toggle('on',i===k);if(i===k)a.setAttribute('aria-current','location');else a.removeAttribute('aria-current');});}}
+addEventListener('scroll',tick,{passive:true});addEventListener('resize',tick);tick();
+// scrim: solid paper up to max(40vw, reading column's right edge + 16px), fading out by 46.5vw (never under the text)
+function scrim(){const vw=innerWidth;if(vw<760)return;let r=0;document.querySelectorAll('#hero .copy > *, .col').forEach(e=>{const b=e.getBoundingClientRect();if(b.width)r=Math.max(r,b.right);});
+  const a=Math.max(vw*.4,r+16),b=Math.max(vw*.465,a+24);const st=document.getElementById('scrim').style;st.setProperty('--scA',a+'px');st.setProperty('--scB',b+'px');}
+addEventListener('resize',scrim);scrim();document.fonts&&document.fonts.ready.then(scrim);
+})();
+</script>
+<!--DOMJS-END-->
+<!--GLJS-START-->
+<script type="module">
+/* ═════════════ File no. 005 · the evidence calendar ═════════════
+   A machined quarter plate: 13 week rows (W01 at the back, audit week W13 nearest the reader) × Mon–Fri columns. */
+import * as THREE from 'three';
+import { RoomEnvironment } from 'three/addons/environments/RoomEnvironment.js';
+
+const reduce=matchMedia('(prefers-reduced-motion: reduce)').matches;
+const SNAP=location.search.includes('snap');if(SNAP)document.documentElement.classList.add('snap');
+const clamp=(x,a=0,b=1)=>Math.min(b,Math.max(a,x));
+const smooth=(a,b,x)=>{const t=clamp((x-a)/(b-a));return t*t*(3-2*t)};
+const lerp=(a,b,t)=>a+(b-a)*t;
+const C=h=>new THREE.Color(h);
+const COL={link:C('#1FD67C'),linkInk:C('#04703F'),drift:C('#FF9A2E'),record:C('#7C93A8'),ink:C('#111614')};
+const MONO='"JetBrains Mono", monospace', SANS='"Inter", sans-serif';
+const V3=(x,y,z)=>new THREE.Vector3(x,y,z);
+
+const canvas=document.getElementById('stage');
+let renderer;
+try{ renderer=new THREE.WebGLRenderer({canvas,antialias:true,alpha:true,powerPreference:'high-performance'}); }
+catch(e){ document.documentElement.classList.add('no-webgl'); throw e; }
+renderer.setPixelRatio(SNAP?1:Math.min(devicePixelRatio,2));
+renderer.setClearColor(0,0);
+renderer.toneMapping=THREE.ACESFilmicToneMapping; renderer.toneMappingExposure=1.0;
+renderer.outputColorSpace=THREE.SRGBColorSpace;
+renderer.shadowMap.enabled=true; renderer.shadowMap.type=SNAP?THREE.PCFShadowMap:THREE.PCFSoftShadowMap;
+const scene=new THREE.Scene();
+scene.environment=new THREE.PMREMGenerator(renderer).fromScene(new RoomEnvironment(),.04).texture; scene.environmentIntensity=.8;
+const camera=new THREE.PerspectiveCamera(28,1,.05,300);
+scene.add(new THREE.HemisphereLight(0xffffff,0x9aa39e,.5));
+const sun=new THREE.DirectionalLight(0xffffff,1.6);sun.position.set(-3.5,9,4.5);sun.castShadow=true;
+sun.shadow.mapSize.set(SNAP?1024:2048,SNAP?1024:2048);Object.assign(sun.shadow.camera,{left:-3.2,right:3.2,top:3.2,bottom:-3.2,near:1,far:30});sun.shadow.bias=-.0005;sun.shadow.radius=4;scene.add(sun);
+const fill=new THREE.DirectionalLight(0xdfe9ff,.45);fill.position.set(6,4,-4);scene.add(fill);
+const front=new THREE.DirectionalLight(0xffffff,.3);front.position.set(1,2,8);scene.add(front);
+
+function cnv(w,h){const c=document.createElement('canvas');c.width=w;c.height=h;return [c,c.getContext('2d')];}
+function tex(c){const t=new THREE.CanvasTexture(c);t.colorSpace=THREE.SRGBColorSpace;t.anisotropy=Math.min(8,renderer.capabilities.getMaxAnisotropy());return t;}
+const alu=new THREE.MeshStandardMaterial({color:'#dfe3df',metalness:.72,roughness:.3});
+const graph=new THREE.MeshStandardMaterial({color:'#2a302d',metalness:.55,roughness:.45});
+const paperSide=new THREE.MeshStandardMaterial({color:'#e3e7e2',roughness:.9});
+const add=(m,p,parent=scene)=>{if(p)m.position.set(...p);parent.add(m);return m;};
+
+/* ─────────── the quarter: Q3 2026 (illustrative) ─────────── */
+const BASE=Date.UTC(2026,5,29);                     // Mon 29 Jun 2026
+const DN=['Mon','Tue','Wed','Thu','Fri'], MN=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+const day=(w,d)=>new Date(BASE+(w*7+d)*864e5);
+const fmtD=(w,d)=>{const t=day(w,d);return `${DN[d]} ${t.getUTCDate()} ${MN[t.getUTCMonth()]}`;};
+const NW=13, ND=5, CPX=.3, RPZ=.24, ML=.36, MR=.08, MT=.2, MB=.1;
+const PW=ND*CPX+ML+MR, PD=NW*RPZ+MT+MB, PZ=.05, TOP=.05;
+const GX0=-PW/2+ML, GZ0=PZ-PD/2+MT;
+const DX=d=>GX0+d*CPX+CPX/2, WZ=w=>GZ0+w*RPZ+RPZ/2;
+const AUD=12;                                        // audit week row (nearest the reader)
+const SRC=[[1.62,-.95],[1.72,.05],[1.62,1.05]];     // an inbox · someone else's spreadsheet · a folder
+
+/* drawing sheet (thin paper) */
+const BX0=-1.55, BX1=2.55, BZ0=-2.0, BZ1=2.45, BW=BX1-BX0, BD=BZ1-BZ0, BCX=(BX0+BX1)/2, BCZ=(BZ0+BZ1)/2;
+function sheetCanvas(){const W=2048,H=Math.round(W*BD/BW),s=W/BW;const [c,g]=cnv(W,H);const X=x=>(x-BX0)*s,Z=z=>(z-BZ0)*s;
+  g.fillStyle='#F4F6F3';g.fillRect(0,0,W,H);
+  for(let x=BX0;x<=BX1+.01;x+=.2){g.fillStyle='rgba(17,22,20,.06)';g.fillRect(X(x),0,1.4,H);} for(let z=BZ0;z<=BZ1+.01;z+=.2){g.fillStyle='rgba(17,22,20,.06)';g.fillRect(0,Z(z),W,1.4);}
+  g.strokeStyle='#111614';g.lineWidth=3;g.strokeRect(14,14,W-28,H-28);
+  // dimension: the observation window, along the right side of the plate
+  const xd=PW/2+.16,z1=GZ0,z2=GZ0+NW*RPZ;g.strokeStyle='#4A544F';g.lineWidth=2.5;g.setLineDash([10,8]);g.beginPath();g.moveTo(X(xd),Z(z1));g.lineTo(X(xd),Z(z2));g.stroke();g.setLineDash([]);
+  [z1,z2].forEach(z=>{g.beginPath();g.moveTo(X(xd)-14,Z(z));g.lineTo(X(xd)+14,Z(z));g.stroke();});
+  g.save();g.translate(X(xd),Z((z1+z2)/2));g.rotate(Math.PI/2);g.fillStyle='#F4F6F3';g.fillRect(-250,-18,500,36);g.fillStyle='#4A544F';g.font=`400 24px ${MONO}`;g.textAlign='center';g.fillText('observation window · Q3 · 13 weeks',0,8);g.restore();
+  // source footprints (dashed)
+  g.setLineDash([9,7]);g.strokeStyle='#7C93A8';g.lineWidth=2.5;SRC.forEach(p=>g.strokeRect(X(p[0]-.2),Z(p[1]-.16),.4*s,.32*s));g.setLineDash([]);
+  // title block, back-right
+  g.fillStyle='#111614';g.fillRect(W-372,40,334,70);g.fillStyle='#DDE4DF';g.font=`500 19px ${MONO}`;g.fillText('evidence calendar · Q3 2026',W-358,70);
+  g.fillStyle='#93A19A';g.font=`400 14px ${MONO}`;g.fillText('file 005 · CMP·01 · illustrative',W-358,96);
+  return c;}
+const LIT='#c6cac6';                                 // lit paper textures stay crisp (no tone mapping) and are pre-dimmed so the light lands them on paper white
+const sheetMat=new THREE.MeshStandardMaterial({map:tex(sheetCanvas()),color:LIT,roughness:.92,toneMapped:false});
+add(new THREE.Mesh(new THREE.BoxGeometry(BW,.012,BD),[paperSide,paperSide,sheetMat,paperSide,paperSide,paperSide]),[BCX,-.006,BCZ]).receiveShadow=true;
+
+/* the calendar plate */
+function plateCanvas(){const W=1400,H=Math.round(W*PD/PW),s=W/PW;const [c,g]=cnv(W,H);
+  const X=x=>(x+PW/2)*s,Z=z=>(z-PZ+PD/2)*s;
+  g.fillStyle='#E4E8E3';g.fillRect(0,0,W,H);
+  // day header
+  g.textAlign='center';DN.forEach((d,i)=>{g.fillStyle='#111614';g.font=`500 30px ${MONO}`;g.fillText(d,X(DX(i)),Z(GZ0)-22);});
+  // week labels + month brackets
+  g.textAlign='right';for(let w=0;w<NW;w++){g.fillStyle=w===AUD?'#9C4C00':'#4A544F';g.font=`${w===AUD?500:400} 27px ${MONO}`;g.fillText('W'+String(w+1).padStart(2,'0'),X(GX0)-14,Z(WZ(w))+9);}
+  const months=[['Jul',0,4],['Aug',5,8],['Sep',9,12]];
+  months.forEach(([m,a,b])=>{const z0=Z(WZ(a)-RPZ/2)+8,z1=Z(WZ(b)+RPZ/2)-8,x=X(-PW/2)+34;g.fillStyle='#111614';g.fillRect(x+22,z0,3,z1-z0);g.fillRect(x+22,z0,12,3);g.fillRect(x+22,z1-3,12,3);
+    g.save();g.translate(x+6,(z0+z1)/2);g.rotate(-Math.PI/2);g.textAlign='center';g.font=`500 30px ${SANS}`;g.fillText(m,0,0);g.restore();});
+  g.textAlign='left';
+  for(let w=0;w<NW;w++)for(let d=0;d<ND;d++){const x=X(DX(d)-CPX/2)+5,y=Z(WZ(w)-RPZ/2)+5,cw=CPX*s-10,chh=RPZ*s-10;
+    g.fillStyle='#F7F8F6';g.fillRect(x,y,cw,chh);g.strokeStyle='#9aa39e';g.lineWidth=2;g.strokeRect(x,y,cw,chh);
+    const t=day(w,d),first=t.getUTCDate()===1;g.fillStyle=first?'#111614':'#4A544F';g.font=`${first?500:400} 22px ${MONO}`;g.fillText(first?'1 '+MN[t.getUTCMonth()]:String(t.getUTCDate()),x+10,y+28);}
+  // audit week row
+  g.strokeStyle='#FF9A2E';g.lineWidth=5;g.setLineDash([16,10]);g.strokeRect(X(GX0)-120,Z(WZ(AUD)-RPZ/2)+1,ND*CPX*s+124,RPZ*s-2);g.setLineDash([]);
+  g.fillStyle='#9C4C00';g.font=`500 20px ${MONO}`;g.textAlign='right';g.fillText('audit',X(GX0)-14,Z(WZ(AUD))+36);g.textAlign='left';
+  g.strokeStyle='#111614';g.lineWidth=5;g.strokeRect(2.5,2.5,W-5,H-5);
+  return c;}
+const plateMat=new THREE.MeshStandardMaterial({map:tex(plateCanvas()),color:LIT,roughness:.8,metalness:0,toneMapped:false});
+const PLATE=add(new THREE.Mesh(new THREE.BoxGeometry(PW,TOP,PD),[alu,alu,plateMat,alu,alu,alu]),[0,TOP/2,PZ]);PLATE.receiveShadow=true;PLATE.castShadow=true;
+// weeks 1–12 hatched: nothing on file
+function hatchCanvas(){const [c,g]=cnv(512,1024);g.strokeStyle='rgba(255,154,46,.8)';g.lineWidth=5;for(let i=-600;i<1200;i+=30){g.beginPath();g.moveTo(0,i);g.lineTo(512,i+512);g.stroke();}g.strokeStyle='#FF9A2E';g.lineWidth=8;g.strokeRect(4,4,504,1016);return c;}
+const hatch=add(new THREE.Mesh(new THREE.PlaneGeometry(ND*CPX,12*RPZ),new THREE.MeshBasicMaterial({map:tex(hatchCanvas()),transparent:true,opacity:0,depthWrite:false,toneMapped:false})),[GX0+ND*CPX/2,TOP+.002,GZ0+6*RPZ]);hatch.rotation.x=-Math.PI/2;
+// 48 h: Wed + Thu of audit week
+const win48=add(new THREE.Mesh(new THREE.PlaneGeometry(2*CPX-.02,RPZ-.02),new THREE.MeshBasicMaterial({color:COL.drift,transparent:true,opacity:0,depthWrite:false,toneMapped:false})),[(DX(2)+DX(3))/2,TOP+.003,WZ(AUD)]);win48.rotation.x=-Math.PI/2;
+const xa=DX(2)-CPX/2, xb=DX(3)+CPX/2, DZ=PZ+PD/2+.1, DY=.004;
+const dim48=new THREE.LineSegments(new THREE.BufferGeometry().setFromPoints([V3(xa,DY,DZ),V3(xb,DY,DZ),V3(xa,DY,DZ-.05),V3(xa,DY,DZ+.05),V3(xb,DY,DZ-.05),V3(xb,DY,DZ+.05),V3(xa,DY,PZ+PD/2),V3(xa,DY,DZ+.02),V3(xb,DY,PZ+PD/2),V3(xb,DY,DZ+.02)]),new THREE.LineBasicMaterial({color:COL.drift,transparent:true,opacity:0,toneMapped:false}));scene.add(dim48);
+
+/* audit flag: Fri of audit week */
+const FLAG=new THREE.Group();FLAG.position.set(DX(4)+.06,TOP,WZ(AUD)+.03);scene.add(FLAG);
+add(new THREE.Mesh(new THREE.CylinderGeometry(.0065,.0065,.38,8),graph),[0,.19,0],FLAG).castShadow=true;
+add(new THREE.Mesh(new THREE.CylinderGeometry(.024,.028,.012,16),graph),[0,.006,0],FLAG);
+const flagMat=new THREE.MeshStandardMaterial({color:'#111614',roughness:.6,side:THREE.DoubleSide});
+const flag=add(new THREE.Mesh(new THREE.PlaneGeometry(.14,.08),flagMat),[.07,.335,0],FLAG);flag.castShadow=true;
+
+/* ─────────── the scramble: sheets from scattered places ─────────── */
+const SHW=.26, SHD=.185;
+function sheetFace(kind,clean){const W=480,H=340;const [c,g]=cnv(W,H);g.fillStyle='#FDFDFB';g.fillRect(0,0,W,H);
+  if(kind==='xls'){g.fillStyle=clean?'#dfe7ee':'#e9ece8';g.fillRect(0,0,W,44);g.fillStyle='#111614';g.font=`500 19px ${MONO}`;g.fillText(clean?'evidence_Q3_clean.xlsx':'racks_v3_FINAL(2).xlsx',16,29);
+    g.strokeStyle='#b9c0bb';g.lineWidth=2;for(let y=62;y<H-10;y+=25){g.beginPath();g.moveTo(10,y);g.lineTo(W-10,y);g.stroke();}for(let x=10;x<W;x+=92){g.beginPath();g.moveTo(x,50);g.lineTo(x,H-12);g.stroke();}
+    g.font=`400 15px ${MONO}`;for(let r=0;r<11;r++){const y=80+r*25;g.fillStyle='#4A544F';g.fillText(['R07','R07','R08','R07','R09','R08','R07','R11','R07','R08','R09'][r],20,y);g.fillText('U'+String(40-r*3).padStart(2,'0'),112,y);
+      if(!clean&&r%4===2){g.fillStyle='rgba(255,154,46,.45)';g.fillRect(196,y-18,88,23);}g.fillStyle=clean?'#3F5871':'#4A544F';g.fillText(clean?'ok':(r%3?'?':'ok'),206,y);}
+    if(clean){g.strokeStyle='#7C93A8';g.lineWidth=12;g.strokeRect(6,6,W-12,H-12);}else{g.fillStyle='#9C4C00';g.font=`500 16px ${MONO}`;g.fillText('last edited 3 weeks ago',W-250,H-16);}}
+  if(kind==='shot'){g.fillStyle='#d5dad5';g.fillRect(0,0,W,36);[18,40,62].forEach(x=>{g.fillStyle='#a9b1ab';g.beginPath();g.arc(x,18,7,0,7);g.fill();});
+    g.fillStyle='#eef1ed';g.fillRect(16,50,W-32,H-104);g.fillStyle='#111614';g.font=`500 18px ${SANS}`;g.fillText('Switch port status · SW-04',30,78);
+    for(let i=0;i<6;i++){g.fillStyle=i%2?'#e2e6e1':'#f7f8f6';g.fillRect(28,92+i*24,W-56,22);g.fillStyle='#4A544F';g.font=`400 14px ${MONO}`;g.fillText(`Gi1/0/${12+i}   ${i===3?'down':'up'}   vlan ${110+i*10}`,36,108+i*24);g.fillStyle=i===3?'#FF9A2E':'#9aa39e';g.fillRect(W-62,99+i*24,9,9);}
+    g.fillStyle='#4A544F';g.font=`400 16px ${MONO}`;g.fillText('Screenshot 2026-09-23 at 23.41.png',16,H-22);}
+  if(kind==='mail'){g.fillStyle='#111614';g.font=`500 22px ${SANS}`;g.fillText('Fwd: Fwd: rack photos for audit?',18,40);g.fillStyle='#4A544F';g.font=`400 15px ${MONO}`;g.fillText('from: ops · 3 attachments',18,68);
+    g.fillStyle='#b9c0bb';for(let i=0;i<7;i++)g.fillRect(18,96+i*22,W-60-(i%3)*70,9);for(let i=0;i<3;i++){g.fillStyle='#e2e6e1';g.fillRect(18+i*148,H-74,132,54);g.fillStyle='#4A544F';g.fillText('IMG_'+(4410+i*7)+'.jpg',28+i*148,H-42);}}
+  g.strokeStyle='#4A544F';g.lineWidth=5;g.strokeRect(2.5,2.5,W-5,H-5);return c;}
+const KINDS=['mail','xls','shot'];
+const sheetGeo=new THREE.PlaneGeometry(SHW,SHD);sheetGeo.rotateX(-Math.PI/2);
+const sheetMats=KINDS.map(k=>new THREE.MeshStandardMaterial({map:tex(sheetFace(k,false)),color:LIT,emissive:'#565a57',roughness:.85,side:THREE.DoubleSide,transparent:true,opacity:1,toneMapped:false}));
+const PER=16;
+const sheetIM=KINDS.map((k,i)=>{const m=new THREE.InstancedMesh(sheetGeo,sheetMats[i],PER);m.castShadow=true;m.receiveShadow=true;m.frustumCulled=false;scene.add(m);return m;});
+let seed=11;const rnd=()=>{seed=(seed*16807)%2147483647;return (seed-1)/2147483646;};
+const PILE=V3((DX(2)+DX(3))/2,0,WZ(AUD)-.01);
+const GAP=.0115;
+const SH=[];
+[1,1,1].forEach((k,j)=>SH.push({k,j,lead:true}));        // three stale spreadsheets are already there
+const cnt=[0,3,0];for(let n=0;SH.length<3*PER;n++){const k=n%3;if(cnt[k]<PER){SH.push({k,j:cnt[k]});cnt[k]++;}}
+SH.forEach((s,i)=>{const ang=(rnd()-.5)*1.1,ox=(rnd()-.5)*.26,oz=(rnd()-.5)*.08;
+  s.end=V3(PILE.x+ox*(.4+.6*(1-i/SH.length)),TOP+.004+i*GAP,PILE.z+oz);s.rot=ang;s.tilt=[(rnd()-.5)*.02,(rnd()-.5)*.02];
+  const depth=PER-1-s.j;
+  s.src=V3(SRC[s.k][0]+(rnd()-.5)*.02,.013+.004+depth*.0068,SRC[s.k][1]+(rnd()-.5)*.02);s.srot=(rnd()-.5)*.12;
+  s.d=s.lead?0:(i-3)/(SH.length-3);});
+const SRCG=SRC.map((p,i)=>{const g=new THREE.Group();g.position.set(p[0],0,p[1]);scene.add(g);
+  const base=add(new THREE.Mesh(new THREE.BoxGeometry(.34,.013,.26),i===2?graph:alu),[0,.0065,0],g);base.castShadow=true;base.receiveShadow=true;return g;});
+// the one clean spreadsheet (what the record claims)
+const cleanMat=new THREE.MeshStandardMaterial({map:tex(sheetFace('xls',true)),color:LIT,roughness:.8,side:THREE.DoubleSide,transparent:true,toneMapped:false});
+const clean=add(new THREE.Mesh(sheetGeo,cleanMat),[PILE.x,0,PILE.z]);clean.castShadow=true;clean.rotation.y=.05;
+
+/* ─────────── continuous evidence: one tile per sweep ─────────── */
+const SWEEPS=[[0,1,'routine walk','09:12'],[1,3,'change window','22:40'],[2,1,'routine walk','10:05'],[3,2,'capacity check','14:18'],[4,0,'change window','23:02'],[5,3,'migration prep','11:47'],
+  [6,1,'routine walk','09:36'],[7,4,'incident follow-up','16:21'],[8,2,'change window','22:15'],[9,1,'routine walk','10:42'],[10,3,'capacity check','13:09'],[11,0,'change window','21:55'],[12,1,'routine walk','09:58']];
+const TW=.22, TH=.18;
+function rackPhoto(g,x,y,w,h,k){g.fillStyle='#161b19';g.fillRect(x,y,w,h);
+  const rows=9,rh=(h-16)/rows;for(let i=0;i<rows;i++){const yy=y+8+i*rh;g.fillStyle=['#3a423e','#2f3633','#353c39','#262c29'][(i+k)%4];g.fillRect(x+16,yy,w-32,rh-3);
+    if((i+k)%3!==1){g.fillStyle='#0d1110';for(let p=0;p<12;p++)g.fillRect(x+w*.36+p*((w*.5)/12),yy+rh*.3,(w*.5)/12-3,rh*.36);}
+    g.fillStyle=(i*7+k)%5===0?'#7C93A8':'#1FD67C';g.fillRect(x+26,yy+rh*.36,6,6);}
+  g.fillStyle='#4a534f';g.fillRect(x+6,y,7,h);g.fillRect(x+w-13,y,7,h);
+  g.strokeStyle='rgba(255,255,255,.9)';g.lineWidth=3;const L=20;[[x+9,y+9,1,1],[x+w-9,y+9,-1,1],[x+9,y+h-9,1,-1],[x+w-9,y+h-9,-1,-1]].forEach(([a,b,sx,sy])=>{g.beginPath();g.moveTo(a,b+L*sy);g.lineTo(a,b);g.lineTo(a+L*sx,b);g.stroke();});}
+function tileCanvas(i){const [w,d,why,tm]=SWEEPS[i];const W=560,H=Math.round(W*TH/TW);const [c,g]=cnv(W,H);
+  g.fillStyle='#F7F8F6';g.fillRect(0,0,W,H);rackPhoto(g,16,16,W-32,236,i);
+  g.fillStyle='rgba(12,17,16,.78)';g.fillRect(16,218,W-32,34);g.fillStyle='#DDE4DF';g.font=`400 17px ${MONO}`;g.fillText(`R07 · IMG_${2031+i*37}.jpg`,28,241);
+  const t=day(w,d);g.fillStyle='#111614';g.font=`500 42px ${SANS}`;g.fillText(`${DN[d]} ${t.getUTCDate()} ${MN[t.getUTCMonth()]} 2026`,24,306);
+  g.fillStyle='#4A544F';g.font=`400 22px ${MONO}`;g.fillText(`${tm} · sweep ${String(i+1).padStart(2,'0')} · ${why}`,24,344);
+  g.fillStyle='#04703F';g.font=`500 21px ${MONO}`;g.fillText('photographed · source-linked',52,392);g.fillStyle='#1FD67C';g.beginPath();g.arc(34,385,9,0,7);g.fill();
+  g.strokeStyle='#04703F';g.lineWidth=6;g.strokeRect(3,3,W-6,H-6);return c;}
+const tileBodyMat=new THREE.MeshBasicMaterial({color:COL.link,toneMapped:false});
+const tileBodyGeo=new THREE.BoxGeometry(TW+.01,TH+.01,.008), tileFaceGeo=new THREE.PlaneGeometry(TW,TH);
+const FLATQ=new THREE.Quaternion().setFromEuler(new THREE.Euler(-Math.PI/2,0,0));
+const TILES=SWEEPS.map((s,i)=>{const G=new THREE.Group();G.position.set(DX(s[1]),TOP+.0045,WZ(s[0]));G.quaternion.copy(FLATQ);scene.add(G);
+  const body=add(new THREE.Mesh(tileBodyGeo,tileBodyMat),null,G);body.castShadow=true;
+  const mat=new THREE.MeshBasicMaterial({map:tex(tileCanvas(i)),toneMapped:false});
+  add(new THREE.Mesh(tileFaceGeo,mat),[0,0,.0042],G);return {G,mat,w:s[0],d:s[1],home:G.position.clone(),q:new THREE.Quaternion()};});
+const SAMPLED=[1,6,11], MACRO=12;
+// the sweep line: walks the quarter from W01 (back) to W13 (front)
+const CUR=new THREE.Group();scene.add(CUR);
+const curMat=new THREE.MeshBasicMaterial({color:COL.link,toneMapped:false,transparent:true});
+add(new THREE.Mesh(new THREE.BoxGeometry(ND*CPX+.5,.008,.012),curMat),[GX0+ND*CPX/2-.12,TOP+.004,0],CUR);
+const curVeil=add(new THREE.Mesh(new THREE.PlaneGeometry(ND*CPX+.5,.18),new THREE.MeshBasicMaterial({color:COL.link,transparent:true,opacity:.16,side:THREE.DoubleSide,depthWrite:false,toneMapped:false})),[GX0+ND*CPX/2-.12,TOP+.09,0],CUR);
+const curHead=add(new THREE.Mesh(new THREE.BoxGeometry(.034,.034,.034),curMat),[GX0+ND*CPX+.13,TOP+.017,0],CUR);
+
+/* ─────────── tags ─────────── */
+const hud=document.getElementById('hud');const TG={};
+function tag(k,html,cls,pos,follow){const el=document.createElement('div');el.className='tag '+cls;el.innerHTML=`<i></i><span>${html}</span>`;hud.appendChild(el);TG[k]={el,pos:pos.clone?pos:V3(...pos),follow,o:cls.includes('up')?'up':cls.includes('left')?'left':'right'};}
+let lastTile=0;
+const pileEdge=()=>V3(PILE.x+.13,clean.position.y,PILE.z);
+const tileAt=(i,x,y)=>()=>{const t=TILES[i].G;return V3(x*TW/2,y*TH/2,.005).multiplyScalar(t.scale.x).applyQuaternion(t.quaternion).add(t.position);};
+tag('hA','<b>Audit week</b>W13 · 21–25 Sep','drift keep',V3(),()=>V3(PW/2,TOP,WZ(AUD)));
+tag('hQ','<b>The observation window</b>13 weeks of controls to prove','ink',V3(PW/2+.16,0,WZ(3)));
+tag('lN','<b>23:58, the night before</b>three-week-old spreadsheets','drift keep',V3(),pileEdge);
+tag('bS','<b>One clean spreadsheet</b>audit week · a snapshot','rec keep',V3(),pileEdge);
+tag('bU','<b>Weeks 1–12</b>nothing on file','drift keep',V3(PW/2-.08,TOP,WZ(5)));
+tag('s1','<b>Someone\'s inbox</b>forwarded photos','ink',V3(SRC[0][0]+.17,.02,SRC[0][1]));
+tag('s2','<b>Someone else\'s spreadsheet</b>last edited weeks ago','ink',V3(SRC[1][0]+.17,.02,SRC[1][1]));
+tag('s3','<b>A folder</b>unopened since the last audit','ink',V3(SRC[2][0]+.17,.02,SRC[2][1]));
+tag('sP','<b>Assembled on request</b>all at once, in audit week','drift keep',V3(),pileEdge);
+tag('k48','<b>48 h</b>Wed 23 – Thu 24 Sep','drift keep',V3(xb,DY,DZ));
+tag('kE','<b>Weeks 1–12</b>still empty behind it','ink',V3(PW/2,TOP,WZ(4)));
+tag('cur','<b>This week\'s sweep</b>—','link up keep',V3(),()=>CUR.position.clone().add(V3(GX0+ND*CPX+.13,TOP+.26,0)));
+tag('cT','<b>One tile per sweep</b>dated · photographed · source-linked','link',V3(),()=>TILES[lastTile].G.position.clone().add(V3(TW/2,0,0)));
+tag('p1','<b>Dated</b>Tue 22 Sep 2026 · 09:58','link keep',V3(),tileAt(MACRO,1,-.05));
+tag('p2','<b>Photographed</b>the rack face itself','link',V3(),tileAt(MACRO,1,.82));
+tag('p3','<b>Done</b>on file before anyone asked','link',V3(),tileAt(MACRO,1,-.88));
+tag('rF','<b>The audit request lands</b>evidence already on file','link keep',V3(),()=>FLAG.position.clone().add(V3(.14,.335,0)));
+SAMPLED.forEach((i,n)=>{const [w,d,why]=SWEEPS[i];tag('r'+n,`<b>Sampled · ${fmtD(w,d)}</b>${why} sweep`,'link up',V3(),tileAt(i,0,1));});
+tag('rN','<b>13 of 13 weeks</b>a sweep on file','ink',V3(PW/2+.16,0,WZ(8)));
+
+/* ─────────── scroll → g ─────────── */
+const BEATS=['lead','what-auditors-want','why-scramble','key48','continuous-evidence','plain','showing-up-ready'].map(id=>document.getElementById(id));
+const more=document.getElementById('more');
+function G(){const y=scrollY,vh=innerHeight;const K=[[0,-1]];
+  BEATS.forEach((e,i)=>{const t=e.offsetTop;K.push([t,i+.25],[t+e.offsetHeight-vh,i+.75]);});K.push([more.offsetTop,BEATS.length+.25]);
+  if(y<=0)return -1;for(let i=0;i<K.length-1;i++){if(y<=K[i+1][0])return lerp(K[i][1],K[i+1][1],clamp((y-K[i][0])/((K[i+1][0]-K[i][0])||1)));}return BEATS.length+.25;}
+const on=(g,a,b)=>smooth(a-.2,a+.15,g)*(1-smooth(b-.15,b+.2,g));
+// camera keys: [g, position, target]
+const MZ=WZ(AUD);
+const CAMS=[[-1,[3.3,3.4,4.6],[.3,0,.05]],
+  [.5,[1.3,1.6,4.6],[.2,.15,1.0]],                     // lead: low, in front of audit week, the quarter behind it
+  [1.5,[.35,7.2,.9],[.35,0,.05]],                       // beat 1: top-down plan of the quarter
+  [2.5,[3.6,2.6,3.6],[.75,.05,.35]],                    // beat 2: the sources fling sheets onto audit week
+  [3.5,[1.9,1.0,4.4],[.25,.3,.9]],                   // key: 48 h macro, the pile towers, the quarter recedes
+  [4.5,[3.0,2.9,3.9],[.3,0,.1]],                        // beat 3: oblique, the sweep line walks toward us
+  [5.5,[1.6,1.3,4.6],[0,.35,.9]],                    // plain: the last tile lifts and faces us
+  [6.5,[2.5,1.15,4.4],[.15,.2,.15]],                     // beat 4: low calm hero
+  [7.25,[3.6,2.0,4.6],[.3,.1,.1]]];
+function blend(g){let P=V3(...CAMS[0][1]),T=V3(...CAMS[0][2]);for(let i=1;i<CAMS.length;i++){const [gi,p,t]=CAMS[i];const gp=CAMS[i-1][0];const k=smooth(gp+(gi-gp)*.3,gi-(gi-gp)*.12,g);if(k>0){P.lerp(V3(...p),k);T.lerp(V3(...t),k);}}return [P,T];}
+
+let vw=0,vh=0,mobile=false;
+function resize(){vw=innerWidth;vh=innerHeight;mobile=vw<760;renderer.setSize(vw,vh,false);camera.aspect=vw/vh;camera.updateProjectionMatrix();}
+addEventListener('resize',resize);resize();
+const cp=V3(...CAMS[0][1]),ct=V3(...CAMS[0][2]);
+const FIT={z:1,x:0,y:0};
+const clock=new THREE.Clock();const M4=new THREE.Matrix4(),Q=new THREE.Quaternion(),S1=V3(1,1,1),E=new THREE.Euler();
+const PLATEPTS=[];[-1,1].forEach(sx=>[-1,1].forEach(sz=>[0,TOP].forEach(y=>PLATEPTS.push(V3(sx*PW/2,y,PZ+sz*PD/2)))));
+let curKey='';
+const hudNote=hud.querySelector('.note');
+
+function frame(){
+  requestAnimationFrame(frame);
+  const dt=Math.min(clock.getDelta(),.05),time=clock.elapsedTime;
+  const mr=more.getBoundingClientRect();
+  const hudOn=mr.top>vh*.92;
+  hud.classList.toggle('off',!hudOn);
+  const show=mr.top>0;canvas.style.visibility=show?'visible':'hidden';if(!show)return;
+  const g=G();
+
+  // ── states
+  const wHero=1-smooth(-.6,-.05,g);
+  const wLead=on(g,0,1), w1=on(g,1,2), w2=on(g,2,3), wK=on(g,3,4), w3=on(g,4,5), wP=on(g,5,6), w4=smooth(5.85,6.2,g);
+  const sheetsOut=smooth(3.95,4.3,g);
+  const flyP=smooth(1.95,2.85,g);
+  const srcOn=smooth(1.75,2.0,g)*(1-smooth(2.95,3.15,g));
+  const cleanOn=smooth(.85,1.2,g)*(1-sheetsOut);
+  hatch.material.opacity=Math.max(w1,wK*.45,w2*.45)*.85;
+  win48.material.opacity=wK*.3;dim48.material.opacity=wK;
+  const cntK=[0,0,0];let top=TOP+.002;
+  SH.forEach((s,i)=>{const im=sheetIM[s.k],idx=cntK[s.k]++;const k=s.lead?1:clamp((flyP*1.25-s.d)/.25);
+    const hidden=sheetsOut>=.999||(!s.lead&&k<=0&&srcOn<.02);
+    if(hidden){M4.makeScale(0,0,0);im.setMatrixAt(idx,M4);return;}
+    let p,ry,tx=0,tz=0;
+    if(k<=0){p=s.src.clone();ry=s.srot;}
+    else if(k>=1){p=s.end.clone();ry=s.rot;tx=s.tilt[0];tz=s.tilt[1];top=Math.max(top,p.y);}
+    else{const e=k*k*(3-2*k);const m=s.src.clone().lerp(s.end,.5);m.y+=.6+s.d*.15;const a=s.src.clone().lerp(m,e),b=m.clone().lerp(s.end,e);p=a.lerp(b,e);ry=lerp(s.srot,s.rot,e)+Math.sin(e*Math.PI)*.7;tz=Math.sin(e*Math.PI)*.3;}
+    const sc=s.lead||k>0?1:Math.max(.0001,srcOn);
+    E.set(tx,ry,tz);Q.setFromEuler(E);M4.compose(p,Q,S1.set(sc,1,sc));im.setMatrixAt(idx,M4);});
+  sheetIM.forEach((m,i)=>{m.instanceMatrix.needsUpdate=true;sheetMats[i].opacity=1-sheetsOut;m.visible=sheetsOut<.999;});
+  clean.position.y=top+GAP;clean.visible=cleanOn>.01;cleanMat.opacity=cleanOn;clean.scale.setScalar(Math.max(.001,cleanOn));
+  SRCG.forEach(s=>{s.scale.setScalar(Math.max(.0001,srcOn));s.visible=srcOn>.01;});
+  flagMat.color.copy(COL.ink).lerp(COL.link,w4);flagMat.emissive.setRGB(0,0,0);
+
+  // tiles accrue as the sweep line walks the quarter
+  const cw=smooth(4.05,4.85,g)*NW;
+  const curOn=g>4.0&&g<4.9?on(g,4,5):0;
+  CUR.position.z=GZ0+Math.min(cw,NW-.02)*RPZ;CUR.visible=curOn>.02&&cw>0;
+  curMat.opacity=curOn;curVeil.material.opacity=.16*curOn;
+  lastTile=0;
+  TILES.forEach((t,i)=>{let a=g>=5?1:clamp((cw-t.w-.35)/.5);if(g<4)a=0;if(a>0)lastTile=i;
+    const lift=i===MACRO?wP:(SAMPLED.includes(i)?w4*on(g,6,7.6):0);
+    const L=smooth(0,1,lift);
+    t.G.visible=a>.001;
+    t.G.position.copy(t.home);
+    if(i===MACRO){t.G.position.y+=L*.36;t.G.position.z+=L*.06;}
+    else t.G.position.y+=L*.3;
+    if(L>0){t.q.copy(FLATQ).slerp(camera.quaternion,L);t.G.quaternion.copy(t.q);}else t.G.quaternion.copy(FLATQ);
+    const big=i===MACRO?1+L*2.2:1+L*.85;
+    const pop=a<1?a*(1+.3*Math.sin(a*Math.PI)):1;t.G.scale.setScalar(Math.max(.0001,pop*big));});
+
+  // ── camera
+  let [Pp,Tt]=blend(g);
+  if(!reduce&&!SNAP&&g<-.2){const s=Math.sin(time*.12)*.3;Pp.x+=s;Pp.z-=s*.35;}
+  if(mobile){Pp.sub(Tt).multiplyScalar(1.2).add(Tt);}
+  const f=(reduce||SNAP)?1:1-Math.pow(.02,dt);cp.lerp(Pp,f);ct.lerp(Tt,f);camera.position.copy(cp);camera.lookAt(ct);
+  const bx=mobile?0:-(.63-.5)*vw, by=0;
+  camera.zoom=1;camera.setViewOffset(vw,vh,bx,by,vw,vh);camera.updateProjectionMatrix();camera.updateMatrixWorld();
+  // framing guard: every object stays in the figure area (desktop: right of the reading column; mobile: the top band)
+  {const pts=PLATEPTS.slice();pts.push(FLAG.position.clone().add(V3(.14,.38,0)));
+   if(srcOn>.02)SRC.forEach(p=>{pts.push(V3(p[0]-.17,0,p[1]+.13),V3(p[0]+.17,.1,p[1]-.13));});
+   if(cleanOn>.02||sheetsOut<1)pts.push(V3(PILE.x,top+.02,PILE.z));
+   TILES.forEach(t=>{if(t.G.visible&&t.G.position.y>TOP+.02){[[-1,1],[1,1],[-1,-1],[1,-1]].forEach(([a,b])=>pts.push(V3(a*TW/2,b*TH/2,0).applyQuaternion(t.G.quaternion).multiplyScalar(t.G.scale.x).add(t.G.position)));}});
+   let x0=1e9,x1=-1e9,y0=1e9,y1=-1e9;const fv=V3();
+   for(const p of pts){fv.copy(p).project(camera);if(fv.z>1||fv.z<-1)continue;const x=(fv.x+1)/2*vw,y=(1-fv.y)/2*vh;x0=Math.min(x0,x);x1=Math.max(x1,x);y0=Math.min(y0,y);y1=Math.max(y1,y);}
+   const L=mobile?16:vw*.47,R=mobile?vw-16:vw*(.975-.17*srcOn),T=mobile?72:88,B=mobile?vh*.45:vh-30;
+   const pcx=vw/2-bx,pcy=vh/2-by;let z=1,sx=0,sy=0;
+   if(x1>x0){z=Math.min(mobile?1.3:1,(R-L)/(x1-x0),(B-T)/(y1-y0));z=Math.max(.3,z);
+     const a0=pcx+(x0-pcx)*z,a1=pcx+(x1-pcx)*z,c0=pcy+(y0-pcy)*z,c1=pcy+(y1-pcy)*z;
+     if(mobile){sx=(L+R)/2-(a0+a1)/2;sy=(T+B)/2-(c0+c1)/2;}
+     else{if(a0<L)sx=L-a0;else if(a1>R)sx=Math.max(L-a0,R-a1);if(c0<T)sy=T-c0;else if(c1>B)sy=Math.max(T-c0,B-c1);}}
+   const fk=(SNAP||reduce)?1:.14;FIT.z=lerp(FIT.z,z,fk);FIT.x=lerp(FIT.x,sx,fk);FIT.y=lerp(FIT.y,sy,fk);}
+  camera.zoom=FIT.z;camera.setViewOffset(vw,vh,bx-FIT.x,by-FIT.y,vw,vh);camera.updateProjectionMatrix();camera.updateMatrixWorld();
+
+  // ── tags: fully on or fully off; never over the reading column, another tag, or off-screen
+  const wk=Math.min(NW-1,Math.floor(cw));const ck=g>=4&&g<5?wk:-1;
+  if(ck!==curKey&&ck>=0){curKey=ck;const s=SWEEPS[ck];TG.cur.el.querySelector('span').innerHTML=`<b>This week's sweep · W${String(ck+1).padStart(2,'0')}</b>${fmtD(s[0],s[1])} · ${s[2]}`;}
+  const vis={hA:Math.max(wHero,wLead),hQ:wHero,lN:wLead,bS:w1,bU:w1,s1:w2,s2:w2,s3:w2,sP:w2*smooth(2.55,2.7,g),k48:wK,kE:wK,
+    cur:w3*(cw>0&&g<4.85?1:0),cT:w3*smooth(4.3,4.4,g),p1:wP,p2:wP,p3:wP,rF:w4,r0:w4,r1:w4,r2:w4,rN:w4*on(g,6,7)};
+  const placed=[];const v=V3();const mid=vw*.44;
+  if(mobile)placed.push([0,vh*.47,vw,vh]);
+  {const r=hudNote.getBoundingClientRect();placed.push([r.left-4,r.top-4,r.right+4,r.bottom+4]);}
+  for(const [n,t] of Object.entries(TG)){let ok=hudOn&&(vis[n]||0)>.5;
+    if(ok){if(t.follow)t.pos.copy(t.follow());v.copy(t.pos).project(camera);if(v.z>1||v.z<-1)ok=false;}
+    if(ok){const x=(v.x+1)/2*vw,y=(1-v.y)/2*vh;const cl=t.el.classList,ew=t.el.offsetWidth,eh=t.el.offsetHeight;
+      if(!ew)ok=false;
+      // preferred side first, then the mirror side (never toward the reading column on desktop: the column test rejects it)
+      const opts=t.o==='up'?['up']:t.o==='left'?['left','right']:['right','left'];let placedOk=false;
+      if(ok)for(const o of opts){
+        const tx=o==='left'?x-ew+3.5:o==='up'?x-ew/2:x-3.5,ty=o==='up'?y-eh+3.5:y-eh/2;
+        const b0=tx,b1=ty,b2=tx+ew,b3=ty+eh;let good=true;
+        if(b0<8||b2>vw-8||b1<70||b3>vh-8)good=false;
+        if(!mobile&&b0<mid)good=false;
+        if(good)for(const b of placed){if(b0<b[2]+6&&b2>b[0]-6&&b1<b[3]+6&&b3>b[1]-6){good=false;break;}}
+        if(good){placed.push([b0,b1,b2,b3]);cl.toggle('left',o==='left');t.el.style.transform=`translate3d(${tx.toFixed(1)}px,${ty.toFixed(1)}px,0)`;placedOk=true;break;}}
+      ok=placedOk;}
+    t.el.style.opacity=ok?1:0;}
+  renderer.render(scene,camera);
+}
+function redrawText(){sheetMat.map.image=sheetCanvas();sheetMat.map.needsUpdate=true;plateMat.map.image=plateCanvas();plateMat.map.needsUpdate=true;
+  sheetMats.forEach((m,i)=>{m.map.image=sheetFace(KINDS[i],false);m.map.needsUpdate=true;});cleanMat.map.image=sheetFace('xls',true);cleanMat.map.needsUpdate=true;
+  TILES.forEach((t,i)=>{t.mat.map.image=tileCanvas(i);t.mat.map.needsUpdate=true;});}
+document.fonts.ready.then(redrawText);
+requestAnimationFrame(frame);
+</script>
+<!--GLJS-END-->
+<script src="/design-system/nav.js" defer></script>
+</body>
+</html>

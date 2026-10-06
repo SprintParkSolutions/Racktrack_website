@@ -1,0 +1,196 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>RackTrack · device preview</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap">
+<link rel="stylesheet" href="/design-system/base.css">
+<style>
+/* Local development tool — not part of the site. Safe to delete. */
+*{box-sizing:border-box}
+html,body{height:100%}
+body{margin:0;display:flex;flex-direction:column;background:var(--paper);color:var(--ink);
+  font:400 14px/1.5 var(--sans);-webkit-font-smoothing:antialiased}
+
+.bar{display:flex;align-items:center;gap:14px;flex-wrap:wrap;flex:none;
+  padding:12px 18px;background:var(--paper-raised);border-bottom:1px solid var(--rule)}
+.grp{display:flex;align-items:center;gap:7px}
+.bar label{font:400 11px/1 var(--mono);color:var(--ink-2);text-transform:uppercase;letter-spacing:.07em}
+select,button{font:500 13px/1 var(--sans);color:var(--ink);background:var(--paper);
+  border:1px solid var(--rule);border-radius:3px;padding:8px 10px;cursor:pointer}
+select{max-width:min(42vw,300px)}
+button:hover,select:hover{border-color:var(--ink-2)}
+button.on{background:var(--ink);color:var(--paper);border-color:var(--ink)}
+.spacer{margin-left:auto}
+.readout{font:400 12px/1 var(--mono);color:var(--ink-2);white-space:nowrap}
+.readout b{color:var(--ink);font-weight:500}
+.chip{display:inline-flex;align-items:center;gap:6px;padding:5px 10px;border:1px solid var(--rule);
+  border-radius:999px;font:400 11px/1 var(--mono);color:var(--ink-2);background:var(--paper);white-space:nowrap}
+.chip i{width:7px;height:7px;border-radius:50%;background:var(--link);display:block;flex:none}
+
+.stage{flex:1;min-height:0;display:grid;place-items:center;padding:26px;overflow:auto;
+  background:
+    linear-gradient(90deg,rgba(17,22,20,.04) 1px,transparent 1px) 0 0/28px 28px,
+    linear-gradient(rgba(17,22,20,.04) 1px,transparent 1px) 0 0/28px 28px,
+    var(--paper)}
+.shell{position:relative;flex:none}
+.bezel{position:absolute;inset:0;border-radius:var(--br,22px);pointer-events:none;z-index:2}
+.notch{position:absolute;top:7px;left:50%;width:84px;height:18px;margin-left:-42px;border-radius:10px;
+  background:#151a18;z-index:3;pointer-events:none;transform-origin:top center}
+iframe{border:0;display:block;background:var(--paper);transform-origin:top left;border-radius:var(--br,22px)}
+.hint{flex:none;padding:9px 18px;border-top:1px solid var(--rule);background:var(--paper-raised);
+  font:400 11.5px/1.5 var(--mono);color:var(--ink-2)}
+.hint b{color:var(--ink);font-weight:500}
+@media (max-width:760px){ .bar{gap:9px;padding:10px 12px} .stage{padding:12px} .spacer{margin-left:0} }
+</style>
+</head>
+<body>
+
+<div class="bar">
+  <div class="grp"><label for="page">Page</label><select id="page"></select></div>
+  <div class="grp"><label for="device">Device</label><select id="device"></select></div>
+  <div class="grp">
+    <button id="rotate" type="button" title="Swap width and height">Rotate</button>
+    <button id="reload" type="button" title="Reload the frame">Reload</button>
+    <button id="fit" type="button" class="on" title="Scale down so the whole device fits on screen">Fit</button>
+  </div>
+  <div class="spacer"></div>
+  <span class="chip"><i></i><span id="bp">—</span></span>
+  <span class="readout" id="size">—</span>
+</div>
+
+<div class="stage" id="stage">
+  <div class="shell" id="shell">
+    <iframe id="frame" title="Site preview"></iframe>
+    <div class="bezel" id="bezel"></div>
+    <div class="notch" id="notch"></div>
+  </div>
+</div>
+
+<div class="hint">
+  Viewport emulation: the frame has a real CSS width, so every media query fires exactly as it would on the device.
+  It does <b>not</b> emulate touch input, device pixel ratio, or iOS Safari's collapsing toolbar —
+  for those use Chrome DevTools (<b>Ctrl+Shift+M</b>).
+</div>
+
+<script>
+const ROUTES = [
+  ["/","Home"],
+  ["/pages/why-racktrack/","Why RackTrack"],
+  ["/pages/solutions/","Solutions"],
+  ["/pages/use-cases/","Use cases"],
+  ["/pages/use-cases/compliance-audit-owners/","— Compliance & audit owners"],
+  ["/pages/use-cases/incident-responders-on-call/","— Incident responders / on-call"],
+  ["/pages/use-cases/infrastructure-data-center-leaders/","— Infrastructure & DC leaders"],
+  ["/pages/use-cases/m-a-migration-teams/","— M&A & migration teams"],
+  ["/pages/use-cases/network-architects-engineers/","— Network architects & engineers"],
+  ["/pages/use-cases/security-vulnerability-teams/","— Security & vulnerability teams"],
+  ["/pages/resources/","Resources"],
+  ["/pages/resources/dcim-vs-physical-reality-why-the-gap-matters/","— DCIM vs physical reality"],
+  ["/pages/resources/free-port-discovery-and-rack-capacity-planning/","— Free port discovery"],
+  ["/pages/resources/from-audit-to-autonomy/","— From audit to autonomy"],
+  ["/pages/resources/how-infrastructure-teams-prepare-for-soc-2-audits/","— Preparing for SOC 2"],
+  ["/pages/resources/physical-layer-the-missing-link-in-infrastructure-security/","— Physical layer security"],
+  ["/pages/resources/the-hidden-cost-of-unreconciled-infrastructure/","— Cost of unreconciled infra"],
+  ["/pages/resources/the-hidden-cost-of-wrong-rack-inventory/","— Cost of wrong inventory"],
+  ["/pages/resources/what-network-verified-actually-means/","— What network-verified means"],
+  ["/pages/resources/why-every-enterprise-cmdb-is-40-wrong/","— Why every CMDB is 40% wrong"],
+  ["/pages/trust-security/","Trust & security"],
+  ["/pages/about-us/","About us"],
+  ["/pages/contact-us/","Contact us"],
+  ["/pages/sign-in/","Sign in"],
+  ["/pages/legal/privacy-policy/","Legal — Privacy policy"],
+  ["/pages/legal/terms-of-use/","Legal — Terms of use"],
+  ["/pages/legal/cookie-policy/","Legal — Cookie policy"],
+  ["/pages/legal/data-we-collect/","Legal — Data we collect"],
+  ["/pages/legal/third-party-services/","Legal — Third-party services"]
+];
+
+/* CSS viewport sizes — what a media query actually sees, not hardware pixels.
+   [label, width, height, corner radius] */
+const DEVICES = [
+  ["iPhone SE",          375, 667, 20],
+  ["iPhone 13 mini",     375, 812, 26],
+  ["iPhone 14 / 15",     390, 844, 28],
+  ["iPhone 15 Pro Max",  430, 932, 30],
+  ["Pixel 7",            412, 915, 24],
+  ["Galaxy S21",         360, 800, 22],
+  ["iPad mini",          744,1133, 18],
+  ["iPad Air",           820,1180, 18],
+  ['iPad Pro 11"',       834,1194, 18],
+  ['iPad Pro 12.9"',    1024,1366, 18],
+  ["Laptop",            1280, 800,  6],
+  ["Desktop",           1440, 900,  6],
+  ["Large desktop",     1920,1080,  6]
+];
+
+const $ = function(id){ return document.getElementById(id); };
+const pageSel=$("page"), devSel=$("device"), frame=$("frame"), shell=$("shell"),
+      bezel=$("bezel"), notch=$("notch"), stage=$("stage"),
+      sizeEl=$("size"), bpEl=$("bp"), fitBtn=$("fit");
+
+ROUTES.forEach(function(r){ pageSel.add(new Option(r[1], r[0])); });
+DEVICES.forEach(function(d,i){ devSel.add(new Option(d[0] + "   " + d[1] + "×" + d[2], i)); });
+devSel.value = 2;                                     /* iPhone 14 / 15 */
+
+let landscape = false, fit = true;
+
+function current(){
+  const d = DEVICES[+devSel.value];
+  return landscape ? {n:d[0], w:d[2], h:d[1], br:d[3]} : {n:d[0], w:d[1], h:d[2], br:d[3]};
+}
+
+/* which nav treatment this width gets — mirrors design-system/base.css */
+function breakpoint(w){
+  if (w <= 600)  return "phone · drawer nav, CTA in drawer";
+  if (w <= 1024) return "tablet · drawer nav";
+  if (w <= 1180) return "small desktop · full nav";
+  return "desktop · full nav, cards flank the rack";
+}
+
+function layout(){
+  const d = current();
+  const s = fit ? Math.min(1, (stage.clientWidth - 52)/d.w, (stage.clientHeight - 52)/d.h) : 1;
+
+  frame.style.width  = d.w + "px";
+  frame.style.height = d.h + "px";
+  frame.style.transform = "scale(" + s + ")";
+  shell.style.width  = (d.w * s) + "px";
+  shell.style.height = (d.h * s) + "px";
+  shell.style.setProperty("--br", (d.br * s) + "px");
+  bezel.style.boxShadow =
+    "0 0 0 " + (10*s) + "px #151a18, 0 0 0 " + (11*s) + "px #2a302d, " +
+    "0 26px 60px -24px rgba(12,17,16,.5)";
+  notch.style.display = (d.br > 14 && !landscape) ? "block" : "none";
+  notch.style.transform = "scale(" + s + ")";
+
+  sizeEl.innerHTML = "<b>" + d.w + " × " + d.h + "</b>   ·   " + Math.round(s*100) + "%";
+  bpEl.textContent = breakpoint(d.w);
+}
+
+function load(){ frame.src = pageSel.value; }
+
+pageSel.addEventListener("change", load);
+devSel .addEventListener("change", function(){ landscape = false; layout(); });
+$("rotate").addEventListener("click", function(){ landscape = !landscape; layout(); });
+$("reload").addEventListener("click", function(){ frame.contentWindow.location.reload(); });
+fitBtn  .addEventListener("click", function(){ fit = !fit; fitBtn.classList.toggle("on", fit); layout(); });
+addEventListener("resize", layout);
+
+/* remember the last selection between reloads */
+const SAVE = "rt-preview";
+try {
+  const s = JSON.parse(localStorage.getItem(SAVE) || "{}");
+  if (s.page) pageSel.value = s.page;
+  if (s.dev != null) devSel.value = s.dev;
+  if (s.land != null) landscape = s.land;
+} catch(e){}
+addEventListener("beforeunload", function(){
+  try { localStorage.setItem(SAVE, JSON.stringify({page:pageSel.value, dev:devSel.value, land:landscape})); } catch(e){}
+});
+
+load(); layout();
+</script>
+</body>
+</html>

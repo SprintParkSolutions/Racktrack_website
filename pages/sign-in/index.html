@@ -1,0 +1,443 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Sign in · RackTrack</title>
+<meta name="description" content="Customer sign-in for the RackTrack platform.">
+<meta name="robots" content="noindex">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600;700&display=swap">
+<link rel="stylesheet" href="/design-system/base.css">
+<style>
+/* RackTrack · Sign in — design-system/ tokens. Protagonist: rack R01 behind a locked door. Your email lights one row of ports, your password
+   another (as masked lights, never characters); the access reader on the rack answers when you press sign in. */
+:root{
+  color-scheme: light;
+  
+}
+*{box-sizing:border-box}
+html,body{height:100%}
+/* column layout so main takes exactly what the footer leaves — the footer is one
+   line on desktop and two on a phone, so no fixed subtraction can be right */
+body{margin:0;background:var(--paper);color:var(--ink);font:400 16px/1.5 var(--sans);-webkit-font-smoothing:antialiased;overflow-x:hidden;display:flex;flex-direction:column;min-height:100vh;min-height:100svh}
+a{color:inherit}
+::selection{background:var(--link);color:#06140d}
+:focus-visible{outline:2px solid var(--link-ink);outline-offset:3px;border-radius:2px}
+body::before{content:"";position:fixed;inset:0;z-index:0;pointer-events:none;background:radial-gradient(55% 60% at 68% 52%,rgba(255,255,255,.7),transparent 72%)}
+#stage{position:fixed;inset:0;z-index:1;display:block;width:100%;height:100%;pointer-events:none}
+#hud{position:fixed;inset:0;z-index:3;pointer-events:none;overflow:hidden}
+
+/* top bar */
+.bar{position:fixed;left:0;right:0;top:0;z-index:10;display:flex;align-items:center;gap:24px;padding:calc(18px + env(safe-area-inset-top,0px)) var(--bleed) 18px}
+.brand{display:flex;align-items:center;gap:10px;text-decoration:none;font:700 17px/1 var(--sans);letter-spacing:-.02em;color:var(--ink)}
+.brand img{width:26px;height:26px;border-radius:5px;display:block}
+.bar .back{margin-left:auto;font:400 12.5px/1 var(--mono);color:var(--ink-2);text-decoration:none}
+.bar .back:hover{color:var(--ink)}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:10px;height:46px;padding:0 20px;border-radius:3px;border:1px solid var(--ink);font:500 15px/1 var(--sans);text-decoration:none;cursor:pointer;background:transparent;color:var(--ink);transition:background .2s,color .2s,border-color .2s}
+.btn.solid{background:var(--ink);color:var(--paper)}
+.btn.solid:hover{background:var(--link-ink);border-color:var(--link-ink);color:#fff}
+.btn .led{width:7px;height:7px;border-radius:50%;background:var(--link);box-shadow:0 0 8px var(--link)}
+.btn[disabled]{opacity:.7;cursor:progress}
+
+/* the sign-in card */
+main{position:relative;z-index:2;flex:1 0 auto;display:flex;align-items:flex-start;padding:clamp(10px,2.8vh,var(--band-y)) var(--bleed)}
+/* margin-block:auto is a safe centre — it centres while there is room and falls
+   back to the top once the card is taller than the window. align-items:center
+   would crop the heading off the top instead, which is how the error state
+   (status banner + field messages) used to lose the top of the card. */
+.card{width:min(27rem,100%);margin-left:0;margin-block:auto;background:var(--paper-2);border:1px solid var(--ink);box-shadow:0 40px 80px -48px rgba(17,22,20,.5)}
+.tb{display:flex;justify-content:space-between;align-items:center;padding:10px 14px;background:var(--ink);color:#DDE4DF;font:500 12px/1 var(--mono)}
+.tb span{display:flex;align-items:center;gap:8px}
+.tb i{width:7px;height:7px;border-radius:50%;background:var(--link);box-shadow:0 0 8px var(--link);transition:background .3s,box-shadow .3s}
+.tb em{font-style:normal;color:#93A19A}
+body[data-phase="error"] .tb i,body[data-phase="notice"] .tb i{background:var(--drift);box-shadow:0 0 8px var(--drift)}
+.in{padding:30px 30px 26px}
+.k{margin:0 0 12px;font:400 12px/1 var(--mono);color:var(--link-ink)}
+h1{margin:0 0 12px}
+.lede{margin:0 0 26px;color:var(--ink-2)}
+form{display:grid;gap:16px}
+.fld label{display:flex;justify-content:space-between;align-items:baseline;gap:8px;font:500 12px/1 var(--mono);color:var(--ink);margin:0 0 8px}
+.fld label a{font-weight:400;color:var(--link-ink);text-decoration:none}
+.fld label a:hover{text-decoration:underline}
+.box{position:relative}
+input[type=email],input[type=password],input[type=text]{width:100%;height:50px;padding:0 14px;border:1px solid var(--rule);border-radius:2px;background:#fff;font:400 16px/1.2 var(--sans);color:var(--ink);transition:border-color .2s,box-shadow .2s;appearance:none;-webkit-appearance:none}
+input::placeholder{color:#7d8781}
+input:hover{border-color:#9aa39e}
+input:focus{outline:none;border-color:var(--ink);box-shadow:0 0 0 3px rgba(31,214,124,.28)}
+[aria-invalid="true"]{border-color:var(--drift)!important;box-shadow:0 0 0 3px rgba(255,154,46,.18)!important}
+.box input{padding-right:64px}
+.show{position:absolute;right:6px;top:50%;transform:translateY(-50%);height:36px;padding:0 10px;border:0;background:transparent;font:500 12px/1 var(--mono);color:var(--ink-2);cursor:pointer;border-radius:2px}
+.show:hover{color:var(--ink);background:var(--paper)}
+.meter{display:flex;gap:3px;margin-top:8px;height:5px}
+.meter i{flex:1;background:var(--rule);transition:background .15s}
+.meter i.on{background:var(--link)}
+.err{margin:7px 0 0;font:400 11.5px/1.3 var(--mono);color:var(--drift-ink)}
+.err:empty{display:none}
+.caps{margin:7px 0 0;font:400 11.5px/1.3 var(--mono);color:var(--drift-ink)}
+.row{display:flex;justify-content:space-between;align-items:center;gap:12px;font-size:14px;color:var(--ink-2)}
+.chk{display:flex;align-items:center;gap:9px;cursor:pointer}
+.chk input{appearance:none;-webkit-appearance:none;width:18px;height:18px;border:1px solid var(--ink-2);border-radius:2px;background:#fff;display:grid;place-content:center;margin:0;cursor:pointer}
+.chk input:checked{background:var(--ink);border-color:var(--ink)}
+.chk input:checked::after{content:"";width:9px;height:5px;border:2px solid var(--link);border-top:0;border-right:0;transform:rotate(-45deg) translate(1px,-1px)}
+.portal{width:100%;margin-top:10px}
+.go{width:100%;height:52px;font-size:16px}
+.status{margin:0;padding:12px 14px;border-left:2px solid var(--drift);background:rgba(255,154,46,.1);font-size:14.5px;line-height:1.45;color:var(--ink)}
+.status a{color:var(--link-ink)}
+.status:empty{display:none}
+.alt{display:flex;flex-direction:column;gap:10px;margin-top:22px;padding-top:18px;border-top:1px dashed var(--rule);font-size:14.5px;color:var(--ink-2)}
+.alt a{color:var(--ink);font-weight:500;text-decoration:none;border-bottom:2px solid var(--link)}
+.alt a:hover{color:var(--link-ink)}
+.fine{display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap;padding:12px 14px;border-top:1px solid var(--rule);font:400 11.5px/1.4 var(--mono);color:var(--ink-2)}
+.fine a{color:var(--ink-2)}
+.fine a:hover{color:var(--link-ink)}
+
+/* The card has to clear the viewport on its own: there is no nav above it and no
+   second screen below, so a short window must not push the sign-in button out of
+   reach. Every vertical step below is fluid in vh, holding its design value on a
+   tall window and tightening as the window shrinks. Horizontal rhythm is fixed. */
+.tb{padding-block:clamp(6px,1vh,10px)}
+.in{padding:clamp(13px,2.4vh,30px) 30px clamp(12px,2.1vh,26px)}
+h1{font-size:clamp(29px,5vh,var(--t-hero));margin-bottom:clamp(8px,1.3vh,12px)}
+.lede{margin-bottom:clamp(13px,2.4vh,26px)}
+form{gap:clamp(9px,1.5vh,16px)}
+.fld label{margin-bottom:clamp(5px,.9vh,8px)}
+input[type=email],input[type=password],input[type=text]{height:clamp(40px,5.2vh,50px)}
+.show{height:clamp(32px,4vh,36px)}
+.go{height:clamp(42px,5.5vh,52px)}
+.portal{margin-top:clamp(5px,1vh,10px)}
+.alt{margin-top:clamp(10px,2vh,22px);padding-top:clamp(8px,1.6vh,18px);gap:clamp(6px,1vh,10px)}
+.fine{padding-block:clamp(7px,1.3vh,12px)}
+.status{padding:clamp(9px,1.4vh,12px) 14px;font-size:14px}
+.meter{margin-top:clamp(5px,.9vh,8px)}
+.err,.caps{margin-top:clamp(4px,.8vh,7px)}
+/* a status banner and its field messages add ~120px mid-form; claw some of it
+   back from the trimmings so the card still clears a laptop window */
+.in:has(.status:not(:empty)) .lede{margin-bottom:clamp(8px,1.4vh,14px)}
+.in:has(.status:not(:empty)) .alt{margin-top:clamp(8px,1.4vh,14px);padding-top:clamp(7px,1.2vh,12px)}
+.in:has(.status:not(:empty)) h1{font-size:clamp(28px,4.2vh,44px)}
+
+/* tags */
+.tag{position:absolute;left:0;top:0;display:flex;align-items:center;opacity:0;visibility:hidden;will-change:transform;white-space:nowrap;transition:opacity .25s}
+.tag.on{opacity:1;visibility:visible}
+.tag::before{content:"";width:7px;height:7px;border-radius:50%;background:var(--c,var(--ink));transform:translate(-3.5px,0);box-shadow:0 0 0 3px color-mix(in oklab,var(--c,var(--ink)) 22%,transparent)}
+.tag i{display:block;width:24px;height:1px;background:var(--c,var(--ink))}
+.tag span{padding:6px 9px;background:var(--paper-2);border:1px solid var(--c,var(--ink));border-radius:2px;font:400 11.5px/1.35 var(--mono);color:var(--ink);box-shadow:0 14px 28px -20px rgba(17,22,20,.45)}
+.tag span b{display:block;font:600 15px/1.15 var(--sans);letter-spacing:-.02em;margin-bottom:2px}
+.tag.link{--c:var(--link)} .tag.link span b{color:var(--link-ink)}
+.tag.drift{--c:var(--drift)} .tag.drift span b{color:var(--drift-ink)}
+.tag.ink{--c:var(--ink)}
+
+.foot{position:relative;z-index:4;display:flex;justify-content:space-between;gap:16px;flex-wrap:wrap;padding:14px var(--bleed) calc(14px + env(safe-area-inset-bottom,0px));font:400 11.5px/1.4 var(--mono);color:var(--ink-2);pointer-events:none}
+.foot a{pointer-events:auto;color:var(--ink-2);text-decoration:none;margin-left:16px}
+.foot a:hover{color:var(--link-ink)}
+.no-webgl #stage,.no-webgl #hud{display:none}
+/* No 3D — tablet, phone, or no WebGL. The card is laid out to sit beside the
+   rack; with the rack gone it centres instead of hugging the left edge. The top
+   bar is fixed, so the card only has to clear it: reserving the full --nav-h
+   band is what pushed the card off-screen on a short window. */
+.no-webgl main{align-items:center;justify-content:center;padding-top:clamp(66px,9vh,calc(var(--nav-h) + 16px))}
+@media (max-width:760px){
+  #stage{height:34vh}
+  #hud{display:none}
+  main{align-items:flex-start;padding-top:calc(34vh + 8px);padding-bottom:40px}
+  .card{margin-left:0}
+  .in{padding:clamp(14px,2.2vh,24px) 20px clamp(12px,2vh,22px)}
+  .foot{position:static;background:var(--paper)}
+  .foot a{margin:0 16px 0 0}
+}
+@media (prefers-reduced-motion:reduce){ .tag,.meter i{transition:none!important} }
+</style>
+</head>
+<body class="stage-band" data-phase="idle">
+
+<canvas id="stage" aria-hidden="true"></canvas>
+<div id="hud" aria-hidden="true"></div>
+
+<header class="bar">
+  <a class="brand" href="/"><img alt="" src="/design-system/assets/Logos/racktrack-mark.jpg">RackTrack</a>
+  <a class="back" href="/">← Back to racktrack.ai</a>
+</header>
+
+<main>
+  <section class="card" aria-labelledby="si-h">
+    <div class="tb"><span><i></i>R01 · customer access</span><em id="clk">--:--</em></div>
+    <div class="in">
+      <h1 id="si-h">Sign in to RackTrack</h1>
+      <p class="lede">Your racks, records and sweeps, waiting where you left them.</p>
+      <form id="signin" method="post" novalidate>
+        <div class="fld"><label for="f-email">Work email</label>
+          <input id="f-email" name="email" type="email" autocomplete="username" inputmode="email" placeholder="you@company.com" required aria-describedby="e-email">
+          <p class="err" id="e-email"></p></div>
+        <div class="fld"><label for="f-pass">Password <a href="mailto:info@racktrack.ai?subject=RackTrack%20password%20reset">Forgot password?</a></label>
+          <div class="box"><input id="f-pass" name="password" type="password" autocomplete="current-password" placeholder="Your password" required aria-describedby="e-pass caps">
+            <button class="show" type="button" aria-controls="f-pass" aria-pressed="false">show</button></div>
+          <div class="meter" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></div>
+          <p class="caps" id="caps" hidden>Caps lock is on.</p>
+          <p class="err" id="e-pass"></p></div>
+        <div class="row"><label class="chk"><input type="checkbox" name="remember"> Keep me signed in</label></div>
+        <button class="btn solid go" type="submit"><span class="led"></span><span class="lbl">Sign in</span></button>
+        <a class="btn portal" href="https://portal.racktrack.ai" rel="noopener">Continue to the RackTrack portal →</a>
+        <p class="status" id="status" role="status" aria-live="polite"></p>
+      </form>
+      <div class="alt">
+        <span>New to RackTrack? <a href="/pages/contact-us/">Book a sweep</a></span>
+        <span>Trouble signing in? <a href="mailto:info@racktrack.ai?subject=RackTrack%20sign-in%20help">info@racktrack.ai</a></span>
+      </div>
+    </div>
+    <p class="fine"><span>By signing in you agree to the <a href="/pages/legal/terms-of-use/">terms</a> and <a href="/pages/legal/privacy-policy/">privacy policy</a>.</span></p>
+  </section>
+</main>
+
+<footer class="foot"><span>© 2026 RackTrack Inc. · Patent pending</span><span><a href="/pages/legal/privacy-policy/">Privacy</a><a href="/pages/legal/terms-of-use/">Terms</a><a href="/pages/legal/cookie-policy/">Cookies</a></span></footer>
+
+<script>
+/* ───── Sign in: form behaviour (works without WebGL). No password ever leaves this page until AUTH_URL is set. ───── */
+(()=>{
+/* Connect sign-in here: the URL of the platform's login endpoint (it receives a normal form POST of `email` and `password`).
+   Leave empty until the platform team provides it; the page then explains that sign-in is not connected yet. */
+const AUTH_URL='';
+
+const $=s=>document.querySelector(s);
+const form=$('#signin'),email=$('#f-email'),pass=$('#f-pass'),show=$('.show'),caps=$('#caps'),status=$('#status'),go=form.querySelector('.go'),lbl=go.querySelector('.lbl');
+const bars=[...document.querySelectorAll('.meter i')];
+const S=window.SIGNIN={emailLen:0,passLen:0,focus:null,phase:'idle',since:0,emailOk:false};
+const setPhase=p=>{S.phase=p;S.since=performance.now();document.body.dataset.phase=p;};
+const okEmail=v=>/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(v);
+const err=(el,id,msg)=>{el.setAttribute('aria-invalid',msg?'true':'false');$(id).textContent=msg;return !msg;};
+email.addEventListener('input',()=>{S.emailLen=email.value.length;S.emailOk=okEmail(email.value.trim());if(email.getAttribute('aria-invalid')==='true')err(email,'#e-email','');if(S.phase!=='checking')setPhase('idle');status.textContent='';});
+pass.addEventListener('input',()=>{S.passLen=pass.value.length;bars.forEach((b,i)=>b.classList.toggle('on',i<Math.min(12,pass.value.length)));if(pass.getAttribute('aria-invalid')==='true')err(pass,'#e-pass','');if(S.phase!=='checking')setPhase('idle');status.textContent='';});
+[email,pass].forEach(el=>{el.addEventListener('focus',()=>S.focus=el===email?'email':'password');el.addEventListener('blur',()=>setTimeout(()=>{if(!form.contains(document.activeElement))S.focus=null;},0));});
+pass.addEventListener('keyup',e=>{caps.hidden=!(e.getModifierState&&e.getModifierState('CapsLock'));});
+show.addEventListener('click',()=>{const on=pass.type==='password';pass.type=on?'text':'password';show.textContent=on?'hide':'show';show.setAttribute('aria-pressed',String(on));pass.focus();});
+form.addEventListener('submit',e=>{
+  const a=err(email,'#e-email',!email.value.trim()?'Enter your work email.':!okEmail(email.value.trim())?'Enter a valid email address.':'');
+  const b=err(pass,'#e-pass',!pass.value?'Enter your password.':'');
+  if(!a||!b){e.preventDefault();setPhase('error');(a?pass:email).focus();return;}
+  if(AUTH_URL){form.action=AUTH_URL;go.disabled=true;lbl.textContent='Signing in…';setPhase('checking');return;}   // real sign-in: normal POST to the platform
+  e.preventDefault();go.disabled=true;lbl.textContent='Checking access…';setPhase('checking');
+  setTimeout(()=>{go.disabled=false;lbl.textContent='Sign in';pass.value='';S.passLen=0;bars.forEach(b=>b.classList.remove('on'));setPhase('notice');
+    status.innerHTML='Online sign-in is not connected on this page yet, and your password was not sent anywhere. Use <a href="https://portal.racktrack.ai" rel="noopener">the RackTrack portal</a> to sign in, or email <a href="mailto:info@racktrack.ai?subject=RackTrack%20sign-in%20help">info@racktrack.ai</a>.';},reduceMotion()?200:1700);
+});
+function reduceMotion(){return matchMedia('(prefers-reduced-motion: reduce)').matches;}
+const fmt=new Intl.DateTimeFormat('en-GB',{hour:'2-digit',minute:'2-digit',hour12:false});const clk=$('#clk');const t=()=>{clk.textContent=fmt.format(new Date())+' local';};t();setInterval(t,20000);
+})();
+</script>
+
+<script type="importmap">
+{ "imports": {
+  "three": "https://cdn.jsdelivr.net/npm/three@0.170.0/build/three.module.js",
+  "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.170.0/examples/jsm/"
+} }
+</script>
+<script type="module">
+/* ═════════════ Sign in · 3D ═════════════
+   Rack R01 on a drawing sheet, behind a perforated front door with an access reader.
+   Idle: a scan band walks up the rack, the reader breathes.  Email: row U41 lights one port per character.
+   Password: row U39 lights one port per character (lights only, never characters).  Sign in: the reader spins,
+   the band races up; the door swings open on success, the reader turns amber when sign-in is not available. */
+/* Tablets and phones get the form on its own — the rack is a desktop-only
+   scene. Bail before importing three so they never download it. The form
+   script above is self-contained, so nothing below here is needed to sign in. */
+if(innerWidth<=1180){
+  document.documentElement.classList.add('no-webgl');
+  await new Promise(()=>{});          // nothing below this line runs
+}
+const [THREE,{RoomEnvironment}]=await Promise.all([
+  import('three'),
+  import('three/addons/environments/RoomEnvironment.js')]);
+
+const reduce=matchMedia('(prefers-reduced-motion: reduce)').matches;
+const SNAP=location.search.includes('snap');
+const clamp=(x,a=0,b=1)=>Math.min(b,Math.max(a,x));
+const smooth=(a,b,x)=>{const t=clamp((x-a)/(b-a));return t*t*(3-2*t)};
+const lerp=(a,b,t)=>a+(b-a)*t;
+const C=h=>new THREE.Color(h);
+const COL={link:C('#1FD67C'),linkInk:C('#04703F'),drift:C('#FF9A2E'),off:C('#0d1211'),dim:C('#2a3230')};
+const MONO='"JetBrains Mono", monospace', SANS='"Inter", sans-serif';
+const V3=(x,y,z)=>new THREE.Vector3(x,y,z);
+
+const canvas=document.getElementById('stage');
+let renderer;
+try{ renderer=new THREE.WebGLRenderer({canvas,antialias:true,alpha:true,powerPreference:'high-performance'}); }
+catch(e){ document.documentElement.classList.add('no-webgl'); throw e; }
+renderer.setPixelRatio(SNAP?1:Math.min(devicePixelRatio,1.5));
+renderer.setClearColor(0,0);
+renderer.toneMapping=THREE.ACESFilmicToneMapping; renderer.toneMappingExposure=1.02;
+renderer.outputColorSpace=THREE.SRGBColorSpace;
+renderer.shadowMap.enabled=true; renderer.shadowMap.type=THREE.PCFShadowMap; renderer.shadowMap.autoUpdate=false; renderer.shadowMap.needsUpdate=true;
+const scene=new THREE.Scene();
+scene.environment=new THREE.PMREMGenerator(renderer).fromScene(new RoomEnvironment(),.04).texture; scene.environmentIntensity=.85;
+const camera=new THREE.PerspectiveCamera(30,1,.05,100);
+scene.add(new THREE.HemisphereLight(0xffffff,0x9aa39e,.55));
+const sun=new THREE.DirectionalLight(0xffffff,1.7);sun.position.set(-3,8,6);sun.castShadow=true;
+sun.shadow.mapSize.set(1024,1024);Object.assign(sun.shadow.camera,{left:-2.5,right:2.5,top:3,bottom:-2,near:1,far:20});sun.shadow.bias=-.0005;sun.shadow.radius=4;scene.add(sun);
+const fill=new THREE.DirectionalLight(0xdfe9ff,.5);fill.position.set(5,3,-4);scene.add(fill);
+const front=new THREE.DirectionalLight(0xffffff,.45);front.position.set(1,2,6);scene.add(front);
+
+function cnv(w,h){const c=document.createElement('canvas');c.width=w;c.height=h;return [c,c.getContext('2d')];}
+function tex(c){const t=new THREE.CanvasTexture(c);t.colorSpace=THREE.SRGBColorSpace;t.anisotropy=Math.min(8,renderer.capabilities.getMaxAnisotropy());return t;}
+const alu=new THREE.MeshStandardMaterial({color:'#dfe3df',metalness:.72,roughness:.3});
+const graph=new THREE.MeshStandardMaterial({color:'#2a302d',metalness:.55,roughness:.45});
+const add=(m,p,parent=scene)=>{if(p)m.position.set(...p);parent.add(m);return m;};
+
+const RW=.6, RD=.9, RH=2.0, U=.044, Y0=.1, FW=.52, FH=42*U, ZF=RD/2;
+const uy=(u,h=1)=>Y0+(u-1)*U+h*U/2;
+
+/* ─────────── drawing sheet ─────────── */
+const BW=3.4, BD=2.6;
+function sheetCanvas(){const W=2048,H=Math.round(W*BD/BW),s=W/BW;const [c,g]=cnv(W,H);const X=x=>(x+BW/2)*s,Z=z=>(z+BD/2)*s;
+  g.fillStyle='#F4F6F3';g.fillRect(0,0,W,H);
+  g.fillStyle='rgba(17,22,20,.055)';for(let x=-BW/2;x<=BW/2;x+=.1)g.fillRect(X(x),0,1.4,H);for(let z=-BD/2;z<=BD/2;z+=.1)g.fillRect(0,Z(z),W,1.4);
+  g.strokeStyle='#111614';g.lineWidth=4;g.strokeRect(14,14,W-28,H-28);
+  g.setLineDash([14,10]);g.strokeStyle='#7C93A8';g.lineWidth=3;g.strokeRect(X(-RW/2-.05),Z(-RD/2-.05),(RW+.1)*s,(RD+.1)*s);
+  // door swing arc (plan symbol)
+  g.beginPath();g.arc(X(-RW/2),Z(ZF),RW*s,0,Math.PI/2);g.stroke();g.setLineDash([]);
+  g.fillStyle='#4A544F';g.font=`600 46px ${MONO}`;g.fillText('R01 · 42U',X(-RW/2),Z(-RD/2-.12));
+  g.font=`500 32px ${MONO}`;g.fillText('door swing',X(-RW/2)+14,Z(ZF+RW)+40);
+  g.fillStyle='#111614';g.fillRect(W-760,H-150,730,120);g.fillStyle='#DDE4DF';g.font=`600 42px ${MONO}`;g.fillText('Customer access · R01',W-736,H-96);
+  g.fillStyle='#93A19A';g.font=`500 30px ${MONO}`;g.fillText('racktrack.ai · sign-in',W-736,H-54);
+  return c;}
+const sheetMat=new THREE.MeshStandardMaterial({map:tex(sheetCanvas()),roughness:.9});
+add(new THREE.Mesh(new THREE.BoxGeometry(BW,.16,BD),alu),[.2,-.08,.25]);
+const sheet=add(new THREE.Mesh(new THREE.PlaneGeometry(BW,BD),sheetMat),[.2,.002,.25]);sheet.rotation.x=-Math.PI/2;sheet.receiveShadow=true;
+add(new THREE.Mesh(new THREE.BoxGeometry(BW+.12,.04,BD+.12),graph),[.2,-.18,.25]);
+
+/* ─────────── the rack ─────────── */
+function drawFace(W,H,list,named){const [c,g]=cnv(W,H);const pu=H/42,rw=W*.06;
+  g.fillStyle='#121615';g.fillRect(0,0,W,H);
+  g.fillStyle='#2a302d';g.fillRect(0,0,rw,H);g.fillRect(W-rw,0,rw,H);
+  g.fillStyle='#0c1110';for(let u=0;u<42*3;u++){const y=u*pu/3+pu/6-1;g.fillRect(rw*.35,y,rw*.3,Math.max(1,pu*.1));g.fillRect(W-rw*.65,y,rw*.3,Math.max(1,pu*.1));}
+  const x0=rw+W*.012,w=W-2*x0;
+  list.forEach(d=>{const y=H-(d.u-1+d.h)*pu+1,h=d.h*pu-2;
+    const bg={blank:'#1b201e',patch:'#1d2321',switch:'#2a302d',server:'#2f3633',storage:'#262c29',ups:'#2b312e'}[d.k];
+    g.fillStyle=bg;g.fillRect(x0,y,w,h);g.fillStyle='rgba(255,255,255,.07)';g.fillRect(x0,y,w,Math.max(1,pu*.06));g.fillStyle='rgba(0,0,0,.4)';g.fillRect(x0,y+h-Math.max(1,pu*.06),w,Math.max(1,pu*.06));
+    if(d.k==='blank'){g.fillStyle='rgba(255,255,255,.05)';for(let yy=y+pu*.3;yy<y+h-2;yy+=pu*.35)g.fillRect(x0+w*.08,yy,w*.84,Math.max(1,pu*.08));}
+    if(d.k==='patch'||d.k==='switch'){const n=24,px=w*.62/n;const rows=d.k==='switch'?2:1;
+      for(let r=0;r<rows;r++)for(let i=0;i<n;i++){const xx=x0+w*.33+i*px,yy=y+h*(rows===2?(r?.56:.14):.3);g.fillStyle='#0b0f0e';g.fillRect(xx,yy,px*.72,h*(rows===2?.3:.4));
+        if(d.k==='switch'&&(i*7+r*3)%5){g.fillStyle='#1FD67C';g.fillRect(xx+px*.2,yy-Math.max(1,pu*.06),px*.3,Math.max(1,pu*.06));}}}
+    if(d.k==='server'){g.fillStyle='#262c29';for(let i=0;i<9;i++)g.fillRect(x0+w*.3+i*w*.055,y+h*.18,w*.045,h*.64);
+      g.fillStyle='#1FD67C';g.fillRect(x0+w*.04,y+h*.66,pu*.16,pu*.16);g.fillStyle='#7C93A8';g.fillRect(x0+w*.04+pu*.28,y+h*.66,pu*.16,pu*.16);
+      g.fillStyle='#1a1f1d';for(let yy=y+h*.2;yy<y+h*.8;yy+=pu*.2)g.fillRect(x0+w*.82,yy,w*.14,Math.max(1,pu*.08));}
+    if(d.k==='storage'){for(let r=0;r<3;r++)for(let i=0;i<4;i++){const xx=x0+w*.22+i*w*.19,yy=y+h*.08+r*h*.3;g.fillStyle='#343b38';g.fillRect(xx,yy,w*.17,h*.26);g.fillStyle=(r+i)%5?'#1FD67C':'#7C93A8';g.fillRect(xx+w*.14,yy+h*.05,pu*.12,pu*.12);}}
+    if(d.k==='ups'){g.fillStyle='#0c1110';g.fillRect(x0+w*.62,y+h*.18,w*.3,h*.4);g.fillStyle='#1FD67C';g.fillRect(x0+w*.65,y+h*.3,w*.12,h*.12);
+      g.fillStyle='#1a1f1d';for(let yy=y+h*.15;yy<y+h*.85;yy+=pu*.22)g.fillRect(x0+w*.2,yy,w*.36,Math.max(1,pu*.08));}
+    if(named&&d.n){g.fillStyle='#DDE4DF';g.font=`600 ${Math.round(pu*.52)}px ${MONO}`;g.fillText(d.n,x0+w*.03,y+Math.min(h*.5+pu*.18,pu*.72));}});
+  return c;}
+
+const EQ=[{u:42,h:1,k:'blank'},{u:41,h:1,k:'patch',n:'PP-R01'},{u:40,h:1,k:'blank'},{u:39,h:1,k:'patch',n:'PP-R01-B'},{u:37,h:1,k:'switch',n:'SW-R01'},
+ {u:34,h:2,k:'server',n:'APP-01'},{u:32,h:2,k:'server',n:'APP-02'},{u:30,h:2,k:'server',n:'APP-03'},{u:25,h:4,k:'storage',n:'NAS-01'},
+ {u:22,h:2,k:'server',n:'DB-01'},{u:20,h:2,k:'server',n:'DB-02'},{u:16,h:2,k:'blank'},{u:12,h:4,k:'storage',n:'BAK-01'},{u:8,h:2,k:'server',n:'APP-04'},{u:2,h:3,k:'ups',n:'UPS-01'}];
+const body=add(new THREE.Mesh(new THREE.BoxGeometry(RW,RH,RD),graph),[0,RH/2,0]);body.castShadow=body.receiveShadow=true;
+const faceMat=new THREE.MeshStandardMaterial({map:tex(drawFace(512,Math.round(512*FH/FW),EQ,true)),metalness:.3,roughness:.55});
+add(new THREE.Mesh(new THREE.PlaneGeometry(FW,FH),faceMat),[0,Y0+FH/2,ZF+.003]);
+// port lights: row U41 = email, row U39 = password (24 each)
+const NP=24, PW=FW*.856, PX0=-FW/2+FW*.072, PX=i=>PX0+PW*(.33+(i+.36)*.62/NP);
+const ports=new THREE.InstancedMesh(new THREE.PlaneGeometry(PW*.62/NP*.74,U*.42),new THREE.MeshBasicMaterial({toneMapped:false}),NP*2);scene.add(ports);ports.frustumCulled=false;
+{const M=new THREE.Matrix4();for(let r=0;r<2;r++)for(let i=0;i<NP;i++){M.makeTranslation(PX(i),uy(r?39:41),ZF+.006);ports.setMatrixAt(r*NP+i,M);ports.setColorAt(r*NP+i,COL.off);}}
+const band=add(new THREE.Mesh(new THREE.PlaneGeometry(RW+.08,.014),new THREE.MeshBasicMaterial({color:COL.link,transparent:true,opacity:0,toneMapped:false,depthWrite:false})),[0,1,ZF+.02]);
+const washGeo=new THREE.PlaneGeometry(RW,1);washGeo.translate(0,.5,0);
+const wash=add(new THREE.Mesh(washGeo,new THREE.MeshBasicMaterial({color:COL.link,transparent:true,opacity:0,toneMapped:false,depthWrite:false})),[0,Y0,ZF+.018]);
+
+/* ─────────── the door: perforated panel on a left hinge ─────────── */
+function meshCanvas(){const W=256,H=Math.round(256*RH/RW);const [c,g]=cnv(W,H);g.clearRect(0,0,W,H);
+  g.fillStyle='rgba(26,31,29,.92)';g.fillRect(0,0,W,H);g.globalCompositeOperation='destination-out';
+  const s=7;for(let y=s;y<H-s;y+=s*.87)for(let x=s+((y/(s*.87))%2?s/2:0);x<W-s;x+=s){g.beginPath();g.arc(x,y,2.35,0,7);g.fill();}
+  g.globalCompositeOperation='source-over';return c;}
+const DOOR=new THREE.Group();DOOR.position.set(-RW/2,0,ZF+.03);scene.add(DOOR);
+const dW=RW, dH=RH-.02;
+const meshTex=tex(meshCanvas());meshTex.wrapS=meshTex.wrapT=THREE.ClampToEdgeWrapping;
+add(new THREE.Mesh(new THREE.PlaneGeometry(dW-.05,dH-.08),new THREE.MeshStandardMaterial({map:meshTex,transparent:true,metalness:.5,roughness:.5,side:THREE.DoubleSide,depthWrite:false})),[dW/2,RH/2,0],DOOR);
+[[dW/2,.02+.015,dW,.03],[dW/2,RH-.03,dW,.03]].forEach(([x,y,w,h])=>add(new THREE.Mesh(new THREE.BoxGeometry(w,h,.022),graph),[x,y,0],DOOR).castShadow=true);
+[[.014,RH/2],[dW-.014,RH/2]].forEach(([x,y])=>add(new THREE.Mesh(new THREE.BoxGeometry(.028,dH,.022),graph),[x,y,0],DOOR).castShadow=true);
+const handle=add(new THREE.Mesh(new THREE.BoxGeometry(.018,.16,.03),alu),[dW-.05,1.08,.022],DOOR);
+// access reader on the door stile
+const READER=new THREE.Group();READER.position.set(dW-.05,1.34,.02);DOOR.add(READER);
+add(new THREE.Mesh(new THREE.BoxGeometry(.07,.11,.022),new THREE.MeshStandardMaterial({color:'#15191a',metalness:.4,roughness:.35})),[0,0,0],READER);
+const ringMat=new THREE.MeshBasicMaterial({color:COL.link,toneMapped:false,transparent:true});
+const ring=add(new THREE.Mesh(new THREE.TorusGeometry(.021,.0035,10,48,Math.PI*1.999),ringMat),[0,.012,.013],READER);
+const arc=add(new THREE.Mesh(new THREE.TorusGeometry(.021,.0055,10,48,Math.PI*.55),new THREE.MeshBasicMaterial({color:'#ffffff',toneMapped:false,transparent:true,opacity:0})),[0,.012,.015],READER);
+const readerLed=add(new THREE.Mesh(new THREE.PlaneGeometry(.036,.006),new THREE.MeshBasicMaterial({color:COL.link,toneMapped:false})),[0,-.034,.0115],READER);
+
+/* ─────────── tags ─────────── */
+const hud=document.getElementById('hud');const TG=[];
+function tag(k,html,cls,pos){const el=document.createElement('div');el.className='tag '+cls;el.innerHTML=`<i></i><span>${html}</span>`;hud.appendChild(el);const t={k,el,pos,on:false};TG.push(t);TG[k]=t;return t;}
+tag('rack','<b>Rack R01</b>customer access','ink',()=>V3(RW/2,RH,ZF));
+tag('mail','<b>U41 · your email</b>0 ports lit','link',()=>V3(FW/2-.01,uy(41),ZF+.01));
+tag('pass','<b>U39 · your password</b>lights only, never characters','link',()=>V3(FW/2-.01,uy(39),ZF+.01));
+tag('reader','<b>Access reader</b>ready','link',()=>READER.localToWorld(V3(.04,0,0)));
+const cardEl=document.querySelector('.card');
+
+/* ─────────── camera ─────────── */
+const POSE={idle:[[2.7,1.95,4.6],[.1,.95,.25]],email:[[1.7,2.25,3.1],[.04,1.5,.4]],password:[[1.6,2.1,3.0],[.04,1.45,.4]],check:[[2.5,1.7,3.9],[.12,1.02,.35]]};
+let vw=0,vh=0,chh=0,mobile=false;
+function resize(){vw=innerWidth;vh=innerHeight;mobile=vw<760;chh=mobile?Math.round(vh*.34):vh;renderer.setSize(vw,chh,false);canvas.style.height=chh+'px';camera.aspect=vw/chh;camera.updateProjectionMatrix();frame.cr=null;}
+addEventListener('resize',resize);resize();
+const cp=V3(...POSE.idle[0]),ct=V3(...POSE.idle[1]);
+const clock=new THREE.Clock();const M4=new THREE.Matrix4();const pv=V3();
+let doorA=0,lastMail=-1,lastDoor=null;
+function project(p){pv.copy(p).project(camera);return {x:(pv.x+1)/2*vw,y:(1-pv.y)/2*chh,z:pv.z};}
+
+function frame(){
+  requestAnimationFrame(frame);
+  const dt=Math.min(clock.getDelta(),.05),time=clock.elapsedTime;
+  const S=window.SIGNIN||{emailLen:0,passLen:0,focus:null,phase:'idle',since:0};
+  const ph=S.phase, age=(performance.now()-S.since)/1000;
+  // camera
+  const key=ph==='checking'||ph==='notice'?'check':S.focus||'idle';
+  const [P,T]=POSE[key];const Pp=V3(...P),Tt=V3(...T);
+  if(!reduce&&!SNAP){Pp.x+=Math.sin(time*.16)*.12;Pp.y+=Math.sin(time*.11)*.04;}
+  if(mobile){Pp.sub(Tt).multiplyScalar(1.25).add(Tt);}
+  const f=(reduce||SNAP)?1:1-Math.pow(.03,dt);cp.lerp(Pp,f);ct.lerp(Tt,f);camera.position.copy(cp);camera.lookAt(ct);
+  camera.setViewOffset(vw,chh,mobile?0:-(.66-.5)*vw,0,vw,chh);camera.updateMatrixWorld();
+
+  // door: ajar while you type, swings wider while access is checked, closes again after
+  const want=ph==='checking'?.55:(S.focus||S.emailLen||S.passLen)&&ph!=='notice'?.16:0;
+  doorA=(reduce||SNAP)?want:lerp(doorA,want,1-Math.pow(.02,dt));DOOR.rotation.y=-doorA;
+  if(lastDoor===null||Math.abs(doorA-lastDoor)>.002){lastDoor=doorA;renderer.shadowMap.needsUpdate=true;}
+
+  // port lights
+  const bad=ph==='error'||ph==='notice';
+  for(let i=0;i<NP;i++){
+    const mOn=i<S.emailLen, pOn=i<S.passLen;
+    const wave=ph==='checking'?(Math.sin(time*14-i*.5)>.2):false;
+    ports.setColorAt(i,wave?COL.link:mOn?(bad&&!S.emailOk?COL.drift:COL.link):COL.off);
+    ports.setColorAt(NP+i,wave?COL.link:pOn?(bad?COL.drift:COL.link):COL.off);}
+  ports.instanceColor.needsUpdate=true;
+
+  // scan band: slow patrol at idle, a fast pass while checking
+  const cyc=ph==='checking'?clamp(age/1.4):((time*.18)%1);
+  const sy=lerp(.14,1.96,cyc);const on=ph==='checking'?1:.55;
+  band.position.y=sy;band.material.opacity=on*(reduce?.8:.7+.3*Math.sin(time*9));
+  wash.scale.y=Math.max(.001,sy-Y0);wash.material.opacity=(ph==='checking'?.12:.05);
+
+  // access reader
+  const col=bad?COL.drift:COL.link;ringMat.color.copy(col);readerLed.material.color.copy(col);
+  ringMat.opacity=ph==='checking'?1:.55+.45*(reduce?1:(.5+.5*Math.sin(time*2.2)));
+  arc.material.opacity=ph==='checking'?1:0;arc.rotation.z=-time*9;
+
+  // tags
+  if(S.emailLen!==lastMail){lastMail=S.emailLen;TG.mail.el.querySelector('span').innerHTML=`<b>U41 · your email</b>${S.emailLen} port${S.emailLen===1?'':'s'} lit`;TG.mail.sz=null;}
+  const rs=ph==='checking'?'<b>Access reader</b>checking…':ph==='notice'?'<b>Access reader</b>sign-in not connected yet':ph==='error'?'<b>Access reader</b>check the highlighted fields':'<b>Access reader</b>ready';
+  if(rs!==frame.rs){frame.rs=rs;TG.reader.el.querySelector('span').innerHTML=rs;TG.reader.el.className='tag '+(bad?'drift':'link');TG.reader.sz=null;}
+  const vis={rack:key==='idle'&&!S.emailLen,mail:S.emailLen>0||key==='email',pass:S.passLen>0||key==='password',reader:true};
+  if(!frame.cr||frame.crW!==vw){frame.crW=vw;frame.cr=cardEl.getBoundingClientRect().right+18;}
+  const placed=[];
+  for(const t of TG){let want=!!vis[t.k];
+    if(want){const s=project(t.pos());
+      if(s.z>1||s.z<-1)want=false;else{
+        if(!t.sz)t.sz={w:t.el.offsetWidth,h:t.el.offsetHeight};const tx=s.x-3.5,ty=s.y-t.sz.h/2;const box={l:tx,t:ty,r:tx+t.sz.w,b:ty+t.sz.h};
+        if(box.l<frame.cr||box.r>vw-8||box.t<70||box.b>chh-44)want=false;
+        else if(placed.some(q=>!(box.r+6<q.l||box.l-6>q.r||box.b+4<q.t||box.t-4>q.b)))want=false;
+        if(want){placed.push(box);const tf=`translate3d(${tx.toFixed(1)}px,${ty.toFixed(1)}px,0)`;if(tf!==t.tf){t.tf=tf;t.el.style.transform=tf;}}}}
+    if(want!==t.on){t.on=want;t.el.classList.toggle('on',want);}}
+  renderer.render(scene,camera);
+}
+document.fonts.ready.then(()=>{sheetMat.map.image=sheetCanvas();sheetMat.map.needsUpdate=true;faceMat.map.image=drawFace(512,Math.round(512*FH/FW),EQ,true);faceMat.map.needsUpdate=true;TG.forEach(t=>t.sz=null);frame.cr=null;});
+try{renderer.compile(scene,camera);}catch(e){}
+requestAnimationFrame(frame);
+</script>
+<script src="/design-system/nav.js" defer></script>
+</body>
+</html>

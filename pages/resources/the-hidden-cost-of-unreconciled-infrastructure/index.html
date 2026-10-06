@@ -1,0 +1,873 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>What it actually costs when nobody checks the rack · RackTrack</title>
+<meta name="description" content="Manual audits are slow and go stale fast. Here's a plain way to put a number on what that gap costs your team.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap">
+<link rel="stylesheet" href="/design-system/base.css">
+<style>
+/* RackTrack · Resources · File no. 002 · INF·01 — design-system/ tokens.
+   CONCEPT: the cost ledger scale. A precision beam balance on a drawing sheet, in front of a row of six racks (R01–R06)
+   and a 21-day calendar ribbon. The left pan carries the cost of the gap; the right pan holds the reconciled record.
+   Every unverified rack sends a weight into the cost pan; the pointer on the dial swings into amber. Small continuous
+   sweeps take the weights off again and the beam comes back to level.
+   BEATS (scroll value g):
+   -1…0 hero ······ beam tipped by a dashed "unmeasured" block; six racks, all unverified (amber).       cam: 3/4 wide establishing
+   0…1  lead ······ a clipboard walks the row, day 1 → 21 on the ribbon; "audit hours" lands in the pan.  cam: high plan over row + ribbon
+   1…2  stale ····· racks checked by hand (record blue) slide back to amber before the walk ends.         cam: low, down the rack row
+   2…3  number ···· three inputs arc from the racks into the pan: hardware, engineer hours, refresh.     cam: macro on the cost pan + dial
+   3…4  key figure  three spreadsheets fan out above the scale, disagreeing; fold into one weight.       cam: front elevation
+   4…5  day to day  an engineer walks to the cabinet the record names, then the right one; six months of skipped
+                    updates stack up as thin plates (in plain terms).                                     cam: high oblique → low macro on the pile
+   5…6  better way  a green sweep passes rack by rack; weights lift off, record tiles fill the right pan, beam levels. cam: low hero angle
+   Scene data (rack names, days, tracker names, cells) is illustrative and captioned as such. */
+:root{
+  color-scheme: light;
+  
+}
+*{box-sizing:border-box}
+html{background:var(--paper);scroll-behavior:auto}
+body{margin:0;background:var(--paper);color:var(--fg);font:400 16px/1.5 var(--sans);-webkit-font-smoothing:antialiased;overflow-x:hidden}
+a{color:inherit}
+::selection{background:var(--link);color:#06140d}
+:focus-visible{outline:2px solid var(--link-ink);outline-offset:3px;border-radius:2px}
+body::before{content:"";position:fixed;inset:0;z-index:0;pointer-events:none;background:radial-gradient(60% 55% at 66% 52%,rgba(255,255,255,.6),transparent 72%)}
+#stage{position:fixed;inset:0;z-index:1;display:block;width:100%;height:100%;pointer-events:none}
+#scrim{position:fixed;inset:0;z-index:1;pointer-events:none;background:linear-gradient(90deg,var(--paper) 0,var(--paper) max(40vw,var(--colr,0px)),rgba(233,236,232,0) max(46.5vw,calc(var(--colr,0px) + 6vw)))}
+#hud{position:fixed;inset:0;z-index:3;pointer-events:none;overflow:hidden}
+main{position:relative;z-index:2}
+
+/* nav */
+.nav{position:fixed;left:0;right:0;top:0;z-index:10;display:flex;align-items:center;gap:28px;height:calc(var(--nav-h) + env(safe-area-inset-top,0px));padding:env(safe-area-inset-top,0px) var(--bleed) 0;background:linear-gradient(var(--paper) 55%,transparent)}
+.brand{display:flex;align-items:center;gap:10px;text-decoration:none;font:700 17px/1 var(--sans);letter-spacing:-.02em;color:var(--ink)}
+.brand img{width:26px;height:26px;border-radius:5px;display:block}
+.nav ul{display:flex;gap:24px;list-style:none;margin:0 0 0 auto;padding:0}
+.nav ul a{font:500 14px/1 var(--sans);text-decoration:none;color:var(--ink-2)}
+.nav ul a:hover{color:var(--ink)}
+.nav ul a[aria-current="page"]{color:var(--ink);text-decoration:underline;text-decoration-color:var(--link);text-decoration-thickness:2px;text-underline-offset:6px}
+.btn{display:inline-flex;align-items:center;gap:10px;height:46px;padding:0 20px;border-radius:3px;border:1px solid var(--fg);font:500 15px/1 var(--sans);text-decoration:none;cursor:pointer;background:transparent;color:var(--fg);transition:background .2s,color .2s,border-color .2s}
+.btn.solid{background:var(--fg);color:var(--bg)}
+.btn.solid:hover{background:var(--link-ink);border-color:var(--link-ink);color:#fff}
+.btn:not(.solid){border-color:var(--line)}
+.btn:not(.solid):hover{border-color:var(--fg)}
+.btn .led{width:7px;height:7px;border-radius:50%;background:var(--link);box-shadow:0 0 8px var(--link)}
+.nav .btn{height:38px;padding:0 16px;font-size:14px}
+
+/* type */
+.ch{position:relative;padding-inline:var(--bleed)}
+h1,h2,h3{margin:0 0 20px;text-wrap:balance}
+h2{max-width:16ch}
+h3{margin:0 0 10px}
+.lede{color:var(--fg-2);max-width:29rem;margin:0 0 28px}
+.k{margin:0 0 14px;font:400 12px/1 var(--mono);color:var(--link-ink)}
+.actions{display:flex;flex-wrap:wrap;gap:12px}
+.chip{font:500 11px/1 var(--mono);padding:5px 7px;border-radius:2px;border:1px solid var(--rule);color:var(--ink);background:rgba(244,246,243,.8)}
+.chip.c-operations{border-color:var(--ink)}
+.chip.c-infrastructure{border-color:var(--link);color:var(--link-ink);background:rgba(31,214,124,.08)}
+.chip.c-compliance{border-color:var(--link-ink);color:var(--link-ink)}
+
+/* tags */
+.tag{position:absolute;left:0;top:0;display:flex;align-items:center;opacity:0;visibility:hidden;will-change:transform;white-space:nowrap}
+.tag.show{opacity:1;visibility:visible}
+.tag::before{content:"";width:7px;height:7px;border-radius:50%;background:var(--c,var(--ink));transform:translate(-3.5px,0);box-shadow:0 0 0 3px color-mix(in oklab,var(--c,var(--ink)) 22%,transparent)}
+.tag i{display:block;width:24px;height:1px;background:var(--c,var(--ink))}
+.tag span{padding:6px 9px;background:var(--paper-2);border:1px solid var(--c,var(--ink));border-radius:2px;font:400 11.5px/1.35 var(--mono);color:var(--ink);box-shadow:0 14px 28px -20px rgba(17,22,20,.45)}
+.tag span b{display:block;font:600 15px/1.15 var(--sans);letter-spacing:-.02em;margin-bottom:2px}
+.tag.left{flex-direction:row-reverse}.tag.left::before{transform:translate(3.5px,0)}
+.tag.up{flex-direction:column-reverse}.tag.up i{width:1px;height:22px}.tag.up::before{transform:translate(0,3.5px)}
+.tag.link{--c:var(--link)} .tag.link span b{color:var(--link-ink)}
+.tag.drift{--c:var(--drift)} .tag.drift span b{color:var(--drift-ink)}
+.tag.rec{--c:var(--record)} .tag.rec span b{color:var(--record-ink)}
+.tag.ink{--c:var(--ink)}
+
+/* figure caption + on-this-page rail (fixed, desktop) */
+#figcap{position:fixed;right:var(--gutter);bottom:18px;z-index:3;pointer-events:none;text-align:right;background:rgba(233,236,232,.94);padding:5px 0 5px 12px;margin:0;font:400 11.5px/1.45 var(--mono);color:var(--ink-2)}
+#figcap b{font-weight:500;color:var(--ink)}
+#figcap em{font-style:normal;color:var(--ink-2);border:1px dashed var(--rule);padding:1px 5px;border-radius:2px;margin-left:6px}
+#rail{position:fixed;left:calc(var(--gutter) + clamp(0px,3vw,64px));bottom:22px;z-index:4;display:flex;gap:4px;align-items:flex-end;opacity:0;visibility:hidden}
+#rail.on{opacity:1;visibility:visible}
+#rail .lab{font:400 11px/1 var(--mono);color:var(--ink-2);margin-right:10px;padding-bottom:9px;white-space:nowrap}
+#rail a{display:flex;gap:8px;min-width:3.4rem;text-decoration:none;font:400 11px/1.25 var(--mono);color:var(--ink-2);padding:0 10px 9px 0;position:relative;white-space:nowrap}
+#rail a em{font-style:normal}
+#rail a span{display:none}
+#rail a.cur span{display:inline}
+#rail a i{position:absolute;left:0;right:6px;bottom:0;height:2px;background:var(--rule);overflow:hidden}
+#rail a i b{position:absolute;inset:0 auto 0 0;width:0;background:var(--ink)}
+#rail a.cur{color:var(--ink)}
+#rail a:hover{color:var(--ink)}
+
+/* hero */
+#hero{min-height:100vh;display:flex;align-items:center;padding-top:96px;padding-bottom:40px}
+#hero .copy{max-width:36rem;}
+.back{display:inline-flex;margin:0 0 26px;font:500 14px/1 var(--sans);color:var(--ink-2);text-decoration:none}
+.back:hover{color:var(--ink)}
+.file{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin:0 0 18px;font:400 12px/1 var(--mono);color:var(--ink-2)}
+#hero h1{max-width:12.5ch;margin-bottom:22px}
+.toc{margin-top:6px;max-width:26rem;border-top:1px solid var(--ink)}
+.toc p{margin:12px 0 6px;font:400 11.5px/1 var(--mono);color:var(--ink-2)}
+.toc ol{list-style:none;margin:0;padding:0;counter-reset:t}
+.toc li{counter-increment:t;border-bottom:1px solid var(--rule)}
+.toc a{display:flex;gap:14px;padding:9px 0;text-decoration:none;font:500 15px/1.3 var(--sans);letter-spacing:-.01em;color:var(--ink)}
+.toc a::before{content:"0" counter(t);font:400 11.5px/1.9 var(--mono);color:var(--ink-2)}
+.toc a:hover{color:var(--link-ink)}
+
+/* article beats (pinned) */
+.pinsec{position:relative}
+#lead{min-height:175vh} #stale-audits{min-height:230vh} #real-price{min-height:240vh} #key-figure{min-height:210vh} #day-to-day{min-height:270vh} #better-way{min-height:230vh}
+.pin{position:sticky;top:0;height:100vh}
+.scopy{position:absolute;left:0;top:50%;transform:translateY(-50%);width:min(34rem,38vw);}
+.no{font:400 12px/1 var(--mono);color:var(--ink-2);margin:0 0 16px;display:flex;gap:10px;align-items:center}
+.body{font-size:17.5px;line-height:1.58;color:var(--ink);max-width:31rem;margin:0 0 18px;letter-spacing:-.003em}
+.leadp{font:400 clamp(21px,1.75vw,27px)/1.34 var(--sans);letter-spacing:-.018em;color:var(--ink);max-width:30rem;margin:0 0 26px}
+.leadp::first-letter{font-weight:600}
+.scopy figure{margin:0;max-width:19rem}
+.scopy figure img{display:block;width:100%;height:auto;aspect-ratio:16/8.4;object-fit:cover;object-position:50% 55%;border-radius:2px;border:1px solid var(--rule);filter:saturate(.8)}
+.scopy figcaption{margin-top:8px;font:400 11.5px/1.3 var(--mono);color:var(--ink-2)}
+.pq{margin:26px 0 0;padding:4px 0 4px 20px;border-left:2px solid var(--ink);max-width:29rem}
+.pq p{margin:0;font:500 clamp(20px,1.6vw,25px)/1.28 var(--sans);letter-spacing:-.018em;color:var(--ink)}
+.pq cite{display:block;margin-top:10px;font:400 11.5px/1 var(--mono);font-style:normal;color:var(--ink-2)}
+.costs{list-style:none;margin:0;padding:0;border-top:1px solid var(--ink);max-width:31rem}
+.costs li{display:grid;grid-template-columns:2.2rem 1fr;gap:6px;padding:12px 0;border-bottom:1px solid var(--rule);font-size:16.5px;line-height:1.45;color:var(--ink)}
+.costs li::before{content:attr(data-n);font:400 11.5px/1.9 var(--mono);color:var(--drift-ink)}
+.plain{margin:22px 0 0;max-width:31rem;background:var(--paper-2);border:1px solid var(--rule);border-left:3px solid var(--link-ink);border-radius:2px;padding:16px 18px 16px}
+.plain .lab{margin:0 0 8px;font:500 11.5px/1 var(--mono);color:var(--link-ink)}
+.plain p:last-child{margin:0;font:500 17.5px/1.42 var(--sans);letter-spacing:-.012em;color:var(--ink)}
+
+/* key figure */
+.kfig{display:flex;align-items:flex-end;gap:18px;margin:0 0 18px;padding-bottom:18px;border-bottom:1px solid var(--rule)}
+.kfig b{font:500 clamp(150px,15vw,236px)/.78 var(--sans);letter-spacing:-.07em;color:var(--ink)}
+.kfig span{font:500 clamp(30px,2.8vw,44px)/1 var(--sans);letter-spacing:-.04em;color:var(--record-ink);padding-bottom:6px}
+.kfp{font:400 clamp(18px,1.4vw,21px)/1.42 var(--sans);letter-spacing:-.01em;color:var(--ink);max-width:28rem;margin:0}
+
+/* keep reading */
+#more{position:relative;z-index:2;background:var(--paper);padding:var(--band-y) var(--bleed);border-top:1px solid var(--rule)}
+.mwrap{max-width:1200px;margin-inline:auto}
+.mwrap h2{margin-bottom:44px}
+.cards{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:clamp(20px,3vw,40px);max-width:62rem}
+.card{position:relative;display:flex;flex-direction:column;min-height:250px;margin-top:24px;padding:26px 24px 22px;background:var(--paper-2);border:1px solid var(--rule);border-top:2px solid var(--tab);border-radius:0 2px 2px 2px;text-decoration:none;color:var(--ink);transition:transform .3s var(--ease),box-shadow .3s var(--ease),border-color .2s}
+.card:hover{transform:translateY(-4px);box-shadow:0 22px 40px -30px rgba(17,22,20,.5);border-color:var(--ink);border-top-color:var(--tab)}
+.card .tab{position:absolute;left:-1px;top:-25px;height:24px;padding:0 12px;display:flex;align-items:center;background:var(--tab);color:var(--tabc,#fff);font:500 11.5px/1 var(--mono);border-radius:2px 2px 0 0}
+.card .meta{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin:0 0 16px;font:400 12px/1 var(--mono);color:var(--ink-2)}
+.card h3{max-width:22ch}
+.card p{margin:0 0 22px;font-size:15px;line-height:1.5;color:var(--ink-2);max-width:30rem}
+.card .go{margin-top:auto;font:500 15px/1 var(--sans);color:var(--link-ink)}
+
+/* cta */
+#cta{padding-block:var(--band-y);text-align:center;background:var(--paper);position:relative;z-index:2;border-top:1px solid var(--rule)}
+#cta h2{margin-inline:auto;max-width:13ch}
+#cta .actions{justify-content:center}
+
+/* footer */
+.foot{position:relative;z-index:2;padding:var(--band-y) var(--bleed) calc(var(--s8) + env(safe-area-inset-bottom,0px));background:var(--paper);border-top:1px solid var(--rule);display:grid;grid-template-columns:var(--copy-w) repeat(3,minmax(0,1fr));gap:28px;font-size:14px;color:var(--ink-2)}
+.foot b{display:block;font:500 13px/1 var(--sans);color:var(--link-ink);margin-bottom:16px}
+.foot nav{display:flex;flex-direction:column;gap:11px}
+.foot nav a{color:var(--ink);text-decoration:none;font-size:15px}
+.foot nav a:hover{color:var(--link-ink)}
+.foot p{margin:0 0 11px;color:var(--ink);font-size:15px;line-height:1.45}
+.foot p a{text-decoration:none}.foot p a:hover{color:var(--link-ink)}
+.foot-brand .brand{margin-bottom:16px}
+.foot-brand p{color:var(--ink-2);max-width:18rem}
+.foot .fine{grid-column:1/-1;display:flex;justify-content:space-between;flex-wrap:wrap;gap:12px;margin-top:16px;padding-top:18px;border-top:1px solid var(--rule);font-size:13px}
+.foot .legal{display:flex;gap:18px;flex-wrap:wrap}.foot .legal a{color:var(--ink-2);text-decoration:none}.foot .legal a:hover{color:var(--link-ink)}
+.foot .social{display:flex;gap:18px}
+.foot .social a{color:var(--ink-2);text-decoration:none}
+
+.no-webgl #stage,.no-webgl #hud,.no-webgl #figcap{display:none}
+@media (max-width:1180px){ .foot{grid-template-columns:repeat(2,minmax(0,1fr))} #rail .lab{display:none} }
+@media (max-width:960px){ #rail{display:none} }
+@media (max-width:760px){
+  #scrim{background:linear-gradient(0deg,var(--paper) 0,var(--paper) 53%,rgba(233,236,232,0) 60%)}
+  #hud .tag:not(.keep){display:none}
+  #figcap{right:auto;left:var(--gutter);top:calc(46vh - 16px);bottom:auto;text-align:left;font-size:10.5px}
+  #figcap .sub{display:none}
+  #hero{align-items:flex-start;padding-top:50vh;padding-bottom:6vh}
+  #hero h1{max-width:14ch;margin-bottom:14px}
+  #hero .lede{margin-bottom:22px}
+  .back{margin-bottom:16px} .file{margin-bottom:12px}
+  .scopy{left:var(--gutter);right:var(--gutter);width:auto;top:auto;bottom:3vh;transform:none;padding-left:0;max-height:52vh}
+  .no{margin-bottom:8px}
+  h2{margin-bottom:10px}
+  .body{font-size:15px;line-height:1.5;margin-bottom:10px}
+  .leadp{font-size:18px;margin-bottom:14px}
+  .scopy figure{display:none}
+  .pq{margin-top:12px;padding-left:14px} .pq p{font-size:17px}
+  .costs li{font-size:14px;padding:7px 0;grid-template-columns:1.8rem 1fr}
+  .plain{margin-top:12px;padding:10px 12px} .plain p:last-child{font-size:15px}
+  .kfig b{font-size:110px} .kfig span{font-size:26px} .kfp{font-size:16px}
+  .cards{grid-template-columns:1fr}
+  #more{padding-top:var(--band-y)}
+}
+@media (max-width:560px){ .foot{grid-template-columns:repeat(2,minmax(0,1fr));gap:var(--s6) var(--s5);padding-block:var(--band-y-sm) calc(var(--s6) + env(safe-area-inset-bottom,0px))} }
+@media (prefers-reduced-motion:reduce){ .card,#rail,#figcap{transition:none!important} }
+</style>
+</head>
+<body>
+
+<canvas id="stage" aria-hidden="true"></canvas>
+<div id="scrim" aria-hidden="true"></div>
+<div id="hud" aria-hidden="true"></div>
+<p id="figcap" aria-hidden="true"><b>Fig. 2 · The cost ledger</b><span class="sub"> · <span id="fcs">every unverified rack adds weight</span></span><em>illustrative scene</em></p>
+<nav id="rail" aria-label="On this page, progress">
+  <span class="lab">On this page</span>
+  <a href="#stale-audits" data-i="1"><em>01</em><span>Why audits go stale</span><i><b></b></i></a>
+  <a href="#real-price" data-i="2"><em>02</em><span>Putting a number on it</span><i><b></b></i></a>
+  <a href="#day-to-day" data-i="4"><em>03</em><span>What it looks like day to day</span><i><b></b></i></a>
+  <a href="#better-way" data-i="5"><em>04</em><span>A better way to measure it</span><i><b></b></i></a>
+</nav>
+
+<nav class="nav" aria-label="Primary">
+  <a class="brand" href="/"><img alt="" src="/design-system/assets/Logos/racktrack-mark.jpg">RackTrack</a>
+  <ul>
+    <li><a href="/pages/why-racktrack/">Why RackTrack</a></li>
+    <li><a href="/pages/solutions/">Solutions</a></li>
+    <li><a href="/pages/use-cases/">Use cases</a></li>
+    <li><a href="/pages/resources/" aria-current="page">Resources</a></li>
+    <li><a href="/pages/trust-security/">Trust</a></li>
+    <li><a href="/pages/about-us/">About</a></li>
+    <li><a href="/pages/sign-in/">Sign in</a></li>
+  </ul>
+  <a class="btn solid" href="/pages/contact-us/"><span class="led"></span>Book a sweep</a>
+</nav>
+
+<main>
+  <section class="ch" id="hero">
+    <div class="copy">
+      <a class="back" href="/pages/resources/">← All resources</a>
+      <p class="file">File no. 002 · INF·01 · <span class="chip c-infrastructure">Infrastructure</span> · 5 min read</p>
+      <h1>What it actually costs when nobody checks the rack</h1>
+      <p class="lede">Manual audits are slow and go stale fast. Here's a plain way to put a number on what that gap costs your team.</p>
+      <nav class="toc" aria-label="On this page">
+        <p>On this page</p>
+        <ol>
+          <li><a href="#stale-audits">Why audits go stale</a></li>
+          <li><a href="#real-price">Putting a number on it</a></li>
+          <li><a href="#day-to-day">What it looks like day to day</a></li>
+          <li><a href="#better-way">A better way to measure it</a></li>
+        </ol>
+      </nav>
+    </div>
+  </section>
+
+  <article aria-label="What it actually costs when nobody checks the rack">
+    <section class="ch pinsec" id="lead">
+      <div class="pin"><div class="scopy">
+        <p class="leadp">A rack audit that takes three weeks to finish is already out of date by the time it's done. Most teams know this. Almost none of them have measured what it costs.</p>
+        <figure><img src="/assets/resources/tangled-cabling.jpg" alt="Dense patch cabling with handwritten cable labels, the kind of wiring a manual audit has to trace by hand" loading="lazy" width="1400" height="875"><figcaption>Fig. 1 · Cabling as it's found, not as it's recorded.</figcaption></figure>
+      </div></div>
+    </section>
+
+    <section class="ch pinsec" id="stale-audits">
+      <div class="pin"><div class="scopy">
+        <p class="no">01 / 04</p>
+        <h2>Why manual audits go stale</h2>
+        <p class="body">Walking every rack with a clipboard, or a spreadsheet open on a laptop, takes days for a small footprint and weeks for anything larger. By the time the last row gets checked, the first row has already changed again.</p>
+        <blockquote class="pq"><p>“A manual audit isn't a snapshot of your infrastructure. It's a snapshot of what it looked like three weeks ago.”</p></blockquote>
+      </div></div>
+    </section>
+
+    <section class="ch pinsec" id="real-price">
+      <div class="pin"><div class="scopy">
+        <p class="no">02 / 04</p>
+        <h2>Putting a number on the gap</h2>
+        <p class="body">The cost hides in ordinary places:</p>
+        <ul class="costs">
+          <li data-n="a">Hardware bought because the record said a rack was full when it wasn't.</li>
+          <li data-n="b">Engineer hours spent hunting for equipment the record insists is somewhere it isn't.</li>
+          <li data-n="c">Refresh cycles started early because nobody trusted the numbers enough to wait.</li>
+        </ul>
+      </div></div>
+    </section>
+
+    <section class="ch pinsec" id="key-figure" aria-label="Key figure">
+      <div class="pin"><div class="scopy">
+        <p class="no">Key figure</p>
+        <p class="kfig"><b>3</b><span>spreadsheets</span></p>
+        <p class="kfp">is roughly how many overlapping inventory trackers teams typically find themselves reconciling by hand.</p>
+      </div></div>
+    </section>
+
+    <section class="ch pinsec" id="day-to-day">
+      <div class="pin"><div class="scopy">
+        <p class="no">03 / 04</p>
+        <h2>What topology debt looks like day to day</h2>
+        <p class="body">An engineer gets pulled off real work to physically check a rack, because nobody trusts the record enough to act on it without a second look. An incident call starts with a five-minute detour (“wait, is that server even still there?”) instead of going straight to the fix.</p>
+        <aside class="plain"><p class="lab">In plain terms</p><p>Topology debt behaves exactly like the technical kind. Skipping today's update is free. Skipping it for six months is not.</p></aside>
+      </div></div>
+    </section>
+
+    <section class="ch pinsec" id="better-way">
+      <div class="pin"><div class="scopy">
+        <p class="no">04 / 04</p>
+        <h2>A framework that doesn't require a full re-audit</h2>
+        <p class="body">Fixing this doesn't require re-auditing everything from scratch. It requires measuring drift continuously, in small sweeps, so the gap never gets the chance to grow into a multi-week reconciliation project again.</p>
+      </div></div>
+    </section>
+  </article>
+
+  <section id="more" aria-labelledby="more-h">
+    <div class="mwrap">
+      <h2 id="more-h">Keep reading</h2>
+      <div class="cards">
+        <a class="card" href="/pages/resources/why-every-enterprise-cmdb-is-40-wrong/" style="--tab:#111614;--tabc:#E9ECE8">
+          <span class="tab">OPS·01</span>
+          <span class="meta">File no. 001 <span class="chip c-operations">Operations</span> 6 min read</span>
+          <h3>Why your infrastructure records are wrong more often than you think</h3>
+          <p>When the system of record drifts from what's actually installed, every decision built on it gets a little less safe, and the gap is more common than most teams assume.</p>
+          <span class="go">Read →</span>
+        </a>
+        <a class="card" href="/pages/resources/how-infrastructure-teams-prepare-for-soc-2-audits/" style="--tab:#04703F;--tabc:#fff">
+          <span class="tab">CMP·01</span>
+          <span class="meta">File no. 005 <span class="chip c-compliance">Compliance</span> 5 min read</span>
+          <h3>Getting ready for a SOC 2 audit without the scramble</h3>
+          <p>Auditors want continuous proof of asset control, not a snapshot from last quarter. Here's how teams generate it as they go.</p>
+          <span class="go">Read →</span>
+        </a>
+      </div>
+    </div>
+  </section>
+
+  <section class="ch" id="cta">
+    <h2>Read the theory. Then verify your own rack</h2>
+    <div class="actions">
+      <a class="btn solid" href="/pages/contact-us/"><span class="led"></span>Request a platform brief</a>
+      <a class="btn" href="/pages/resources/">All resources</a>
+    </div>
+  </section>
+
+  <footer class="foot">
+    <div class="foot-brand">
+      <a class="brand" href="/"><img alt="" src="/design-system/assets/Logos/racktrack-mark.jpg">RackTrack</a>
+      <p>Physical infrastructure intelligence for data centers.</p>
+    </div>
+    <nav aria-label="Platform"><b>Platform</b>
+      <a href="/pages/why-racktrack/">Why RackTrack</a><a href="/pages/solutions/">Solutions</a><a href="/pages/use-cases/">Use cases</a><a href="/pages/trust-security/">Trust &amp; security</a></nav>
+    <nav aria-label="Company"><b>Company</b>
+      <a href="/pages/resources/">Resources</a><a href="/pages/about-us/">About us</a><a href="/pages/contact-us/">Contact us</a></nav>
+    <div><b>Contact</b>
+      <p><a href="mailto:info@racktrack.ai">info@racktrack.ai</a></p><p><a href="tel:+18608782448">+1 (860) 878 2448</a></p><p>85 Felt Rd, Suite #604<br>South Windsor, CT 06074</p></div>
+    <div class="fine">
+      <span>© 2026 RackTrack Inc. · Patent pending</span>
+      <span class="legal"><a href="/pages/legal/privacy-policy/">Privacy</a><a href="/pages/legal/terms-of-use/">Terms</a><a href="/pages/legal/cookie-policy/">Cookies</a><a href="/pages/legal/data-we-collect/">Data we collect</a><a href="/pages/legal/third-party-services/">Third parties</a></span>
+      <span class="social"><a href="https://www.linkedin.com/company/racktrack/" rel="noopener" target="_blank">LinkedIn</a><a href="https://www.instagram.com/racktrack_inc/" rel="noopener" target="_blank">Instagram</a><a href="https://www.facebook.com/share/18depF5xzA/" rel="noopener" target="_blank">Facebook</a></span>
+    </div>
+  </footer>
+</main>
+
+<script type="importmap">
+{ "imports": {
+  "three": "https://cdn.jsdelivr.net/npm/three@0.170.0/build/three.module.js",
+  "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.170.0/examples/jsm/"
+} }
+</script>
+<!--DOMJS-START-->
+<script>
+/* ───── Article: on-this-page rail + figure caption (no WebGL needed) ───── */
+(()=>{
+const clamp=(x,a=0,b=1)=>Math.min(b,Math.max(a,x));
+const $=s=>document.querySelector(s);
+const ids=['lead','stale-audits','real-price','key-figure','day-to-day','better-way'];
+const secs=ids.map(id=>document.getElementById(id));
+const rail=$('#rail'),links=[...rail.querySelectorAll('a')],more=$('#more'),cap=$('#figcap');
+const SUB=['every unverified rack adds weight','a three-week audit, rack by rack','checked by hand, then changed again','the inputs that build the number','three trackers, reconciled by hand','the walk to the wrong cabinet','small sweeps take the weight off'];
+const fcs=$('#fcs');let lastSub=-2;
+function frame(){
+  const vh=innerHeight,y=scrollY;
+  const p=secs.map(s=>clamp((y-s.offsetTop)/Math.max(1,s.offsetHeight-vh)));
+  let cur=-1;secs.forEach((s,i)=>{if(y>=s.offsetTop-vh*.5)cur=i;});
+  const mr=more.getBoundingClientRect().top;
+  const inBody=y>=secs[0].offsetTop-vh*.3&&mr>vh*.95;
+  rail.classList.toggle('on',inBody);
+  // progress per link: sections 1,2 own one link each; 3 (key figure) counts toward link 2; 4,5 one each
+  const prog=[p[1],Math.min(1,(p[2]+p[3])/2+ (p[3]>0?.0:0)),p[4],p[5]];
+  links.forEach((a,i)=>{a.querySelector('b').style.width=(prog[i]*100)+'%';const own=[[1],[2,3],[4],[5]][i];a.classList.toggle('cur',own.includes(cur));});
+  cap.style.visibility=mr>vh*.97?'visible':'hidden';
+  const si=cur+1;if(si!==lastSub){lastSub=si;fcs.textContent=SUB[Math.max(0,si)];}
+  requestAnimationFrame(frame);
+}
+requestAnimationFrame(frame);
+})();
+</script>
+<!--DOMJS-END-->
+<!--GLJS-START-->
+<script type="module">
+/* ═════════════ File no. 002 · The cost ledger · 3D ═════════════
+   A beam balance on a drawing sheet, six racks and a 21-day ribbon behind it. Cost pan (left) · record pan (right).
+   Scene data is illustrative (see the caption). */
+import * as THREE from 'three';
+import { RoomEnvironment } from 'three/addons/environments/RoomEnvironment.js';
+
+const reduce=matchMedia('(prefers-reduced-motion: reduce)').matches;
+const SNAP=location.search.includes('snap');
+const clamp=(x,a=0,b=1)=>Math.min(b,Math.max(a,x));
+const smooth=(a,b,x)=>{const t=clamp((x-a)/(b-a));return t*t*(3-2*t)};
+const lerp=(a,b,t)=>a+(b-a)*t;
+const C=h=>new THREE.Color(h);
+const COL={link:C('#1FD67C'),linkInk:C('#04703F'),drift:C('#FF9A2E'),record:C('#7C93A8'),ink:C('#111614')};
+const MONO='"JetBrains Mono", monospace', SANS='"Inter", sans-serif';
+const V3=(x,y,z)=>new THREE.Vector3(x,y,z);
+
+const canvas=document.getElementById('stage');
+let renderer;
+try{ renderer=new THREE.WebGLRenderer({canvas,antialias:true,alpha:true,powerPreference:'high-performance'}); }
+catch(e){ document.documentElement.classList.add('no-webgl'); throw e; }
+renderer.setPixelRatio(SNAP?1:Math.min(devicePixelRatio,2));
+renderer.setClearColor(0,0);
+renderer.toneMapping=THREE.ACESFilmicToneMapping; renderer.toneMappingExposure=1.02;
+renderer.outputColorSpace=THREE.SRGBColorSpace;
+renderer.shadowMap.enabled=true; renderer.shadowMap.type=SNAP?THREE.PCFShadowMap:THREE.PCFSoftShadowMap;
+const scene=new THREE.Scene();
+scene.environment=new THREE.PMREMGenerator(renderer).fromScene(new RoomEnvironment(),.04).texture; scene.environmentIntensity=.85;
+const camera=new THREE.PerspectiveCamera(28,1,.05,300);
+scene.add(new THREE.HemisphereLight(0xffffff,0x9aa39e,.55));
+const sun=new THREE.DirectionalLight(0xffffff,1.75);sun.position.set(-4,11,7);sun.castShadow=true;
+sun.shadow.mapSize.set(SNAP?1024:2048,SNAP?1024:2048);Object.assign(sun.shadow.camera,{left:-4,right:4,top:4,bottom:-4,near:1,far:30});sun.shadow.bias=-.0005;sun.shadow.radius=4;scene.add(sun);
+const fill=new THREE.DirectionalLight(0xdfe9ff,.55);fill.position.set(7,4,-5);scene.add(fill);
+const front=new THREE.DirectionalLight(0xffffff,.35);front.position.set(1,2,8);scene.add(front);
+
+function cnv(w,h){const c=document.createElement('canvas');c.width=w;c.height=h;return [c,c.getContext('2d')];}
+function tex(c){const t=new THREE.CanvasTexture(c);t.colorSpace=THREE.SRGBColorSpace;t.anisotropy=Math.min(8,renderer.capabilities.getMaxAnisotropy());return t;}
+const alu=new THREE.MeshStandardMaterial({color:'#dfe3df',metalness:.72,roughness:.3});
+const graph=new THREE.MeshStandardMaterial({color:'#2a302d',metalness:.55,roughness:.45});
+const dark=new THREE.MeshStandardMaterial({color:'#1d2321',metalness:.4,roughness:.55});
+const add=(m,p,parent=scene)=>{if(p)m.position.set(...p);parent.add(m);return m;};
+const basic=(col,o={})=>new THREE.MeshBasicMaterial({color:col,toneMapped:false,...o});
+function rodBetween(a,b,r,mat,parent=scene){const d=b.clone().sub(a);const m=new THREE.Mesh(new THREE.CylinderGeometry(r,r,d.length(),8),mat);m.position.copy(a).addScaledVector(d,.5);m.quaternion.setFromUnitVectors(V3(0,1,0),d.clone().normalize());parent.add(m);m.castShadow=true;return m;}
+
+/* ─────────── layout ─────────── */
+const BW=6.4, BD=4.6;                                   // drawing sheet
+const RX=i=>-1.25+i*.5, RZ=-1.95, RW=.34, RH=.95, RDp=.4; // rack row R01–R06
+const RB=V3(0,.0,-1.3);                                 // ribbon centre (x span ±1.4)
+const SZ=.75, FY=1.78, L=1.15, HANG=.84;                // scale: z, fulcrum y, arm, pan hang
+const PATHZ=-1.56, DESK=V3(2.35,0,1.45);
+
+/* ─────────── drawing sheet ─────────── */
+function sheetCanvas(){const W=2048,H=Math.round(W*BD/BW),s=W/BW;const [c,g]=cnv(W,H);const X=x=>(x+BW/2)*s,Z=z=>(z+BD/2)*s;
+  g.fillStyle='#F4F6F3';g.fillRect(0,0,W,H);
+  for(let x=-BW/2;x<=BW/2+.01;x+=.2){g.fillStyle='rgba(17,22,20,.05)';g.fillRect(X(x),0,1.2,H);} for(let z=-BD/2;z<=BD/2+.01;z+=.2){g.fillStyle='rgba(17,22,20,.05)';g.fillRect(0,Z(z),W,1.2);}
+  g.strokeStyle='#111614';g.lineWidth=3;g.strokeRect(16,16,W-32,H-32);
+  // rack footprints + row label
+  g.strokeStyle='#4A544F';g.lineWidth=2;for(let i=0;i<6;i++)g.strokeRect(X(RX(i)-RW/2-.02),Z(RZ-RDp/2-.02),(RW+.04)*s,(RDp+.04)*s);
+  g.fillStyle='#4A544F';g.font=`400 20px ${MONO}`;g.fillText('row F · R01–R06',X(-1.45),Z(RZ-.3));
+  // dimension line under the ribbon: three weeks, rack by rack
+  const dz=Z(RB.z+.24);g.strokeStyle='#4A544F';g.lineWidth=2;g.setLineDash([10,8]);g.beginPath();g.moveTo(X(-1.4),dz);g.lineTo(X(1.4),dz);g.stroke();g.setLineDash([]);
+  [-1.4,1.4].forEach(x=>{g.beginPath();g.moveTo(X(x),dz-14);g.lineTo(X(x),dz+14);g.stroke();});
+  g.fillStyle='#F4F6F3';g.fillRect(X(0)-150,dz-14,300,28);g.fillStyle='#4A544F';g.font=`400 20px ${MONO}`;g.textAlign='center';g.fillText('manual audit · 21 days',X(0),dz+7);g.textAlign='left';
+  // scale footprint: base, pan shadows (dashed), labels
+  g.strokeStyle='#4A544F';g.lineWidth=2;g.strokeRect(X(-.42),Z(SZ-.26),.84*s,.52*s);
+  g.setLineDash([12,9]);g.lineWidth=2.5;
+  g.strokeStyle='#FF9A2E';g.beginPath();g.arc(X(-L),Z(SZ),.5*s,0,7);g.stroke();
+  g.strokeStyle='#7C93A8';g.beginPath();g.arc(X(L),Z(SZ),.5*s,0,7);g.stroke();g.setLineDash([]);
+  g.font=`400 20px ${MONO}`;g.fillStyle='#9C4C00';g.fillText('cost of the gap',X(-L)-80,Z(SZ-.56));g.fillStyle='#3F5871';g.fillText('reconciled record',X(L)-90,Z(SZ-.56));
+  g.strokeStyle='rgba(17,22,20,.35)';g.lineWidth=1.5;g.setLineDash([4,6]);g.beginPath();g.moveTo(X(-L),Z(SZ));g.lineTo(X(L),Z(SZ));g.stroke();g.setLineDash([]);
+  // desk
+  g.strokeStyle='#4A544F';g.lineWidth=2;g.strokeRect(X(DESK.x-.2),Z(DESK.z-.14),.4*s,.28*s);g.fillStyle='#4A544F';g.fillText('desk',X(DESK.x-.2),Z(DESK.z+.26));
+  // title block
+  g.fillStyle='#111614';g.fillRect(W-560,20,540,104);g.fillStyle='#DDE4DF';g.font=`500 28px ${MONO}`;g.fillText('INF·01 · the cost ledger',W-540,66);
+  g.fillStyle='#93A19A';g.font=`400 20px ${MONO}`;g.fillText('illustrative scene · not to scale',W-540,102);
+  return c;}
+const sheetMat=new THREE.MeshStandardMaterial({map:tex(sheetCanvas()),roughness:.9});
+const base=add(new THREE.Mesh(new THREE.BoxGeometry(BW,.2,BD),[alu,alu,sheetMat,alu,alu,alu]),[0,-.1,0]);base.receiveShadow=true;
+add(new THREE.Mesh(new THREE.BoxGeometry(BW+.14,.04,BD+.14),graph),[0,-.22,0]);
+
+/* ─────────── the rack row ─────────── */
+function rackFace(i){const W=256,H=720;const [c,g]=cnv(W,H);g.fillStyle='#1d2321';g.fillRect(0,0,W,H);
+  g.fillStyle='#DDE4DF';g.font=`500 22px ${MONO}`;g.fillText('R0'+(i+1),14,30);
+  // devices (varying per rack)
+  const plan=[[2,'sw'],[1,'pp'],[2,'sv'],[2,'sv'],[1,'bl'],[4,'st'],[2,'sv'],[2,'bl'],[2,'sv'],[3,'ups']];
+  let y=46;const uh=(H-60)/21;
+  plan.forEach(([h,k],j)=>{const hh=h*uh-3;const kk=(j+i)%4===0&&k==='sv'?'bl':k;
+    g.fillStyle={sw:'#2a302d',pp:'#222826',sv:'#2f3633',bl:'#191d1c',st:'#262c29',ups:'#2b312e'}[kk];g.fillRect(8,y,W-16,hh);
+    if(kk==='sw'||kk==='pp'){g.fillStyle='#0d1110';for(let p=0;p<12;p++)g.fillRect(30+p*17,y+6,12,hh/2-6);}
+    if(kk==='sv'){g.fillStyle='#1a1f1d';for(let v=y+6;v<y+hh-4;v+=6)g.fillRect(W-80,v,60,3);g.fillStyle='#7C93A8';g.fillRect(18,y+hh-12,6,6);}
+    if(kk==='st'){for(let r=0;r<3;r++)for(let q=0;q<4;q++){g.fillStyle='#343b38';g.fillRect(18+q*56,y+6+r*(hh-8)/3,50,(hh-8)/3-5);}}
+    if(kk==='ups'){g.fillStyle='#0c1110';g.fillRect(W-110,y+10,90,26);}
+    y+=h*uh;});
+  return c;}
+const RACKS=[];
+const dashGeo=new THREE.EdgesGeometry(new THREE.BoxGeometry(RW+.05,RH+.05,RDp+.05));
+for(let i=0;i<6;i++){const grp=new THREE.Group();grp.position.set(RX(i),0,RZ);scene.add(grp);
+  const body=add(new THREE.Mesh(new THREE.BoxGeometry(RW,RH,RDp),graph),[0,RH/2,0],grp);body.castShadow=true;body.receiveShadow=true;
+  const fm=new THREE.MeshStandardMaterial({map:tex(rackFace(i)),metalness:.3,roughness:.6});
+  const face=add(new THREE.Mesh(new THREE.PlaneGeometry(RW-.03,RH-.04),fm),[0,RH/2,RDp/2+.002],grp);
+  const lamp=add(new THREE.Mesh(new THREE.BoxGeometry(.1,.018,.05),basic('#FF9A2E')),[0,RH+.012,RDp/2-.05],grp);
+  const solid=add(new THREE.LineSegments(dashGeo,new THREE.LineBasicMaterial({color:COL.record,transparent:true,toneMapped:false})),[0,RH/2,0],grp);
+  const dashed=add(new THREE.LineSegments(dashGeo,new THREE.LineDashedMaterial({color:COL.drift,dashSize:.035,gapSize:.025,transparent:true,toneMapped:false})),[0,RH/2,0],grp);dashed.computeLineDistances();
+  RACKS.push({grp,fm,face,lamp,solid,dashed,top:V3(RX(i),RH+.05,RZ),front:V3(RX(i),.55,RZ+RDp/2)});}
+// sweep band (better way)
+const band=add(new THREE.Mesh(new THREE.PlaneGeometry(RW+.08,.018),basic(COL.link,{transparent:true,opacity:0,depthWrite:false})),[0,.5,RZ+RDp/2+.03]);
+const wash=add(new THREE.Mesh(new THREE.PlaneGeometry(RW+.02,1),basic(COL.link,{transparent:true,opacity:0,depthWrite:false})),[0,.5,RZ+RDp/2+.026]);
+
+/* ─────────── the calendar ribbon (21 days) ─────────── */
+function ribbonCanvas(){const W=2048,H=150;const [c,g]=cnv(W,H);g.fillStyle='#F4F6F3';g.fillRect(0,0,W,H);
+  g.strokeStyle='#111614';g.lineWidth=3;g.strokeRect(2,2,W-4,H-4);const cw=(W-4)/21;
+  for(let d=0;d<21;d++){const x=2+d*cw;g.strokeStyle=d%7===0?'#111614':'#C6CCC7';g.lineWidth=d%7===0?3:2;g.beginPath();g.moveTo(x,d%7===0?2:48);g.lineTo(x,H-2);g.stroke();
+    g.fillStyle='#4A544F';g.font=`400 30px ${MONO}`;g.textAlign='center';g.fillText(String(d+1),x+cw/2,112);}
+  g.textAlign='left';g.fillStyle='#111614';g.font=`500 28px ${MONO}`;['week 1','week 2','week 3'].forEach((w,k)=>g.fillText(w,14+k*7*cw,36));
+  g.strokeStyle='#C6CCC7';g.lineWidth=2;g.beginPath();g.moveTo(2,48);g.lineTo(W-2,48);g.stroke();
+  return c;}
+const RBW=2.8,RBD=.2;
+const ribMat=new THREE.MeshStandardMaterial({map:tex(ribbonCanvas()),roughness:.8});
+const ribbon=add(new THREE.Mesh(new THREE.BoxGeometry(RBW,.012,RBD),[alu,alu,ribMat,alu,alu,alu]),[0,.006,RB.z]);ribbon.receiveShadow=true;
+const ribFill=add(new THREE.Mesh(new THREE.PlaneGeometry(1,RBD*.66),basic(COL.record,{transparent:true,opacity:.34,depthWrite:false})),[0,.0135,RB.z+RBD*.17]);ribFill.rotation.x=-Math.PI/2;
+const cursor=new THREE.Group();scene.add(cursor);
+add(new THREE.Mesh(new THREE.BoxGeometry(.012,.09,RBD+.04),graph),[0,.045,0],cursor).castShadow=true;
+{const tri=new THREE.Mesh(new THREE.ConeGeometry(.03,.05,3),graph);tri.rotation.z=Math.PI;add(tri,[0,.115,0],cursor);}
+cursor.position.set(-RBW/2,0,RB.z);
+
+/* ─────────── the clipboard (manual audit) ─────────── */
+function clipCanvas(){const [c,g]=cnv(200,260);g.fillStyle='#F4F6F3';g.fillRect(0,0,200,260);g.fillStyle='#111614';g.font=`500 17px ${MONO}`;g.fillText('rack audit',14,28);
+  g.font=`400 13px ${MONO}`;g.fillStyle='#4A544F';g.fillText('U · device · ok?',14,50);
+  for(let r=0;r<9;r++){const y=70+r*20;g.fillStyle='rgba(17,22,20,.12)';g.fillRect(14,y+6,172,1.5);g.strokeStyle='#4A544F';g.lineWidth=1.5;g.strokeRect(160,y-8,12,12);
+    if(r<5){g.strokeStyle='#3F5871';g.lineWidth=2.5;g.beginPath();g.moveTo(161,y-2);g.lineTo(165,y+2);g.lineTo(172,y-8);g.stroke();}
+    g.fillStyle='#4A544F';g.fillRect(14,y-4,40+((r*37)%60),3);}
+  return c;}
+const CLIP=new THREE.Group();scene.add(CLIP);
+add(new THREE.Mesh(new THREE.BoxGeometry(.2,.27,.012),graph),null,CLIP).castShadow=true;
+const clipPaper=add(new THREE.Mesh(new THREE.PlaneGeometry(.18,.234),new THREE.MeshBasicMaterial({map:tex(clipCanvas()),toneMapped:false})),[0,-.012,.0065],CLIP);
+add(new THREE.Mesh(new THREE.BoxGeometry(.08,.03,.02),alu),[0,.13,.01],CLIP);
+
+/* ─────────── the scale ─────────── */
+const SC=new THREE.Group();SC.position.set(0,0,SZ);scene.add(SC);
+add(new THREE.Mesh(new THREE.BoxGeometry(.8,.07,.48),graph),[0,.035,0],SC).castShadow=true;
+add(new THREE.Mesh(new THREE.BoxGeometry(.7,.02,.4),alu),[0,.08,0],SC);
+const pillar=add(new THREE.Mesh(new THREE.CylinderGeometry(.04,.05,FY-.1,20),alu),[0,.09+(FY-.1)/2,0],SC);pillar.castShadow=true;
+add(new THREE.Mesh(new THREE.BoxGeometry(.16,.05,.1),graph),[0,FY-.04,0],SC);
+// dial plate (graduated arc, pivot at the fulcrum)
+const DW=.56,DH=.22,DYC=FY-.44;
+function dialCanvas(){const W=768,H=Math.round(W*DH/DW);const [c,g]=cnv(W,H);g.fillStyle='#F4F6F3';g.fillRect(0,0,W,H);g.strokeStyle='#111614';g.lineWidth=3;g.strokeRect(2,2,W-4,H-4);
+  const px=x=>(x+DW/2)/DW*W, py=y=>(DYC+DH/2-y)/DH*H;
+  for(let a=-.3;a<=.3001;a+=.025){const maj=Math.abs(a%.1)<.001||Math.abs(Math.abs(a%.1)-.1)<.001;const r0=.40,r1=maj?.46:.435;
+    const p0=[Math.sin(a)*r0,FY-Math.cos(a)*r0],p1=[Math.sin(a)*r1,FY-Math.cos(a)*r1];
+    g.strokeStyle=Math.abs(a)<.001?'#04703F':a>0?'#FF9A2E':'#C6CCC7';g.lineWidth=Math.abs(a)<.001?6:maj?4:2.5;
+    g.beginPath();g.moveTo(px(p0[0]),py(p0[1]));g.lineTo(px(p1[0]),py(p1[1]));g.stroke();}
+  g.font=`500 24px ${MONO}`;g.textAlign='center';g.fillStyle='#04703F';g.fillText('level',px(0),py(FY-.5)+8);
+  g.fillStyle='#9C4C00';g.fillText('gap →',px(.2),py(FY-.5)+2);g.textAlign='left';
+  return c;}
+const dial=add(new THREE.Mesh(new THREE.PlaneGeometry(DW,DH),new THREE.MeshBasicMaterial({map:tex(dialCanvas()),toneMapped:false})),[0,DYC,.055],SC);
+add(new THREE.Mesh(new THREE.BoxGeometry(DW+.03,DH+.03,.02),graph),[0,DYC,.042],SC);
+// beam + pointer
+const BEAM=new THREE.Group();BEAM.position.set(0,FY,SZ);scene.add(BEAM);
+add(new THREE.Mesh(new THREE.BoxGeometry(2*L+.08,.05,.05),alu),null,BEAM).castShadow=true;
+{const hub=add(new THREE.Mesh(new THREE.CylinderGeometry(.055,.055,.12,24),graph),null,BEAM);hub.rotation.x=Math.PI/2;}
+[-1,1].forEach(s=>add(new THREE.Mesh(new THREE.BoxGeometry(.04,.07,.07),graph),[s*L,0,0],BEAM));
+const pointer=add(new THREE.Mesh(new THREE.BoxGeometry(.012,.47,.008),basic('#111614')),[0,-.235,.075],BEAM);
+add(new THREE.Mesh(new THREE.ConeGeometry(.012,.04,4),basic('#111614')),[0,-.49,.075],BEAM).rotation.z=Math.PI;
+// pans (hang from the beam ends, stay level)
+function makePan(rimCol){const P=new THREE.Group();scene.add(P);
+  const dish=add(new THREE.Mesh(new THREE.CylinderGeometry(.47,.42,.03,48),alu),[0,-HANG,0],P);dish.castShadow=true;dish.receiveShadow=true;
+  const rimMat=basic(rimCol);
+  const rim=add(new THREE.Mesh(new THREE.TorusGeometry(.47,.007,6,64),rimMat),[0,-HANG+.016,0],P);rim.rotation.x=Math.PI/2;
+  const ring=add(new THREE.Mesh(new THREE.TorusGeometry(.47,.005,6,64),alu),[0,-HANG+.52,0],P);ring.rotation.x=Math.PI/2;
+  [Math.PI*1.5,Math.PI/6,Math.PI*5/6].forEach(a=>{const x=Math.cos(a)*.47,z=Math.sin(a)*.47;
+    rodBetween(V3(x,-HANG+.015,z),V3(x,-HANG+.52,z),.005,alu,P);rodBetween(V3(x,-HANG+.52,z),V3(0,-.06,0),.004,alu,P);});
+  add(new THREE.Mesh(new THREE.CylinderGeometry(.018,.018,.08,10),graph),[0,-.04,0],P);
+  return {P,rimMat};}
+const PC=makePan('#FF9A2E'), PR=makePan('#7C93A8');
+// the unmeasured cost (hero): a dashed amber block, no label, no number
+const ghostBlock=add(new THREE.LineSegments(new THREE.EdgesGeometry(new THREE.BoxGeometry(.72,.3,.24)),new THREE.LineDashedMaterial({color:COL.drift,dashSize:.03,gapSize:.022,transparent:true,toneMapped:false})),[0,-HANG+.17,0],PC.P);ghostBlock.computeLineDistances();
+const ghostFillM=add(new THREE.Mesh(new THREE.BoxGeometry(.7,.28,.22),basic(COL.drift,{transparent:true,opacity:.12,depthWrite:false})),[0,-HANG+.17,0],PC.P);
+// the record, not yet (dashed record-blue) in the right pan
+const recGhost=add(new THREE.LineSegments(new THREE.EdgesGeometry(new THREE.BoxGeometry(.52,.17,.34)),new THREE.LineDashedMaterial({color:COL.record,dashSize:.03,gapSize:.022,transparent:true,toneMapped:false})),[0,-HANG+.1,0],PR.P);recGhost.computeLineDistances();
+
+/* ─────────── the weights ─────────── */
+function weightCanvas(t){const [c,g]=cnv(256,108);g.fillStyle='#2a302d';g.fillRect(0,0,256,108);g.fillStyle='#FF9A2E';g.fillRect(0,0,256,5);
+  g.fillStyle='#DDE4DF';g.font=`500 25px ${MONO}`;g.textAlign='center';g.fillText(t,128,66);return c;}
+const WBW=.235,WBH=.1,WBD=.2;
+const wGeo=new THREE.BoxGeometry(WBW,WBH,WBD);
+const SLOT=[[-.25,0],[0,0],[.25,0],[-.25,1],[0,1],[.25,1],[-.125,2],[.125,2]].map(([x,r])=>V3(x,.03+WBH/2+r*(WBH+.012),-.02));
+const WD=[
+  {t:'audit hours',land:.8},{t:'re-audit',land:1.8},
+  {t:'spare hardware',land:2.32},{t:'search hours',land:2.56},{t:'early refresh',land:2.8},
+  {t:'hand reconcile',land:3.84},
+  {t:'rack check',land:4.36},{t:'incident detour',land:4.6}];
+const WTS=WD.map((d,i)=>{const grp=new THREE.Group();scene.add(grp);
+  const m=add(new THREE.Mesh(wGeo,graph),null,grp);m.castShadow=true;m.receiveShadow=true;
+  const lab=add(new THREE.Mesh(new THREE.PlaneGeometry(WBW-.006,WBH-.006),new THREE.MeshBasicMaterial({map:tex(weightCanvas(d.t)),toneMapped:false})),[0,0,WBD/2+.001],grp);
+  grp.visible=false;return {...d,i,grp,lab,leave:5.12+(7-i)*.075,cur:V3()};});
+// plates: six months of skipped updates
+const NPL=6;
+const plates=new THREE.InstancedMesh(new THREE.BoxGeometry(.46,.016,.2),new THREE.MeshStandardMaterial({color:'#3a413d',metalness:.5,roughness:.45}),NPL);plates.castShadow=true;scene.add(plates);
+const plateEdge=new THREE.InstancedMesh(new THREE.BoxGeometry(.466,.006,.206),basic(COL.drift),NPL);scene.add(plateEdge);
+// record tiles (green-edged), one per sweep, in the right pan
+const tiles=new THREE.InstancedMesh(new THREE.BoxGeometry(.5,.012,.32),new THREE.MeshStandardMaterial({color:'#F4F6F3',roughness:.6}),6);tiles.castShadow=true;scene.add(tiles);
+const tileEdge=new THREE.InstancedMesh(new THREE.BoxGeometry(.506,.005,.326),basic(COL.link),6);scene.add(tileEdge);
+
+/* ─────────── three trackers (key figure) ─────────── */
+const TRK=[
+  {f:'inventory.xlsx',k:'A',rows:[['U22','SRV-118','R04','sw2/14'],['U18','SRV-121','R02','sw1/03'],['U31','SW-A2','R01','uplink'],['U26','SRV-133','R06','sw3/22'],['U14','SRV-140','R03','sw1/09'],['U10','ST-07','R05','—']],bad:[]},
+  {f:'rack-elevations_v7.xlsx',k:'B',rows:[['U22','SRV-118','R06','sw2/14'],['U20','SRV-121','R02','sw1/03'],['U31','SW-A2','R01','uplink'],['U26','SRV-133','R06','sw3/22'],['U14','SRV-140','R03','—'],['U10','ST-07','R05','—']],bad:[[0,2],[1,0],[4,3]]},
+  {f:'ports_FINAL.xlsx',k:'C',rows:[['U22','SRV-118','R04','sw2/16'],['U18','SRV-121','R02','sw1/03'],['U31','SW-A2','R01','uplink'],['—','SRV-133','—','—'],['U14','SRV-140','R03','sw1/09'],['U12','ST-07','R05','—']],bad:[[0,3],[3,0],[3,2],[5,0]]}];
+const TW=1.1,TH=.72;
+function trackerCanvas(T){const W=1024,H=Math.round(W*TH/TW);const [c,g]=cnv(W,H);g.fillStyle='#F4F6F3';g.fillRect(0,0,W,H);
+  g.fillStyle='#7C93A8';g.fillRect(0,0,W,78);g.fillStyle='#F4F6F3';g.font=`500 34px ${MONO}`;g.fillText(T.f,28,52);
+  g.fillStyle='#F4F6F3';g.font=`400 26px ${MONO}`;g.textAlign='right';g.fillText('tracker '+T.k,W-28,52);g.textAlign='left';
+  const cols=[40,190,440,640];g.font=`500 25px ${MONO}`;g.fillStyle='#3F5871';['U','device','rack','port'].forEach((h,i)=>g.fillText(h,cols[i],124));
+  g.fillStyle='#3F5871';g.fillRect(28,140,W-56,2);
+  T.rows.forEach((r,ri)=>{const y=190+ri*62;g.fillStyle='rgba(17,22,20,.08)';g.fillRect(28,y+20,W-56,2);
+    r.forEach((v,ci)=>{const bad=T.bad.some(([a,b])=>a===ri&&b===ci);if(bad){g.fillStyle='rgba(255,154,46,.28)';g.fillRect(cols[ci]-12,y-36,ci===1?220:170,50);g.strokeStyle='#FF9A2E';g.lineWidth=3;g.strokeRect(cols[ci]-12,y-36,ci===1?220:170,50);}
+      g.fillStyle=bad?'#9C4C00':'#111614';g.font=`400 28px ${MONO}`;g.fillText(v,cols[ci],y);});});
+  g.fillStyle='#4A544F';g.font=`400 22px ${MONO}`;g.fillText('edited by hand',40,H-26);
+  g.strokeStyle='#3F5871';g.lineWidth=5;g.strokeRect(2.5,2.5,W-5,H-5);return c;}
+const TRKS=TRK.map((T,i)=>{const grp=new THREE.Group();scene.add(grp);
+  const mat=new THREE.MeshBasicMaterial({map:tex(trackerCanvas(T)),toneMapped:false,transparent:true,side:THREE.DoubleSide});
+  const m=add(new THREE.Mesh(new THREE.PlaneGeometry(TW,TH),mat),null,grp);
+  const back=add(new THREE.Mesh(new THREE.BoxGeometry(TW+.02,TH+.02,.012),new THREE.MeshStandardMaterial({color:'#dfe3df',metalness:.3,roughness:.5,transparent:true})),[0,0,-.009],grp);back.castShadow=true;
+  const home=V3(-.8+i*.8,3.0-i*.1,-.1+i*.38);grp.visible=false;return {grp,mat,back,home,T};});
+
+/* ─────────── the engineer's walk (day to day) ─────────── */
+const leg1=new THREE.CatmullRomCurve3([V3(DESK.x-.05,.012,DESK.z-.2),V3(2.3,.012,.35),V3(2.1,.012,-.8),V3(1.7,.012,PATHZ),V3(RX(5),.012,PATHZ)],false,'catmullrom',.3);
+const leg2=new THREE.CatmullRomCurve3([V3(RX(5),.012,PATHZ),V3(RX(4),.012,PATHZ-.02),V3(RX(3),.012,PATHZ)],false,'catmullrom',.3);
+const mkPath=(cv,col)=>{const m=add(new THREE.Mesh(new THREE.TubeGeometry(cv,120,.009,6,false),basic(col)));m.userData.n=m.geometry.index.count;m.geometry.setDrawRange(0,0);return m;};
+const path1=mkPath(leg1,'#7C93A8'),path2=mkPath(leg2,'#FF9A2E');
+const desk=add(new THREE.Mesh(new THREE.BoxGeometry(.4,.1,.28),graph),[DESK.x,.05,DESK.z]);desk.castShadow=true;
+add(new THREE.Mesh(new THREE.BoxGeometry(.16,.004,.11),dark),[DESK.x,.102,DESK.z]);
+const PIN=new THREE.Group();scene.add(PIN);
+add(new THREE.Mesh(new THREE.CylinderGeometry(.008,.008,.3,8),graph),[0,.15,0],PIN).castShadow=true;
+add(new THREE.Mesh(new THREE.CylinderGeometry(.05,.05,.03,24),basic('#111614')),[0,.31,0],PIN);
+const pinRing=add(new THREE.Mesh(new THREE.RingGeometry(.035,.05,32),basic('#111614',{transparent:true,side:THREE.DoubleSide,depthWrite:false})),[0,.004,0],PIN);pinRing.rotation.x=-Math.PI/2;
+const missX=add(new THREE.Group(),[RX(5),.02,PATHZ-.02]);
+[1,-1].forEach(s=>{const b=add(new THREE.Mesh(new THREE.BoxGeometry(.12,.006,.018),basic(COL.drift)),null,missX);b.rotation.y=s*Math.PI/4;});
+
+[plates,plateEdge,tiles,tileEdge].forEach(m=>m.frustumCulled=false);
+
+/* ─────────── tags ─────────── */
+const hud=document.getElementById('hud');const TG=[];const TGK={};
+function tag(k,html,cls,follow){const el=document.createElement('div');el.className='tag '+cls;el.innerHTML=`<i></i><span>${html}</span>`;hud.appendChild(el);const t={k,el,follow,t:0};TG.push(t);TGK[k]=t;return t;}
+const panC=()=>PC.P.position, panR=()=>PR.P.position;
+const WP=i=>()=>WTS[i].grp.position.clone().add(V3(WBW/2,0,WBD/2));
+// hero
+tag('hGhost','<b>The cost nobody measured</b>it tips the scale all the same','drift keep',()=>panC().clone().add(V3(.36,-HANG+.3,.12)));
+tag('hRack','<b>Six racks, unverified</b>nobody has checked them lately','drift',()=>RACKS[5].top.clone().add(V3(RW/2,-.1,0)));
+tag('hRec','<b>Reconciled record</b>empty, so far','rec',()=>panR().clone().add(V3(.47,-HANG+.05,0)));
+// lead
+tag('aClip','<b>Manual audit</b>rack by rack, clipboard in hand','rec keep',()=>CLIP.position.clone().add(V3(.1,.08,0)));
+tag('aDay','<b>Day 1 of 21</b>three weeks for one row','ink up',()=>cursor.position.clone().add(V3(0,.15,0)));
+tag('w0','<b>Audit hours</b>days for a small footprint, weeks for more','drift',WP(0));
+// stale
+tag('sR1','<b>R01 · changed again</b>checked on day 2','drift up keep',()=>RACKS[0].top.clone().add(V3(0,.04,0)));
+tag('sR6','<b>R06 · the last row</b>checked on day 20','rec up',()=>RACKS[5].top.clone().add(V3(0,.04,0)));
+tag('w1','<b>Stale by day 21</b>the first rows need a second look','drift',WP(1));
+// number
+tag('w2','<b>Hardware bought</b>the rack wasn\'t full','drift keep',WP(2));
+tag('w3','<b>Engineer hours</b>hunting for equipment','drift',WP(3));
+tag('w4','<b>Early refresh</b>nobody trusted the numbers','drift',WP(4));
+tag('nDial','<b>The number</b>each input adds weight','drift',()=>BEAM.localToWorld(V3(0,-.5,.08)));
+// key figure
+tag('kC','<b>Three trackers</b>three answers · disagreements in amber','rec keep',()=>TRKS[2].grp.localToWorld(V3(TW/2,-.05,0)));
+tag('w5','<b>Reconciled by hand</b>three trackers, one answer','drift',WP(5));
+// day to day
+tag('dEng','<b>Pulled off real work</b>to check a rack in person','ink keep',()=>PIN.position.clone().add(V3(.05,.31,0)));
+tag('dRec','<b>The record says R06</b>first walk','rec up',()=>RACKS[5].top.clone().add(V3(0,.04,0)));
+tag('dReal','<b>It\'s in R04</b>second walk','drift up',()=>RACKS[3].top.clone().add(V3(0,.04,0)));
+tag('w7','<b>Incident call</b>a five-minute detour','drift',WP(7));
+tag('dDebt','<b>Topology debt</b>six months of skipped updates','drift keep',()=>panC().clone().add(V3(.24,-HANG+.46,0)));
+// better way
+tag('bSweep','<b>Small sweep</b>one rack at a time, continuously','link',()=>band.position.clone().add(V3(RW/2+.04,0,0)));
+tag('bRec','<b>Reconciled record</b>kept current, sweep by sweep','link',()=>panR().clone().add(V3(.47,-HANG+.12,0)));
+tag('bLevel','<b>Back to level</b>the gap never grows','link keep',()=>BEAM.localToWorld(V3(0,-.5,.08)));
+
+/* ─────────── scroll → global g ─────────── */
+const secEls=['lead','stale-audits','real-price','key-figure','day-to-day','better-way'].map(id=>document.getElementById(id));
+const moreEl=document.getElementById('more');
+function G(){const y=scrollY,vh=innerHeight;const t0=secEls[0].offsetTop;
+  if(y<t0)return -1+clamp(y/Math.max(1,t0));
+  for(let i=0;i<secEls.length;i++){const e=secEls[i],a=e.offsetTop,b=a+e.offsetHeight-vh;if(y<=b||i===secEls.length-1)return i+clamp((y-a)/Math.max(1,b-a));}
+  return 6;}
+const on=(g,a,b)=>smooth(a-.2,a+.15,g)*(1-smooth(b-.15,b+.2,g));
+const CAMS=[
+  [-1,[4.6,4.7,6.9],[.05,.75,-.55]],   // hero: 3/4 wide
+  [.5,[1.3,7.6,3.9],[0,.3,-.9]],     // lead: high plan over the row + ribbon
+  [1.5,[-2.7,1.45,.2],[-.5,.62,-1.95]],// stale: low, down the rack row from the left
+  [2.5,[-.1,3.0,6.4],[-.35,1.1,.3]],   // number: the whole balance, cost pan forward
+  [3.45,[.9,2.95,5.9],[.1,2.4,.2]],    // key figure: front elevation of the trackers
+  [4.3,[4.1,5.6,3.4],[.6,.2,-.7]],     // day to day: high oblique over the walk
+  [4.85,[-1.2,1.75,3.5],[-1.05,.95,.55]],// plain terms: low, close on the pile
+  [5.55,[2.2,2.3,6.5],[.1,.95,-.5]],   // better way: low hero angle, level beam
+  [6,[3.4,2.4,7.2],[.1,.95,-.5]]];
+let vw=0,vh=0,mobile=false;
+function resize(){vw=innerWidth;vh=innerHeight;mobile=vw<760;renderer.setSize(vw,vh,false);camera.aspect=vw/vh;camera.updateProjectionMatrix();}
+addEventListener('resize',resize);resize();
+const cp=V3(...CAMS[0][1]),ct=V3(...CAMS[0][2]);
+const clock=new THREE.Clock();const M4=new THREE.Matrix4(),Q=new THREE.Quaternion(),S1=V3(1,1,1),E0=new THREE.Euler();
+const tmpCam=new THREE.PerspectiveCamera(28,1,.05,300);const vv=V3();
+// framing guard: per object group, project the bounding points of the target pose; pan the view (or pull the camera back
+// along its view vector) until no visible object enters the reading column (desktop) or leaves the 3D band (mobile).
+const RIGHT=V3();
+function guard(P,T,groups){
+  tmpCam.aspect=camera.aspect;tmpCam.setViewOffset(vw,vh,mobile?0:-(.63-.5)*vw,mobile?vh*.2:0,vw,vh);tmpCam.updateProjectionMatrix();
+  const lim=vw*.455;
+  for(let it=0;it<44;it++){tmpCam.position.copy(P);tmpCam.lookAt(T);tmpCam.updateMatrixWorld();
+    let viol=false,allMax=-1e9,need=0;
+    for(const G of groups){let x0=1e9,x1=-1e9,y0=1e9,y1=-1e9,behind=0;
+      for(const p of G){vv.copy(p).project(tmpCam);if(vv.z>1||vv.z<-1){behind++;continue;}const x=(vv.x+1)/2*vw,y=(1-vv.y)/2*vh;x0=Math.min(x0,x);x1=Math.max(x1,x);y0=Math.min(y0,y);y1=Math.max(y1,y);}
+      if(behind===G.length)continue;
+      if(behind>0){viol=true;need=2;continue;}
+      if(x1<0||x0>vw||y1<0||y0>vh)continue;
+      allMax=Math.max(allMax,x1);
+      if(mobile){if(x0<6||x1>vw-6||y0<62||y1>vh*.44){viol=true;need=2;}}
+      else{if(x0<lim){viol=true;need=Math.max(need,1);}if(y0<58||(!G.base&&y1>vh-50)){viol=true;need=2;}}}
+    if(!viol)return;
+    const d=P.distanceTo(T);
+    if(need===1&&allMax<vw*.965){RIGHT.subVectors(T,P).cross(camera.up).normalize().multiplyScalar(-d*.03);P.add(RIGHT);T.add(RIGHT);}
+    else P.sub(T).multiplyScalar(1.06).add(T);}
+}
+const arc=(a,b,k,h)=>a.clone().lerp(b,k).add(V3(0,Math.sin(Math.PI*k)*h,0));
+let tilt=.13,lastDay=0;const colWarn=C('#FF9A2E'),colRec=C('#7C93A8'),colLink=C('#1FD67C');
+
+function frame(){
+  requestAnimationFrame(frame);
+  const dt=Math.min(clock.getDelta(),.05),time=clock.elapsedTime;
+  const mTop=moreEl.getBoundingClientRect().top;
+  const showCanvas=mTop>0, showHud=mTop>vh*.97;
+  canvas.style.visibility=showCanvas?'visible':'hidden';hud.style.display=showHud?'':'none';
+  if(!showHud)for(const t of TG)t.el.classList.remove('show');
+  if(!showCanvas)return;
+  const g=G();
+  const wHero=1-smooth(-.6,-.05,g);
+  const wLead=on(g,0,1),wS1=on(g,1,2),wS2=on(g,2,3),wKF=on(g,3,4),wS3=on(g,4,4.66),wPT=on(g,4.66,5),wS4=smooth(4.85,5.2,g);
+
+  // ── audit walk + rack state ──
+  const aT=smooth(.12,1.78,g);
+  const D=1+aT*20+smooth(2.0,4.5,g)*22;                 // day on the (illustrative) calendar
+  const sweepAt=i=>5.13+i*.09;                          // green sweep finishes rack i
+  RACKS.forEach((r,i)=>{const ci=1.6+i*3.6, re=ci+7.2;
+    let st=(D>=ci&&D<re)?1:0; if(g>=sweepAt(i))st=2;
+    const col=st===2?colLink:st===1?colRec:colWarn;
+    r.lamp.material.color.copy(col);r.solid.material.color.copy(col);r.solid.visible=st!==0;r.dashed.visible=st===0;r.st=st;});
+  // clipboard hops rack to rack
+  const clipV=smooth(-.05,.2,g)*(1-smooth(1.8,1.98,g));
+  const idx=clamp((D-1.2)/3.6,0,5.0), i0=Math.floor(idx), fr=idx-i0;
+  const hop=smooth(.7,1,fr);
+  CLIP.position.set(lerp(RX(i0),RX(Math.min(5,i0+1)),hop),.78+Math.sin(Math.PI*hop)*.12,RZ+RDp/2+.26);CLIP.rotation.set(-.25,0,0);
+  CLIP.scale.setScalar(Math.max(.0001,clipV*1.6));CLIP.visible=clipV>.01;
+  // ribbon
+  const dd=clamp(D,1,21);
+  const fillW=(dd-1)/20*RBW;ribFill.scale.x=Math.max(.0001,fillW);ribFill.position.x=-RBW/2+fillW/2;ribFill.material.opacity=.34*smooth(-.1,.2,g);
+  cursor.position.x=-RBW/2+(dd-.5)/21*RBW;cursor.visible=g>-.2;
+  const di=Math.round(dd);if(di!==lastDay){lastDay=di;TGK.aDay.el.querySelector('b').textContent=`Day ${di} of 21`;}
+
+  // ── weights ──
+  let mass=.13*(1-smooth(.4,2.9,g));
+  const pc=PC.P.position, pr=PR.P.position;
+  const srcOf=i=>{switch(i){case 0:return CLIP.position.clone();case 1:return RACKS[0].top.clone();case 2:return RACKS[2].top.clone();case 3:return RACKS[3].top.clone();case 4:return RACKS[5].top.clone();
+    case 5:return TRKS[1].grp.position.clone();case 6:return V3(RX(5),.4,PATHZ);default:return V3(RX(3),.4,PATHZ);}};
+  // compute tilt first from landed state, then place weights
+  const kIn=w=>clamp((g-(w.land-.2))/.2), kOut=w=>clamp((g-w.leave)/.1);
+  WTS.forEach(w=>{mass+=.021*kIn(w)*(1-kOut(w));});
+  const plIn=j=>clamp((g-(4.7+j*.045))/.06), plOut=j=>clamp((g-(5.04+j*.012))/.08);
+  for(let j=0;j<NPL;j++)mass+=.008*plIn(j)*(1-plOut(j));
+  const target=Math.min(.27,mass);
+  tilt=(reduce||SNAP)?target:lerp(tilt,target,1-Math.pow(.04,dt));
+  BEAM.rotation.z=tilt;
+  const endL=V3(-L*Math.cos(tilt),FY-L*Math.sin(tilt),SZ), endR=V3(L*Math.cos(tilt),FY+L*Math.sin(tilt),SZ);
+  PC.P.position.copy(endL);PR.P.position.copy(endR);
+  const dishTop=p=>p.clone().add(V3(0,-HANG+.015,0));
+  WTS.forEach(w=>{const a=kIn(w),b=kOut(w);const slot=dishTop(pc).add(SLOT[w.i]);
+    if(a<=0||b>=1){w.grp.visible=false;return;}w.grp.visible=true;
+    let p,s=1;
+    if(a<1){const k=smooth(0,1,a);p=arc(srcOf(w.i),slot,k,.7);s=.55+.45*k;E0.set(0,(1-k)*1.4,0);}
+    else if(b>0){const k=smooth(0,1,b);p=arc(slot,RACKS[w.i%6].top.clone().add(V3(0,.25,0)),k,.5);s=1-k*.9;E0.set(0,k*1.2,0);}
+    else{p=slot;E0.set(0,0,0);}
+    w.grp.position.copy(p);w.grp.rotation.copy(E0);w.grp.scale.setScalar(Math.max(.001,s));w.cur.copy(p);});
+  ghostBlock.material.opacity=smooth(.2,.9,1-smooth(.5,2.2,g));ghostFillM.material.opacity=.12*(1-smooth(.5,2.2,g));ghostBlock.visible=ghostFillM.visible=g<2.25;
+  // plates
+  for(let j=0;j<NPL;j++){const a=plIn(j),b=plOut(j);
+    if(a<=0||b>=1){M4.makeScale(0,0,0);}else{const top=dishTop(pc).add(V3(0,.03+3*(WBH+.012)-.012+.012+j*.024,-.02));
+      const p=top.clone().add(V3(0,(1-smooth(0,1,a))*.6+smooth(0,1,b)*.6,0));Q.identity();M4.compose(p,Q,S1.setScalar(Math.max(.001,1-b)));}
+    plates.setMatrixAt(j,M4);plateEdge.setMatrixAt(j,M4);}
+  plates.instanceMatrix.needsUpdate=plateEdge.instanceMatrix.needsUpdate=true;
+  // record tiles (one per sweep) fly from each rack into the record pan
+  for(let i=0;i<6;i++){const k=clamp((g-(sweepAt(i)-.02))/.1);
+    if(k<=0){M4.makeScale(0,0,0);}else{const slot=dishTop(pr).add(V3(0,.02+i*.03,0));const p=k<1?arc(RACKS[i].top,slot,smooth(0,1,k),.6):slot;Q.setFromEuler(E0.set(0,(1-k)*1.2,0));M4.compose(p,Q,S1.setScalar(.5+.5*k));}
+    tiles.setMatrixAt(i,M4);tileEdge.setMatrixAt(i,M4);}
+  tiles.instanceMatrix.needsUpdate=tileEdge.instanceMatrix.needsUpdate=true;
+  recGhost.material.opacity=1-smooth(5.05,5.3,g);recGhost.visible=g<5.3;
+  PR.rimMat.color.copy(colRec).lerp(colLink,smooth(5.1,5.5,g));
+
+  // ── trackers (key figure) ──
+  const tIn=smooth(2.92,3.22,g), tOut=smooth(3.6,3.72,g);
+  TRKS.forEach((t,i)=>{const a=clamp(tIn*1.4-i*.2), vis=a*(1-tOut);t.grp.visible=vis>.01;
+    const p=t.home.clone().add(V3(0,-(1-a)*.35,0));p.lerp(TRKS[1].home,tOut);t.grp.position.copy(p);
+    t.grp.rotation.set(0,-.16+i*.04,(1-a)*.08);t.grp.scale.setScalar(Math.max(.001,vis));t.mat.opacity=clamp(vis*1.2);t.back.material.opacity=clamp(vis*1.2);});
+
+  // ── engineer walk ──
+  const p1=smooth(4.08,4.3,g), p2=smooth(4.38,4.54,g), pathV=smooth(3.95,4.08,g)*(1-smooth(5.0,5.15,g));
+  path1.geometry.setDrawRange(0,Math.floor(p1*path1.userData.n/6)*6);path2.geometry.setDrawRange(0,Math.floor(p2*path2.userData.n/6)*6);
+  path1.visible=path2.visible=pathV>.02;
+  PIN.position.copy(p2>0?leg2.getPoint(p2):leg1.getPoint(p1));PIN.scale.setScalar(Math.max(.001,pathV));PIN.visible=pathV>.02;
+  missX.visible=pathV>.02&&p2>.05;
+  desk.visible=true;
+
+  // ── better way: the sweep band ──
+  let bi=-1,by=0;
+  for(let i=0;i<6;i++){const a=sweepAt(i)-.09,b=sweepAt(i);if(g>=a&&g<b){bi=i;by=(g-a)/.09;}}
+  if(bi<0&&g>=sweepAt(5)&&g<6.2&&!reduce&&!SNAP){const T=time*.55;bi=Math.floor(T)%6;by=T%1;}
+  if(bi<0&&g>=sweepAt(5)){bi=5;by=.62;}
+  if(bi>=0){band.position.set(RX(bi),.05+by*(RH-.08),RZ+RDp/2+.03);wash.position.set(RX(bi),.05+by*(RH-.08)/2,RZ+RDp/2+.026);wash.scale.y=Math.max(.001,by*(RH-.08));}
+  const bv=wS4*(bi>=0?1:0);band.material.opacity=bv*(reduce||SNAP?.95:.75+.25*Math.sin(time*9));wash.material.opacity=bv*.12;band.visible=wash.visible=bv>.01;
+
+  // ── camera ──
+  let Pp=V3(...CAMS[0][1]),Tt=V3(...CAMS[0][2]);
+  if(!reduce&&!SNAP){const s=Math.sin(time*.12)*.14;Pp.x+=s*wHero;}
+  for(let i=1;i<CAMS.length;i++){const [gi,p,t]=CAMS[i];const gp=CAMS[i-1][0];const k=smooth(gp+(gi-gp)*.3,gi-(gi-gp)*.15,g);if(k>0){Pp.lerp(V3(...p),k);Tt.lerp(V3(...t),k);}}
+  if(mobile){Pp.sub(Tt).multiplyScalar(1.35).add(Tt);}
+  // guarded object groups: everything that stands on the sheet or flies above it
+  const grp=[];const box=(x0,x1,y0,y1,z0,z1)=>{const o=[];[x0,x1].forEach(x=>[y0,y1].forEach(y=>[z0,z1].forEach(z=>o.push(V3(x,y,z)))));return o;};
+  grp.push(box(-1.25-RW/2,1.25+RW/2,0,RH+.05,RZ-RDp/2,RZ+RDp/2));
+  grp.push(box(-RBW/2,RBW/2,0,.02,RB.z-.1,RB.z+.1));
+  {const sb=[...box(-.4,.4,0,.08,SZ-.24,SZ+.24),V3(0,FY+.08,SZ),endL.clone(),endR.clone()];sb.base=true;grp.push(sb);}
+  [pc,pr].forEach(p=>grp.push(box(p.x-.47,p.x+.47,p.y-HANG,p.y-HANG+.52,SZ-.47,SZ+.47)));
+  if(g>2.8&&g<3.8)TRKS.forEach(t=>{if(t.grp.visible)grp.push([[-1,1],[1,1],[-1,-1],[1,-1]].map(([a,b])=>t.grp.localToWorld(V3(a*TW/2,b*TH/2,0))));});
+  if(pathV>.02)grp.push([...box(DESK.x-.2,DESK.x+.2,0,.1,DESK.z-.14,DESK.z+.14),...[0,.25,.5,.75,1].map(u=>leg1.getPoint(u))]);
+  if(clipV>.02)grp.push(box(CLIP.position.x-.16,CLIP.position.x+.16,CLIP.position.y-.2,CLIP.position.y+.2,CLIP.position.z,CLIP.position.z));
+  WTS.forEach(w=>{if(w.grp.visible)grp.push([w.cur.clone()]);});
+  guard(Pp,Tt,grp);
+  const f=(reduce||SNAP)?1:1-Math.pow(.02,dt);cp.lerp(Pp,f);ct.lerp(Tt,f);camera.position.copy(cp);camera.lookAt(ct);
+  camera.setViewOffset(vw,vh,mobile?0:-(.63-.5)*vw,mobile?vh*.2:0,vw,vh);
+  camera.updateMatrixWorld();
+
+  // ── tags: on/off at .5, collision + column + viewport guards ──
+  const landed0=i=>kIn(WTS[i])>=1&&kOut(WTS[i])<=0;const landed=i=>landed0(i)&&(i===7||!landed0(i+1));
+  const vis={hGhost:wHero,hRack:wHero,hRec:wHero,
+    aClip:wLead*clipV,aDay:Math.max(wLead,wS1*(g<1.85?1:0)),w0:wLead*(landed(0)?1:0),
+    sR1:wS1*(RACKS[0].st===0&&D>9?1:0),sR6:wS1*(RACKS[5].st===1?1:0),w1:wS1*(landed(1)?1:0),
+    w2:wS2*(landed(2)?1:0),w3:wS2*(landed(3)?1:0),w4:wS2*(landed(4)?1:0),nDial:wS2*(g>2.82?1:0),
+    kC:wKF*(tIn>.9&&tOut<.1?1:0),w5:wKF*(landed(5)?1:0),
+    dEng:wS3*(pathV>.5?1:0),dRec:wS3*(p1>.98?1:0),dReal:wS3*(p2>.98?1:0),w7:wS3*(landed(7)?1:0),
+    dDebt:wPT*(plIn(NPL-1)>=1?1:0),
+    bSweep:(g>5.02&&g<5.62)?wS4:0,bRec:(g>5.45&&g<5.8)?wS4:0,bLevel:g>5.72?wS4:0};
+  const placed=[];const colX=Math.max(vw*.38,colRight+14);
+  for(const t of TG){const want=(vis[t.k]||0)>.5&&showHud;let ok=false;
+    if(want&&!(mobile&&!t.el.classList.contains('keep'))){
+      if(t.follow)vv.copy(t.follow());vv.project(camera);
+      if(vv.z<1&&vv.z>-1){const x=(vv.x+1)/2*vw,y=(1-vv.y)/2*vh;const cl=t.el.classList,ew=t.el.offsetWidth,eh=t.el.offsetHeight;
+        const tx=cl.contains('left')?x-ew+3.5:cl.contains('up')?x-ew/2:x-3.5, ty=cl.contains('up')?y-eh+3.5:y-eh/2;
+        const bx={x:tx,y:ty,w:ew,h:eh};
+        ok=tx>=6&&tx+ew<=vw-6&&ty>=62&&ty+eh<=vh-(mobile?6:46);
+        if(ok&&!mobile&&tx<colX)ok=false;
+        if(ok&&mobile&&ty+eh>vh*.46)ok=false;
+        if(ok)for(const p of placed){if(tx<p.x+p.w+8&&tx+ew+8>p.x&&ty<p.y+p.h+6&&ty+eh+6>p.y){ok=false;break;}}
+        if(ok){placed.push(bx);t.el.style.transform=`translate3d(${tx.toFixed(1)}px,${ty.toFixed(1)}px,0)`;}}}
+    t.el.classList.toggle('show',ok);}
+  renderer.render(scene,camera);
+}
+let colRight=0;
+function measureCol(){colRight=0;document.querySelectorAll('.scopy,#hero .copy').forEach(e=>{const r=e.getBoundingClientRect();colRight=Math.max(colRight,r.right);});document.documentElement.style.setProperty('--colr',Math.round(colRight+16)+'px');}
+addEventListener('resize',measureCol);measureCol();
+function redrawText(){sheetMat.map.image=sheetCanvas();sheetMat.map.needsUpdate=true;ribMat.map.image=ribbonCanvas();ribMat.map.needsUpdate=true;
+  dial.material.map.image=dialCanvas();dial.material.map.needsUpdate=true;clipPaper.material.map.image=clipCanvas();clipPaper.material.map.needsUpdate=true;
+  RACKS.forEach((r,i)=>{r.fm.map.image=rackFace(i);r.fm.map.needsUpdate=true;});
+  WTS.forEach(w=>{w.lab.material.map.image=weightCanvas(w.t);w.lab.material.map.needsUpdate=true;});
+  TRKS.forEach(t=>{t.mat.map.image=trackerCanvas(t.T);t.mat.map.needsUpdate=true;});measureCol();}
+document.fonts.ready.then(redrawText);
+{const hid=[];scene.traverse(o=>{if(!o.visible){hid.push(o);o.visible=true;}});try{renderer.compile(scene,camera);}catch(e){}hid.forEach(o=>o.visible=false);}
+requestAnimationFrame(frame);
+</script>
+<!--GLJS-END-->
+<script src="/design-system/nav.js" defer></script>
+</body>
+</html>

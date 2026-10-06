@@ -1,0 +1,528 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Resources · RackTrack</title>
+<meta name="description" content="Short, plain-language reads on why infrastructure records drift from reality, what that costs, and how teams close the gap.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap">
+<link rel="stylesheet" href="/design-system/base.css">
+<style>
+/* RackTrack · Resources — design-system/ tokens. Protagonist: the index. A rack-mount card-index drawer; every article is a card with a team tab. */
+:root{
+  color-scheme: light;
+  
+}
+*{box-sizing:border-box}
+html{background:var(--paper)}
+body{margin:0;background:var(--paper);color:var(--fg);font:400 16px/1.5 var(--sans);-webkit-font-smoothing:antialiased;overflow-x:hidden}
+a{color:inherit}
+::selection{background:var(--link);color:#06140d}
+:focus-visible{outline:2px solid var(--link-ink);outline-offset:3px;border-radius:2px}
+body::before{content:"";position:fixed;inset:0;z-index:0;pointer-events:none;background:radial-gradient(60% 55% at 64% 50%,rgba(255,255,255,.6),transparent 72%)}
+#stage{position:fixed;inset:0;z-index:1;display:block;width:100%;height:100%;pointer-events:none}
+#scrim{position:fixed;inset:0;z-index:1;pointer-events:none;background:linear-gradient(90deg,var(--paper) 0,rgba(233,236,232,.92) 24%,rgba(233,236,232,0) 45%)}
+#hud{position:fixed;inset:0;z-index:3;pointer-events:none;overflow:hidden}
+main{position:relative;z-index:2}
+
+/* nav */
+.nav{position:fixed;left:0;right:0;top:0;z-index:10;display:flex;align-items:center;gap:28px;height:calc(var(--nav-h) + env(safe-area-inset-top,0px));padding:env(safe-area-inset-top,0px) var(--bleed) 0;background:linear-gradient(var(--paper) 55%,transparent)}
+.brand{display:flex;align-items:center;gap:10px;text-decoration:none;font:700 17px/1 var(--sans);letter-spacing:-.02em;color:var(--ink)}
+.brand img{width:26px;height:26px;border-radius:5px;display:block}
+.nav ul{display:flex;gap:24px;list-style:none;margin:0 0 0 auto;padding:0}
+.nav ul a{font:500 14px/1 var(--sans);text-decoration:none;color:var(--ink-2)}
+.nav ul a:hover{color:var(--ink)}
+.nav ul a[aria-current="page"]{color:var(--ink);text-decoration:underline;text-decoration-color:var(--link);text-decoration-thickness:2px;text-underline-offset:6px}
+.btn{display:inline-flex;align-items:center;gap:10px;height:46px;padding:0 20px;border-radius:3px;border:1px solid var(--fg);font:500 15px/1 var(--sans);text-decoration:none;cursor:pointer;background:transparent;color:var(--fg);transition:background .2s,color .2s,border-color .2s}
+.btn.solid{background:var(--fg);color:var(--bg)}
+.btn.solid:hover{background:var(--link-ink);border-color:var(--link-ink);color:#fff}
+.btn:not(.solid){border-color:var(--line)}
+.btn:not(.solid):hover{border-color:var(--fg)}
+.btn .led{width:7px;height:7px;border-radius:50%;background:var(--link);box-shadow:0 0 8px var(--link)}
+.nav .btn{height:38px;padding:0 16px;font-size:14px}
+
+/* type */
+.ch{position:relative;padding-inline:var(--bleed)}
+.copy{max-width:31rem;}
+h1,h2,h3{margin:0 0 20px;text-wrap:balance}
+h1{max-width:9ch}
+h2{max-width:15ch}
+h3{margin:0 0 12px}
+.lede{color:var(--fg-2);max-width:27rem;margin:0 0 28px}
+.k{margin:0 0 14px;font:400 12px/1 var(--mono);color:var(--link-ink)}
+.actions{display:flex;flex-wrap:wrap;gap:12px}
+
+/* tags */
+.tag{position:absolute;left:0;top:0;display:flex;align-items:center;opacity:0;will-change:transform,opacity;white-space:nowrap}
+.tag::before{content:"";width:7px;height:7px;border-radius:50%;background:var(--c,var(--ink));transform:translate(-3.5px,0);box-shadow:0 0 0 3px color-mix(in oklab,var(--c,var(--ink)) 22%,transparent)}
+.tag i{display:block;width:24px;height:1px;background:var(--c,var(--ink))}
+.tag span{padding:6px 9px;background:var(--paper-2);border:1px solid var(--c,var(--ink));border-radius:2px;font:400 11.5px/1.35 var(--mono);color:var(--ink);box-shadow:0 14px 28px -20px rgba(17,22,20,.45)}
+.tag span b{display:block;font:600 15px/1.15 var(--sans);letter-spacing:-.02em;margin-bottom:2px}
+.tag.left{flex-direction:row-reverse}.tag.left::before{transform:translate(3.5px,0)}
+.tag.up{flex-direction:column-reverse}.tag.up i{width:1px;height:22px}.tag.up::before{transform:translate(0,3.5px)}
+.tag.link{--c:var(--link)} .tag.link span b{color:var(--link-ink)}
+.tag.drift{--c:var(--drift)} .tag.drift span b{color:var(--drift-ink)}
+.tag.rec{--c:var(--record)} .tag.rec span b{color:var(--record-ink)}
+.tag.ink{--c:var(--ink)}
+
+/* hero */
+#hero h1{max-width:11ch}
+#hero{min-height:100vh;display:flex;align-items:center;padding-top:90px}
+.hero-meta{display:flex;gap:22px;margin-top:34px;padding-top:14px;border-top:1px solid var(--rule);max-width:27rem;font:400 12px/1.4 var(--mono);color:var(--ink-2)}
+.hero-meta b{display:block;font:500 22px/1 var(--sans);letter-spacing:-.03em;color:var(--ink);margin-bottom:6px}
+
+/* featured (pinned) */
+#featured{position:relative;min-height:170vh}
+.pin{position:sticky;top:0;height:100vh}
+.scopy{position:absolute;left:var(--gutter);top:50%;transform:translateY(-50%);width:min(31rem,40vw);}
+.file{display:flex;gap:10px;align-items:center;margin:0 0 16px;font:400 12px/1 var(--mono);color:var(--ink-2)}
+.chip{font:500 11px/1 var(--mono);padding:5px 7px;border-radius:2px;border:1px solid var(--rule);color:var(--ink);background:rgba(244,246,243,.8)}
+.chip.c-operations{border-color:var(--ink)}
+.chip.c-infrastructure{border-color:var(--link);color:var(--link-ink);background:rgba(31,214,124,.08)}
+.chip.c-strategy{border-color:var(--record);color:var(--record-ink);background:rgba(124,147,168,.1)}
+.chip.c-security{border-color:var(--drift);color:var(--drift-ink);background:rgba(255,154,46,.1)}
+.chip.c-compliance{border-color:var(--link-ink);color:var(--link-ink)}
+.chip.c-finance{border-color:var(--drift-ink);color:var(--drift-ink)}
+#featured h2{max-width:15ch}
+.stat40{display:flex;gap:16px;align-items:baseline;margin:0 0 28px;padding:14px 0;border-top:1px solid var(--ink);border-bottom:1px solid var(--rule);max-width:27rem}
+.stat40 b{font:500 52px/1 var(--sans);letter-spacing:-.05em;color:var(--drift-ink)}
+.stat40 span{font-size:14.5px;line-height:1.4;color:var(--ink-2)}
+
+/* library */
+#library{position:relative;padding:var(--band-y) var(--bleed)}
+.lib{width:min(36rem,40vw);}
+.lib h2{max-width:14ch}
+.tabs{display:flex;flex-wrap:wrap;gap:6px;margin:6px 0 14px}
+.tabs button{all:unset;box-sizing:border-box;cursor:pointer;padding:8px 11px;border:1px solid var(--rule);border-radius:2px;font:500 13.5px/1 var(--sans);color:var(--ink-2);background:rgba(244,246,243,.75);transition:border-color .2s,color .2s,background .2s}
+.tabs button i{display:inline-block;width:7px;height:7px;border-radius:50%;margin-right:7px;background:var(--dot,var(--ink));vertical-align:1px}
+.tabs button:hover{border-color:var(--ink);color:var(--ink)}
+.tabs button[aria-selected="true"]{background:var(--ink);border-color:var(--ink);color:var(--paper)}
+.tabs button:focus-visible{outline:2px solid var(--link-ink);outline-offset:2px}
+.count{font:400 12px/1 var(--mono);color:var(--ink-2);margin:0 0 10px}
+.rows{list-style:none;margin:0;padding:0;border-top:1px solid var(--ink)}
+.rows li[hidden]{display:none}
+.rows a{display:grid;grid-template-columns:4.6rem 1fr auto;gap:6px 16px;padding:18px 10px 18px 0;border-bottom:1px solid var(--rule);text-decoration:none;color:var(--ink);position:relative;background:linear-gradient(90deg,rgba(244,246,243,.9),rgba(244,246,243,0)) no-repeat;background-size:0 100%;transition:background-size .3s var(--ease)}
+.rows a>*:not(.go){transition:transform .3s var(--ease)}
+.rows a::before{content:"";position:absolute;left:-14px;top:18px;bottom:18px;width:2px;background:var(--cc,var(--ink));transform:scaleY(0);transition:transform .3s var(--ease)}
+.rows li.on a{background-size:100% 100%}
+.rows li.on a>*:not(.go){transform:translateX(10px)}
+.rows li.on a::before{transform:none}
+.rows .code{font:500 12px/1.6 var(--mono);color:var(--cc,var(--ink));grid-row:span 2}
+.rows h3{margin:0}
+.rows p{grid-column:2;margin:0;font-size:14.5px;line-height:1.45;color:var(--ink-2);max-width:31rem}
+.rows .min{grid-row:1;grid-column:3;font:400 11.5px/1.6 var(--mono);color:var(--ink-2);white-space:nowrap}
+.rows .go{grid-column:3;grid-row:2;align-self:end;justify-self:end;font:500 15px/1 var(--sans);color:var(--link-ink);opacity:0;transform:translateX(-6px);transition:opacity .25s,transform .25s}
+.rows li.on .go,.rows a:focus-visible .go{opacity:1;transform:none}
+.empty{font:400 13px/1.4 var(--mono);color:var(--ink-2);padding:18px 0}
+[data-cat="operations"]{--cc:#111614}[data-cat="infrastructure"]{--cc:#04703F}[data-cat="strategy"]{--cc:#3F5871}[data-cat="security"]{--cc:#9C4C00}[data-cat="compliance"]{--cc:#04703F}[data-cat="finance"]{--cc:#9C4C00}
+
+/* cta */
+#cta{padding-block:var(--band-y);text-align:center;background:var(--paper);position:relative;z-index:2;border-top:1px solid var(--rule)}
+#cta h2{margin-inline:auto;max-width:13ch}
+#cta .lede{margin-inline:auto}
+#cta .actions{justify-content:center}
+
+/* footer */
+.foot{position:relative;z-index:2;padding:var(--band-y) var(--bleed) calc(var(--s8) + env(safe-area-inset-bottom,0px));background:var(--paper);border-top:1px solid var(--rule);display:grid;grid-template-columns:var(--copy-w) repeat(3,minmax(0,1fr));gap:28px;font-size:14px;color:var(--ink-2)}
+.foot b{display:block;font:500 13px/1 var(--sans);color:var(--link-ink);margin-bottom:16px}
+.foot nav{display:flex;flex-direction:column;gap:11px}
+.foot nav a{color:var(--ink);text-decoration:none;font-size:15px}
+.foot nav a:hover{color:var(--link-ink)}
+.foot p{margin:0 0 11px;color:var(--ink);font-size:15px;line-height:1.45}
+.foot p a{text-decoration:none}.foot p a:hover{color:var(--link-ink)}
+.foot-brand .brand{margin-bottom:16px}
+.foot-brand p{color:var(--ink-2);max-width:18rem}
+.foot .fine{grid-column:1/-1;display:flex;justify-content:space-between;flex-wrap:wrap;gap:12px;margin-top:16px;padding-top:18px;border-top:1px solid var(--rule);font-size:13px}
+.foot .legal{display:flex;gap:18px;flex-wrap:wrap}.foot .legal a{color:var(--ink-2);text-decoration:none}.foot .legal a:hover{color:var(--link-ink)}
+.foot .social{display:flex;gap:18px}
+.foot .social a{color:var(--ink-2);text-decoration:none}
+
+.no-webgl #stage,.no-webgl #hud{display:none}
+@media (max-width:1180px){ .foot{grid-template-columns:repeat(2,minmax(0,1fr))} }
+@media (max-width:760px){
+  #scrim{background:linear-gradient(0deg,var(--paper) 0,rgba(233,236,232,.94) 44%,rgba(233,236,232,0) 64%)}
+  #hud .tag:not(.keep){display:none}
+  #hero{align-items:flex-end;padding-top:46vh;padding-bottom:5vh}
+  #hero .lede{} .hero-meta{display:none}
+  .scopy{left:var(--gutter);right:var(--gutter);width:auto;top:auto;bottom:4vh;transform:none;padding-left:0}
+  #featured h2{} #featured .lede{display:none} .stat40{margin-bottom:16px} .stat40 b{font-size:38px}
+  #library{background:var(--paper);z-index:2;padding-top:var(--band-y)}
+  .lib{width:auto;padding-left:0}
+  .rows a{grid-template-columns:3.8rem 1fr;padding-right:0} .rows .min{grid-column:2;grid-row:auto} .rows .go{display:none}
+}
+@media (max-width:560px){ .foot{grid-template-columns:repeat(2,minmax(0,1fr));gap:var(--s6) var(--s5);padding-block:var(--band-y-sm) calc(var(--s6) + env(safe-area-inset-bottom,0px))} }
+@media (prefers-reduced-motion:reduce){ .rows a,.rows a>*,.rows a::before,.rows .go{transition:none!important} }
+</style>
+</head>
+<body>
+
+<canvas id="stage" aria-hidden="true"></canvas>
+<div id="scrim" aria-hidden="true"></div>
+<div id="hud" aria-hidden="true"></div>
+
+<nav class="nav" aria-label="Primary">
+  <a class="brand" href="/"><img alt="" src="/design-system/assets/Logos/racktrack-mark.jpg">RackTrack</a>
+  <ul>
+    <li><a href="/pages/why-racktrack/">Why RackTrack</a></li>
+    <li><a href="/pages/solutions/">Solutions</a></li>
+    <li><a href="/pages/use-cases/">Use cases</a></li>
+    <li><a href="/pages/resources/" aria-current="page">Resources</a></li>
+    <li><a href="/pages/trust-security/">Trust</a></li>
+    <li><a href="/pages/about-us/">About</a></li>
+    <li><a href="/pages/sign-in/">Sign in</a></li>
+  </ul>
+  <a class="btn solid" href="/pages/contact-us/"><span class="led"></span>Book a sweep</a>
+</nav>
+
+<main>
+  <section class="ch" id="hero">
+    <div class="copy">
+      <h1>The thinking behind what RackTrack checks</h1>
+      <p class="lede">Short, plain-language reads on why infrastructure records drift from reality, what that costs, and how teams close the gap: for operations, security, compliance and finance teams alike.</p>
+      <div class="actions">
+        <a class="btn solid" href="#library"><span class="led"></span>Browse the library</a>
+        <a class="btn" href="#featured">Start with file 001 ↓</a>
+      </div>
+      <div class="hero-meta"><span><b>9</b>articles</span><span><b>6</b>teams</span><span><b>4–6</b>minute reads</span></div>
+    </div>
+  </section>
+
+  <section class="ch" id="featured">
+    <div class="pin">
+      <div class="scopy">
+        <p class="file">File no. 001 <span class="chip c-operations">Operations</span> 6 min read</p>
+        <h2>Why your infrastructure records are wrong more often than you think</h2>
+        <p class="lede">When the system of record drifts from what's actually installed, every decision built on it gets a little less safe, and the gap is more common than most teams assume.</p>
+        <div class="stat40"><b>40%</b><span>of enterprise infrastructure records no longer match what's physically in the rack. The gap this article closes.</span></div>
+        <div class="actions"><a class="btn solid" href="/pages/resources/why-every-enterprise-cmdb-is-40-wrong/"><span class="led"></span>Read the article</a></div>
+      </div>
+    </div>
+  </section>
+
+  <section class="ch" id="library">
+    <div class="lib">
+      <h2>Browse by the question your team has</h2>
+      <p class="lede">Not by product feature. Pick a team, or run your cursor down the drawer.</p>
+      <div class="tabs" role="tablist" aria-label="Filter by team">
+        <button role="tab" aria-selected="true" data-f="all">All</button>
+        <button role="tab" aria-selected="false" data-f="operations" style="--dot:#111614"><i></i>Operations</button>
+        <button role="tab" aria-selected="false" data-f="infrastructure" style="--dot:#1FD67C"><i></i>Infrastructure</button>
+        <button role="tab" aria-selected="false" data-f="strategy" style="--dot:#7C93A8"><i></i>Strategy</button>
+        <button role="tab" aria-selected="false" data-f="security" style="--dot:#FF9A2E"><i></i>Security</button>
+        <button role="tab" aria-selected="false" data-f="compliance" style="--dot:#04703F"><i></i>Compliance</button>
+        <button role="tab" aria-selected="false" data-f="finance" style="--dot:#9C4C00"><i></i>Finance</button>
+      </div>
+      <p class="count" id="count" aria-live="polite">9 articles shown</p>
+      <ul class="rows" id="rows">
+        <li data-cat="operations" data-card="0"><a href="/pages/resources/why-every-enterprise-cmdb-is-40-wrong/"><span class="code">OPS·01</span><h3>Why your infrastructure records are wrong more often than you think</h3><span class="min">6 min</span><p>When the system of record drifts from what's actually installed, every decision built on it gets a little less safe, and the gap is more common than most teams assume.</p><span class="go">Read →</span></a></li>
+        <li data-cat="infrastructure" data-card="1"><a href="/pages/resources/the-hidden-cost-of-unreconciled-infrastructure/"><span class="code">INF·01</span><h3>What it actually costs when nobody checks the rack</h3><span class="min">5 min</span><p>Manual audits are slow and go stale fast. Here's a plain way to put a number on what that gap costs your team.</p><span class="go">Read →</span></a></li>
+        <li data-cat="strategy" data-card="2"><a href="/pages/resources/from-audit-to-autonomy/"><span class="code">STR·01</span><h3>From once-a-year audits to always-on records</h3><span class="min">5 min</span><p>A trustworthy inventory starts with proof you can trace back to a photo and a timestamp, not a spreadsheet someone updated by hand.</p><span class="go">Read →</span></a></li>
+        <li data-cat="security" data-card="3"><a href="/pages/resources/physical-layer-the-missing-link-in-infrastructure-security/"><span class="code">SEC·01</span><h3>The security gap your network tools can't see</h3><span class="min">5 min</span><p>Network monitoring only shows what's active on the network, not what's actually sitting in the rack. That blind spot is where risk builds up.</p><span class="go">Read →</span></a></li>
+        <li data-cat="compliance" data-card="4"><a href="/pages/resources/how-infrastructure-teams-prepare-for-soc-2-audits/"><span class="code">CMP·01</span><h3>Getting ready for a SOC 2 audit without the scramble</h3><span class="min">5 min</span><p>Auditors want continuous proof of asset control, not a snapshot from last quarter. Here's how teams generate it as they go.</p><span class="go">Read →</span></a></li>
+        <li data-cat="operations" data-card="5"><a href="/pages/resources/dcim-vs-physical-reality-why-the-gap-matters/"><span class="code">OPS·02</span><h3>Your DCIM platform shows a plan. The rack shows what's real</h3><span class="min">5 min</span><p>DCIM tools model what should be there. Knowing where that model and the real rack disagree helps you fix the right problem.</p><span class="go">Read →</span></a></li>
+        <li data-cat="finance" data-card="6"><a href="/pages/resources/the-hidden-cost-of-wrong-rack-inventory/"><span class="code">FIN·01</span><h3>What a wrong inventory actually costs you</h3><span class="min">4 min</span><p>Misidentified hardware and early refresh cycles quietly waste budget. Most teams never measure it until it's already expensive.</p><span class="go">Read →</span></a></li>
+        <li data-cat="infrastructure" data-card="7"><a href="/pages/resources/what-network-verified-actually-means/"><span class="code">INF·02</span><h3>What we mean when we say a record is "verified"</h3><span class="min">5 min</span><p>A record only earns trust when what's physically there matches what the network reports. Here's how that check actually works.</p><span class="go">Read →</span></a></li>
+        <li data-cat="infrastructure" data-card="8"><a href="/pages/resources/free-port-discovery-and-rack-capacity-planning/"><span class="code">INF·03</span><h3>Planning your next rack without guessing at free ports</h3><span class="min">4 min</span><p>Teams plan capacity better when they can see which ports are actually open, not which ones a spreadsheet says should be.</p><span class="go">Read →</span></a></li>
+      </ul>
+      <p class="empty" id="empty" hidden>No articles in this category yet.</p>
+    </div>
+  </section>
+
+  <section class="ch" id="cta">
+    <h2>Read the theory. Then verify your own rack</h2>
+    <p class="lede">One sweep of one rack is enough to see the gap these articles describe.</p>
+    <div class="actions">
+      <a class="btn solid" href="/pages/contact-us/"><span class="led"></span>Request a platform brief</a>
+      <a class="btn" href="/pages/solutions/">See how it works</a>
+    </div>
+  </section>
+
+  <footer class="foot">
+    <div class="foot-brand">
+      <a class="brand" href="/"><img alt="" src="/design-system/assets/Logos/racktrack-mark.jpg">RackTrack</a>
+      <p>Physical infrastructure intelligence for data centers.</p>
+    </div>
+    <nav aria-label="Platform"><b>Platform</b>
+      <a href="/pages/why-racktrack/">Why RackTrack</a><a href="/pages/solutions/">Solutions</a><a href="/pages/use-cases/">Use cases</a><a href="/pages/trust-security/">Trust &amp; security</a></nav>
+    <nav aria-label="Company"><b>Company</b>
+      <a href="/pages/resources/">Resources</a><a href="/pages/about-us/">About us</a><a href="/pages/contact-us/">Contact us</a></nav>
+    <div><b>Contact</b>
+      <p><a href="mailto:info@racktrack.ai">info@racktrack.ai</a></p><p><a href="tel:+18608782448">+1 (860) 878 2448</a></p><p>85 Felt Rd, Suite #604<br>South Windsor, CT 06074</p></div>
+    <div class="fine">
+      <span>© 2026 RackTrack Inc. · Patent pending</span>
+      <span class="legal"><a href="/pages/legal/privacy-policy/">Privacy</a><a href="/pages/legal/terms-of-use/">Terms</a><a href="/pages/legal/cookie-policy/">Cookies</a><a href="/pages/legal/data-we-collect/">Data we collect</a><a href="/pages/legal/third-party-services/">Third parties</a></span>
+      <span class="social"><a href="https://www.linkedin.com/company/racktrack/" rel="noopener" target="_blank">LinkedIn</a><a href="https://www.instagram.com/racktrack_inc/" rel="noopener" target="_blank">Instagram</a><a href="https://www.facebook.com/share/18depF5xzA/" rel="noopener" target="_blank">Facebook</a></span>
+    </div>
+  </footer>
+</main>
+
+<script type="importmap">
+{ "imports": {
+  "three": "https://cdn.jsdelivr.net/npm/three@0.170.0/build/three.module.js",
+  "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.170.0/examples/jsm/"
+} }
+</script>
+<!--DOMJS-START-->
+<script>
+/* ───── Resources: filters, active row (hover / focus / scroll-centre), ruler. Works without WebGL. ───── */
+(()=>{
+const $=s=>document.querySelector(s), $$=s=>[...document.querySelectorAll(s)];
+const rows=$$('#rows li'), tabs=$$('.tabs button');
+const RS=window.RS={filter:'all',active:-1,hover:-1};
+let curOn=null;
+function setActive(li){if(li===curOn)return;if(curOn)curOn.classList.remove('on');if(li)li.classList.add('on');curOn=li||null;RS.active=li?+li.dataset.card:-1;}
+tabs.forEach(t=>t.addEventListener('click',()=>{
+  tabs.forEach(b=>b.setAttribute('aria-selected',String(b===t)));RS.filter=t.dataset.f;let n=0;
+  rows.forEach(r=>{const m=RS.filter==='all'||r.dataset.cat===RS.filter;r.hidden=!m;if(m)n++;});
+  $('#count').textContent=`${n} article${n===1?'':'s'} shown`;$('#empty').hidden=n>0;RS.hover=-1;
+}));
+rows.forEach(r=>{const a=r.querySelector('a');
+  r.addEventListener('pointerenter',()=>{RS.hover=+r.dataset.card;setActive(r);});
+  r.addEventListener('pointerleave',()=>{RS.hover=-1;});
+  a.addEventListener('focus',()=>{RS.hover=+r.dataset.card;setActive(r);});
+  a.addEventListener('blur',()=>{RS.hover=-1;});});
+const libEl=$('#library');let queued=false;
+function update(){queued=false;
+  const vh=innerHeight,S=scrollY/(document.documentElement.scrollHeight-vh||1);
+  if(RS.hover>=0)return;
+  const lib=libEl.getBoundingClientRect();let best=null;
+  if(!(lib.top>vh*.55||lib.bottom<vh*.3)){let bd=1e9;const c=vh*.5;
+    for(const r of rows){if(r.hidden)continue;const b=r.getBoundingClientRect();if(b.bottom<0||b.top>vh)continue;const d=Math.abs((b.top+b.bottom)/2-c);if(d<bd){bd=d;best=r;}}}
+  setActive(best);}
+function queue(){if(!queued){queued=true;requestAnimationFrame(update);}}
+addEventListener('scroll',queue,{passive:true});addEventListener('resize',queue);
+rows.forEach(r=>r.addEventListener('pointerleave',queue));
+queue();
+})();
+</script>
+<!--DOMJS-END-->
+<!--GLJS-START-->
+<script type="module">
+/* ═════════════ Resources · 3D ═════════════
+   The index: a 19-inch rack-mount card drawer on a drawing sheet. Nine files stand in it, each with a team tab.
+   Hero: drawer half open.  Featured: file 001 lifts out and is laid on the sheet beside a stack of ten record slips,
+   four of which have slid out of true (40%).  Library: drawer fully open; the team filter raises its cards and sinks
+   the rest; the row you point at (or the one centred on screen) lifts its card out so the face can be read. */
+import * as THREE from 'three';
+import { RoomEnvironment } from 'three/addons/environments/RoomEnvironment.js';
+import { RoundedBoxGeometry } from 'three/addons/geometries/RoundedBoxGeometry.js';
+
+const reduce=matchMedia('(prefers-reduced-motion: reduce)').matches;
+const SNAP=location.search.includes('snap');
+const clamp=(x,a=0,b=1)=>Math.min(b,Math.max(a,x));
+const smooth=(a,b,x)=>{const t=clamp((x-a)/(b-a));return t*t*(3-2*t)};
+const lerp=(a,b,t)=>a+(b-a)*t;
+const C=h=>new THREE.Color(h);
+const MONO='"JetBrains Mono", monospace', SANS='"Inter", sans-serif';
+const V3=(x,y,z)=>new THREE.Vector3(x,y,z);
+
+const canvas=document.getElementById('stage');
+let renderer;
+try{ renderer=new THREE.WebGLRenderer({canvas,antialias:true,alpha:true,powerPreference:'high-performance'}); }
+catch(e){ document.documentElement.classList.add('no-webgl'); throw e; }
+renderer.setPixelRatio(SNAP?1:Math.min(devicePixelRatio,1.5));
+renderer.setClearColor(0,0);
+renderer.toneMapping=THREE.ACESFilmicToneMapping; renderer.toneMappingExposure=1.0;
+renderer.outputColorSpace=THREE.SRGBColorSpace;
+renderer.shadowMap.enabled=true; renderer.shadowMap.type=THREE.PCFShadowMap;
+const scene=new THREE.Scene();
+scene.environment=new THREE.PMREMGenerator(renderer).fromScene(new RoomEnvironment(),.04).texture; scene.environmentIntensity=.8;
+const camera=new THREE.PerspectiveCamera(28,1,.05,200);
+scene.add(new THREE.HemisphereLight(0xffffff,0x9aa39e,.55));
+const sun=new THREE.DirectionalLight(0xffffff,1.7);sun.position.set(-4,9,6);sun.castShadow=true;
+sun.shadow.mapSize.set(1024,1024);Object.assign(sun.shadow.camera,{left:-4,right:4,top:4,bottom:-4,near:1,far:25});sun.shadow.bias=-.0005;sun.shadow.radius=4;scene.add(sun);
+const fill=new THREE.DirectionalLight(0xdfe9ff,.5);fill.position.set(6,3,-4);scene.add(fill);
+
+function cnv(w,h){const c=document.createElement('canvas');c.width=w;c.height=h;return [c,c.getContext('2d')];}
+function tex(c){const t=new THREE.CanvasTexture(c);t.colorSpace=THREE.SRGBColorSpace;t.anisotropy=Math.min(8,renderer.capabilities.getMaxAnisotropy());return t;}
+const alu=new THREE.MeshStandardMaterial({color:'#dfe3df',metalness:.72,roughness:.3});
+const graph=new THREE.MeshStandardMaterial({color:'#2a302d',metalness:.55,roughness:.45});
+const add=(m,p,parent=scene)=>{if(p)m.position.set(...p);parent.add(m);return m;};
+
+/* ─────────── data ─────────── */
+const CAT={operations:['#111614','#DDE4DF','Operations'],infrastructure:['#1FD67C','#06140d','Infrastructure'],strategy:['#7C93A8','#0c1110','Strategy'],security:['#FF9A2E','#1a0d00','Security'],compliance:['#04703F','#E9ECE8','Compliance'],finance:['#9C4C00','#F4F6F3','Finance']};
+const FILES=[
+ ['OPS·01','operations',6,'Why your infrastructure records are wrong more often than you think'],
+ ['INF·01','infrastructure',5,'What it actually costs when nobody checks the rack'],
+ ['STR·01','strategy',5,'From once-a-year audits to always-on records'],
+ ['SEC·01','security',5,'The security gap your network tools can\'t see'],
+ ['CMP·01','compliance',5,'Getting ready for a SOC 2 audit without the scramble'],
+ ['OPS·02','operations',5,'Your DCIM platform shows a plan. The rack shows what\'s real.'],
+ ['FIN·01','finance',4,'What a wrong inventory actually costs you'],
+ ['INF·02','infrastructure',5,'What we mean when we say a record is "verified"'],
+ ['INF·03','infrastructure',4,'Planning your next rack without guessing at free ports']];
+
+/* ─────────── drawing sheet ─────────── */
+const BW=6.2, BD=4.8;
+function sheetCanvas(){const W=2048,H=Math.round(W*BD/BW),s=W/BW;const [c,g]=cnv(W,H);const X=x=>(x+BW/2)*s,Z=z=>(z+BD/2)*s;
+  g.fillStyle='#F4F6F3';g.fillRect(0,0,W,H);
+  for(let x=-BW/2;x<=BW/2+.01;x+=.2){g.fillStyle='rgba(17,22,20,.05)';g.fillRect(X(x),0,1.2,H);} for(let z=-BD/2;z<=BD/2+.01;z+=.2){g.fillStyle='rgba(17,22,20,.05)';g.fillRect(0,Z(z),W,1.2);}
+  g.strokeStyle='#111614';g.lineWidth=3;g.strokeRect(16,16,W-32,H-32);
+  // drawer travel, dimensioned
+  g.setLineDash([10,8]);g.strokeStyle='#7C93A8';g.lineWidth=2.5;g.strokeRect(X(-.75),Z(-1.75),1.5*s,3.75*s);g.setLineDash([]);
+  g.fillStyle='#4A544F';g.font=`400 20px ${MONO}`;g.fillText('drawer travel · 1500',X(-.72),Z(2.14));
+  g.strokeStyle='#4A544F';g.lineWidth=2;g.beginPath();g.moveTo(X(-.95),Z(-1.75));g.lineTo(X(-.95),Z(2.0));g.stroke();[-1.75,2.0].forEach(z=>{g.beginPath();g.moveTo(X(-1.02),Z(z));g.lineTo(X(-.88),Z(z));g.stroke();});
+  // reading area
+  g.setLineDash([10,8]);g.strokeStyle='#04703F';g.lineWidth=2.5;g.strokeRect(X(1.2),Z(-.5),1.6*s,1.85*s);g.setLineDash([]);
+  g.fillStyle='#04703F';g.fillText('reading area',X(1.22),Z(-.56));
+  // placement marks: the file (top) and the slips (bottom), corner ticks only
+  const corners=(x0,z0,x1,z1)=>{const L=.07*s;g.strokeStyle='#4A544F';g.lineWidth=2;[[x0,z0,1,1],[x1,z0,-1,1],[x0,z1,1,-1],[x1,z1,-1,-1]].forEach(([x,z,dx,dz])=>{g.beginPath();g.moveTo(X(x)+dx*L,Z(z));g.lineTo(X(x),Z(z));g.lineTo(X(x),Z(z)+dz*L);g.stroke();});};
+  corners(1.35,-.31,2.65,.31);corners(1.62,.64,2.38,1.1);
+  g.fillStyle='#4A544F';g.font=`400 18px ${MONO}`;g.fillText('file',X(1.35),Z(.4));g.fillText('record slips · 10',X(1.62),Z(1.2));
+  g.fillStyle='#111614';g.fillRect(W-520,H-120,500,100);g.fillStyle='#DDE4DF';g.font=`500 28px ${MONO}`;g.fillText('RT-IDX · resources',W-500,H-74);
+  g.fillStyle='#93A19A';g.font=`400 20px ${MONO}`;g.fillText('files 001–009 · 1:6',W-500,H-40);return c;}
+const sheetMat=new THREE.MeshStandardMaterial({map:tex(sheetCanvas()),roughness:.9});
+add(new THREE.Mesh(new THREE.BoxGeometry(BW,.2,BD),[alu,alu,sheetMat,alu,alu,alu]),[0,-.1,0]).receiveShadow=true;
+add(new THREE.Mesh(new THREE.BoxGeometry(BW+.14,.04,BD+.14),graph),[0,-.22,0]);
+
+/* ─────────── housing (19" rack-mount, 4U) ─────────── */
+const HW=1.5, HH=.46, HD=2.3, HZ=-.6;
+const HOUSE=new THREE.Group();HOUSE.position.set(0,0,HZ);scene.add(HOUSE);
+const shell=new THREE.MeshStandardMaterial({color:'#262c29',metalness:.5,roughness:.45});
+[[HW,.02,HD,0,HH-.01,0],[HW,.02,HD,0,.01,0],[.02,HH,HD,-HW/2+.01,HH/2,0],[.02,HH,HD,HW/2-.01,HH/2,0],[HW,HH,.02,0,HH/2,-HD/2+.01]].forEach(([w,h,d,x,y,z])=>{const m=add(new THREE.Mesh(new THREE.BoxGeometry(w,h,d),shell),[x,y,z],HOUSE);m.castShadow=true;m.receiveShadow=true;});
+function earCanvas(){const [c,g]=cnv(64,256);g.fillStyle='#dfe3df';g.fillRect(0,0,64,256);g.fillStyle='#2a302d';[40,128,216].forEach(y=>{g.beginPath();g.ellipse(32,y,12,7,0,0,7);g.fill();});return c;}
+const earMat=new THREE.MeshStandardMaterial({map:tex(earCanvas()),metalness:.6,roughness:.35});
+[-1,1].forEach(sx=>add(new THREE.Mesh(new THREE.BoxGeometry(.12,HH,.02),[alu,alu,alu,alu,earMat,alu]),[sx*(HW/2+.06),HH/2,HD/2],HOUSE).castShadow=true);
+// slide rails
+[-1,1].forEach(sx=>add(new THREE.Mesh(new THREE.BoxGeometry(.018,.035,HD-.1),alu),[sx*(HW/2-.03),.2,0],HOUSE));
+
+/* ─────────── drawer ─────────── */
+const DW=1.38, DH=.34, DD=2.12;
+const DRAWER=new THREE.Group();scene.add(DRAWER);
+const trayMat=new THREE.MeshStandardMaterial({color:'#dfe3df',metalness:.55,roughness:.38});
+[[DW,.015,DD,0,.04,0],[.015,DH,DD,-DW/2,DH/2+.035,0],[.015,DH,DD,DW/2,DH/2+.035,0],[DW,DH,.015,0,DH/2+.035,-DD/2]].forEach(([w,h,d,x,y,z])=>{const m=add(new THREE.Mesh(new THREE.BoxGeometry(w,h,d),trayMat),[x,y,z],DRAWER);m.castShadow=true;m.receiveShadow=true;});
+// the rod that holds the cards (a card catalogue detail)
+add(new THREE.Mesh(new THREE.CylinderGeometry(.012,.012,DD-.06,12),alu),[0,.075,0],DRAWER).rotation.x=Math.PI/2;
+function frontCanvas(){const [c,g]=cnv(1024,300);g.fillStyle='#232927';g.fillRect(0,0,1024,300);g.fillStyle='rgba(255,255,255,.05)';g.fillRect(0,0,1024,3);
+  g.fillStyle='#dfe3df';g.fillRect(372,54,280,92);g.fillStyle='#111614';g.font=`500 30px ${MONO}`;g.fillText('resources',398,96);g.fillStyle='#4A544F';g.font=`400 22px ${MONO}`;g.fillText('files 001–009',398,128);
+  g.fillStyle='#93A19A';g.font=`400 18px ${MONO}`;g.fillText('RT-IDX',30,40);g.fillText('4U · 19"',30,270);return c;}
+const front=add(new THREE.Mesh(new THREE.BoxGeometry(HW-.04,HH-.03,.03),[graph,graph,graph,graph,new THREE.MeshStandardMaterial({map:tex(frontCanvas()),metalness:.45,roughness:.45}),graph]),[0,HH/2,DD/2+.015],DRAWER);front.castShadow=true;
+const handle=add(new THREE.Mesh(new THREE.CapsuleGeometry(.018,.46,6,12),alu),[0,.12,DD/2+.075],DRAWER);handle.rotation.z=Math.PI/2;handle.castShadow=true;
+[-1,1].forEach(sx=>add(new THREE.Mesh(new THREE.CylinderGeometry(.014,.014,.05,10),alu),[sx*.25,.12,DD/2+.05],DRAWER).rotation.x=Math.PI/2);
+const led=add(new THREE.Mesh(new THREE.CircleGeometry(.016,20),new THREE.MeshBasicMaterial({color:'#1FD67C',toneMapped:false})),[.6,.36,DD/2+.031],DRAWER);
+
+/* ─────────── cards ─────────── */
+const CW=1.22, CH=.5, CT=.008;
+function wrap(g,text,x,y,maxW,lh){const words=text.split(' ');let line='',yy=y,lines=0;for(const w of words){const t=line?line+' '+w:w;if(g.measureText(t).width>maxW&&line){g.fillText(line,x,yy);yy+=lh;line=w;lines++;}else line=t;}g.fillText(line,x,yy);return lines+1;}
+function faceCanvas(i){const [code,cat,min,title]=FILES[i];const W=1220,H=500;const [c,g]=cnv(W,H);
+  g.fillStyle='#F4F6F3';g.fillRect(0,0,W,H);g.fillStyle='rgba(17,22,20,.06)';for(let y=150;y<H-70;y+=46)g.fillRect(40,y,W-80,2);
+  g.fillStyle='#C23b2e00';g.fillStyle='rgba(194,59,46,.35)';g.fillRect(40,126,W-80,2);
+  g.fillStyle='#111614';g.font=`500 26px ${MONO}`;g.fillText(code,40,58);g.fillStyle='#4A544F';g.font=`400 22px ${MONO}`;g.fillText('file no. '+String(i+1).padStart(3,'0'),40,96);
+  const [bg,fg,label]=CAT[cat];g.font=`500 22px ${MONO}`;const lw=g.measureText(label).width+28;g.fillStyle=bg;g.fillRect(W-40-lw,34,lw,38);g.fillStyle=fg;g.fillText(label,W-26-lw,61);
+  g.fillStyle='#111614';g.font=`500 54px ${SANS}`;wrap(g,title,40,196,W-120,60);
+  g.fillStyle='#4A544F';g.font=`400 22px ${MONO}`;g.fillText(min+' min read',40,H-34);g.fillText('racktrack · resources',W-300,H-34);return c;}
+function tabCanvas(i){const [code,cat]=FILES[i];const [bg,fg]=CAT[cat];const [c,g]=cnv(256,80);g.fillStyle=bg;g.fillRect(0,0,256,80);g.fillStyle=fg;g.font=`500 34px ${MONO}`;g.fillText(code,24,52);return c;}
+const backMat=new THREE.MeshStandardMaterial({color:'#e9ece6',roughness:.9});
+const edgeMat=new THREE.MeshStandardMaterial({color:'#dde2dc',roughness:.9});
+const CARDS=FILES.map((f,i)=>{const grp=new THREE.Group();scene.add(grp);
+  const face=new THREE.MeshStandardMaterial({map:tex(faceCanvas(i)),roughness:.85,toneMapped:false});
+  const body=add(new THREE.Mesh(new THREE.BoxGeometry(CW,CH,CT),[edgeMat,edgeMat,edgeMat,edgeMat,face,backMat]),[0,CH/2,0],grp);body.castShadow=true;body.receiveShadow=true;
+  const tm=new THREE.MeshStandardMaterial({map:tex(tabCanvas(i)),roughness:.7});
+  const tx=-CW/2+.14+(i%5)*.235;
+  const tab=add(new THREE.Mesh(new THREE.BoxGeometry(.22,.07,CT),[tm,tm,tm,tm,tm,tm]),[tx,CH+.035,0],grp);tab.castShadow=true;
+  return {grp,face,tab,tm,body,i,cat:f[1],lift:0,rise:0,dim:0,tx};});
+// slot positions inside the drawer (card 0 = file 001 at the front)
+const slotZ=i=>DD/2-.2-i*.22;
+
+/* ─────────── the 40% stack: ten record slips, four slid out of true ─────────── */
+const SLIP=V3(2.0,0,.87);
+function slipCanvas(bad){const [c,g]=cnv(512,300);g.fillStyle='#F4F6F3';g.fillRect(0,0,512,300);g.fillStyle='#111614';g.font=`500 24px ${MONO}`;g.fillText('R07 · U28',24,44);
+  g.fillStyle='rgba(17,22,20,.12)';for(let y=80;y<280;y+=36)g.fillRect(24,y,464,3);
+  g.fillStyle=bad?'#9C4C00':'#04703F';g.font=`400 22px ${MONO}`;g.fillText(bad?'record ≠ rack':'record = rack',24,270);return c;}
+const slipGood=new THREE.MeshStandardMaterial({map:tex(slipCanvas(false)),roughness:.85,toneMapped:false});
+const slipBad=new THREE.MeshStandardMaterial({map:tex(slipCanvas(true)),roughness:.85,toneMapped:false});
+const BAD=new Set([1,4,6,8]);
+const SLIPS=[...Array(10)].map((_,k)=>{const bad=BAD.has(k);const m=add(new THREE.Mesh(new THREE.BoxGeometry(.62,.012,.36),[edgeMat,edgeMat,bad?slipBad:slipGood,backMat,edgeMat,edgeMat]),[SLIP.x,.006+k*.014,SLIP.z]);m.castShadow=true;m.receiveShadow=true;
+  let e=null;if(bad){e=add(new THREE.LineSegments(new THREE.EdgesGeometry(new THREE.BoxGeometry(.625,.014,.365)),new THREE.LineBasicMaterial({color:'#FF9A2E',transparent:true,opacity:0,toneMapped:false})),null,m);}
+  const dir=((k*37)%7-3)/3;return {m,e,bad,k,dx:bad?(k%2?.1:-.1)+(k%3)*.012:0,dz:bad?.035*(k%2?1:-1):0,rot:bad?.14*(k%2?1:-1):0};});
+
+/* ─────────── tags ─────────── */
+const hud=document.getElementById('hud');const TG={};
+function tag(k,html,cls,fn){const el=document.createElement('div');el.className='tag '+cls;el.innerHTML=`<i></i><span>${html}</span>`;hud.appendChild(el);TG[k]={el,fn,cur:0,t:0};}
+tag('hIdx','<b>The index</b>9 files · 6 teams','ink keep',()=>V3(HW/2+.12,HH,DRAWER.position.z+DD/2));
+tag('h001','<b>File 001</b>start here','link up keep',()=>CARDS[0].tab.getWorldPosition(V3()).add(V3(0,.04,0)));
+tag('f001','<b>File 001</b>operations · 6 min','ink left keep',()=>CARDS[0].grp.localToWorld(V3(-CW/2,CH/2,0)));
+tag('f40','<b>4 in 10</b>records don\'t match the rack','drift keep',()=>V3(SLIP.x+.36,.1,SLIP.z));
+tag('lib','<b>—</b>','link up',()=>{const c=CARDS[libActive<0?0:libActive];return c.tab.getWorldPosition(V3()).add(V3(0,.05,0));});
+
+/* ─────────── scroll → g ─────────── */
+const secF=document.getElementById('featured'),secL=document.getElementById('library');
+function G(){const y=scrollY,vh=innerHeight;const f0=secF.offsetTop,f1=f0+secF.offsetHeight-vh,l0=secL.offsetTop-vh*.35,l1=secL.offsetTop+secL.offsetHeight-vh;
+  const K=[[0,-1],[f0,0],[f1,1],[l0,1.35],[l1,2]];
+  for(let i=0;i<K.length-1;i++){if(y<=K[i+1][0])return lerp(K[i][1],K[i+1][1],clamp((y-K[i][0])/((K[i+1][0]-K[i][0])||1)));}return 2;}
+const CAMS=[[-1,null],[.55,[2.55,4.1,3.5],[1.85,.02,.38]],[1.6,[2.5,3.2,6.0],[-.62,.35,.3]]];
+let vw=0,vh=0,mobile=false;
+function resize(){vw=innerWidth;vh=innerHeight;mobile=vw<760;renderer.setSize(vw,vh,false);camera.aspect=vw/vh;camera.updateProjectionMatrix();}
+addEventListener('resize',resize);resize();
+const cp=V3(3.4,3.2,5.2),ct=V3(.3,.3,.2);
+const clock=new THREE.Clock();
+const RS=window.RS||{filter:'all',active:-1,hover:-1};
+let libActive=-1;const cta=document.getElementById('cta');
+const Q0=new THREE.Quaternion(),Qflat=new THREE.Quaternion().setFromEuler(new THREE.Euler(-Math.PI/2,0,0)),Qtilt=new THREE.Quaternion().setFromEuler(new THREE.Euler(-.5,.42,0,'YXZ'));
+
+function frame(){
+  requestAnimationFrame(frame);
+  const dt=Math.min(clock.getDelta(),.05),time=clock.elapsedTime;
+  const show=cta.getBoundingClientRect().top>0;
+  if(show!==frame.vis){frame.vis=show;canvas.style.visibility=hud.style.visibility=show?'visible':'hidden';}if(!show)return;
+  const g=G();
+  // camera
+  const sway=reduce?0:Math.sin(time*.13)*.12;
+  let Pp=V3(Math.sin(.62+sway)*5.6,3.3,Math.cos(.62+sway)*5.6),Tt=V3(.35,.28,.25);
+  for(let i=1;i<CAMS.length;i++){const [gi,p,t]=CAMS[i];const gp=CAMS[i-1][0];const k=smooth(gp+(gi-gp)*.25,gi-(gi-gp)*.1,g);if(k>0){Pp.lerp(V3(...p),k);Tt.lerp(V3(...t),k);}}
+  if(mobile){Pp.sub(Tt).multiplyScalar(1.45).add(Tt);}
+  const f=(reduce||SNAP)?1:1-Math.pow(.02,dt);cp.lerp(Pp,f);ct.lerp(Tt,f);camera.position.copy(cp);camera.lookAt(ct);
+  camera.setViewOffset(vw,vh,mobile?0:-(.63-.5)*vw,mobile?vh*.2:0,vw,vh);
+
+  // drawer travel: half open in the hero, fully open in the library
+  const open=lerp(.55,1.0,smooth(1.05,1.45,g));
+  DRAWER.position.set(0,0,HZ+open*1.5);
+  led.material.color.set(Math.sin(time*2.4)>-.2||reduce?'#1FD67C':'#0b3a22');
+
+  // featured: file 001 comes out and lies flat in the reading area; four slips slide out of true
+  const fo=smooth(.02,.55,g)*(1-smooth(1.02,1.3,g));
+  const drift=smooth(.35,.8,g)*(1-smooth(1.2,1.4,g));
+  // library state
+  const wLib=smooth(1.2,1.45,g);
+  const want=RS.hover>=0?RS.hover:RS.active;
+  libActive=wLib>.5?want:-1;
+  CARDS.forEach((c,i)=>{
+    const match=RS.filter==='all'||c.cat===RS.filter;
+    c.rise=lerp(c.rise,wLib>.5?(match?(RS.filter==='all'?0:.07):-.13):0,reduce?1:1-Math.pow(.002,dt));
+    c.lift=lerp(c.lift,libActive===i?1:0,reduce?1:1-Math.pow(.001,dt));
+    c.dim=lerp(c.dim,wLib>.5&&!match?1:0,reduce?1:1-Math.pow(.01,dt));
+    const inDrawer=DRAWER.localToWorld(V3(c.lift*.12,.05+c.rise+c.lift*.5,slotZ(i)+c.lift*.1));
+    let q=Q0.clone().slerp(Qtilt,c.lift);
+    if(i===0&&fo>0){const up=inDrawer.clone();up.y+=.62;const desk=V3(2.0,.012,CH/2);
+      const a=smooth(0,.4,fo),b=smooth(.35,1,fo);const p=inDrawer.clone().lerp(up,a).lerp(desk,b);p.y+=Math.sin(Math.PI*b)*.35;
+      c.grp.position.copy(p);q=Q0.clone().slerp(Qflat,b);}
+    else c.grp.position.copy(inDrawer);
+    c.grp.quaternion.copy(q);
+    const d=c.dim;c.face.color.setScalar(1-d*.35);c.tm.color.setScalar(1-d*.55);
+  });
+  SLIPS.forEach(s=>{const t=reduce?drift:drift;s.m.position.set(SLIP.x+s.dx*t,.006+s.k*.0135,SLIP.z+s.dz*t);s.m.rotation.y=s.rot*t;if(s.e)s.e.material.opacity=t;});
+
+  // tags
+  const wHero=1-smooth(-.5,-.05,g),wF=smooth(.3,.6,g)*(1-smooth(1.0,1.2,g));
+  if(libActive>=0){const F=FILES[libActive];const html=`<b>${F[0]}</b>${CAT[F[1]][2].toLowerCase()} · ${F[2]} min read`;if(TG.lib.el._h!==html){TG.lib.el._h=html;TG.lib.el.querySelector('span').innerHTML=html;}}
+  const vis={hIdx:wHero,h001:wHero,f001:wF,f40:wF*smooth(.5,.85,g),lib:(libActive>=0?1:0)*wLib*CARDS[Math.max(0,libActive)].lift};
+  const v=V3();
+  for(const [n,t] of Object.entries(TG)){t.t=vis[n]||0;t.cur=(reduce||SNAP)?t.t:lerp(t.cur,t.t,1-Math.pow(.001,dt));
+    if(t.cur<.01){if(t.op!=='0'){t.op='0';t.el.style.opacity=0;}continue;}
+    v.copy(t.fn());v.project(camera);if(v.z>1){if(t.op!=='0'){t.op='0';t.el.style.opacity=0;}continue;}const x=(v.x+1)/2*vw,y=(1-v.y)/2*vh;const cl=t.el.classList;if(!t.sz||t.sz.h!==t.el._h){t.sz={w:t.el.offsetWidth,h:t.el._h,hh:t.el.offsetHeight};}const ew=t.sz.w,eh=t.sz.hh;
+    const tx=clamp(cl.contains('left')?x-ew+3.5:cl.contains('up')?x-ew/2:x-3.5,8,vw-ew-8),ty=cl.contains('up')?y-eh+3.5:y-eh/2;
+    const tf=`translate3d(${tx.toFixed(1)}px,${ty.toFixed(1)}px,0)`,op=t.cur.toFixed(2);if(tf!==t.tf){t.tf=tf;t.el.style.transform=tf;}if(op!==t.op){t.op=op;t.el.style.opacity=op;}}
+  renderer.render(scene,camera);
+}
+document.fonts.ready.then(()=>{Object.values(TG).forEach(t=>t.sz=null);sheetMat.map.image=sheetCanvas();sheetMat.map.needsUpdate=true;
+  CARDS.forEach(c=>{c.face.map.image=faceCanvas(c.i);c.face.map.needsUpdate=true;c.tm.map.image=tabCanvas(c.i);c.tm.map.needsUpdate=true;});
+  front.material[4].map.image=frontCanvas();front.material[4].map.needsUpdate=true;
+  slipGood.map.image=slipCanvas(false);slipGood.map.needsUpdate=true;slipBad.map.image=slipCanvas(true);slipBad.map.needsUpdate=true;});
+requestAnimationFrame(frame);
+</script>
+<!--GLJS-END-->
+<script src="/design-system/nav.js" defer></script>
+</body>
+</html>

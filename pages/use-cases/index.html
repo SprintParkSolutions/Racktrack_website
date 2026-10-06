@@ -1,0 +1,625 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Use cases · RackTrack</title>
+<meta name="description" content="One rack sweep, six useful answers. How leaders, network, security, compliance, on-call and migration teams use the same RackTrack record.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap">
+<link rel="stylesheet" href="/design-system/base.css">
+<style>
+/* RackTrack · Use cases — design-system/ tokens. Protagonist: Hall B, a 56-cabinet scale model (maquette) that each team re-lights its own way. */
+:root{
+  color-scheme: light;
+  
+}
+*{box-sizing:border-box}
+html{background:var(--paper)}
+body{margin:0;background:var(--paper);color:var(--fg);font:400 16px/1.5 var(--sans);-webkit-font-smoothing:antialiased;overflow-x:hidden}
+a{color:inherit}
+::selection{background:var(--link);color:#06140d}
+:focus-visible{outline:2px solid var(--link-ink);outline-offset:3px;border-radius:2px}
+body::before{content:"";position:fixed;inset:0;z-index:0;pointer-events:none;background:radial-gradient(60% 55% at 64% 52%,rgba(255,255,255,.6),transparent 72%)}
+
+#stage{position:fixed;inset:0;z-index:1;display:block;width:100%;height:100%;pointer-events:none}
+#scrim{position:fixed;inset:0;z-index:1;pointer-events:none;opacity:0;background:linear-gradient(90deg,var(--paper) 0,rgba(233,236,232,.9) 25%,rgba(233,236,232,0) 46%)}
+#hud{position:fixed;inset:0;z-index:3;pointer-events:none;overflow:hidden}
+main{position:relative;z-index:2}
+
+/* nav */
+.nav{position:fixed;left:0;right:0;top:0;z-index:10;display:flex;align-items:center;gap:28px;height:calc(var(--nav-h) + env(safe-area-inset-top,0px));padding:env(safe-area-inset-top,0px) var(--bleed) 0;background:linear-gradient(var(--paper) 55%,transparent)}
+.brand{display:flex;align-items:center;gap:10px;text-decoration:none;font:700 17px/1 var(--sans);letter-spacing:-.02em;color:var(--ink)}
+.brand img{width:26px;height:26px;border-radius:5px;display:block}
+.nav ul{display:flex;gap:24px;list-style:none;margin:0 0 0 auto;padding:0}
+.nav ul a{font:500 14px/1 var(--sans);text-decoration:none;color:var(--ink-2)}
+.nav ul a:hover{color:var(--ink)}
+.nav ul a[aria-current="page"]{color:var(--ink);text-decoration:underline;text-decoration-color:var(--link);text-decoration-thickness:2px;text-underline-offset:6px}
+.btn{display:inline-flex;align-items:center;gap:10px;height:46px;padding:0 20px;border-radius:3px;border:1px solid var(--fg);font:500 15px/1 var(--sans);text-decoration:none;cursor:pointer;background:transparent;color:var(--fg);transition:background .2s,color .2s,border-color .2s}
+.btn.solid{background:var(--fg);color:var(--bg)}
+.btn.solid:hover{background:var(--link-ink);border-color:var(--link-ink);color:#fff}
+.btn:not(.solid){border-color:var(--line)}
+.btn:not(.solid):hover{border-color:var(--fg)}
+.btn .led{width:7px;height:7px;border-radius:50%;background:var(--link);box-shadow:0 0 8px var(--link)}
+.nav .btn{height:38px;padding:0 16px;font-size:14px}
+
+
+/* type */
+.ch{position:relative;padding-inline:var(--bleed)}
+.copy{max-width:30rem;}
+h1,h2,h3{margin:0 0 20px;text-wrap:balance}
+h1{max-width:9ch}
+h2{max-width:13ch}
+.lede{color:var(--fg-2);max-width:25rem;margin:0 0 28px}
+.k{margin:0 0 14px;font:400 12px/1 var(--mono);color:var(--link-ink)}
+.actions{display:flex;flex-wrap:wrap;gap:12px}
+
+/* tags */
+.tag{position:absolute;left:0;top:0;display:flex;align-items:center;opacity:0;will-change:transform,opacity;white-space:nowrap}
+.tag::before{content:"";width:7px;height:7px;border-radius:50%;background:var(--c,var(--ink));transform:translate(-3.5px,0);box-shadow:0 0 0 3px color-mix(in oklab,var(--c,var(--ink)) 22%,transparent)}
+.tag i{display:block;width:24px;height:1px;background:var(--c,var(--ink))}
+.tag span{padding:6px 9px;background:var(--paper-2);border:1px solid var(--c,var(--ink));border-radius:2px;font:400 11.5px/1.35 var(--mono);color:var(--ink);box-shadow:0 14px 28px -20px rgba(17,22,20,.45)}
+.tag span b{display:block;font:600 15px/1.15 var(--sans);letter-spacing:-.02em;margin-bottom:2px}
+.tag.left{flex-direction:row-reverse}.tag.left::before{transform:translate(3.5px,0)}
+.tag.up{flex-direction:column-reverse}.tag.up i{width:1px;height:22px}.tag.up::before{transform:translate(0,3.5px)}
+.tag.link{--c:var(--link)} .tag.link span b{color:var(--link-ink)}
+.tag.drift{--c:var(--drift)} .tag.drift span b{color:var(--drift-ink)}
+.tag.rec{--c:var(--record)} .tag.rec span b{color:var(--record-ink)}
+.tag.ink{--c:var(--ink)}
+
+/* 00 · hero */
+#hero{min-height:100vh;display:flex;align-items:center;padding-top:var(--nav-h)}
+.roles-chips{display:flex;flex-wrap:wrap;gap:8px;margin-top:6px;max-width:30rem}
+.roles-chips a{font:400 12px/1 var(--mono);text-decoration:none;color:var(--ink);border:1px solid var(--rule);background:rgba(244,246,243,.7);padding:9px 11px;border-radius:2px;display:flex;gap:8px;align-items:center;transition:border-color .2s,background .2s}
+.roles-chips a i{font-style:normal;color:var(--ink-2)}
+.roles-chips a:hover{border-color:var(--link-ink);background:var(--paper-2)}
+.hint{margin-top:34px;font:400 12px/1.4 var(--mono);color:var(--ink-2);display:flex;align-items:center;gap:10px}
+.hint::before{content:"";width:1px;height:28px;background:linear-gradient(var(--link-ink),transparent);animation:drip 1.8s ease-in-out infinite}
+@keyframes drip{0%{transform:scaleY(.2);transform-origin:top}50%{transform:scaleY(1);transform-origin:top}100%{transform:scaleY(.2);transform-origin:bottom}}
+
+/* 01 · six lenses (pinned) */
+#roles{min-height:760vh}
+.rpin{position:sticky;top:0;height:100vh}
+.rcopy{position:absolute;left:var(--gutter);top:50%;transform:translateY(-46%);width:min(31rem,42vw);height:470px}
+.role{position:absolute;inset:0;opacity:0;transform:translateY(16px);transition:opacity .5s,transform .6s var(--ease);pointer-events:none}
+.role.on{opacity:1;transform:none;pointer-events:auto}
+.role .who{font:400 12px/1.3 var(--mono);color:var(--link-ink);margin:0 0 16px;display:flex;gap:10px}
+.role .who b{font-weight:400;color:var(--ink-2)}
+.role q{display:block;font:500 clamp(28px,2.9vw,44px)/1.05 var(--sans);letter-spacing:-.035em;quotes:"\201C" "\201D";margin:0 0 26px;max-width:14ch;text-wrap:balance}
+.stat{display:flex;align-items:baseline;gap:12px;border-top:1px solid var(--rule);padding-top:16px;margin-bottom:12px}
+.stat b{font:500 clamp(40px,4vw,60px)/1 var(--sans);letter-spacing:-.045em}
+.stat span{font:400 12.5px/1.35 var(--mono);color:var(--ink-2);max-width:12rem}
+.role.dr .stat b{color:var(--drift-ink)}
+.role p{margin:0 0 22px;color:var(--ink-2);max-width:26rem}
+.role .go{font:500 15px/1 var(--sans);text-decoration:none;display:inline-flex;gap:10px;align-items:center;border-bottom:1px solid var(--ink);padding-bottom:4px}
+.role .go:hover{color:var(--link-ink);border-color:var(--link-ink)}
+.lens{position:absolute;right:var(--gutter);top:50%;transform:translateY(-50%);display:flex;flex-direction:column;gap:6px;z-index:4}
+.lens button{all:unset;cursor:pointer;display:flex;align-items:center;gap:10px;justify-content:flex-end;font:400 11.5px/1 var(--mono);color:var(--ink-2);padding:6px 0}
+.lens button i{width:18px;height:2px;background:var(--rule);transition:width .3s var(--ease),background .3s}
+.lens button span{opacity:0;transform:translateX(6px);transition:opacity .3s,transform .3s}
+.lens button:hover span,.lens button.on span{opacity:1;transform:none}
+.lens button.on{color:var(--ink)} .lens button.on i{width:34px;background:var(--link-ink)}
+.lens button:focus-visible{outline:2px solid var(--link-ink);outline-offset:3px}
+.rfoot{position:absolute;left:var(--gutter);bottom:26px;font:400 11.5px/1 var(--mono);color:var(--ink-2);display:flex;gap:14px;align-items:center;}
+.rfoot .bar{display:flex;gap:4px}.rfoot .bar i{width:26px;height:3px;background:var(--rule);position:relative;overflow:hidden}
+.rfoot .bar i b{position:absolute;inset:0 auto 0 0;width:0;background:var(--link-ink)}
+
+/* 02 · index */
+#index{padding-block:var(--band-y);background:var(--paper);position:relative;z-index:2}
+.ix{max-width:1720px;margin-inline:auto;}
+.ix .head{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,24rem);gap:40px;align-items:end;margin-bottom:40px}
+.ix .head .lede{margin:0}
+.rows{list-style:none;margin:0;padding:0;border-top:1px solid var(--rule)}
+.rows a{display:grid;grid-template-columns:56px minmax(0,1.1fr) minmax(0,1.4fr) minmax(0,.9fr) 40px;gap:24px;align-items:center;padding:24px 0;border-bottom:1px solid var(--rule);text-decoration:none;position:relative;transition:padding .35s var(--ease)}
+.rows a::before{content:"";position:absolute;left:0;top:-1px;bottom:-1px;width:0;background:linear-gradient(90deg,rgba(31,214,124,.12),transparent);transition:width .45s var(--ease)}
+.rows a:hover::before,.rows a:focus-visible::before{width:100%}
+.rows a:hover{padding-left:14px}
+.rows .n{font:400 12px/1 var(--mono);color:var(--ink-2)}
+.rows .r{font:500 21px/1.15 var(--sans);letter-spacing:-.02em}
+.rows .q{color:var(--ink-2);font-size:16px}
+.rows .s{font:400 13px/1.3 var(--mono)} .rows .s b{font-weight:500;color:var(--link-ink)} .rows .s b.a{color:var(--drift-ink)}
+.rows .ar{font:400 18px/1 var(--sans);color:var(--ink-2);transition:transform .3s var(--ease),color .3s}
+.rows a:hover .ar{transform:translateX(6px);color:var(--link-ink)}
+
+/* 03 · cta */
+#cta{padding-block:var(--band-y);text-align:center;background:var(--paper);position:relative;z-index:2}
+#cta h2{margin-inline:auto;max-width:14ch}
+#cta .lede{margin-inline:auto}
+#cta .actions{justify-content:center}
+
+/* footer */
+.foot{position:relative;z-index:2;padding:var(--band-y) var(--bleed) calc(var(--s8) + env(safe-area-inset-bottom,0px));background:var(--paper);border-top:1px solid var(--rule);display:grid;grid-template-columns:var(--copy-w) repeat(3,minmax(0,1fr));gap:28px;font-size:14px;color:var(--ink-2)}
+.foot b{display:block;font:500 13px/1 var(--sans);color:var(--link-ink);margin-bottom:16px}
+.foot nav{display:flex;flex-direction:column;gap:11px}
+.foot nav a{color:var(--ink);text-decoration:none;font-size:15px}
+.foot nav a:hover{color:var(--link-ink)}
+.foot p{margin:0 0 11px;color:var(--ink);font-size:15px;line-height:1.45}
+.foot p a{text-decoration:none}.foot p a:hover{color:var(--link-ink)}
+.foot-brand .brand{margin-bottom:16px}
+.foot-brand p{color:var(--ink-2);max-width:18rem}
+.foot .fine{grid-column:1/-1;display:flex;justify-content:space-between;flex-wrap:wrap;gap:12px;margin-top:16px;padding-top:18px;border-top:1px solid var(--rule);font-size:13px}
+.foot .legal{display:flex;gap:18px;flex-wrap:wrap}.foot .legal a{color:var(--ink-2);text-decoration:none}.foot .legal a:hover{color:var(--link-ink)}
+.foot .social{display:flex;gap:18px}
+.foot .social a{color:var(--ink-2);text-decoration:none}
+
+.no-webgl #stage,.no-webgl #hud{display:none}
+@media (max-width:1180px){ .foot{grid-template-columns:repeat(2,minmax(0,1fr))} .rows a{grid-template-columns:40px minmax(0,1fr) minmax(0,1fr) 30px}.rows .q{display:none} }
+@media (max-width:960px){ .ix .head{grid-template-columns:1fr} .lens{display:none} }
+@media (max-width:760px){
+  #scrim{background:linear-gradient(0deg,var(--paper) 0,rgba(233,236,232,.92) 40%,rgba(233,236,232,0) 60%)}
+  #hud .tag:not(.keep){display:none}
+  #hero{align-items:flex-end;padding-top:50vh;padding-bottom:6vh}
+  .rcopy{left:var(--gutter);right:var(--gutter);width:auto;top:auto;bottom:5vh;transform:none;height:330px}
+  .role q{font-size:26px;margin-bottom:14px} .stat b{font-size:34px} .role p{display:none}
+  .rfoot{display:none}
+  .rows a{grid-template-columns:32px minmax(0,1fr) 24px;gap:12px}.rows .s{grid-column:2}
+}
+@media (max-width:560px){ .foot{grid-template-columns:repeat(2,minmax(0,1fr));gap:var(--s6) var(--s5);padding-block:var(--band-y-sm) calc(var(--s6) + env(safe-area-inset-bottom,0px))} }
+@media (prefers-reduced-motion:reduce){ .role,.rows a,.rows a::before,.lens button i{transition:none!important} .hint::before{animation:none} }
+</style>
+</head>
+<body>
+
+<canvas id="stage" aria-hidden="true"></canvas>
+<div id="scrim" aria-hidden="true"></div>
+<div id="hud" aria-hidden="true"></div>
+
+<nav class="nav" aria-label="Primary">
+  <a class="brand" href="/"><img alt="" src="/design-system/assets/Logos/racktrack-mark.jpg">RackTrack</a>
+  <ul>
+    <li><a href="/pages/why-racktrack/">Why RackTrack</a></li>
+    <li><a href="/pages/solutions/">Solutions</a></li>
+    <li><a href="/pages/use-cases/" aria-current="page">Use cases</a></li>
+    <li><a href="/pages/resources/">Resources</a></li>
+    <li><a href="/pages/trust-security/">Trust</a></li>
+    <li><a href="/pages/about-us/">About</a></li>
+    <li><a href="/pages/sign-in/">Sign in</a></li>
+  </ul>
+  <a class="btn solid" href="/pages/contact-us/"><span class="led"></span>Book a sweep</a>
+</nav>
+
+<main>
+  <section class="ch" id="hero">
+    <div class="copy">
+      <h1>One sweep. Six answers</h1>
+      <p class="lede">A phone sweep captures the hall once. Each team reads the same record for the question it owns.</p>
+      <nav class="roles-chips" aria-label="Jump to a team">
+        <a href="#roles" data-go="0"><i>01</i>Leaders</a><a href="#roles" data-go="1"><i>02</i>Network</a><a href="#roles" data-go="2"><i>03</i>Security</a>
+        <a href="#roles" data-go="3"><i>04</i>Compliance</a><a href="#roles" data-go="4"><i>05</i>On-call</a><a href="#roles" data-go="5"><i>06</i>M&amp;A</a>
+      </nav>
+      <p class="hint">Hall B · 56 cabinets · scroll to see it six ways</p>
+    </div>
+  </section>
+
+  <section class="ch" id="roles" aria-label="Six teams, one record">
+    <div class="rpin">
+      <div class="rcopy" id="rcopy">
+        <article class="role on"><p class="who">01<b>Infrastructure &amp; data center leaders</b></p>
+          <q>Just tell me what's actually installed, everywhere.</q>
+          <div class="stat"><b data-count="47">47</b><span>of 56 cabinets swept this week</span></div>
+          <p>One source of truth across every site, row and rack, reconciled continuously.</p>
+          <a class="go" href="/pages/use-cases/infrastructure-data-center-leaders/">See their case →</a></article>
+        <article class="role"><p class="who">02<b>Network architects &amp; engineers</b></p>
+          <q>Does the wiring actually match the diagram?</q>
+          <div class="stat"><b>24 + 4</b><span>ports mapped per switch</span></div>
+          <p>Port-level topology that matches the cables you can actually touch.</p>
+          <a class="go" href="/pages/use-cases/network-architects-engineers/">See their case →</a></article>
+        <article class="role dr"><p class="who">03<b>Security &amp; vulnerability teams</b></p>
+          <q>What's plugged in that we don't know about?</q>
+          <div class="stat"><b>2</b><span>devices missing from the CMDB</span></div>
+          <p>Every physical device, including the ones agents can't reach.</p>
+          <a class="go" href="/pages/use-cases/security-vulnerability-teams/">See their case →</a></article>
+        <article class="role"><p class="who">04<b>Compliance &amp; audit owners</b></p>
+          <q>Can we actually prove this record is real?</q>
+          <div class="stat"><b>09:14</b><span>sweep timestamp on every record</span></div>
+          <p>Every record timestamped, reconciled against your CMDB and ready to export.</p>
+          <a class="go" href="/pages/use-cases/compliance-audit-owners/">See their case →</a></article>
+        <article class="role"><p class="who">05<b>Incident responders &amp; on-call</b></p>
+          <q>Where do I need to go, right now?</q>
+          <div class="stat"><b>B-06 / U35</b><span>located to the rack unit</span></div>
+          <p>Find the device, and the port, before you open the door.</p>
+          <a class="go" href="/pages/use-cases/incident-responders-on-call/">See their case →</a></article>
+        <article class="role dr"><p class="who">06<b>M&amp;A &amp; migration teams</b></p>
+          <q>What did we actually just buy?</q>
+          <div class="stat"><b>4</b><span>CMDB deltas on one cabinet</span></div>
+          <p>Walk the rows once. Inventory, topology and a reconciliation report follow.</p>
+          <a class="go" href="/pages/use-cases/m-a-migration-teams/">See their case →</a></article>
+      </div>
+      <div class="lens" id="lens" aria-label="Choose a team">
+        <button type="button" data-go="0"><span>Leaders</span><i></i></button><button type="button" data-go="1"><span>Network</span><i></i></button>
+        <button type="button" data-go="2"><span>Security</span><i></i></button><button type="button" data-go="3"><span>Compliance</span><i></i></button>
+        <button type="button" data-go="4"><span>On-call</span><i></i></button><button type="button" data-go="5"><span>M&amp;A</span><i></i></button>
+      </div>
+      <div class="rfoot" aria-hidden="true"><span class="bar"><i><b></b></i><i><b></b></i><i><b></b></i><i><b></b></i><i><b></b></i><i><b></b></i></span><span id="rNum">1 / 6</span><span>· same hall, same sweep</span></div>
+    </div>
+  </section>
+
+  <section class="ch" id="index">
+    <div class="ix">
+      <div class="head"><h2>Find your team</h2><p class="lede">Every case starts the same way: a phone walks the rack. What each team gets back is different.</p></div>
+      <ol class="rows">
+        <li><a href="/pages/use-cases/infrastructure-data-center-leaders/"><span class="n">01</span><span class="r">Infrastructure &amp; data center leaders</span><span class="q">"Just tell me what's actually installed, everywhere."</span><span class="s"><b>47 / 56</b> cabinets swept</span><span class="ar">→</span></a></li>
+        <li><a href="/pages/use-cases/network-architects-engineers/"><span class="n">02</span><span class="r">Network architects &amp; engineers</span><span class="q">"Does the wiring actually match the diagram?"</span><span class="s"><b>24 + 4</b> ports per switch</span><span class="ar">→</span></a></li>
+        <li><a href="/pages/use-cases/security-vulnerability-teams/"><span class="n">03</span><span class="r">Security &amp; vulnerability teams</span><span class="q">"What's plugged in that we don't know about?"</span><span class="s"><b class="a">2</b> devices, no agent</span><span class="ar">→</span></a></li>
+        <li><a href="/pages/use-cases/compliance-audit-owners/"><span class="n">04</span><span class="r">Compliance &amp; audit owners</span><span class="q">"Can we actually prove this record is real?"</span><span class="s"><b>09:14</b> on every record</span><span class="ar">→</span></a></li>
+        <li><a href="/pages/use-cases/incident-responders-on-call/"><span class="n">05</span><span class="r">Incident responders &amp; on-call</span><span class="q">"Where do I need to go, right now?"</span><span class="s"><b>B-06 / U35</b> located</span><span class="ar">→</span></a></li>
+        <li><a href="/pages/use-cases/m-a-migration-teams/"><span class="n">06</span><span class="r">M&amp;A &amp; migration teams</span><span class="q">"What did we actually just buy?"</span><span class="s"><b class="a">4</b> CMDB deltas, one cabinet</span><span class="ar">→</span></a></li>
+      </ol>
+    </div>
+  </section>
+
+  <section class="ch" id="cta">
+    <h2>Bring the pressure you own. We'll start at the rack</h2>
+    <p class="lede">One guided sweep gives your team a more defensible place to make its next decision.</p>
+    <div class="actions">
+      <a class="btn solid" href="/pages/contact-us/"><span class="led"></span>Book a sweep</a>
+      <a class="btn" href="/pages/solutions/">How it works</a>
+    </div>
+  </section>
+
+  <footer class="foot">
+    <div class="foot-brand">
+      <a class="brand" href="/"><img alt="" src="/design-system/assets/Logos/racktrack-mark.jpg">RackTrack</a>
+      <p>Physical infrastructure intelligence for data centers.</p>
+    </div>
+    <nav aria-label="Platform"><b>Platform</b>
+      <a href="/pages/why-racktrack/">Why RackTrack</a><a href="/pages/solutions/">Solutions</a><a href="/pages/use-cases/">Use cases</a><a href="/pages/trust-security/">Trust &amp; security</a></nav>
+    <nav aria-label="Company"><b>Company</b>
+      <a href="/pages/resources/">Resources</a><a href="/pages/about-us/">About us</a><a href="/pages/contact-us/">Contact us</a></nav>
+    <div><b>Contact</b>
+      <p><a href="mailto:info@racktrack.ai">info@racktrack.ai</a></p><p><a href="tel:+18608782448">+1 (860) 878 2448</a></p><p>85 Felt Rd, Suite #604<br>South Windsor, CT 06074</p></div>
+    <div class="fine">
+      <span>© 2026 RackTrack Inc. · Patent pending</span>
+      <span class="legal"><a href="/pages/legal/privacy-policy/">Privacy</a><a href="/pages/legal/terms-of-use/">Terms</a><a href="/pages/legal/cookie-policy/">Cookies</a><a href="/pages/legal/data-we-collect/">Data we collect</a><a href="/pages/legal/third-party-services/">Third parties</a></span>
+      <span class="social"><a href="https://www.linkedin.com/company/racktrack/" rel="noopener" target="_blank">LinkedIn</a><a href="https://www.instagram.com/racktrack_inc/" rel="noopener" target="_blank">Instagram</a><a href="https://www.facebook.com/share/18depF5xzA/" rel="noopener" target="_blank">Facebook</a></span>
+    </div>
+  </footer>
+</main>
+
+<script type="importmap">
+{ "imports": {
+  "three": "https://cdn.jsdelivr.net/npm/three@0.170.0/build/three.module.js",
+  "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.170.0/examples/jsm/"
+} }
+</script>
+<!--DOMJS-START-->
+<script>
+/* ───── Use cases: role copy, lens rail, chips, counters (no WebGL needed) ───── */
+(()=>{
+const reduce=matchMedia('(prefers-reduced-motion: reduce)').matches;
+const clamp=(x,a=0,b=1)=>Math.min(b,Math.max(a,x));
+const $=s=>document.querySelector(s), $$=s=>[...document.querySelectorAll(s)];
+const sec=$('#roles'), roles=$$('#rcopy .role'), lens=$$('#lens button'), bars=$$('.rfoot .bar i b'), rNum=$('#rNum'), cnt=$('[data-count]');
+const rOf=()=>{const r=sec.getBoundingClientRect();return -r.top/(r.height-innerHeight)*6;};
+window.UC={r:rOf};
+const go=k=>{const r=sec.getBoundingClientRect();const y=scrollY+r.top+(r.height-innerHeight)*((k+.45)/6);scrollTo({top:y,behavior:reduce?'auto':'smooth'});};
+lens.forEach(b=>b.addEventListener('click',()=>go(+b.dataset.go)));
+$$('.roles-chips a').forEach(a=>a.addEventListener('click',e=>{e.preventDefault();go(+a.dataset.go);}));
+let cur=-1;
+function frame(){
+  const vh=innerHeight, S=scrollY/(document.documentElement.scrollHeight-vh||1);
+  const r=rOf(), k=clamp(Math.floor(r+.02),0,5);
+  if(k!==cur){cur=k;roles.forEach((e,i)=>e.classList.toggle('on',i===k));lens.forEach((b,i)=>b.classList.toggle('on',i===k));rNum.textContent=(k+1)+' / 6';}
+  bars.forEach((b,i)=>b.style.width=(clamp(r-i)*100)+'%');
+  cnt.textContent=Math.round(47*(reduce?1:clamp((r-.05)/.55)));
+  requestAnimationFrame(frame);
+}
+requestAnimationFrame(frame);
+})();
+</script>
+<!--DOMJS-END-->
+<!--GLJS-START-->
+<script type="module">
+/* ═════════════ Use cases · 3D ═════════════
+   Hall B: a 1:50 scale model of a 56-cabinet data hall on a drawing-sheet plinth.
+   The hero builds it and a sweep walks the aisles. Each of the six teams then re-lights the same model:
+   Leaders (coverage fills in) · Network (overhead trays and drops) · Security (agent rings; two cabinets with none)
+   Compliance (timestamp slips stamp down) · On-call (a path from the door to B-06, U35 slides out)
+   M&A (an unknown hall of dashed ghosts is baselined into solid cabinets; one cabinet carries 4 deltas).       */
+import * as THREE from 'three';
+import { RoomEnvironment } from 'three/addons/environments/RoomEnvironment.js';
+
+const reduce=matchMedia('(prefers-reduced-motion: reduce)').matches;
+const SNAP=location.search.includes('snap');
+const clamp=(x,a=0,b=1)=>Math.min(b,Math.max(a,x));
+const smooth=(a,b,x)=>{const t=clamp((x-a)/(b-a));return t*t*(3-2*t)};
+const lerp=(a,b,t)=>a+(b-a)*t;
+const C=h=>new THREE.Color(h);
+const COL={link:C('#1FD67C'),linkInk:C('#04703F'),drift:C('#FF9A2E'),record:C('#7C93A8'),body:C('#d6dbd7'),top:C('#e7ebe7'),paper:C('#F4F6F3'),dim:C('#eef1ee'),ink:C('#111614')};
+const MONO='"JetBrains Mono", monospace', SANS='"Inter", sans-serif';
+
+const canvas=document.getElementById('stage');
+let renderer;
+try{ renderer=new THREE.WebGLRenderer({canvas,antialias:true,alpha:true,powerPreference:'high-performance'}); }
+catch(e){ document.documentElement.classList.add('no-webgl'); throw e; }
+renderer.setPixelRatio(SNAP?1:Math.min(devicePixelRatio,2));
+renderer.setClearColor(0x000000,0);
+renderer.toneMapping=THREE.ACESFilmicToneMapping; renderer.toneMappingExposure=1.02;
+renderer.outputColorSpace=THREE.SRGBColorSpace;
+renderer.shadowMap.enabled=true; renderer.shadowMap.type=SNAP?THREE.PCFShadowMap:THREE.PCFSoftShadowMap;
+const scene=new THREE.Scene();
+scene.environment=new THREE.PMREMGenerator(renderer).fromScene(new RoomEnvironment(),0.04).texture; scene.environmentIntensity=.8;
+const camera=new THREE.PerspectiveCamera(28,1,.1,200);
+scene.add(new THREE.HemisphereLight(0xffffff,0x9aa39e,.55));
+const sun=new THREE.DirectionalLight(0xffffff,1.9); sun.position.set(-5,11,7); sun.castShadow=true;
+sun.shadow.mapSize.set(SNAP?1024:2048,SNAP?1024:2048); Object.assign(sun.shadow.camera,{left:-7,right:7,top:6,bottom:-6,near:1,far:30}); sun.shadow.bias=-.0006; sun.shadow.radius=4; scene.add(sun);
+const fill=new THREE.DirectionalLight(0xdfe9ff,.5); fill.position.set(6,4,-6); scene.add(fill);
+
+function cnv(w,h){const c=document.createElement('canvas');c.width=w;c.height=h;return [c,c.getContext('2d')];}
+function tex(c){const t=new THREE.CanvasTexture(c);t.colorSpace=THREE.SRGBColorSpace;t.anisotropy=Math.min(8,renderer.capabilities.getMaxAnisotropy());return t;}
+const GLOW=(()=>{const [c,g]=cnv(64,64);const r=g.createRadialGradient(32,32,0,32,32,32);r.addColorStop(0,'rgba(255,255,255,1)');r.addColorStop(.35,'rgba(255,255,255,.35)');r.addColorStop(1,'rgba(255,255,255,0)');g.fillStyle=r;g.fillRect(0,0,64,64);return new THREE.CanvasTexture(c);})();
+
+/* ─────────── Hall B ─────────── */
+const HALL=new THREE.Group(); scene.add(HALL);
+const ROWS=[{id:'A',z:-2.05,f:-1},{id:'B',z:-.95,f:1},{id:'C',z:.95,f:-1},{id:'D',z:2.05,f:1}];
+const NC=14, PITCH=.52, CW=.46, CH=1.05, CD=.62;
+const xOf=i=>(i-6.5)*PITCH;
+const cabs=[];
+ROWS.forEach((r,ri)=>{for(let i=0;i<NC;i++){const id=`${r.id}-${String(i+1).padStart(2,'0')}`;cabs.push({id,ri,i,x:xOf(i),z:r.z,f:r.f});}});
+const byId=Object.fromEntries(cabs.map(c=>[c.id,c]));
+// serpentine sweep order
+cabs.forEach(c=>{c.sw=c.ri*NC+(c.ri%2?NC-1-c.i:c.i);});
+const PW=10.4, PD=6.8;
+// plinth: a drawing sheet on an aluminium base
+function sheetCanvas(){
+  const W=2080,H=Math.round(2080*PD/PW),s=W/PW;const [c,g]=cnv(W,H);
+  const X=x=>(x+PW/2)*s, Z=z=>(z+PD/2)*s;
+  g.fillStyle='#F4F6F3';g.fillRect(0,0,W,H);
+  for(let x=-PW/2;x<=PW/2+.001;x+=.26){g.fillStyle='rgba(17,22,20,.045)';g.fillRect(X(x),0,1.2,H);}
+  for(let z=-PD/2;z<=PD/2+.001;z+=.26){g.fillStyle='rgba(17,22,20,.045)';g.fillRect(0,Z(z),W,1.2);}
+  g.strokeStyle='#111614';g.lineWidth=3;g.strokeRect(18,18,W-36,H-36);
+  // aisle bands
+  [[-1.5,'hot aisle'],[1.5,'hot aisle'],[0,'cold aisle']].forEach(([z,t])=>{g.fillStyle=!z?'rgba(124,147,168,.1)':'rgba(255,154,46,.05)';g.fillRect(X(-3.9),Z(z-.24),X(3.9)-X(-3.9),.48*s);
+    g.fillStyle='#7f8a85';g.font=`400 22px ${MONO}`;g.fillText(t,X(3.95),Z(z)+8);});
+  // cabinet footprints
+  cabs.forEach(cb=>{g.fillStyle='rgba(17,22,20,.07)';g.fillRect(X(cb.x-CW/2-.02),Z(cb.z-CD/2-.02),(CW+.04)*s,(CD+.04)*s);});
+  // row letters and numbers
+  g.fillStyle='#111614';g.font=`500 40px ${MONO}`;ROWS.forEach(r=>g.fillText(r.id,X(-4.35),Z(r.z)+14));
+  g.font=`400 18px ${MONO}`;g.fillStyle='#4A544F';for(let i=0;i<NC;i+=1){if(i%2)continue;g.fillText(String(i+1).padStart(2,'0'),X(xOf(i))-10,Z(-2.05-CD/2-.14));}
+  // door
+  g.strokeStyle='#111614';g.lineWidth=3;g.beginPath();g.moveTo(X(-4.75),Z(PD/2-.02));g.lineTo(X(-4.75),Z(PD/2-.55));g.stroke();
+  g.setLineDash([6,6]);g.beginPath();g.arc(X(-4.75),Z(PD/2-.02),.53*s,-Math.PI/2,0);g.stroke();g.setLineDash([]);
+  g.fillStyle='#4A544F';g.font=`400 20px ${MONO}`;g.fillText('door 2',X(-4.72),Z(PD/2-.62));
+  // title block
+  g.fillStyle='#111614';g.fillRect(W-520,H-122,500,100);g.fillStyle='#DDE4DF';g.font=`500 30px ${MONO}`;g.fillText('Hall B · DC1',W-500,H-74);
+  g.fillStyle='#93A19A';g.font=`400 22px ${MONO}`;g.fillText('56 cabinets · 1:50 · sweep 12',W-500,H-40);
+  // scale bar
+  g.fillStyle='#111614';for(let k=0;k<4;k++){g.fillStyle=k%2?'#F4F6F3':'#111614';g.fillRect(60+k*52,H-70,52,10);}g.strokeStyle='#111614';g.lineWidth=2;g.strokeRect(60,H-70,208,10);
+  g.fillStyle='#4A544F';g.font=`400 18px ${MONO}`;g.fillText('0      2      4 m',60,H-38);
+  return c;
+}
+const alu=new THREE.MeshStandardMaterial({color:'#dfe3df',metalness:.7,roughness:.32});
+const sheetMat=new THREE.MeshStandardMaterial({map:tex(sheetCanvas()),roughness:.9,metalness:0});
+const plinth=new THREE.Mesh(new THREE.BoxGeometry(PW,.3,PD),[alu,alu,sheetMat,alu,alu,alu]);plinth.position.y=-.15;plinth.receiveShadow=true;HALL.add(plinth);
+const base=new THREE.Mesh(new THREE.BoxGeometry(PW+.18,.06,PD+.18),new THREE.MeshStandardMaterial({color:'#2a302d',metalness:.5,roughness:.5}));base.position.y=-.33;HALL.add(base);
+{const [c,g]=cnv(128,128);const gr=g.createRadialGradient(64,64,10,64,64,64);gr.addColorStop(0,'rgba(17,22,20,.28)');gr.addColorStop(1,'rgba(17,22,20,0)');g.fillStyle=gr;g.fillRect(0,0,128,128);
+ const sh=new THREE.Mesh(new THREE.PlaneGeometry(PW*1.5,PD*1.6),new THREE.MeshBasicMaterial({map:new THREE.CanvasTexture(c),transparent:true,depthWrite:false}));sh.rotation.x=-Math.PI/2;sh.position.y=-.36;HALL.add(sh);}
+
+// cabinets: instanced bodies, doors, tops
+const bodyMat=new THREE.MeshStandardMaterial({color:0xffffff,metalness:.25,roughness:.5});
+const bodies=new THREE.InstancedMesh(new THREE.BoxGeometry(CW,CH,CD),bodyMat,cabs.length);bodies.castShadow=true;bodies.receiveShadow=true;HALL.add(bodies);
+function doorCanvas(){const [c,g]=cnv(128,288);g.fillStyle='#262c29';g.fillRect(0,0,128,288);
+  for(let y=14;y<270;y+=7)for(let x=14;x<114;x+=7){g.fillStyle='#1a1f1d';g.fillRect(x,y,4,4);}
+  g.fillStyle='#3a423e';g.fillRect(0,0,128,6);g.fillRect(0,282,128,6);g.fillStyle='#c9d0cb';g.fillRect(104,120,8,48);
+  g.fillStyle='#e9ece8';g.fillRect(20,20,58,16);return c;}
+const doorMat=new THREE.MeshStandardMaterial({map:tex(doorCanvas()),metalness:.35,roughness:.55,color:0xffffff});
+const doors=new THREE.InstancedMesh(new THREE.PlaneGeometry(CW-.04,CH-.06),doorMat,cabs.length);HALL.add(doors);
+const topMat=new THREE.MeshStandardMaterial({color:0xffffff,roughness:.6,metalness:.1});
+const tops=new THREE.InstancedMesh(new THREE.PlaneGeometry(CW-.02,CD-.02),topMat,cabs.length);HALL.add(tops);
+// outlines: solid (states) + dashed (record ghosts)
+function boxEdges(cx,cz,h){const w=CW/2+.012,d=CD/2+.012,y0=0,y1=h;const P=[[-w,y0,-d],[w,y0,-d],[w,y0,d],[-w,y0,d],[-w,y1,-d],[w,y1,-d],[w,y1,d],[-w,y1,d]];
+  const E=[[0,1],[1,2],[2,3],[3,0],[4,5],[5,6],[6,7],[7,4],[0,4],[1,5],[2,6],[3,7]];const v=[];E.forEach(([a,b])=>v.push(cx+P[a][0],P[a][1],cz+P[a][2],cx+P[b][0],P[b][1],cz+P[b][2]));return v;}
+function edgesMesh(dashed){const v=[];cabs.forEach(c=>v.push(...boxEdges(c.x,c.z,CH+.012)));const g=new THREE.BufferGeometry();g.setAttribute('position',new THREE.Float32BufferAttribute(v,3));
+  g.setAttribute('color',new THREE.Float32BufferAttribute(new Float32Array(v.length/3*4),4));
+  const m=dashed?new THREE.LineDashedMaterial({vertexColors:true,transparent:true,depthWrite:false,dashSize:.045,gapSize:.035,toneMapped:false}):new THREE.LineBasicMaterial({vertexColors:true,transparent:true,depthWrite:false,toneMapped:false});
+  const l=new THREE.LineSegments(g,m);if(dashed)l.computeLineDistances();l.renderOrder=3;HALL.add(l);return l;}
+const solid=edgesMesh(false), dashed=edgesMesh(true);
+const M4=new THREE.Matrix4(), Q=new THREE.Quaternion(), V=new THREE.Vector3(), S3=new THREE.Vector3(), EY=new THREE.Euler();
+cabs.forEach(c=>{c.bc=COL.body.clone();c.tc=COL.top.clone();});
+
+/* sweep light (hero + M&A) */
+const sheet=new THREE.Mesh(new THREE.PlaneGeometry(1.25,1.5),new THREE.MeshBasicMaterial({color:COL.link,transparent:true,opacity:0,side:THREE.DoubleSide,depthWrite:false,toneMapped:false}));
+sheet.rotation.y=Math.PI/2;HALL.add(sheet);
+const sheetEdge=new THREE.Mesh(new THREE.BoxGeometry(.012,1.5,.012),new THREE.MeshBasicMaterial({color:COL.link,transparent:true,opacity:0,toneMapped:false}));HALL.add(sheetEdge);
+const walker=new THREE.Mesh(new THREE.RingGeometry(.09,.13,32),new THREE.MeshBasicMaterial({color:COL.link,transparent:true,opacity:0,toneMapped:false,side:THREE.DoubleSide}));walker.rotation.x=-Math.PI/2;HALL.add(walker);
+
+/* Network: trays, drops, trunks */
+const netV=[], netSeg=[];
+function seg(a,b,meta){netV.push(...a,...b);netSeg.push(meta);}
+const TY=1.55, CORE=[0,2.35,0];
+ROWS.forEach((r,ri)=>{seg([xOf(0)-.2,TY,r.z],[xOf(NC-1)+.2,TY,r.z],{t:.0+ri*.04,kind:'tray'});
+  seg([0,TY,r.z],[0,2.05,r.z*.55],{t:.55,kind:'trunk'});seg([0,2.05,r.z*.55],CORE,{t:.62,kind:'trunk'});});
+cabs.forEach(c=>seg([c.x,CH+.02,c.z],[c.x,TY,c.z],{t:.12+c.i/NC*.4,kind:'drop',id:c.id}));
+const netL=new THREE.LineSegments(new THREE.BufferGeometry(),new THREE.LineBasicMaterial({vertexColors:true,transparent:true,depthWrite:false,toneMapped:false}));
+netL.geometry.setAttribute('position',new THREE.Float32BufferAttribute(netV,3));netL.geometry.setAttribute('color',new THREE.Float32BufferAttribute(new Float32Array(netV.length/3*4),4));HALL.add(netL);
+const core=new THREE.Mesh(new THREE.OctahedronGeometry(.13),new THREE.MeshBasicMaterial({color:COL.link,wireframe:true,transparent:true,opacity:0,toneMapped:false}));core.position.set(...CORE);HALL.add(core);
+const pk=new THREE.Points(new THREE.BufferGeometry(),new THREE.PointsMaterial({size:.12,map:GLOW,color:COL.link,transparent:true,opacity:0,depthWrite:false,toneMapped:false}));
+pk.geometry.setAttribute('position',new THREE.Float32BufferAttribute(new Float32Array(12*3),3));HALL.add(pk);
+
+/* Security: agent rings + beacons */
+const ringMat=new THREE.MeshBasicMaterial({color:COL.linkInk,transparent:true,opacity:0,toneMapped:false,side:THREE.DoubleSide,depthWrite:false});
+const rings=new THREE.InstancedMesh(new THREE.RingGeometry(.07,.1,24),ringMat,cabs.length);HALL.add(rings);
+const UNK=['A-11','C-04'];
+const beacons=UNK.map(id=>{const c=byId[id];const g=new THREE.Group();g.position.set(c.x,0,c.z);HALL.add(g);
+  const b=new THREE.Mesh(new THREE.CylinderGeometry(.03,.03,1.6,12,1,true),new THREE.MeshBasicMaterial({color:COL.drift,transparent:true,opacity:0,toneMapped:false,depthWrite:false}));b.position.y=CH+.8;g.add(b);
+  const ring=new THREE.Mesh(new THREE.RingGeometry(.33,.36,48),new THREE.MeshBasicMaterial({color:COL.drift,transparent:true,opacity:0,toneMapped:false,side:THREE.DoubleSide,depthWrite:false}));ring.rotation.x=-Math.PI/2;ring.position.y=.01;g.add(ring);
+  return {g,b,ring};});
+
+/* Compliance: timestamp slips */
+function slipCanvas(){const [c,g]=cnv(256,168);g.fillStyle='#F4F6F3';g.fillRect(0,0,256,168);g.strokeStyle='#C6CCC7';g.lineWidth=4;g.strokeRect(2,2,252,164);
+  g.fillStyle='#1FD67C';g.fillRect(0,0,10,168);g.fillStyle='#111614';g.font=`500 52px ${MONO}`;g.fillText('09:14',28,78);
+  g.fillStyle='#4A544F';g.font=`400 24px ${MONO}`;g.fillText('sweep 12',28,118);g.fillStyle='#04703F';g.fillText('✓ CMDB',28,150);return c;}
+const slipMat=new THREE.MeshBasicMaterial({map:tex(slipCanvas()),transparent:true,opacity:0,toneMapped:false,side:THREE.DoubleSide});
+const slips=new THREE.InstancedMesh(new THREE.PlaneGeometry(.36,.24),slipMat,cabs.length);slips.renderOrder=4;HALL.add(slips);
+
+/* On-call: path from door 2 to B-06, U35 slides out */
+const B06=byId['B-06'];
+const pathPts=[[-4.75,.02,3.1],[-4.75,.02,0],[B06.x,.02,0],[B06.x,.02,-.2]].map(p=>new THREE.Vector3(...p));
+const pathCurve=new THREE.CurvePath();for(let i=0;i<pathPts.length-1;i++)pathCurve.add(new THREE.LineCurve3(pathPts[i],pathPts[i+1]));
+const pathGeo=new THREE.TubeGeometry(pathCurve,120,.028,6,false);
+const pathMesh=new THREE.Mesh(pathGeo,new THREE.MeshBasicMaterial({color:COL.link,transparent:true,opacity:0,toneMapped:false}));HALL.add(pathMesh);
+const pathDots=[];for(let i=0;i<16;i++){const d=new THREE.Mesh(new THREE.CircleGeometry(.045,16),new THREE.MeshBasicMaterial({color:COL.linkInk,transparent:true,opacity:0,toneMapped:false}));d.rotation.x=-Math.PI/2;HALL.add(d);pathDots.push(d);}
+const U35Y=(34.5/42)*CH;
+const unit=new THREE.Group();HALL.add(unit);
+{const b=new THREE.Mesh(new THREE.BoxGeometry(CW-.05,.032,CD-.06),new THREE.MeshStandardMaterial({color:'#2a302d',metalness:.5,roughness:.4}));unit.add(b);
+ const e=new THREE.LineSegments(new THREE.EdgesGeometry(new THREE.BoxGeometry(CW-.03,.05,CD-.04)),new THREE.LineBasicMaterial({color:COL.link,transparent:true,toneMapped:false}));unit.add(e);unit.userData.e=e;
+ const [c,g]=cnv(256,32);g.fillStyle='#1b201e';g.fillRect(0,0,256,32);for(let i=0;i<24;i++){g.fillStyle=i===16?'#1FD67C':'#070909';g.fillRect(12+i*9.5,9,7,14);}
+ const f=new THREE.Mesh(new THREE.PlaneGeometry(CW-.05,.032),new THREE.MeshBasicMaterial({map:tex(c),toneMapped:false}));f.position.z=(CD-.06)/2+.001;unit.add(f);unit.userData.f=f;}
+unit.position.set(B06.x,U35Y,B06.z);unit.rotation.y=B06.f>0?0:Math.PI;unit.visible=false;
+
+/* M&A: 4 deltas on D-09 */
+const D09=byId['D-09'];
+const deltas=[0,1,2,3].map(k=>{const m=new THREE.Mesh(new THREE.BoxGeometry(.07,.07,.07),new THREE.MeshBasicMaterial({color:COL.drift,transparent:true,opacity:0,toneMapped:false}));HALL.add(m);return m;});
+
+/* ─────────── tags ─────────── */
+const hud=document.getElementById('hud');const TG=[];
+function tag(html,cls,pos){const el=document.createElement('div');el.className='tag '+cls;el.innerHTML=`<i></i><span>${html}</span>`;hud.appendChild(el);const t={el,pos:new THREE.Vector3(...pos),cur:0,target:0};TG.push(t);return t;}
+const T={
+  hero:tag('<b>Hall B · DC1</b>56 cabinets · 4 rows','ink up keep',[-3.6,CH+.1,-2.05]),
+  L:tag('<b>47 / 56</b>swept this week','link up keep',[0,CH+.1,0]),
+  L2:tag('<b>D-01 → D-09</b>next on the route','rec up',[xOf(4),CH+.1,2.05]),
+  N:tag('<b>B-03 ToR</b>24 + 4 ports mapped','link up',[xOf(2),TY,-.95]),
+  N2:tag('<b>B-11</b>port 24 · diagram says 22','drift up keep',[xOf(10),TY+.05,-.95]),
+  S1:tag('<b>A-11</b>seen on sweep · no agent','drift up keep',[byId['A-11'].x,CH+1.65,byId['A-11'].z]),
+  S2:tag('<b>C-04</b>seen on sweep · no agent','drift up',[byId['C-04'].x,CH+1.65,byId['C-04'].z]),
+  C:tag('<b>B-06 · 09:14:07 UTC</b>frame #0412 · CMDB ✓','link up keep',[B06.x,CH+.12,B06.z]),
+  O0:tag('<b>Door 2</b>start here','ink left',[-4.75,.05,3.1]),
+  O:tag('<b>B-06 / U35</b>OOB-2 · port 17 · 42 m','link up keep',[B06.x,CH+.15,B06.z-.3]),
+  M:tag('<b>D-09 · 4 deltas</b>serial ×2 · position · missing asset','drift up keep',[D09.x,CH+.45,D09.z]),
+  M0:tag('<b>Acquired site</b>no trusted record yet','rec up',[0,CH+.25,-2.05]),
+};
+
+/* ─────────── input, sizing ─────────── */
+const mouse={x:0,y:0,sx:0,sy:0};addEventListener('pointermove',e=>{mouse.x=e.clientX/innerWidth*2-1;mouse.y=e.clientY/innerHeight*2-1;},{passive:true});
+let vw=0,vh=0,mobile=false;
+function resize(){vw=innerWidth;vh=innerHeight;mobile=vw<760;renderer.setSize(vw,vh,false);camera.aspect=vw/vh;camera.updateProjectionMatrix();}
+addEventListener('resize',resize);resize();
+const K=(p,t)=>({p:new THREE.Vector3(...p),t:new THREE.Vector3(...t)});
+const CAM=[K([3.2,15.2,11.8],[.2,-.2,.4]),K([-10.4,3.9,6.4],[.6,.8,-.4]),K([9.6,7.8,-9.4],[0,.2,0]),K([5.6,4.9,7.6],[-.6,.6,.1]),K([-7.4,7.0,11.4],[-1.4,.2,-.3]),K([-8.4,11.6,-9.8],[.2,0,0])];
+const cp=new THREE.Vector3(9,7,9), ct=new THREE.Vector3();
+const scrim=document.getElementById('scrim'), idx=document.getElementById('index');
+const clock=new THREE.Clock(); const T0=performance.now();
+const tmpC=new THREE.Color(), tmpC2=new THREE.Color();
+
+function frame(){
+  requestAnimationFrame(frame);
+  const dt=Math.min(clock.getDelta(),.05), time=clock.elapsedTime;
+  const ir=idx.getBoundingClientRect(); const show=ir.top>0;
+  canvas.style.visibility=hud.style.visibility=show?'visible':'hidden'; if(!show) return;
+  const r=window.UC?window.UC.r():-1;
+  const wH=1-smooth(-.45,.05,r);
+  const w=[0,1,2,3,4,5].map(k=>smooth(k-.1,k+.12,r)*(k===5?1:1-smooth(k+.9,k+1.12,r)));
+  const p=[0,1,2,3,4,5].map(k=>reduce?1:clamp((r-k)/.72));
+  const load=reduce||SNAP?9:(performance.now()-T0)/1000;
+
+  // camera
+  const ang=.72+(reduce?0:time*.045);
+  const hp=new THREE.Vector3(Math.sin(ang)*15.6,9.4,Math.cos(ang)*15.6);
+  let P=hp.clone(),Tt=new THREE.Vector3(0,-.1,0);
+  CAM.forEach((k,i)=>{if(w[i]>0){P.lerp(k.p,w[i]);Tt.lerp(k.t,w[i]);}});
+  if(mobile){P.sub(Tt).multiplyScalar(1.5).add(Tt);}
+  const f=(reduce||SNAP)?1:1-Math.pow(.015,dt);
+  cp.lerp(P,f);ct.lerp(Tt,f);camera.position.copy(cp);camera.lookAt(ct);
+  camera.setViewOffset(vw,vh,mobile?0:-(.64-.5)*vw,mobile?vh*.2:0,vw,vh);
+  mouse.sx=lerp(mouse.sx,mouse.x,.05);mouse.sy=lerp(mouse.sy,mouse.y,.05);
+  HALL.rotation.y=reduce?0:mouse.sx*.05;
+  scrim.style.opacity=mobile?1:lerp(.5,1,smooth(-.5,0,r));
+
+  // hero sweep: a light sheet walks the two cold aisles
+  const hc=(time%9)/9, aisle=hc<.5?0:2.75, hx=lerp(-4,4,(hc%.5)*2);
+  const msw=smooth(.28,.86,p[5]);                          // M&A baseline sweep
+  const mx=lerp(-4.2,4.2,msw);
+  const sheetA=Math.max(wH*(reduce?0:1),w[5]*(msw>0&&msw<1?1:0));
+  const sx=w[5]>.5?mx:hx, sz=w[5]>.5?0:aisle;
+  const wide=w[5]>.5;
+  sheet.position.set(sx,.75,sz); sheet.scale.set(wide?5.6/1.25:1,1,1); sheet.material.opacity=.12*sheetA;
+  sheetEdge.position.set(sx,.75,sz); sheetEdge.scale.set(1,1,1); sheetEdge.material.opacity=sheetA*(wide?0:1);
+  // leaders: the walker follows the serpentine route
+  const lp=smooth(.05,.6,p[0]), swN=Math.round(47*lp);
+  const cur=cabs.find(c=>c.sw===Math.min(46,Math.max(0,swN-1)));
+  walker.position.set(cur.x,.02,cur.z+ (cur.f*(CD/2+.2)));walker.material.opacity=w[0]*(1-smooth(.62,.75,p[0]))*.9;
+  T.L.pos.set(cur.x,CH+.1,cur.z);
+
+  // per-cabinet state
+  const sc=solid.geometry.attributes.color, dc=dashed.geometry.attributes.color;
+  cabs.forEach((c,k)=>{
+    // build-in
+    const rise=reduce?1:smooth(0,.55,load-.25-c.sw*.011);
+    let hScale=rise, bc=tmpC.copy(COL.body), tcol=tmpC2.copy(COL.top), sA=0, sCol=COL.link, dA=0, dCol=COL.record;
+    // hero ripple
+    const near=Math.max(0,1-Math.abs(c.x-hx)/.35)*(Math.abs(c.z-aisle)<.7?1:0);
+    tcol.lerp(COL.link,near*wH*.8);
+    // L
+    if(w[0]>0){const sw=c.sw<swN;tcol.lerp(sw?COL.link:COL.top,w[0]*(sw?.85:0));if(c.sw>=47){dA=Math.max(dA,w[0]*smooth(.55,.7,p[0])*.9);bc.lerp(COL.dim,w[0]*.7);}}
+    // N
+    if(w[1]>0){tcol.lerp(COL.linkInk,w[1]*.25);if(c.id==='B-11'){sA=Math.max(sA,w[1]*smooth(.6,.7,p[1]));sCol=COL.drift;}}
+    // S
+    if(w[2]>0){const u=UNK.includes(c.id);bc.lerp(COL.dim,w[2]*(u?0:.8));tcol.lerp(u?COL.drift:COL.dim,w[2]*(u?smooth(.3,.45,p[2]):.8));if(u){sA=Math.max(sA,w[2]*smooth(.3,.45,p[2]));sCol=COL.drift;}}
+    // C
+    if(w[3]>0){if(c.id==='B-06'){sA=Math.max(sA,w[3]*smooth(.7,.8,p[3]));sCol=COL.link;}}
+    // O
+    if(w[4]>0){const me=c.id==='B-06';bc.lerp(me?COL.body:COL.dim,w[4]*(me?0:.75));if(me){tcol.lerp(COL.link,w[4]*smooth(.45,.6,p[4]));sA=Math.max(sA,w[4]*smooth(.45,.6,p[4]));sCol=COL.link;}}
+    // M: unknown hall → baselined
+    if(w[5]>0){const passed=c.x<mx-.1||msw>=1;const gh=w[5]*(passed?0:1)*smooth(0,.2,p[5]);
+      hScale=Math.min(hScale,lerp(1,.02,gh)); dA=Math.max(dA,gh*.95); dCol=COL.record;
+      if(c.id==='D-09'){const dd=w[5]*smooth(.88,.95,p[5]);sA=Math.max(sA,dd);sCol=COL.drift;tcol.lerp(COL.drift,dd);}}
+    c.h=hScale;
+    // matrices
+    V.set(c.x,CH*hScale/2,c.z);S3.set(1,Math.max(.001,hScale),1);M4.compose(V,Q.identity(),S3);bodies.setMatrixAt(k,M4);bodies.setColorAt(k,bc);
+    EY.set(0,c.f>0?0:Math.PI,0);Q.setFromEuler(EY);V.set(c.x,CH*hScale/2,c.z+c.f*(CD/2+.002));S3.set(1,Math.max(.001,hScale),1);M4.compose(V,Q,S3);doors.setMatrixAt(k,M4);
+    EY.set(-Math.PI/2,0,0);Q.setFromEuler(EY);V.set(c.x,CH*hScale+.002,c.z);S3.set(1,1,1);M4.compose(V,Q,S3);tops.setMatrixAt(k,M4);tops.setColorAt(k,tcol);
+    for(let j=0;j<24;j++){const o=(k*24+j)*4;sc.array[o]=sCol.r;sc.array[o+1]=sCol.g;sc.array[o+2]=sCol.b;sc.array[o+3]=sA;dc.array[o]=dCol.r;dc.array[o+1]=dCol.g;dc.array[o+2]=dCol.b;dc.array[o+3]=dA;}
+    // rings (S)
+    V.set(c.x,CH*hScale+.006,c.z);EY.set(-Math.PI/2,0,0);Q.setFromEuler(EY);S3.setScalar(UNK.includes(c.id)?.001:1);M4.compose(V,Q,S3);rings.setMatrixAt(k,M4);
+    // slips (C): stamp down in route order
+    const sd=smooth(.05+c.sw/56*.5,.12+c.sw/56*.5,p[3]);
+    V.set(c.x,CH*hScale+.012+(1-sd)*.9,c.z);EY.set(-Math.PI/2+(1-sd)*.9,0,(1-sd)*.4);Q.setFromEuler(EY);S3.setScalar(w[3]>.01?(sd>0?1:.001):.001);M4.compose(V,Q,S3);slips.setMatrixAt(k,M4);
+  });
+  [bodies,doors,tops,rings,slips].forEach(m=>{m.instanceMatrix.needsUpdate=true;if(m.instanceColor)m.instanceColor.needsUpdate=true;});
+  sc.needsUpdate=dc.needsUpdate=true;
+  ringMat.opacity=w[2]*smooth(.05,.25,p[2])*.9; slipMat.opacity=w[3];
+
+  // N: trays, drops, trunks draw in
+  const nc=netL.geometry.attributes.color;
+  netSeg.forEach((s,i)=>{const a=w[1]*smooth(s.t,s.t+.12,p[1])*(s.kind==='tray'?.95:s.kind==='trunk'?.8:.55);const c=s.id==='B-11'?COL.drift:COL.linkInk;
+    for(let j=0;j<2;j++){nc.setXYZW(i*2+j,c.r,c.g,c.b,s.id==='B-11'?Math.min(1,a*1.8):a);}});
+  nc.needsUpdate=true; core.material.opacity=w[1]*smooth(.6,.7,p[1]); core.rotation.y=time*.8; core.rotation.x=time*.4;
+  {const pp=pk.geometry.attributes.position;for(let i=0;i<12;i++){const ri=i%4,u=((time*.18+i*.29)%1);pp.setXYZ(i,lerp(xOf(0)-.2,xOf(NC-1)+.2,u),TY,ROWS[ri].z);}pp.needsUpdate=true;pk.material.opacity=w[1]*smooth(.3,.45,p[1]);}
+
+  // S beacons
+  beacons.forEach((b,i)=>{const a=w[2]*smooth(.3+i*.1,.45+i*.1,p[2]);const pulse=reduce?1:.6+.4*Math.sin(time*4+i);b.b.material.opacity=a*.55*pulse;
+    const rs=reduce?1:1+((time*.7+i*.5)%1)*1.2;b.ring.scale.setScalar(rs);b.ring.material.opacity=a*(reduce?.6:1-((time*.7+i*.5)%1));});
+
+  // O path + unit
+  const op=smooth(.05,.5,p[4]);
+  pathMesh.material.opacity=w[4]*.95; pathGeo.setDrawRange(0,Math.floor(pathGeo.index.count*op/6)*6);
+  pathDots.forEach((d,i)=>{const u=((time*.25+i/16)%1)*op;d.position.copy(pathCurve.getPointAt(Math.min(.999,u)));d.position.y=.03;d.material.opacity=w[4]*(op>.02?.9:0);});
+  unit.visible=w[4]>.01; const out=smooth(.55,.8,p[4]); unit.position.set(B06.x,U35Y,B06.z+B06.f*(CD/2*.0+out*.42)); unit.scale.setScalar(w[4]>.01?1:.001);
+  unit.userData.e.material.opacity=w[4];
+
+  // M deltas
+  deltas.forEach((m,i)=>{const a=w[5]*smooth(.88+i*.02,.93+i*.02,p[5]);m.material.opacity=a;m.position.set(D09.x-.14+i*.095,CH+.12+(reduce?0:Math.sin(time*2+i)*.02),D09.z);m.rotation.y=time*.8;});
+
+  // tags
+  const vis={hero:wH*smooth(.8,1.2,load),L:w[0]*smooth(.05,.15,p[0]),L2:w[0]*smooth(.62,.72,p[0]),N:w[1]*smooth(.35,.45,p[1]),N2:w[1]*smooth(.65,.75,p[1]),
+    S1:w[2]*smooth(.4,.5,p[2]),S2:w[2]*smooth(.5,.6,p[2]),C:w[3]*smooth(.72,.82,p[3]),O0:w[4]*smooth(.02,.12,p[4]),O:w[4]*smooth(.72,.82,p[4]),
+    M0:w[5]*smooth(.05,.15,p[5])*(1-smooth(.3,.4,p[5])),M:w[5]*smooth(.92,.98,p[5])};
+  T.L.el.querySelector('span').innerHTML=`<b>${swN} / 56</b>swept this week`;
+  const v=new THREE.Vector3();
+  const idxFade=smooth(vh*.2,vh*.9,ir.top);
+  for(const [n,t] of Object.entries(T)){t.target=(vis[n]||0)*idxFade;t.cur=(reduce||SNAP)?t.target:lerp(t.cur,t.target,1-Math.pow(.001,dt));
+    if(t.cur<.01){t.el.style.opacity=0;continue;}
+    v.copy(t.pos);HALL.localToWorld(v);v.project(camera);const x=(v.x+1)/2*vw,y=(1-v.y)/2*vh;const cl=t.el.classList,ew=t.el.offsetWidth,eh=t.el.offsetHeight;
+    const tx=cl.contains('left')?x-ew+3.5:cl.contains('up')?x-ew/2:x-3.5, ty=cl.contains('up')?y-eh+3.5:y-eh/2;
+    t.el.style.transform=`translate3d(${tx.toFixed(1)}px,${ty.toFixed(1)}px,0)`;t.el.style.opacity=t.cur.toFixed(3);}
+
+  renderer.render(scene,camera);
+}
+document.fonts.ready.then(()=>{sheetMat.map.image=sheetCanvas();sheetMat.map.needsUpdate=true;slipMat.map.image=slipCanvas();slipMat.map.needsUpdate=true;});
+requestAnimationFrame(frame);
+</script>
+<!--GLJS-END-->
+<script src="/design-system/nav.js" defer></script>
+</body>
+</html>

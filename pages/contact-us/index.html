@@ -1,0 +1,790 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Contact us Â· RackTrack</title>
+<meta name="description" content="Send us the rack, row or site you want to understand. We reply within one business day and show how a sweep becomes a verified record.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600;700&display=swap">
+<link rel="stylesheet" href="/design-system/base.css">
+<style>
+/* RackTrack Â· Contact us â€” design-system/ tokens. Protagonist: the brief. A small hall on a drawing sheet; the form scopes it (rack / row / site), the brief card fills in as you type, then brief â†’ reply â†’ baseline. */
+:root{
+  color-scheme: light;
+  
+}
+*{box-sizing:border-box}
+html{background:var(--paper);scroll-behavior:smooth}
+body{margin:0;background:var(--paper);color:var(--fg);font:400 16px/1.5 var(--sans);-webkit-font-smoothing:antialiased;overflow-x:hidden}
+a{color:inherit}
+::selection{background:var(--link);color:#06140d}
+:focus-visible{outline:2px solid var(--link-ink);outline-offset:3px;border-radius:2px}
+body::before{content:"";position:fixed;inset:0;z-index:0;pointer-events:none;background:radial-gradient(60% 55% at 64% 50%,rgba(255,255,255,.6),transparent 72%)}
+#stage{position:fixed;left:0;top:0;z-index:1;display:block;width:100%;height:100%;pointer-events:none}
+#scrim{position:fixed;inset:0;z-index:1;pointer-events:none;background:linear-gradient(90deg,var(--paper) 0,rgba(233,236,232,.96) 33%,rgba(233,236,232,0) 50%);transition:opacity .4s}
+#scrim2{position:fixed;inset:0;z-index:1;pointer-events:none;opacity:0;background:linear-gradient(90deg,var(--paper) 0,var(--paper) 44%,rgba(233,236,232,0) 58%);transition:opacity .45s}
+body.wide #scrim2{opacity:1}
+#hud{position:fixed;inset:0;z-index:3;pointer-events:none;overflow:hidden}
+main{position:relative;z-index:2}
+
+/* nav */
+.nav{position:fixed;left:0;right:0;top:0;z-index:10;display:flex;align-items:center;gap:28px;height:calc(var(--nav-h) + env(safe-area-inset-top,0px));padding:env(safe-area-inset-top,0px) var(--bleed) 0;background:linear-gradient(var(--paper) 55%,transparent)}
+.brand{display:flex;align-items:center;gap:10px;text-decoration:none;font:700 17px/1 var(--sans);letter-spacing:-.02em;color:var(--ink)}
+.brand img{width:26px;height:26px;border-radius:5px;display:block}
+.nav ul{display:flex;gap:24px;list-style:none;margin:0 0 0 auto;padding:0}
+.nav ul a{font:500 14px/1 var(--sans);text-decoration:none;color:var(--ink-2)}
+.nav ul a:hover{color:var(--ink)}
+.btn{display:inline-flex;align-items:center;gap:10px;height:46px;padding:0 20px;border-radius:3px;border:1px solid var(--fg);font:500 15px/1 var(--sans);text-decoration:none;cursor:pointer;background:transparent;color:var(--fg);transition:background .2s,color .2s,border-color .2s}
+.btn.solid{background:var(--fg);color:var(--bg)}
+.btn.solid:hover{background:var(--link-ink);border-color:var(--link-ink);color:#fff}
+.btn:not(.solid){border-color:var(--line)}
+.btn:not(.solid):hover{border-color:var(--fg)}
+.btn .led{width:7px;height:7px;border-radius:50%;background:var(--link);box-shadow:0 0 8px var(--link)}
+.nav .btn{height:38px;padding:0 16px;font-size:14px}
+
+/* type */
+.ch{position:relative;padding-inline:var(--bleed)}
+.copy{max-width:33rem;}
+h1,h2,h3{margin:0 0 20px;text-wrap:balance}
+h1{max-width:11ch}
+h2{max-width:15ch}
+h3{margin:0 0 12px}
+.lede{color:var(--fg-2);max-width:28rem;margin:0 0 28px}
+.k{margin:0 0 14px;font:400 12px/1 var(--mono);color:var(--link-ink)}
+.actions{display:flex;flex-wrap:wrap;gap:12px}
+
+/* tags */
+.tag{position:absolute;left:0;top:0;display:flex;align-items:center;opacity:0;visibility:hidden;will-change:transform;white-space:nowrap;transition:opacity .25s}
+.tag.on{opacity:1;visibility:visible}
+.tag::before{content:"";width:7px;height:7px;border-radius:50%;background:var(--c,var(--ink));transform:translate(-3.5px,0);box-shadow:0 0 0 3px color-mix(in oklab,var(--c,var(--ink)) 22%,transparent)}
+.tag i{display:block;width:24px;height:1px;background:var(--c,var(--ink))}
+.tag span{padding:6px 9px;background:var(--paper-2);border:1px solid var(--c,var(--ink));border-radius:2px;font:400 11.5px/1.35 var(--mono);color:var(--ink);box-shadow:0 14px 28px -20px rgba(17,22,20,.45)}
+.tag span b{display:block;font:600 15px/1.15 var(--sans);letter-spacing:-.02em;margin-bottom:2px}
+.tag.left{flex-direction:row-reverse}.tag.left::before{transform:translate(3.5px,0)}
+.tag.up{flex-direction:column-reverse}.tag.up i{width:1px;height:22px}.tag.up::before{transform:translate(0,3.5px)}
+.tag.link{--c:var(--link)} .tag.link span b{color:var(--link-ink)}
+.tag.drift{--c:var(--drift)} .tag.drift span b{color:var(--drift-ink)}
+.tag.rec{--c:var(--record)} .tag.rec span b{color:var(--record-ink)}
+.tag.ink{--c:var(--ink)}
+
+/* hero */
+#hero{min-height:100vh;display:flex;align-items:center;padding-top:90px;padding-bottom:40px}
+.facts{display:flex;gap:0;margin:34px 0 0;padding:0;border-top:1px solid var(--ink);max-width:28rem}
+.facts div{flex:1;padding:14px 16px 0 0}
+.facts div+div{border-left:1px solid var(--rule);padding-left:16px}
+.facts dt{margin:0;font:500 clamp(28px,2.4vw,36px)/1 var(--sans);letter-spacing:-.04em;color:var(--ink)}
+.facts dd{margin:6px 0 0;font:400 12px/1.3 var(--mono);color:var(--ink-2)}
+.cap{margin:18px 0 0;font:400 12px/1.4 var(--mono);color:var(--ink-2);max-width:26rem}
+
+/* brief form */
+#brief{min-height:100vh;padding-top:var(--page-top);padding-bottom:var(--band-y);scroll-margin-top:0}
+.fcol{width:min(35rem,43vw);}
+.fcol .lede{margin-bottom:26px}
+form{display:grid;gap:16px}
+.two{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.fld{min-width:0}
+.fld>label,.fld>.lbl{display:flex;justify-content:space-between;align-items:baseline;gap:8px;font:500 12px/1 var(--mono);color:var(--ink);margin:0 0 8px}
+.fld em{font-style:normal;font-weight:400;color:var(--ink-2)}
+input,select,textarea{width:100%;height:46px;padding:0 13px;border:1px solid var(--rule);border-radius:2px;background:var(--paper-2);font:400 15.5px/1.2 var(--sans);color:var(--ink);transition:border-color .2s,box-shadow .2s;appearance:none;-webkit-appearance:none}
+select{background-image:linear-gradient(45deg,transparent 50%,var(--ink-2) 50%),linear-gradient(135deg,var(--ink-2) 50%,transparent 50%);background-position:calc(100% - 17px) 20px,calc(100% - 12px) 20px;background-size:5px 5px;background-repeat:no-repeat;padding-right:28px}
+textarea{height:92px;padding:11px 13px;resize:vertical;line-height:1.45}
+input::placeholder,textarea::placeholder{color:#7d8781}
+input:hover,select:hover,textarea:hover{border-color:#9aa39e}
+input:focus,select:focus,textarea:focus{outline:none;border-color:var(--ink);box-shadow:0 0 0 3px rgba(31,214,124,.28)}
+[aria-invalid="true"]{border-color:var(--drift)!important;box-shadow:0 0 0 3px rgba(255,154,46,.18)!important}
+.err{min-height:0;margin:6px 0 0;font:400 11.5px/1.3 var(--mono);color:var(--drift-ink)}
+.err:empty{display:none}
+.tel{display:grid;grid-template-columns:104px 1fr;gap:8px}
+fieldset{border:0;margin:0;padding:0;min-width:0}
+legend{padding:0;margin:0 0 8px;font:500 12px/1 var(--mono);color:var(--ink);display:flex;gap:8px;width:100%;justify-content:space-between}
+.seg{display:grid;grid-template-columns:repeat(3,1fr);border:1px solid var(--rule);border-radius:2px;background:var(--paper-2)}
+.seg label{position:relative;display:block;padding:11px 12px 12px;cursor:pointer;border-left:1px solid var(--rule);transition:background .2s}
+.seg label:first-child{border-left:0}
+.seg input{position:absolute;opacity:0;width:1px;height:1px;pointer-events:none}
+.seg b{display:flex;align-items:center;gap:8px;font:600 15.5px/1.15 var(--sans);letter-spacing:-.015em;color:var(--ink-2)}
+.seg b::before{content:"";width:7px;height:7px;border-radius:50%;border:1px solid var(--ink-2);flex:none;transition:all .2s}
+.seg small{display:block;margin-top:5px;font:400 11px/1.25 var(--mono);color:var(--ink-2)}
+.seg label:hover{background:#fff}
+.seg label:has(input:checked){background:#fff;box-shadow:inset 0 -3px 0 var(--link-ink)}
+.seg label:has(input:checked) b{color:var(--ink)}
+.seg label:has(input:checked) b::before{background:var(--link);border-color:var(--link-ink);box-shadow:0 0 8px var(--link)}
+.seg label:has(input:focus-visible){outline:2px solid var(--link-ink);outline-offset:-2px}
+.submit{display:flex;align-items:center;gap:18px;flex-wrap:wrap;margin-top:4px}
+.submit .btn{height:50px}
+.note{margin:0;font:400 11.5px/1.4 var(--mono);color:var(--ink-2);max-width:20rem}
+.status{margin:0;font:400 12.5px/1.45 var(--mono);color:var(--link-ink)}
+.status:empty{display:none}
+
+/* next steps (pinned) */
+.pinsec{position:relative}
+#next{min-height:330vh}
+.pin{position:sticky;top:0;height:100vh}
+.scopy{position:absolute;left:var(--gutter);top:50%;transform:translateY(-50%);width:min(31rem,40vw);}
+.scopy .h{margin-bottom:30px}
+.stack{position:relative;height:230px}
+.st{position:absolute;inset:0;opacity:0;transform:translateY(14px);transition:opacity .45s,transform .55s var(--ease);pointer-events:none}
+.st.on{opacity:1;transform:none;pointer-events:auto}
+.st .no{font:400 12px/1 var(--mono);color:var(--ink-2);margin:0 0 12px;display:flex;gap:10px;align-items:center}
+.chip{font:500 11px/1 var(--mono);padding:5px 7px;border-radius:2px;border:1px solid var(--link);color:var(--link-ink);background:rgba(31,214,124,.08)}
+.chip.a{border-color:var(--drift);color:var(--drift-ink);background:rgba(255,154,46,.1)}
+.st p{margin:0 0 14px;color:var(--ink-2);max-width:27rem}
+.st .tiny{font:400 11.5px/1.4 var(--mono);color:var(--ink-2)}
+.big{font:500 clamp(44px,4.4vw,64px)/1 var(--sans);letter-spacing:-.045em;color:var(--ink);margin:4px 0 8px}
+.big small{font:400 13px/1 var(--mono);letter-spacing:0;color:var(--ink-2);margin-left:10px}
+.prog{display:flex;gap:5px;align-items:center;margin-top:18px;font:400 11px/1 var(--mono);color:var(--ink-2)}
+.prog i{width:28px;height:3px;background:var(--rule);position:relative;overflow:hidden}
+.prog i b{position:absolute;inset:0 auto 0 0;width:0;background:var(--link-ink)}
+.prog span{margin-left:8px}
+
+/* reach */
+#reach{position:relative;z-index:2;background:var(--paper);padding:var(--band-y) var(--bleed);border-top:1px solid var(--rule)}
+.wrap{max-width:var(--shell);margin-inline:auto;}
+.wrap .head{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,26rem);gap:40px;align-items:end;margin-bottom:56px}
+.wrap .head h2{margin:0;max-width:16ch}
+.wrap .head .lede{margin:0}
+.ways{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:clamp(20px,3vw,44px)}
+.way{border-top:1px solid var(--ink);padding-top:16px;min-width:0}
+.way .l{margin:0 0 18px;font:400 12px/1 var(--mono);color:var(--link-ink)}
+.way .v{display:block;margin:0 0 12px;font:500 clamp(20px,1.7vw,25px)/1.2 var(--sans);letter-spacing:-.025em;color:var(--ink);text-decoration:none;overflow-wrap:anywhere}
+a.v{background:linear-gradient(var(--link),var(--link)) 0 100%/0 2px no-repeat;transition:background-size .35s var(--ease)}
+a.v:hover{background-size:100% 2px}
+.way p{margin:0;color:var(--ink-2);font-size:15px;line-height:1.45}
+.way .t{margin-top:14px;font:400 12px/1.3 var(--mono);color:var(--ink-2)}
+.way .t b{color:var(--ink);font-weight:500}
+.dot{display:inline-block;width:7px;height:7px;border-radius:50%;background:var(--link);box-shadow:0 0 8px var(--link);margin-right:8px;vertical-align:1px}
+
+/* faq */
+#faq{position:relative;z-index:2;background:var(--paper);padding:var(--band-y) var(--bleed)}
+.faq{display:grid;grid-template-columns:minmax(0,22rem) minmax(0,1fr);gap:clamp(32px,6vw,110px);align-items:start}
+.faq .side{position:sticky;top:120px}
+.faq .side h2{max-width:10ch}
+.qs{border-top:1px solid var(--ink)}
+details{border-bottom:1px solid var(--rule)}
+summary{list-style:none;display:grid;grid-template-columns:3.2rem 1fr 24px;align-items:baseline;gap:8px;padding:19px 0;cursor:pointer;font:500 clamp(17px,1.35vw,20px)/1.3 var(--sans);letter-spacing:-.015em;color:var(--ink)}
+summary::-webkit-details-marker{display:none}
+summary i{font:400 11.5px/1 var(--mono);font-style:normal;color:var(--ink-2)}
+summary::after{content:"+";font:400 20px/1 var(--mono);color:var(--ink-2);justify-self:end;transition:transform .3s var(--ease)}
+details[open] summary::after{transform:rotate(45deg);color:var(--link-ink)}
+summary:hover{color:var(--link-ink)}
+details p{margin:0 0 22px 3.7rem;max-width:40rem;color:var(--ink-2)}
+
+/* footer */
+.foot{position:relative;z-index:2;padding:var(--band-y) var(--bleed) calc(var(--s8) + env(safe-area-inset-bottom,0px));background:var(--paper);border-top:1px solid var(--rule);display:grid;grid-template-columns:var(--copy-w) repeat(3,minmax(0,1fr));gap:28px;font-size:14px;color:var(--ink-2)}
+.foot b{display:block;font:500 13px/1 var(--sans);color:var(--link-ink);margin-bottom:16px}
+.foot nav{display:flex;flex-direction:column;gap:11px}
+.foot nav a{color:var(--ink);text-decoration:none;font-size:15px}
+.foot nav a:hover{color:var(--link-ink)}
+.foot p{margin:0 0 11px;color:var(--ink);font-size:15px;line-height:1.45}
+.foot p a{text-decoration:none}.foot p a:hover{color:var(--link-ink)}
+.foot-brand .brand{margin-bottom:16px}
+.foot-brand p{color:var(--ink-2);max-width:18rem}
+.foot .fine{grid-column:1/-1;display:flex;justify-content:space-between;flex-wrap:wrap;gap:12px;margin-top:16px;padding-top:18px;border-top:1px solid var(--rule);font-size:13px}
+.foot .legal{display:flex;gap:18px;flex-wrap:wrap}.foot .legal a{color:var(--ink-2);text-decoration:none}.foot .legal a:hover{color:var(--link-ink)}
+.foot .social{display:flex;gap:18px}
+.foot .social a{color:var(--ink-2);text-decoration:none}
+
+.no-webgl #stage,.no-webgl #hud,.no-webgl #scrim,.no-webgl #scrim2{display:none}
+@media (max-width:1180px){ .foot{grid-template-columns:repeat(2,minmax(0,1fr))} .ways{grid-template-columns:1fr 1fr;row-gap:40px} }
+@media (max-width:960px){ .wrap .head,.faq{grid-template-columns:1fr} .faq .side{position:static} }
+@media (max-width:760px){
+  #stage{z-index:5;height:46vh}
+  #hud{z-index:6;bottom:auto;height:46vh}
+  #scrim,#scrim2{display:none}
+  #hud .tag:not(.keep){display:none}
+  #hero{align-items:flex-end;padding-top:48vh;padding-bottom:6vh;min-height:100svh}
+  #hero .lede{margin-bottom:20px}
+  .facts{margin-top:24px}
+  #brief{position:relative;z-index:7;background:var(--paper);padding-top:var(--nav-h)}
+  .fcol{width:auto;padding-left:0}
+  .two{grid-template-columns:1fr}
+  .seg b{font-size:14px} .seg small{display:none}
+  /* the pinned "what happens next" steps need the full-height stage: drop them on phones */
+  #next{display:none}
+  .ways{grid-template-columns:1fr}
+  details p{margin-left:0}
+  summary{grid-template-columns:2.6rem 1fr 20px}
+}
+@media (max-width:560px){ .foot{grid-template-columns:repeat(2,minmax(0,1fr));gap:var(--s6) var(--s5);padding-block:var(--band-y-sm) calc(var(--s6) + env(safe-area-inset-bottom,0px))} }
+/* no 3D (tablet, phone, or no WebGL): nothing reserves room for the hall any more */
+.no-webgl #hero{align-items:center;padding-top:var(--page-top);padding-bottom:var(--band-y);min-height:auto}
+.no-webgl .scopy{left:var(--gutter);right:var(--gutter);width:auto;top:50%;bottom:auto;transform:translateY(-50%);padding-left:0}
+@media (prefers-reduced-motion:reduce){ html{scroll-behavior:auto} .st,.tag{transition:none!important} }
+</style>
+</head>
+<body class="stage-band">
+
+<canvas id="stage" aria-hidden="true"></canvas>
+<div id="scrim" aria-hidden="true"></div>
+<div id="scrim2" aria-hidden="true"></div>
+<div id="hud" aria-hidden="true"></div>
+
+<nav class="nav" aria-label="Primary">
+  <a class="brand" href="/"><img alt="" src="/design-system/assets/Logos/racktrack-mark.jpg">RackTrack</a>
+  <ul>
+    <li><a href="/pages/why-racktrack/">Why RackTrack</a></li>
+    <li><a href="/pages/solutions/">Solutions</a></li>
+    <li><a href="/pages/use-cases/">Use cases</a></li>
+    <li><a href="/pages/resources/">Resources</a></li>
+    <li><a href="/pages/trust-security/">Trust</a></li>
+    <li><a href="/pages/about-us/">About</a></li>
+    <li><a href="/pages/sign-in/">Sign in</a></li>
+  </ul>
+  <a class="btn solid" href="#brief" aria-current="page"><span class="led"></span>Book a sweep</a>
+</nav>
+
+<main>
+  <section class="ch" id="hero">
+    <div class="copy">
+      <h1>See what RackTrack finds in one rack</h1>
+      <p class="lede">Send us the rack, row, or site you want to understand. We will show how a sweep becomes a verified record.</p>
+      <div class="actions">
+        <a class="btn solid" href="#brief"><span class="led"></span>Request platform brief</a>
+        <a class="btn" href="mailto:info@racktrack.ai">info@racktrack.ai</a>
+      </div>
+      <dl class="facts">
+        <div><dt>~20 min</dt><dd>baseline assessment</dd></div>
+        <div><dt>1 day</dt><dd>response time, business days</dd></div>
+      </dl>
+      <p class="cap">We compare what your tools say with what the rack physically shows.</p>
+    </div>
+  </section>
+
+  <section class="ch" id="brief" aria-labelledby="brief-h">
+    <div class="fcol">
+      <h2 id="brief-h">Tell us what you want to check</h2>
+      <p class="lede">It can be one rack, one row, or one site. We will shape the demo around the question you need answered.</p>
+      <form id="brief-request" novalidate>
+        <div class="two">
+          <div class="fld"><label for="f-name">Full name <em>required</em></label>
+            <input id="f-name" name="fullName" type="text" autocomplete="name" placeholder="Enter your full name" required aria-describedby="e-name">
+            <p class="err" id="e-name" data-error="fullName"></p></div>
+          <div class="fld"><label for="f-email">Email address <em>required</em></label>
+            <input id="f-email" name="email" type="email" autocomplete="email" placeholder="you@company.com" required aria-describedby="e-email">
+            <p class="err" id="e-email" data-error="email"></p></div>
+        </div>
+        <div class="two">
+          <div class="fld"><label for="f-company">Company name <em>optional</em></label>
+            <input id="f-company" name="company" type="text" autocomplete="organization" placeholder="Your company"></div>
+          <div class="fld"><label for="f-mobile">Mobile number <em>required</em></label>
+            <div class="tel">
+              <select name="countryCode" aria-label="Country code">
+                <option value="+1">US +1</option><option value="+44">UK +44</option><option value="+91">IN +91</option><option value="+61">AU +61</option><option value="+49">DE +49</option>
+              </select>
+              <input id="f-mobile" name="mobile" type="tel" inputmode="numeric" autocomplete="tel-national" placeholder="10-digit number" required aria-describedby="e-mobile">
+            </div>
+            <p class="err" id="e-mobile" data-error="mobile"></p></div>
+        </div>
+        <fieldset class="fld">
+          <legend>What should we look at? <em>scope</em></legend>
+          <div class="seg">
+            <label><input type="radio" name="scope" value="rack" checked><b>One rack</b><small>about 20 minutes</small></label>
+            <label><input type="radio" name="scope" value="row"><b>One row</b><small>about 20 minutes</small></label>
+            <label><input type="radio" name="scope" value="site"><b>One site</b><small>scoped with you</small></label>
+          </div>
+        </fieldset>
+        <div class="fld"><label for="f-req">Requirement <em>optional</em></label>
+          <textarea id="f-req" name="requirement" placeholder="Racks, rows or sites in scope, and what you are trying to reconcile."></textarea></div>
+        <div class="submit">
+          <button class="btn solid" type="submit"><span class="led"></span>Request platform brief</button>
+          <p class="note">Submitting opens your email app with the request prepared for info@racktrack.ai. Nothing is sent until you send it. See our <a href="/pages/legal/privacy-policy/">privacy policy</a>.</p>
+        </div>
+        <p class="status" id="form-status" role="status" aria-live="polite"></p>
+      </form>
+    </div>
+  </section>
+
+  <section class="ch pinsec" id="next" data-steps="3">
+    <div class="pin">
+      <div class="scopy">
+        <div class="h"><h2>From brief to baseline</h2></div>
+        <div class="stack">
+          <div class="st on"><p class="no">01 Â· You send the brief <span class="chip">today</span></p><h3>Tell us the footprint</h3><p>Whatever you know about the footprint: a rack, a row, or a site.</p></div>
+          <div class="st"><p class="no">02 Â· We reply <span class="chip">1 business day</span></p><h3>Within one business day</h3><p>We respond quickly to demos, planning, and support conversations. You can see a guided walkthrough against your own environment before committing.</p></div>
+          <div class="st"><p class="no">03 Â· We show the baseline <span class="chip">about 20 min</span></p><h3>Captured, matched, needs review</h3><p>For a single rack or row, we show what was captured, what matched your records, and what needs review.</p><p class="tiny">Illustrative scene Â· rack B-06</p></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section id="reach" aria-labelledby="reach-h">
+    <div class="wrap">
+      <div class="head"><div><h2 id="reach-h">Talk to the platform team</h2></div><p class="lede">Audit goals, rollout questions, demos or support: use whichever channel suits you.</p></div>
+      <div class="ways">
+        <div class="way"><p class="l">Office address</p><address class="v" style="font-style:normal">85 Felt Rd, Suite #604<br>South Windsor, CT 06074</address><p class="t"><span class="dot"></span>It's <b id="clkCT">--:--</b> in South Windsor</p></div>
+        <div class="way"><p class="l">Email</p><a class="v" href="mailto:info@racktrack.ai">info@racktrack.ai</a><p>Share audit goals, rollout questions, or support requests.</p></div>
+        <div class="way"><p class="l">Phone</p><a class="v" href="tel:+18608782448">+1 (860) 878 2448</a><p>Call our contact team for demos, support, and meeting schedules.</p></div>
+        <div class="way"><p class="l">Response time</p><span class="v">Within 1 business day</span><p>We respond quickly to demos, planning, and support conversations.</p></div>
+      </div>
+    </div>
+  </section>
+
+  <section id="faq" aria-labelledby="faq-h">
+    <div class="wrap faq">
+      <div class="side"><h2 id="faq-h">Before you connect</h2><p class="lede">Questions the platform team is asked most often.</p><a class="btn" href="#brief">Request platform brief</a></div>
+      <div class="qs">
+        <details><summary><i>Q01</i>Can RackTrack scan existing racks without downtime?</summary><p>Yes. RackTrack uses a smartphone video sweep to capture rack state without agents, downtime, or disruption to production infrastructure.</p></details>
+        <details><summary><i>Q02</i>What kind of infrastructure can RackTrack identify?</summary><p>RackTrack supports a broad and continuously expanding range of enterprise networking and data center infrastructure devices.</p></details>
+        <details><summary><i>Q03</i>How does RackTrack verify inventory accuracy?</summary><p>RackTrack reconciles physical scan data against live infrastructure signals to maintain continuously verified inventory and topology records.</p></details>
+        <details><summary><i>Q04</i>Does RackTrack replace our CMDB or DCIM?</summary><p>No. RackTrack acts as the physical infrastructure intelligence layer underneath existing CMDB, DCIM, and ITSM platforms, helping reconcile what systems report against what is physically present in the rack.</p></details>
+        <details><summary><i>Q05</i>Is RackTrack useful for compliance and audit preparation?</summary><p>Yes. RackTrack helps generate continuously updated inventory, topology, and infrastructure evidence that supports audit readiness and operational reviews.</p></details>
+        <details><summary><i>Q06</i>Can RackTrack help during incidents and outages?</summary><p>Yes. RackTrack helps teams quickly identify devices, ports, and cable relationships so responders spend less time validating rack state during critical incidents.</p></details>
+        <details><summary><i>Q07</i>Does RackTrack support security and vulnerability workflows?</summary><p>Yes. RackTrack provides device-level firmware currency and physical infrastructure visibility, so security teams can see what is actually in the rack and which devices are running out-of-date firmware.</p></details>
+        <details><summary><i>Q08</i>How long does a baseline assessment take?</summary><p>Typically about twenty minutes for a single rack or row. The assessment compares your existing records against observed physical and network state.</p></details>
+        <details><summary><i>Q09</i>Can we request a demo before committing?</summary><p>Yes. You can schedule a guided walkthrough against your own environment to see how RackTrack performs on real infrastructure.</p></details>
+        <details><summary><i>Q10</i>Does RackTrack work with existing enterprise tools?</summary><p>Yes. RackTrack is designed to integrate with existing infrastructure, inventory, compliance, and operational workflows.</p></details>
+        <details><summary><i>Q11</i>Where can RackTrack be deployed?</summary><p>RackTrack supports cloud-hosted, private cloud, on-premise, and air-gapped deployment models for regulated or restricted environments.</p></details>
+        <details><summary><i>Q12</i>Who uses RackTrack?</summary><p>RackTrack is built for infrastructure leaders, network engineering teams, security operations, compliance owners, incident responders, and data center operators.</p></details>
+      </div>
+    </div>
+  </section>
+
+  <footer class="foot">
+    <div class="foot-brand">
+      <a class="brand" href="/"><img alt="" src="/design-system/assets/Logos/racktrack-mark.jpg">RackTrack</a>
+      <p>Physical infrastructure intelligence for data centers.</p>
+    </div>
+    <nav aria-label="Platform"><b>Platform</b>
+      <a href="/pages/why-racktrack/">Why RackTrack</a><a href="/pages/solutions/">Solutions</a><a href="/pages/use-cases/">Use cases</a><a href="/pages/trust-security/">Trust &amp; security</a></nav>
+    <nav aria-label="Company"><b>Company</b>
+      <a href="/pages/resources/">Resources</a><a href="/pages/about-us/">About us</a><a href="/pages/contact-us/" aria-current="page">Contact us</a></nav>
+    <div><b>Contact</b>
+      <p><a href="mailto:info@racktrack.ai">info@racktrack.ai</a></p><p><a href="tel:+18608782448">+1 (860) 878 2448</a></p><p>85 Felt Rd, Suite #604<br>South Windsor, CT 06074</p></div>
+    <div class="fine">
+      <span>Â© 2026 RackTrack Inc. Â· Patent pending</span>
+      <span class="legal"><a href="/pages/legal/privacy-policy/">Privacy</a><a href="/pages/legal/terms-of-use/">Terms</a><a href="/pages/legal/cookie-policy/">Cookies</a><a href="/pages/legal/data-we-collect/">Data we collect</a><a href="/pages/legal/third-party-services/">Third parties</a></span>
+      <span class="social"><a href="https://www.linkedin.com/company/racktrack/" rel="noopener" target="_blank">LinkedIn</a><a href="https://www.instagram.com/racktrack_inc/" rel="noopener" target="_blank">Instagram</a><a href="https://www.facebook.com/share/18depF5xzA/" rel="noopener" target="_blank">Facebook</a></span>
+    </div>
+  </footer>
+</main>
+
+<script type="importmap">
+{ "imports": {
+  "three": "https://cdn.jsdelivr.net/npm/three@0.170.0/build/three.module.js",
+  "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.170.0/examples/jsm/"
+} }
+</script>
+<script>
+/* â”€â”€â”€â”€â”€ Contact: scroll value g (shared with the 3D), pinned steps, brief form, office clock (no WebGL needed) â”€â”€â”€â”€â”€ */
+(()=>{
+const clamp=(x,a=0,b=1)=>Math.min(b,Math.max(a,x));
+const $=s=>document.querySelector(s), $$=s=>[...document.querySelectorAll(s)];
+const brief=$('#brief'), next=$('#next'), reach=$('#reach');
+const st=$$('#next .st');
+
+/* shared state the 3D reads: form scope + what to print on the brief card */
+const S=window.CONTACT_STATE={scope:'rack',name:'',company:'',sent:false};
+
+let T={b:{t:0,h:0},n:{t:0,h:0},r:{t:0}};
+function measure(){const y=scrollY,r=e=>{const b=e.getBoundingClientRect();return {t:b.top+y,h:b.height};};T={b:r(brief),n:r(next),r:r(reach)};lastY=-1;}
+let lastY=-1,lastW=-1,cur=-1;
+measure();addEventListener('resize',measure);addEventListener('load',measure);document.fonts&&document.fonts.ready.then(measure);
+if('ResizeObserver' in window)new ResizeObserver(()=>measure()).observe(document.body);
+
+/* g: -1 hero Â· 0 the form (held while it is on screen) Â· 1..4 the three pinned steps */
+function G(){const y=scrollY,vh=innerHeight;
+  const k0=Math.max(1,T.b.t-vh*.55);if(y<k0)return -1+y/k0;
+  const k1=Math.max(k0,T.b.t+T.b.h-vh);if(y<k1)return 0;
+  const k2=Math.max(k1+1,T.n.t);if(y<k2)return (y-k1)/(k2-k1);
+  const k3=T.n.t+T.n.h-vh;return 1+3*clamp((y-k2)/Math.max(1,k3-k2));}
+const setC=(el,c,v)=>{if(el.classList.contains(c)!==v)el.classList.toggle(c,v);};
+
+function frame(){
+  if(scrollY!==lastY||innerWidth!==lastW){lastY=scrollY;lastW=innerWidth;
+    const vh=innerHeight,y=scrollY,g=G();window.CONTACT_G=g;
+    const mob=innerWidth<760;
+    // the 3D hides once a paper section covers the screen (and behind the form on phones)
+    window.CONTACT_OFF=(T.r.t-y<vh*.98)||(mob&&y>T.b.t-vh*.5&&y<T.b.t+T.b.h-vh*.4);
+    setC(document.body,'wide',!mob&&((g>-.45&&g<.7)||g>2.85));
+    const k=clamp(Math.floor(g-1),0,2);
+    if(k!==cur){cur=k;st.forEach((e,i)=>setC(e,'on',i===k));}}
+  requestAnimationFrame(frame);}
+requestAnimationFrame(frame);
+
+/* â”€â”€ the brief form (validation + email hand-off, as on racktrack.ai) â”€â”€ */
+const form=$('#brief-request'), status=$('#form-status');
+const setError=(name,msg)=>{const f=form.elements[name];f.setAttribute('aria-invalid',msg?'true':'false');const e=form.querySelector(`[data-error="${name}"]`);if(e)e.textContent=msg;return !msg;};
+const sync=()=>{S.name=form.elements.fullName.value.trim();S.company=form.elements.company.value.trim();S.scope=form.elements.scope.value||'rack';};
+form.addEventListener('input',e=>{sync();const n=e.target.name;if(e.target.getAttribute('aria-invalid')==='true')setError(n,'');});
+form.addEventListener('change',sync);
+form.elements.mobile.addEventListener('input',e=>{const v=e.target.value.replace(/\D/g,'').slice(0,10);if(v!==e.target.value)e.target.value=v;});
+form.addEventListener('submit',e=>{
+  e.preventDefault();status.textContent='';sync();
+  const name=form.elements.fullName.value.trim(), email=form.elements.email.value.trim(), mobile=form.elements.mobile.value.trim();
+  const ok=[
+    setError('fullName',!name?'Full name is required.':!/^[A-Za-z][A-Za-z\s'.-]*$/.test(name)?'Enter a valid name.':''),
+    setError('email',!email?'Email address is required.':!/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(email)?'Enter a valid email address.':''),
+    setError('mobile',!mobile?'Mobile number is required.':!/^\d{10}$/.test(mobile)?'Enter exactly 10 digits.':'')];
+  if(ok.includes(false)){form.querySelector('[aria-invalid="true"]').focus();return;}
+  const scope={rack:'One rack',row:'One row',site:'One site'}[S.scope];
+  const company=form.elements.company.value.trim()||'Not provided', req=form.elements.requirement.value.trim()||'Not provided';
+  const subject=encodeURIComponent(`RackTrack platform brief request from ${name}`);
+  const body=encodeURIComponent([`Full name: ${name}`,`Email: ${email}`,`Company: ${company}`,`Mobile: ${form.elements.countryCode.value} ${mobile}`,`Scope: ${scope}`,`Requirement: ${req}`].join('\n'));
+  S.sent=true;
+  window.location.href=`mailto:info@racktrack.ai?subject=${subject}&body=${body}`;
+  status.textContent='Your email app is ready with the request details. If it did not open, email info@racktrack.ai directly.';
+});
+
+/* â”€â”€ local time at the office â”€â”€ */
+const fmt=new Intl.DateTimeFormat('en-US',{timeZone:'America/New_York',hour:'numeric',minute:'2-digit'});
+const clk=$('#clkCT');const tick=()=>{clk.textContent=fmt.format(new Date())+' ET';};tick();setInterval(tick,20000);
+})();
+</script>
+<script type="module">
+/* â•â•â•â•â•â•â•â•â•â•â•â•â• Contact Â· 3D â•â•â•â•â•â•â•â•â•â•â•â•â•
+   A small hall on a drawing sheet: rows A and B, eight racks each. Rack B-06 is being swept.
+   Hero: the hall, B-06 under a live sweep.  Form: the scope you pick lights up (rack / row / site) and the
+   brief card fills in as you type.  Next: 1 the brief lands, stamped sent Â· 2 one business day runs out to
+   the reply flag Â· 3 the phone sweeps B-06 and each device resolves green (matched) or amber (needs review). */
+/* Tablet and phone get the static page: the hall is a desktop-only scene.
+   Bail before importing three, so phones never pay for the download. */
+if(innerWidth<=1180){
+  document.documentElement.classList.add('no-webgl');
+  await new Promise(()=>{});          // nothing below this line runs
+}
+const [THREE,{RoomEnvironment},{RoundedBoxGeometry}]=await Promise.all([
+  import('three'),
+  import('three/addons/environments/RoomEnvironment.js'),
+  import('three/addons/geometries/RoundedBoxGeometry.js')]);
+
+const reduce=matchMedia('(prefers-reduced-motion: reduce)').matches;
+const SNAP=location.search.includes('snap');
+const clamp=(x,a=0,b=1)=>Math.min(b,Math.max(a,x));
+const smooth=(a,b,x)=>{const t=clamp((x-a)/(b-a));return t*t*(3-2*t)};
+const lerp=(a,b,t)=>a+(b-a)*t;
+const C=h=>new THREE.Color(h);
+const COL={link:C('#1FD67C'),linkInk:C('#04703F'),drift:C('#FF9A2E'),record:C('#7C93A8'),ink:C('#111614'),top:C('#353c39')};
+const MONO='"JetBrains Mono", monospace', SANS='"Inter", sans-serif';
+const V3=(x,y,z)=>new THREE.Vector3(x,y,z);
+
+const canvas=document.getElementById('stage');
+let renderer;
+try{ renderer=new THREE.WebGLRenderer({canvas,antialias:true,alpha:true,powerPreference:'high-performance'}); }
+catch(e){ document.documentElement.classList.add('no-webgl'); throw e; }
+renderer.setPixelRatio(SNAP?1:Math.min(devicePixelRatio,1.5));
+renderer.setClearColor(0,0);
+renderer.toneMapping=THREE.ACESFilmicToneMapping; renderer.toneMappingExposure=1.02;
+renderer.outputColorSpace=THREE.SRGBColorSpace;
+renderer.shadowMap.enabled=true; renderer.shadowMap.type=THREE.PCFShadowMap; renderer.shadowMap.autoUpdate=false; renderer.shadowMap.needsUpdate=true;
+const scene=new THREE.Scene();
+scene.environment=new THREE.PMREMGenerator(renderer).fromScene(new RoomEnvironment(),.04).texture; scene.environmentIntensity=.85;
+const camera=new THREE.PerspectiveCamera(28,1,.05,300);
+scene.add(new THREE.HemisphereLight(0xffffff,0x9aa39e,.55));
+const sun=new THREE.DirectionalLight(0xffffff,1.7);sun.position.set(-4,10,7);sun.castShadow=true;
+sun.shadow.mapSize.set(1024,1024);Object.assign(sun.shadow.camera,{left:-5.5,right:5.5,top:5,bottom:-4.5,near:1,far:30});sun.shadow.bias=-.0005;sun.shadow.radius=4;scene.add(sun);
+const fill=new THREE.DirectionalLight(0xdfe9ff,.5);fill.position.set(7,4,-5);scene.add(fill);
+const front=new THREE.DirectionalLight(0xffffff,.4);front.position.set(1,2,8);scene.add(front);
+
+function cnv(w,h){const c=document.createElement('canvas');c.width=w;c.height=h;return [c,c.getContext('2d')];}
+function tex(c){const t=new THREE.CanvasTexture(c);t.colorSpace=THREE.SRGBColorSpace;t.anisotropy=Math.min(8,renderer.capabilities.getMaxAnisotropy());return t;}
+const alu=new THREE.MeshStandardMaterial({color:'#dfe3df',metalness:.72,roughness:.3});
+const graph=new THREE.MeshStandardMaterial({color:'#2a302d',metalness:.55,roughness:.45});
+const add=(m,p,parent=scene)=>{if(p)m.position.set(...p);parent.add(m);return m;};
+
+/* â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ layout â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
+const BW=7.6, BD=4.6, SX=-.3, SZ=.2;                     // drawing sheet
+const RW=.6, RD=.9, RH=2.0, U=.044, Y0=.1, FW=.52, FH=42*U;
+const RX=i=>-3.02+i*.62, ROWZ=[-1.0,.6], ROWN=['A','B'];
+const uy=(u,h=1)=>Y0+(u-1)*U+h*U/2;
+const B6={x:RX(5),z:ROWZ[1]}, ZF=B6.z+RD/2;              // rack B-06, its front face
+const STX0=-1.45, STX1=1.55, STZ=1.84, STW=.34;            // the one-business-day strip
+const CARD={w:1.3,d:.84,x:2.7,z:.95};                    // the brief card's resting place
+
+/* â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ drawing sheet â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
+function sheetCanvas(){const W=2048,H=Math.round(W*BD/BW),s=W/BW;const [c,g]=cnv(W,H);const X=x=>(x-SX+BW/2)*s,Z=z=>(z-SZ+BD/2)*s;
+  g.fillStyle='#F4F6F3';g.fillRect(0,0,W,H);
+  g.fillStyle='rgba(17,22,20,.055)';for(let x=-4;x<=4;x+=.2)g.fillRect(X(x),0,1.4,H);for(let z=-2.2;z<=2.6;z+=.2)g.fillRect(0,Z(z),W,1.4);
+  g.strokeStyle='#111614';g.lineWidth=4;g.strokeRect(14,14,W-28,H-28);
+  // row footprints
+  g.setLineDash([14,10]);g.strokeStyle='#7C93A8';g.lineWidth=3;
+  ROWZ.forEach(z=>g.strokeRect(X(RX(0)-.36),Z(z-.5),(RX(7)-RX(0)+.72)*s,1.0*s));g.setLineDash([]);
+  g.fillStyle='#4A544F';g.font=`600 44px ${MONO}`;ROWZ.forEach((z,i)=>g.fillText('row '+ROWN[i],X(-3.97),Z(z)+16));
+  g.font=`500 30px ${MONO}`;g.fillText('aisle',X(-3.97),Z(-.2)+10);
+  // dimension line behind row A
+  const dz=Z(-1.66);g.strokeStyle='#4A544F';g.lineWidth=2.5;g.beginPath();g.moveTo(X(RX(0)-.3),dz);g.lineTo(X(RX(7)+.3),dz);
+  [RX(0)-.3,RX(7)+.3].forEach(x=>{g.moveTo(X(x),dz-16);g.lineTo(X(x),dz+16);});g.stroke();
+  const lab='8 racks per row Â· 4.96 m';g.font=`500 32px ${MONO}`;const lw=g.measureText(lab).width;g.fillStyle='#F4F6F3';g.fillRect(X(-.85)-lw/2-14,dz-22,lw+28,44);g.fillStyle='#4A544F';g.fillText(lab,X(-.85)-lw/2,dz+11);
+  // the brief's place
+  g.setLineDash([10,9]);g.strokeStyle='#9aa39e';g.lineWidth=3;g.strokeRect(X(CARD.x-CARD.w/2-.03),Z(CARD.z-CARD.d/2-.03),(CARD.w+.06)*s,(CARD.d+.06)*s);g.setLineDash([]);
+  g.fillStyle='#4A544F';g.font=`500 30px ${MONO}`;g.fillText('the brief',X(CARD.x-CARD.w/2),Z(CARD.z-CARD.d/2-.08));
+  // title block
+  g.fillStyle='#111614';g.fillRect(X(1.95),H-122,W-28-X(1.95)-10,98);g.fillStyle='#DDE4DF';g.font=`600 36px ${MONO}`;g.fillText('Hall 1 Â· plan',X(1.95)+24,H-78);
+  g.fillStyle='#93A19A';g.font=`500 26px ${MONO}`;g.fillText('rows Aâ€“B Â· 16 racks Â· 1:50',X(1.95)+24,H-42);
+  return c;}
+const sheetMat=new THREE.MeshStandardMaterial({map:tex(sheetCanvas()),roughness:.9});
+add(new THREE.Mesh(new THREE.BoxGeometry(BW,.2,BD),alu),[SX,-.1,SZ]);
+const sheet=add(new THREE.Mesh(new THREE.PlaneGeometry(BW,BD),sheetMat),[SX,.002,SZ]);sheet.rotation.x=-Math.PI/2;sheet.receiveShadow=true;
+add(new THREE.Mesh(new THREE.BoxGeometry(BW+.14,.04,BD+.14),graph),[SX,-.22,SZ]);
+
+/* â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ rack fronts (one shared face for the hall, a named one for B-06) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
+const HALL_EQ=[[41,1,'patch'],[39,1,'switch'],[38,1,'switch'],[35,2,'server'],[33,2,'server'],[31,2,'server'],[28,2,'blank'],[24,4,'storage'],[21,2,'server'],[19,2,'server'],[16,2,'server'],[13,2,'blank'],[9,4,'storage'],[6,2,'server'],[2,3,'ups']].map(([u,h,k])=>({u,h,k}));
+const B6_EQ=[
+ {u:41,h:1,k:'patch',n:'PP-B6'},{u:39,h:1,k:'switch',n:'SW-B6-1'},{u:38,h:1,k:'switch',n:'SW-B6-2'},
+ {u:35,h:2,k:'server',n:'APP-11'},{u:33,h:2,k:'server',n:'APP-12'},{u:31,h:2,k:'server',n:'APP-13',rev:1},{u:29,h:2,k:'server',n:'APP-14'},
+ {u:24,h:4,k:'storage',n:'NAS-B6'},{u:21,h:2,k:'server',n:'DB-07'},{u:19,h:2,k:'server',n:'DB-08',rev:1},{u:16,h:2,k:'server',n:'DB-09'},
+ {u:10,h:4,k:'storage',n:'BAK-B6'},{u:7,h:2,k:'server',n:'APP-15'},{u:2,h:3,k:'ups',n:'UPS-B6'}];
+function drawFace(W,H,list,named){const [c,g]=cnv(W,H);const pu=H/42,rw=W*.06;
+  g.fillStyle='#121615';g.fillRect(0,0,W,H);
+  g.fillStyle='#2a302d';g.fillRect(0,0,rw,H);g.fillRect(W-rw,0,rw,H);
+  g.fillStyle='#0c1110';for(let u=0;u<42*3;u++){const y=u*pu/3+pu/6-1;g.fillRect(rw*.35,y,rw*.3,Math.max(1,pu*.1));g.fillRect(W-rw*.65,y,rw*.3,Math.max(1,pu*.1));}
+  const x0=rw+W*.012,w=W-2*x0;
+  list.forEach(d=>{const y=H-(d.u-1+d.h)*pu+1,h=d.h*pu-2;
+    const bg={blank:'#1b201e',patch:'#1d2321',switch:'#2a302d',server:'#2f3633',storage:'#262c29',ups:'#2b312e'}[d.k];
+    g.fillStyle=bg;g.fillRect(x0,y,w,h);g.fillStyle='rgba(255,255,255,.07)';g.fillRect(x0,y,w,Math.max(1,pu*.06));g.fillStyle='rgba(0,0,0,.4)';g.fillRect(x0,y+h-Math.max(1,pu*.06),w,Math.max(1,pu*.06));
+    if(d.k==='blank'){g.fillStyle='rgba(255,255,255,.05)';for(let yy=y+pu*.3;yy<y+h-2;yy+=pu*.35)g.fillRect(x0+w*.08,yy,w*.84,Math.max(1,pu*.08));}
+    if(d.k==='patch'||d.k==='switch'){const n=24,px=w*.62/n;const rows=d.k==='switch'?2:1;
+      for(let r=0;r<rows;r++)for(let i=0;i<n;i++){const xx=x0+w*.33+i*px,yy=y+h*(rows===2?(r?.56:.14):.3);g.fillStyle='#0b0f0e';g.fillRect(xx,yy,px*.72,h*(rows===2?.3:.4));
+        if(d.k==='switch'&&(i*7+r*3)%5){g.fillStyle='#1FD67C';g.fillRect(xx+px*.2,yy-Math.max(1,pu*.06),px*.3,Math.max(1,pu*.06));}}}
+    if(d.k==='server'){g.fillStyle='#262c29';for(let i=0;i<9;i++)g.fillRect(x0+w*.3+i*w*.055,y+h*.18,w*.045,h*.64);
+      g.fillStyle='#1FD67C';g.fillRect(x0+w*.04,y+h*.66,pu*.16,pu*.16);g.fillStyle='#7C93A8';g.fillRect(x0+w*.04+pu*.28,y+h*.66,pu*.16,pu*.16);
+      g.fillStyle='#1a1f1d';for(let yy=y+h*.2;yy<y+h*.8;yy+=pu*.2)g.fillRect(x0+w*.82,yy,w*.14,Math.max(1,pu*.08));}
+    if(d.k==='storage'){for(let r=0;r<3;r++)for(let i=0;i<4;i++){const xx=x0+w*.22+i*w*.19,yy=y+h*.08+r*h*.3;g.fillStyle='#343b38';g.fillRect(xx,yy,w*.17,h*.26);g.fillStyle=(r+i)%5?'#1FD67C':'#7C93A8';g.fillRect(xx+w*.14,yy+h*.05,pu*.12,pu*.12);}}
+    if(d.k==='ups'){g.fillStyle='#0c1110';g.fillRect(x0+w*.62,y+h*.18,w*.3,h*.4);g.fillStyle='#1FD67C';g.fillRect(x0+w*.65,y+h*.3,w*.12,h*.12);
+      g.fillStyle='#1a1f1d';for(let yy=y+h*.15;yy<y+h*.85;yy+=pu*.22)g.fillRect(x0+w*.2,yy,w*.36,Math.max(1,pu*.08));}
+    if(named&&d.n){g.fillStyle='#DDE4DF';g.font=`600 ${Math.round(pu*.52)}px ${MONO}`;g.fillText(d.n,x0+w*.03,y+Math.min(h*.5+pu*.18,pu*.72));}});
+  return c;}
+function overlayCanvas(){const W=512,H=Math.round(W*FH/FW);const [c,g]=cnv(W,H);const pu=H/42,rw=W*.06,x0=rw+W*.012,w=W-2*x0;
+  B6_EQ.forEach(d=>{const y=H-(d.u-1+d.h)*pu+3,h=d.h*pu-6;const bad=d.rev;
+    g.fillStyle=bad?'rgba(255,154,46,.22)':'rgba(31,214,124,.14)';g.fillRect(x0,y,w,h);
+    g.strokeStyle=bad?'#FF9A2E':'#1FD67C';g.lineWidth=5;g.strokeRect(x0+2.5,y+2.5,w-5,h-5);
+    const bx=x0+w-pu*.95,by=y+h/2-pu*.36,bs=pu*.72;g.fillStyle=bad?'#FF9A2E':'#1FD67C';g.fillRect(bx,by,bs,bs);
+    g.strokeStyle='#111614';g.lineWidth=4;g.beginPath();
+    if(bad){g.moveTo(bx+bs*.25,by+bs*.38);g.lineTo(bx+bs*.75,by+bs*.38);g.moveTo(bx+bs*.25,by+bs*.62);g.lineTo(bx+bs*.75,by+bs*.62);}
+    else{g.moveTo(bx+bs*.22,by+bs*.52);g.lineTo(bx+bs*.43,by+bs*.72);g.lineTo(bx+bs*.8,by+bs*.28);}g.stroke();});
+  return c;}
+
+/* â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ the hall: 15 racks instanced, B-06 on its own â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
+const HALL=[];for(let r=0;r<2;r++)for(let i=0;i<8;i++)HALL.push({r,i,x:RX(i),z:ROWZ[r],id:ROWN[r]+'-0'+(i+1),b6:r===1&&i===5});
+const OTH=HALL.filter(h=>!h.b6);
+const M4=new THREE.Matrix4(),Q=new THREE.Quaternion(),S1=V3(1,1,1),QT=new THREE.Quaternion().setFromEuler(new THREE.Euler(-Math.PI/2,0,0));
+const bodies=new THREE.InstancedMesh(new THREE.BoxGeometry(RW,RH,RD),graph,OTH.length);bodies.castShadow=bodies.receiveShadow=true;scene.add(bodies);
+const hallFaceMat=new THREE.MeshStandardMaterial({map:tex(drawFace(256,Math.round(256*FH/FW),HALL_EQ,false)),metalness:.3,roughness:.55});
+const faces=new THREE.InstancedMesh(new THREE.PlaneGeometry(FW,FH),hallFaceMat,OTH.length);scene.add(faces);
+OTH.forEach((h,k)=>{M4.makeTranslation(h.x,RH/2,h.z);bodies.setMatrixAt(k,M4);M4.makeTranslation(h.x,Y0+FH/2,h.z+RD/2+.003);faces.setMatrixAt(k,M4);});
+const tops=new THREE.InstancedMesh(new THREE.PlaneGeometry(RW-.05,RD-.05),new THREE.MeshBasicMaterial({toneMapped:false}),HALL.length);scene.add(tops);
+HALL.forEach((h,k)=>{M4.compose(V3(h.x,RH+.003,h.z),QT,S1);tops.setMatrixAt(k,M4);tops.setColorAt(k,COL.top);});
+[bodies,faces,tops].forEach(m=>m.frustumCulled=false);
+// B-06
+const b6Body=add(new THREE.Mesh(new THREE.BoxGeometry(RW,RH,RD),graph),[B6.x,RH/2,B6.z]);b6Body.castShadow=b6Body.receiveShadow=true;
+const b6FaceMat=new THREE.MeshStandardMaterial({map:tex(drawFace(512,Math.round(512*FH/FW),B6_EQ,true)),metalness:.3,roughness:.55});
+add(new THREE.Mesh(new THREE.PlaneGeometry(FW,FH),b6FaceMat),[B6.x,Y0+FH/2,ZF+.003]);
+const ovTex=tex(overlayCanvas());
+const ovGeo=new THREE.PlaneGeometry(FW,FH);ovGeo.translate(0,FH/2,0);
+const overlay=add(new THREE.Mesh(ovGeo,new THREE.MeshBasicMaterial({map:ovTex,transparent:true,toneMapped:false,depthWrite:false})),[B6.x,Y0,ZF+.006]);
+const band=add(new THREE.Mesh(new THREE.PlaneGeometry(RW+.08,.014),new THREE.MeshBasicMaterial({color:COL.link,transparent:true,opacity:0,toneMapped:false,depthWrite:false})),[B6.x,1,ZF+.014]);
+const washGeo=new THREE.PlaneGeometry(RW,1);washGeo.translate(0,.5,0);
+const wash=add(new THREE.Mesh(washGeo,new THREE.MeshBasicMaterial({color:COL.link,transparent:true,opacity:0,toneMapped:false,depthWrite:false})),[B6.x,Y0,ZF+.01]);
+
+/* â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ scope highlight: rack Â· row Â· site â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
+const SCOPE={rack:[B6.x-.37,B6.x+.37,B6.z-.52,B6.z+.52],row:[RX(0)-.37,RX(7)+.37,ROWZ[1]-.52,ROWZ[1]+.52],site:[RX(0)-.37,RX(7)+.37,ROWZ[0]-.52,ROWZ[1]+.52]};
+const scFill=add(new THREE.Mesh(new THREE.PlaneGeometry(1,1),new THREE.MeshBasicMaterial({color:COL.link,transparent:true,opacity:0,toneMapped:false,depthWrite:false})),[0,.008,0]);scFill.rotation.x=-Math.PI/2;
+const scBox=add(new THREE.LineSegments(new THREE.EdgesGeometry(new THREE.BoxGeometry(1,1,1)),new THREE.LineBasicMaterial({color:COL.linkInk,transparent:true,opacity:0,toneMapped:false})));
+const scB=[...SCOPE.rack];let scopeKey='rack';
+
+/* â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ the brief card â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
+const CARDG=new THREE.Group();scene.add(CARDG);
+const cardBody=add(new THREE.Mesh(new THREE.BoxGeometry(CARD.w,.018,CARD.d),new THREE.MeshStandardMaterial({color:'#F4F6F3',roughness:.7})),null,CARDG);cardBody.castShadow=true;
+function fitText(g,t,x,maxW,font,size){let s=size;g.font=font(s);while(s>30&&g.measureText(t).width>maxW){s-=2;g.font=font(s);}g.fillText(t,x,0);}
+function cardCanvas(st){const W=1560,H=1008;const [c,g]=cnv(W,H);
+  g.fillStyle='#F4F6F3';g.fillRect(0,0,W,H);g.strokeStyle='#111614';g.lineWidth=8;g.strokeRect(4,4,W-8,H-8);
+  g.fillStyle='#111614';g.fillRect(0,0,W,168);g.fillStyle='#F4F6F3';g.font=`600 92px ${SANS}`;g.fillText('Platform brief',60,114);
+  g.fillStyle='#1FD67C';g.beginPath();g.arc(W-330,84,16,0,7);g.fill();g.fillStyle='#C6CCC7';g.font=`500 44px ${MONO}`;g.fillText('RackTrack',W-296,100);
+  const scope={rack:'One rack Â· B-06',row:'One row Â· row B',site:'One site Â· hall 1'}[st.scope];
+  const rows=[['Client',st.company||'Your company',!st.company],['Contact',st.name||'Your name',!st.name],['Scope',scope,false,'#04703F']];
+  rows.forEach(([l,v,ph,col],i)=>{const y=310+i*180;g.fillStyle='rgba(17,22,20,.14)';g.fillRect(60,y+62,W-120,3);
+    g.fillStyle='#4A544F';g.font=`500 46px ${MONO}`;g.fillText(l,60,y);
+    g.fillStyle=ph?'#7C93A8':col||'#111614';g.save();g.translate(0,y+4);fitText(g,v,390,W-460,s=>`${ph?500:600} ${s}px ${SANS}`,82);g.restore();});
+  if(st.sent){g.save();g.translate(W-300,H-118);g.rotate(-.1);g.strokeStyle='#04703F';g.lineWidth=12;g.strokeRect(-190,-78,380,140);g.fillStyle='#04703F';g.font=`700 96px ${MONO}`;g.fillText('sent',-112,28);g.restore();}
+  return c;}
+const cardMat=new THREE.MeshBasicMaterial({map:tex(cardCanvas({scope:'rack',name:'',company:'',sent:false})),toneMapped:false});
+const cardTop=add(new THREE.Mesh(new THREE.PlaneGeometry(CARD.w-.02,CARD.d-.02),cardMat),[0,.0095,0],CARDG);cardTop.rotation.x=-Math.PI/2;
+let cardKey='';
+
+/* â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ one business day â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
+function stripCanvas(){const W=2048,H=Math.round(W*STW/(STX1-STX0));const [c,g]=cnv(W,H);
+  g.fillStyle='#F4F6F3';g.fillRect(0,0,W,H);g.strokeStyle='#111614';g.lineWidth=5;g.strokeRect(2.5,2.5,W-5,H-5);
+  const half=W*.5;g.fillStyle='rgba(31,214,124,.16)';g.fillRect(half,0,half,H);
+  g.fillStyle='#111614';g.fillRect(half-2,0,4,H);
+  g.fillStyle='#4A544F';for(let i=0;i<=48;i++){const x=i/48*W;const long=i%6===0;g.fillRect(x-1,H-(long?56:30),3,long?56:30);}
+  g.font=`600 64px ${MONO}`;g.fillStyle='#111614';g.fillText('today',28,86);g.fillStyle='#04703F';g.fillText('next business day',half+28,86);
+  return c;}
+const strip=add(new THREE.Mesh(new THREE.PlaneGeometry(STX1-STX0,STW),new THREE.MeshBasicMaterial({map:tex(stripCanvas()),toneMapped:false})),[(STX0+STX1)/2,.012,STZ]);strip.rotation.x=-Math.PI/2;
+add(new THREE.Mesh(new THREE.BoxGeometry(STX1-STX0+.03,.01,STW+.03),graph),[(STX0+STX1)/2,.006,STZ]);
+const cursor=add(new THREE.Mesh(new THREE.BoxGeometry(.035,.05,STW+.05),new THREE.MeshStandardMaterial({color:'#111614',roughness:.4})),[STX0+.03,.03,STZ]);
+const FLAG=new THREE.Group();FLAG.position.set(STX1-.03,.012,STZ-.05);scene.add(FLAG);
+add(new THREE.Mesh(new THREE.CylinderGeometry(.007,.007,.42,8),graph),[0,.21,0],FLAG).castShadow=true;
+{const sh=new THREE.Shape();sh.moveTo(0,0);sh.lineTo(.2,-.055);sh.lineTo(0,-.11);sh.closePath();
+ add(new THREE.Mesh(new THREE.ShapeGeometry(sh),new THREE.MeshBasicMaterial({color:COL.link,side:THREE.DoubleSide,toneMapped:false})),[.004,.42,0],FLAG);}
+
+/* â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ the capture phone â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
+function makePhone(parent,W,label){
+  const H=W*2.06, D=W*.105, R=W*.15;
+  const frameM=new THREE.MeshStandardMaterial({color:'#c9cfcb',metalness:.85,roughness:.22});
+  const backM=new THREE.MeshStandardMaterial({color:'#2a302d',metalness:.35,roughness:.28});
+  add(new THREE.Mesh(new RoundedBoxGeometry(W,H,D,6,R*.55),frameM),null,parent);
+  add(new THREE.Mesh(new RoundedBoxGeometry(W*.965,H*.975,D*.2,5,R*.5),backM),[0,0,-D/2+D*.06],parent);
+  add(new THREE.Mesh(new RoundedBoxGeometry(W*.46,W*.46,D*.5,5,W*.09),backM),[-W*.2,H*.34,-D/2-D*.14],parent);
+  [[W/2+D*.02,H*.18,H*.12],[-W/2-D*.02,H*.24,H*.06],[-W/2-D*.02,H*.14,H*.06]].forEach(([x,y,h])=>add(new THREE.Mesh(new THREE.BoxGeometry(D*.28,h,D*.42),frameM),[x,y,0],parent));
+  const cw=420,ch=Math.round(cw*2.06);const pc=document.createElement('canvas');pc.width=cw;pc.height=ch;const g=pc.getContext('2d');
+  function draw(t){g.setTransform(1,0,0,1,0,0);g.clearRect(0,0,cw,ch);const r=58;g.save();
+    g.beginPath();g.roundRect(0,0,cw,ch,r);g.clip();g.fillStyle='#050706';g.fillRect(0,0,cw,ch);
+    const b=10;g.save();g.beginPath();g.roundRect(b,b,cw-2*b,ch-2*b,r-b);g.clip();
+    g.fillStyle='#cfd5d0';g.fillRect(0,0,cw,ch);g.fillStyle='#b9c0bb';g.fillRect(0,ch*.62,cw,ch*.38);
+    const rx=cw*.2,rw=cw*.6,ry=ch*.12,rh=ch*.6;g.fillStyle='#1d2321';g.fillRect(rx,ry,rw,rh);
+    for(let i=0;i<16;i++){const y=ry+10+i*(rh-20)/16;g.fillStyle=i%4===1?'#343b38':'#2a302d';g.fillRect(rx+12,y,rw-24,(rh-20)/16-5);for(let k=0;k<6;k++){g.fillStyle=(i+k)%3?'#1FD67C':'#56605b';g.fillRect(rx+rw-60+k*7,y+6,4,3);}}
+    g.strokeStyle='#1FD67C';g.lineWidth=4;[[2,2],[7,1],[11,3]].forEach(([i,n])=>{const y=ry+10+i*(rh-20)/16;g.strokeRect(rx+8,y-3,rw-16,n*(rh-20)/16+1);});
+    const sy=ry+rh*(.25+.5*t);g.fillStyle='rgba(31,214,124,.9)';g.fillRect(rx-18,sy,rw+36,4);g.fillStyle='rgba(31,214,124,.16)';g.fillRect(rx,ry,rw,sy-ry);
+    g.fillStyle='rgba(0,0,0,.28)';g.fillRect(0,0,cw,78);g.fillStyle='#fff';g.font=`600 24px ${SANS}`;g.fillText('9:41',40,50);
+    g.fillRect(cw-78,34,34,16);g.fillRect(cw-116,38,6,12);g.fillRect(cw-106,34,6,16);g.fillRect(cw-96,30,6,20);
+    g.fillStyle='#000';g.beginPath();g.roundRect(cw/2-62,22,124,36,18);g.fill();
+    g.fillStyle='rgba(12,17,16,.8)';g.beginPath();g.roundRect(cw/2-110,92,220,40,20);g.fill();g.fillStyle='#1FD67C';g.beginPath();g.arc(cw/2-84,112,7,0,7);g.fill();
+    g.fillStyle='#fff';g.font=`500 18px ${MONO}`;g.fillText(label,cw/2-66,118);
+    g.fillStyle='rgba(5,7,6,.88)';g.fillRect(0,ch-230,cw,230);
+    g.font=`600 17px ${SANS}`;g.fillStyle='#93A19A';g.fillText('photo',64,ch-190);g.fillText('video',cw-116,ch-190);g.fillStyle='#1FD67C';g.fillText('SWEEP',cw/2-30,ch-190);
+    g.strokeStyle='#fff';g.lineWidth=6;g.beginPath();g.arc(cw/2,ch-104,46,0,7);g.stroke();g.fillStyle='#1FD67C';g.beginPath();g.roundRect(cw/2-20,ch-124,40,40,8);g.fill();
+    g.fillStyle='#fff';g.beginPath();g.roundRect(cw/2-70,ch-30,140,7,4);g.fill();
+    g.restore();g.restore();return pc;}
+  const tx=new THREE.CanvasTexture(draw(.5));tx.colorSpace=THREE.SRGBColorSpace;tx.anisotropy=8;
+  add(new THREE.Mesh(new THREE.PlaneGeometry(W*.965,H*.975),new THREE.MeshBasicMaterial({map:tx,transparent:true,toneMapped:false})),[0,0,D/2+.0004*W/.08],parent);
+  let last=-1;parent.userData.phoneTick=t=>{const k=Math.round(((t%1)+1)%1*24)/24;if(k===last)return;last=k;draw(k);tx.needsUpdate=true;};
+  parent.userData.redraw=()=>{draw(.5);tx.needsUpdate=true;last=-1;};
+  return parent;}
+const PHW=.085;
+const PHONE=makePhone(new THREE.Group(),PHW,'B-06 Â· sweep');scene.add(PHONE);
+const fr=new Float32Array(8*3);const frGeo=new THREE.BufferGeometry();frGeo.setAttribute('position',new THREE.BufferAttribute(fr,3));
+const frustum=add(new THREE.LineSegments(frGeo,new THREE.LineBasicMaterial({color:COL.link,transparent:true,opacity:0,toneMapped:false,depthWrite:false})));frustum.frustumCulled=false;
+
+/* â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ tags â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
+const hud=document.getElementById('hud');const TG=[];
+function tag(k,html,cls,pos){const el=document.createElement('div');el.className='tag '+cls;el.innerHTML=`<i></i><span>${html}</span>`;hud.appendChild(el);
+  const p=typeof pos==='function'?pos:(v=>()=>v)(V3(...pos));const t={k,el,pos:p,on:false};TG.push(t);TG[k]=t;return t;}
+const devY=n=>{const d=B6_EQ.find(e=>e.n===n);return uy(d.u,d.h);};
+const FR=B6.x+FW/2-.01;
+tag('b6','<b>Rack B-06</b>live sweep','link keep',[B6.x+RW/2,RH,ZF]);
+tag('recs','<b>Your records</b>what the tools say','rec',[RX(7)+RW/2,RH,ROWZ[0]+RD/2]);
+const SCOPE_TXT={rack:'<b>One rack Â· B-06</b>baseline in about 20 minutes',row:'<b>One row Â· row B</b>8 racks Â· about 20 minutes',site:'<b>One site Â· hall 1</b>16 racks Â· scoped with you'};
+tag('scope',SCOPE_TXT.rack,'link keep',()=>V3(scB[1],2.12,scB[3]));
+tag('card','<b>Your brief</b>fills in as you type','ink',()=>CARDG.localToWorld(V3(CARD.w/2,0,-CARD.d/2+.1)));
+tag('sent','<b>Brief sent</b>a rack, a row or a site','link keep',()=>CARDG.localToWorld(V3(CARD.w/2,0,-CARD.d/4)));
+tag('reply','<b>We reply</b>within one business day','link left keep',()=>FLAG.localToWorld(V3(0,.42,0)));
+tag('cap','<b>Captured</b>14 devices Â· one phone sweep','link',()=>PHONE.position.clone().add(V3(PHW*.55,PHW*.6,0)));
+tag('match','<b>Matched your records</b>12 of 14','link keep',[FR,devY('APP-11'),ZF+.01]);
+tag('rev','<b>Needs review</b>APP-13 Â· serial differs','drift keep',[FR,devY('APP-13'),ZF+.01]);
+tag('rev2','<b>Needs review</b>DB-08 Â· not in your record','drift',[FR,devY('DB-08'),ZF+.01]);
+
+/* â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ camera keys (g) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
+const CAMS=[
+  [-1,[6.0,5.6,9.4],[-1.25,.55,.2]],
+  [0,[2.2,10.2,8.4],[-.25,-.1,.45]],
+  [1.5,[4.6,2.7,4.1],[2.45,.2,.75]],
+  [2.5,[.9,4.0,8.9],[.05,.3,1.45]],
+  [3.5,[2.35,1.55,3.55],[.12,1.0,ZF]]];
+let vw=0,vh=0,cw=0,chh=0,mobile=false;
+function resize(){vw=innerWidth;vh=innerHeight;mobile=vw<760;cw=vw;chh=mobile?Math.round(vh*.46):vh;renderer.setSize(cw,chh,false);canvas.style.height=chh+'px';camera.aspect=cw/chh;camera.updateProjectionMatrix();frame.cr=null;}
+addEventListener('resize',resize);resize();
+const cp=V3(...CAMS[0][1]),ct=V3(...CAMS[0][2]);
+const clock=new THREE.Clock();
+const heroCopy=document.querySelector('#hero .copy'),formCol=document.querySelector('#brief .fcol'),nextCopy=document.querySelector('#next .scopy');
+const pv=V3();
+function project(p){pv.copy(p).project(camera);return {x:(pv.x+1)/2*cw,y:(1-pv.y)/2*chh,z:pv.z};}
+
+function frame(){
+  requestAnimationFrame(frame);
+  const dt=Math.min(clock.getDelta(),.05),time=clock.elapsedTime;
+  // resized down into tablet/phone range after load: park the scene, don't render
+  const narrow=innerWidth<=1180;
+  if(narrow!==frame.narrow){frame.narrow=narrow;document.documentElement.classList.toggle('no-webgl',narrow);}
+  const off=narrow||!!window.CONTACT_OFF;
+  if(off!==frame.off){frame.off=off;canvas.style.visibility=off?'hidden':'visible';hud.style.display=off?'none':'';}
+  if(off){TG.forEach(t=>{if(t.on){t.on=false;t.el.classList.remove('on');}});return;}
+  // smoothed scroll value: wheel steps glide instead of snapping
+  const gRaw=window.CONTACT_G??-1;
+  if(frame.gs===undefined||reduce||SNAP||Math.abs(gRaw-frame.gs)>1.5)frame.gs=gRaw;else frame.gs+=(gRaw-frame.gs)*(1-Math.pow(.0005,dt));
+  if(Math.abs(gRaw-frame.gs)<1e-5)frame.gs=gRaw;
+  const g=frame.gs;
+  if(g!==frame.gPrev){frame.gPrev=g;renderer.shadowMap.needsUpdate=true;}
+  const S=window.CONTACT_STATE||{scope:'rack',name:'',company:'',sent:false};
+
+  // â”€â”€ camera
+  const Pp=V3(...CAMS[0][1]),Tt=V3(...CAMS[0][2]);
+  for(let i=1;i<CAMS.length;i++){const [gi,p,t]=CAMS[i];const gp=CAMS[i-1][0];const k=smooth(gp+(gi-gp)*.3,gi-(gi-gp)*.12,g);if(k>0){Pp.lerp(V3(...p),k);Tt.lerp(V3(...t),k);}}
+  if(!reduce&&!SNAP)Pp.x+=Math.sin(time*.13)*.1*(1-smooth(2.8,3.3,g));
+  if(mobile){Pp.sub(Tt).multiplyScalar(1.3).add(Tt);}
+  const f=(reduce||SNAP)?1:1-Math.pow(.02,dt);cp.lerp(Pp,f);ct.lerp(Tt,f);camera.position.copy(cp);camera.lookAt(ct);
+  camera.setViewOffset(cw,chh,mobile?0:-(.63-.5)*cw,mobile?-chh*.03:0,cw,chh);
+  camera.updateMatrixWorld();
+
+  // â”€â”€ weights
+  const on=(a,b)=>smooth(a-.2,a+.15,g)*(1-smooth(b-.15,b+.2,g));
+  const wHero=1-smooth(-.6,-.15,g), wForm=smooth(-.45,-.1,g)*(1-smooth(.45,.8,g));
+  const w1=on(1,2), w2=on(2,3), w3=smooth(2.8,3.15,g);
+  const scopeVis=smooth(-.5,-.1,g)*(1-smooth(1.75,2.05,g));
+
+  // â”€â”€ scope highlight
+  if(S.scope!==scopeKey){scopeKey=S.scope;TG.scope.el.querySelector('span').innerHTML=SCOPE_TXT[scopeKey]||SCOPE_TXT.rack;TG.scope.sz=null;}
+  const tb=SCOPE[scopeKey]||SCOPE.rack,sf=(reduce||SNAP)?1:1-Math.pow(.003,dt);for(let i=0;i<4;i++)scB[i]=lerp(scB[i],tb[i],sf);
+  scFill.position.set((scB[0]+scB[1])/2,.008,(scB[2]+scB[3])/2);scFill.scale.set(scB[1]-scB[0],scB[3]-scB[2],1);scFill.material.opacity=.13*scopeVis;scFill.visible=scopeVis>.01;
+  scBox.position.set((scB[0]+scB[1])/2,1.06,(scB[2]+scB[3])/2);scBox.scale.set(scB[1]-scB[0],2.12,scB[3]-scB[2]);scBox.material.opacity=.9*scopeVis;scBox.visible=scopeVis>.01;
+  HALL.forEach((h,k)=>{const inS=h.x>scB[0]&&h.x<scB[1]&&h.z>scB[2]&&h.z<scB[3];const want=inS?scopeVis:0;
+    h.c=lerp(h.c||0,want,sf);tops.setColorAt(k,COL.top.clone().lerp(COL.link,h.c));});
+  tops.instanceColor.needsUpdate=true;
+
+  // â”€â”€ the brief card: resting (hero) â†’ raised beside the hall (form) â†’ lands, sent (step 1)
+  const raise=smooth(-.55,-.08,g)*(1-smooth(1.0,1.45,g));
+  const sent=S.sent||g>1.38;
+  CARDG.position.set(CARD.x+.05*raise,.01+.62*raise,CARD.z+.3*raise);CARDG.rotation.set(.62*raise,-.16*raise,0);
+  const ck=[S.company,S.name,scopeKey,sent].join('|');if(ck!==cardKey){cardKey=ck;cardMat.map.image=cardCanvas({...S,scope:scopeKey,sent});cardMat.map.needsUpdate=true;}
+
+  // â”€â”€ one business day
+  const dp=smooth(2.02,2.45,g);
+  cursor.position.x=lerp(STX0+.03,STX1-.05,dp);
+  const fl=smooth(2.38,2.55,g);FLAG.scale.set(1,Math.max(.001,fl),1);FLAG.visible=fl>.01;
+
+  // â”€â”€ the sweep: a slow loop in the hero, one bottom-to-top pass in step 3
+  const loopY=.3+1.55*(.5-.5*Math.cos(time*.55));
+  const sw=smooth(3.08,3.62,g);
+  const phoneOn=Math.max(wHero,w3);
+  const sweepY=g<1.5?(reduce?1.1:loopY):lerp(.2,1.98,sw);
+  PHONE.visible=phoneOn>.01;PHONE.scale.setScalar(Math.max(.001,phoneOn));
+  PHONE.position.set(B6.x+.04,Math.max(.32,sweepY),ZF+.5);PHONE.rotation.set(-.05,-.32,0);
+  if(PHONE.visible)PHONE.userData.phoneTick(reduce?.5:time*.35);
+  const scanOn=Math.max(wHero,w3*(sw>0&&sw<1?1:0))*phoneOn;
+  band.position.y=sweepY;band.material.opacity=scanOn*(reduce?.9:.75+.25*Math.sin(time*9));band.visible=scanOn>.01;
+  const wy=Math.max(.001,sweepY-Y0);wash.scale.y=wy;wash.material.opacity=scanOn*.08;wash.visible=scanOn>.01;
+  const ov=w3*sw;overlay.visible=ov>.001;overlay.scale.y=Math.max(.001,sw);ovTex.repeat.set(1,Math.max(.001,sw));overlay.material.opacity=smooth(0,.2,ov);
+  frustum.material.opacity=scanOn*.5;
+  if(scanOn>.02){const a=PHONE.localToWorld(V3(-PHW*.2,PHW*.7,-.01));let j=0;
+    [[-RW/2,.09],[RW/2,.09],[-RW/2,-.09],[RW/2,-.09]].forEach(([x,dy])=>{fr[j++]=a.x;fr[j++]=a.y;fr[j++]=a.z;fr[j++]=B6.x+x;fr[j++]=sweepY+dy;fr[j++]=ZF+.014;});
+    frGeo.attributes.position.needsUpdate=true;frustum.visible=true;}else frustum.visible=false;
+
+  // â”€â”€ tags: fully on or off, kept out of the text column and off each other
+  const vis={b6:wHero,recs:wHero,scope:wForm,card:wForm,sent:w1*(g>1.4?1:0),reply:w2*fl,
+    cap:w3*(sw>.05&&sw<.97?1:0),match:w3*(sw>.97?1:0),rev:w3*(sw>.97?1:0),rev2:w3*(sw>.97?1:0)};
+  if(!frame.cr||frame.crW!==cw){frame.crW=cw;const R=e=>e.getBoundingClientRect().right+14;frame.cr={h:R(heroCopy),f:R(formCol),n:R(nextCopy)};}
+  const colR=mobile?0:Math.max(cw*.38,g<-.4?frame.cr.h:g<.6?frame.cr.f:frame.cr.n);
+  const placed=[];
+  for(const t of TG){let want=(vis[t.k]||0)>.5;
+    if(want&&mobile&&!t.el.classList.contains('keep'))want=false;
+    if(want){const s=project(t.pos());
+      if(s.z>1||s.z<-1)want=false;else{
+        const cl=t.el.classList;if(!t.sz){t.sz={w:t.el.offsetWidth,h:t.el.offsetHeight};}const ew=t.sz.w,eh=t.sz.h;
+        const tx=cl.contains('left')?s.x-ew+3.5:cl.contains('up')?s.x-ew/2:s.x-3.5, ty=cl.contains('up')?s.y-eh+3.5:s.y-eh/2;
+        const box={l:tx,t:ty,r:tx+ew,b:ty+eh};
+        if(box.l<colR||box.r>cw-8||box.t<(mobile?58:72)||box.b>chh-(mobile?30:40))want=false;
+        else if(placed.some(q=>!(box.r+6<q.l||box.l-6>q.r||box.b+4<q.t||box.t-4>q.b)))want=false;
+        if(want){placed.push(box);const tf=`translate3d(${tx.toFixed(1)}px,${ty.toFixed(1)}px,0)`;if(tf!==t.tf){t.tf=tf;t.el.style.transform=tf;}}}}
+    if(want!==t.on){t.on=want;t.el.classList.toggle('on',want);}}
+  renderer.render(scene,camera);
+}
+document.fonts.ready.then(()=>{sheetMat.map.image=sheetCanvas();sheetMat.map.needsUpdate=true;
+  b6FaceMat.map.image=drawFace(512,Math.round(512*FH/FW),B6_EQ,true);b6FaceMat.map.needsUpdate=true;
+  strip.material.map.image=stripCanvas();strip.material.map.needsUpdate=true;cardKey='';PHONE.userData.redraw();
+  TG.forEach(t=>t.sz=null);frame.cr=null;});
+PHONE.traverse(o=>{if(o.isMesh)o.castShadow=false;});
+{const hid=[];scene.traverse(o=>{if(!o.visible){hid.push(o);o.visible=true;}});try{renderer.compile(scene,camera);}catch(e){}hid.forEach(o=>o.visible=false);}
+requestAnimationFrame(frame);
+</script>
+<script src="/design-system/nav.js" defer></script>
+</body>
+</html>

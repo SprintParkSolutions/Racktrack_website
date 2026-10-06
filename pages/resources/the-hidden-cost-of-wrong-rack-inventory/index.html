@@ -1,0 +1,849 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>What a wrong inventory actually costs you Â· RackTrack</title>
+<meta name="description" content="Misidentified hardware and early refresh cycles quietly waste budget. Most teams never measure it until it's already expensive.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap">
+<link rel="stylesheet" href="/design-system/base.css">
+<style>
+/* RackTrack Â· Resources Â· File no. 007 Â· FINÂ·01 Â· The budget leak.
+   OBJECT: one rack (R07) on the drawing sheet beside a glass budget gauge (a tank of capex). Three pipes leave the
+   gauge and each ends in a sink that is literally hardware you did not need to buy: a refresh tray of young servers,
+   a pallet of new switches stacked beside a shelf of unused spares, and a dashed ghost rack (R08) planned around R07.
+   BEATS: hero Â· the gauge leaks quietly.
+   1 hidden line item Â· the three pipes run; money turns into objects in each sink; the level drains below the planned line.
+   2 where the waste hides Â· macro on R07 + the tray: paper asset tags with the wrong model and age, a "retired" server
+     still lit and drawing power, and blue-grey record ghosts that fill every empty slot so the rack reads "full".
+   3 key figure 60% Â· the ghosts drop out; two U-columns beside the rack: record 42/42U vs floor 25/42U.
+   4 real example Â· a sweep band climbs R07 and outlines the open slots; the servers land there; PO-2291 is rewritten;
+     R08 fades; its pipe closes and the level recovers.
+   5 catching it early Â· a calendar strip of routine sweeps rises in front; every valve turns green; the level holds.
+   CAMERA: wide 3/4 establishing â†’ high 3/4 over the three sinks â†’ macro on the rack's tags â†’ straight elevation
+   (the two columns) â†’ low hero angle past the PO card â†’ top-down plan with the sweep calendar.
+   Framing guard dollies back so nothing enters the left 45%; labels are on/off with collision + column guards. */
+:root{
+  color-scheme: light;
+  --colL:calc(var(--gutter) + clamp(0px,3vw,64px));
+  --colW:min(38rem,calc(40vw - var(--colL)));
+}
+*{box-sizing:border-box}
+html{background:var(--paper)}
+body{margin:0;background:var(--paper);color:var(--fg);font:400 16px/1.5 var(--sans);-webkit-font-smoothing:antialiased;overflow-x:hidden}
+a{color:inherit}
+::selection{background:var(--link);color:#06140d}
+:focus-visible{outline:2px solid var(--link-ink);outline-offset:3px;border-radius:2px}
+body::before{content:"";position:fixed;inset:0;z-index:0;pointer-events:none;background:radial-gradient(60% 55% at 66% 50%,rgba(255,255,255,.6),transparent 72%)}
+#stage{position:fixed;left:0;top:0;z-index:1;display:block;width:100%;height:100%;pointer-events:none}
+#scrim{position:fixed;inset:0;z-index:1;pointer-events:none;background:linear-gradient(90deg,var(--paper) 0,var(--paper) 41%,rgba(233,236,232,.85) 44%,rgba(233,236,232,0) 50%)}
+#hud{position:fixed;inset:0;z-index:3;pointer-events:none;overflow:hidden;transition:opacity .3s}
+main{position:relative;z-index:2}
+
+/* nav */
+.nav{position:fixed;left:0;right:0;top:0;z-index:10;display:flex;align-items:center;gap:28px;height:calc(var(--nav-h) + env(safe-area-inset-top,0px));padding:env(safe-area-inset-top,0px) var(--bleed) 0;background:linear-gradient(var(--paper) 55%,transparent)}
+.brand{display:flex;align-items:center;gap:10px;text-decoration:none;font:700 17px/1 var(--sans);letter-spacing:-.02em;color:var(--ink)}
+.brand img{width:26px;height:26px;border-radius:5px;display:block}
+.nav ul{display:flex;gap:24px;list-style:none;margin:0 0 0 auto;padding:0}
+.nav ul a{font:500 14px/1 var(--sans);text-decoration:none;color:var(--ink-2)}
+.nav ul a:hover{color:var(--ink)}
+.nav ul a[aria-current="page"]{color:var(--ink);text-decoration:underline;text-decoration-color:var(--link);text-decoration-thickness:2px;text-underline-offset:6px}
+.btn{display:inline-flex;align-items:center;gap:10px;height:46px;padding:0 20px;border-radius:3px;border:1px solid var(--fg);font:500 15px/1 var(--sans);text-decoration:none;cursor:pointer;background:transparent;color:var(--fg);transition:background .2s,color .2s,border-color .2s}
+.btn.solid{background:var(--fg);color:var(--bg)}
+.btn.solid:hover{background:var(--link-ink);border-color:var(--link-ink);color:#fff}
+.btn:not(.solid){border-color:var(--line)}
+.btn:not(.solid):hover{border-color:var(--fg)}
+.btn .led{width:7px;height:7px;border-radius:50%;background:var(--link);box-shadow:0 0 8px var(--link)}
+.nav .btn{height:38px;padding:0 16px;font-size:14px}
+
+/* progress rail (on this page) */
+.rail{position:fixed;left:14px;top:50%;transform:translateY(-50%);z-index:4;display:flex;flex-direction:column;gap:6px;transition:opacity .3s}
+.rail a{display:flex;align-items:center;gap:7px;text-decoration:none;font:500 10.5px/1 var(--mono);color:var(--ink-2);padding:4px 0}
+.rail a i{display:block;width:12px;height:2px;background:var(--rule);transition:width .3s var(--ease),background .3s}
+.rail a.on{color:var(--ink)} .rail a.on i{width:22px;background:var(--link-ink)}
+.rail a:hover i{background:var(--ink)}
+
+/* type */
+.ch{position:relative;padding-inline:var(--bleed)}
+.col{width:var(--colW);}
+h1,h2,h3{margin:0 0 20px;text-wrap:balance}
+h1{max-width:12ch}
+h2{max-width:17ch}
+.k{margin:0 0 14px;font:400 12px/1 var(--mono);color:var(--link-ink)}
+.lede{color:var(--fg-2);max-width:30rem;margin:0 0 28px}
+.actions{display:flex;flex-wrap:wrap;gap:12px}
+.chip{font:500 11px/1 var(--mono);padding:5px 7px;border-radius:2px;border:1px solid var(--rule);color:var(--ink);background:rgba(244,246,243,.8)}
+.chip.c-finance{border-color:var(--drift-ink);color:var(--drift-ink)}
+
+/* hero */
+#hero{min-height:100vh;display:flex;align-items:center;padding-top:96px;padding-bottom:40px}
+.back{display:inline-flex;gap:8px;align-items:center;margin:0 0 26px;font:500 14px/1 var(--sans);color:var(--ink-2);text-decoration:none}
+.back:hover{color:var(--ink)}
+.meta{display:flex;flex-wrap:wrap;align-items:center;gap:8px 10px;margin:0 0 18px;font:400 12px/1 var(--mono);color:var(--ink-2)}
+.dek{font-size:clamp(17px,1.35vw,20px);line-height:1.45;color:var(--ink-2);max-width:30rem;margin:0 0 30px;letter-spacing:-.005em}
+.toc{border-top:1px solid var(--ink);max-width:26rem}
+.toc p{margin:12px 0 6px;font:400 11.5px/1 var(--mono);color:var(--ink-2)}
+.toc ol{list-style:none;margin:0;padding:0;counter-reset:t}
+.toc li{counter-increment:t;border-bottom:1px solid var(--rule)}
+.toc a{display:flex;gap:14px;padding:9px 0;text-decoration:none;font:500 15px/1.3 var(--sans);color:var(--ink)}
+.toc a::before{content:"0" counter(t);font:400 11.5px/1.9 var(--mono);color:var(--drift-ink);width:1.4rem}
+.toc a:hover{color:var(--link-ink)}
+
+/* article body */
+.lead{padding-block:var(--band-y)}
+.lead p{margin:0;font:500 clamp(21px,1.75vw,27px)/1.35 var(--sans);letter-spacing:-.018em;color:var(--ink)}
+.lead p::first-letter{color:var(--drift-ink)}
+.sec{min-height:150vh;position:relative}
+.sec .in{position:sticky;top:max(96px,14vh);padding-bottom:var(--band-y)}
+.sec .no{display:flex;align-items:center;gap:10px;margin:0 0 16px;font:400 12px/1 var(--mono);color:var(--ink-2)}
+.sec .no b{font-weight:500;color:var(--drift-ink)}
+.sec p{margin:0 0 16px;font-size:clamp(17px,1.2vw,18.5px);line-height:1.6;color:var(--ink);max-width:36rem}
+.habits{list-style:none;margin:6px 0 26px;padding:0;border-top:1px solid var(--rule);max-width:36rem}
+.habits li{display:grid;grid-template-columns:1.6rem 1fr;gap:8px;padding:11px 0;border-bottom:1px solid var(--rule);font-size:clamp(16px,1.15vw,17.5px);line-height:1.45}
+.habits li::before{content:"";width:9px;height:9px;margin-top:7px;background:var(--drift);box-shadow:0 0 0 3px rgba(255,154,46,.18)}
+.pq{margin:4px 0 0;padding:4px 0 4px 20px;border-left:2px solid var(--drift);max-width:34rem}
+.pq p{margin:0!important;font:500 clamp(21px,1.75vw,27px)/1.28 var(--sans)!important;letter-spacing:-.02em;color:var(--ink)!important}
+.pq span{display:block;margin-top:12px;font:400 11.5px/1 var(--mono);color:var(--ink-2)}
+/* key figure */
+#key-figure{min-height:160vh}
+.kf{border-top:1px solid var(--ink);padding-top:14px;max-width:34rem}
+.kf .n{display:flex;align-items:flex-start;font:500 clamp(120px,12.5vw,210px)/.86 var(--sans);letter-spacing:-.065em;color:var(--ink);margin:10px 0 18px}
+.kf .n small{font-size:.42em;letter-spacing:-.04em;margin:.08em 0 0 .04em;color:var(--link-ink)}
+.kf .l{margin:0 0 18px!important;font:500 clamp(19px,1.5vw,23px)/1.35 var(--sans)!important;letter-spacing:-.015em}
+.kf .bars{display:grid;grid-template-columns:4.4rem 1fr 5rem;gap:8px 12px;align-items:center;font:400 11.5px/1 var(--mono);color:var(--ink-2);padding-top:14px;border-top:1px solid var(--rule)}
+.kf .bars i{display:block;height:8px;background:var(--rule);position:relative}
+.kf .bars i b{position:absolute;inset:0 auto 0 0}
+.kf .bars .r b{width:100%;background:var(--record)}
+.kf .bars .f b{width:59.5%;background:var(--link)}
+.kf .bars em{font-style:normal;color:var(--ink)}
+.kf .note{grid-column:1/-1;margin-top:2px;color:var(--ink-2)}
+/* in plain terms */
+.plain{margin:26px 0 0;display:grid;grid-template-columns:8.5rem 1fr;gap:16px;padding:14px;border:1px solid var(--rule);background:rgba(244,246,243,.85);max-width:36rem;border-radius:2px}
+.plain img{display:block;width:100%;height:100%;min-height:104px;object-fit:cover;object-position:62% 45%;border-radius:2px;filter:saturate(.7)}
+.plain b{display:block;margin:0 0 8px;font:500 11.5px/1 var(--mono);color:var(--link-ink)}
+.plain p{margin:0!important;font-size:15.5px!important;line-height:1.5!important;color:var(--ink-2)!important}
+
+/* figure caption (fixed, beside the 3D) */
+.figcap{position:fixed;right:var(--gutter);bottom:18px;z-index:3;padding:6px 8px;background:rgba(244,246,243,.92);border:1px solid var(--rule);border-radius:2px;display:flex;gap:10px;align-items:baseline;font:400 11.5px/1.3 var(--mono);color:var(--ink-2);pointer-events:none;transition:opacity .3s;text-align:right;max-width:44vw;justify-content:flex-end}
+.figcap b{font-weight:500;color:var(--ink)}
+.figcap em{font-style:normal;padding:3px 6px;border:1px dashed var(--rule);white-space:nowrap}
+
+/* tags */
+.tag{position:absolute;left:0;top:0;display:flex;align-items:center;opacity:0;visibility:hidden;will-change:transform;white-space:nowrap}
+.tag.show{opacity:1;visibility:visible}
+.tag::before{content:"";width:7px;height:7px;border-radius:50%;background:var(--c,var(--ink));transform:translate(-3.5px,0);box-shadow:0 0 0 3px color-mix(in oklab,var(--c,var(--ink)) 22%,transparent)}
+.tag i{display:block;width:24px;height:1px;background:var(--c,var(--ink))}
+.tag span{padding:6px 9px;background:var(--paper-2);border:1px solid var(--c,var(--ink));border-radius:2px;font:400 11.5px/1.35 var(--mono);color:var(--ink);box-shadow:0 14px 28px -20px rgba(17,22,20,.45)}
+.tag span b{display:block;font:600 15px/1.15 var(--sans);letter-spacing:-.02em;margin-bottom:2px}
+.tag.left{flex-direction:row-reverse}.tag.left::before{transform:translate(3.5px,0)}
+.tag.up{flex-direction:column-reverse}.tag.up i{width:1px;height:22px}.tag.up::before{transform:translate(0,3.5px)}
+.tag.link{--c:var(--link)} .tag.link span b{color:var(--link-ink)}
+.tag.drift{--c:var(--drift)} .tag.drift span b{color:var(--drift-ink)}
+.tag.rec{--c:var(--record)} .tag.rec span b{color:var(--record-ink)}
+.tag.ink{--c:var(--ink)}
+
+/* keep reading */
+#more{position:relative;z-index:2;background:var(--paper);border-top:1px solid var(--rule);padding:var(--band-y) var(--bleed)}
+.mwrap{max-width:var(--shell);margin-inline:auto;}
+.mwrap .head{display:flex;justify-content:space-between;align-items:end;gap:24px;margin-bottom:44px;flex-wrap:wrap}
+.mwrap .head h2{margin:0}
+.mwrap .head a{font:500 15px/1 var(--sans);color:var(--link-ink);text-decoration:none;border-bottom:1px solid var(--link)}
+.cards{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:clamp(20px,3vw,40px);padding-top:22px}
+.card{position:relative;display:flex;flex-direction:column;min-height:250px;padding:26px 26px 22px;background:var(--paper-2);border:1px solid var(--rule);border-radius:0 3px 3px 3px;text-decoration:none;color:var(--ink);box-shadow:0 22px 40px -34px rgba(17,22,20,.5);transition:transform .35s var(--ease),border-color .25s,box-shadow .35s}
+.card:hover{transform:translateY(-4px);border-color:var(--ink);box-shadow:0 30px 44px -32px rgba(17,22,20,.55)}
+.card .tab{position:absolute;left:-1px;top:-23px;height:23px;padding:0 12px;display:flex;align-items:center;gap:8px;border-radius:3px 3px 0 0;background:var(--tc);color:var(--tt);font:500 11px/1 var(--mono)}
+.card .fno{display:flex;justify-content:space-between;font:400 12px/1 var(--mono);color:var(--ink-2);padding-bottom:14px;border-bottom:1px dashed var(--rule);margin-bottom:18px}
+.card h3{margin:0 0 auto;max-width:22ch}
+.card .go{margin-top:28px;display:flex;justify-content:space-between;align-items:center;font:500 15px/1 var(--sans);color:var(--link-ink)}
+.card .go small{font:400 11.5px/1 var(--mono);color:var(--ink-2)}
+
+/* cta */
+#cta{padding-block:var(--band-y);text-align:center;background:var(--paper);position:relative;z-index:2;border-top:1px solid var(--rule)}
+#cta h2{margin-inline:auto;max-width:13ch}
+#cta .lede{margin-inline:auto}
+#cta .actions{justify-content:center}
+
+/* footer */
+.foot{position:relative;z-index:2;padding:var(--band-y) var(--bleed) calc(var(--s8) + env(safe-area-inset-bottom,0px));background:var(--paper);border-top:1px solid var(--rule);display:grid;grid-template-columns:var(--copy-w) repeat(3,minmax(0,1fr));gap:28px;font-size:14px;color:var(--ink-2)}
+.foot b{display:block;font:500 13px/1 var(--sans);color:var(--link-ink);margin-bottom:16px}
+.foot nav{display:flex;flex-direction:column;gap:11px}
+.foot nav a{color:var(--ink);text-decoration:none;font-size:15px}
+.foot nav a:hover{color:var(--link-ink)}
+.foot p{margin:0 0 11px;color:var(--ink);font-size:15px;line-height:1.45}
+.foot p a{text-decoration:none}.foot p a:hover{color:var(--link-ink)}
+.foot-brand .brand{margin-bottom:16px}
+.foot-brand p{color:var(--ink-2);max-width:18rem}
+.foot .fine{grid-column:1/-1;display:flex;justify-content:space-between;flex-wrap:wrap;gap:12px;margin-top:16px;padding-top:18px;border-top:1px solid var(--rule);font-size:13px}
+.foot .legal{display:flex;gap:18px;flex-wrap:wrap}.foot .legal a{color:var(--ink-2);text-decoration:none}.foot .legal a:hover{color:var(--link-ink)}
+.foot .social{display:flex;gap:18px}
+.foot .social a{color:var(--ink-2);text-decoration:none}
+
+.no-webgl #stage,.no-webgl #hud,.no-webgl .figcap{display:none}
+.ended #hud{display:none}
+.ended .figcap,.ended .rail{opacity:0;visibility:hidden}
+@media (max-width:1180px){ .foot{grid-template-columns:repeat(2,minmax(0,1fr))} }
+@media (max-width:960px){ .rail{display:none} .cards{grid-template-columns:1fr} }
+@media (max-width:760px){
+  :root{--colW:auto}
+  #stage{height:46vh;z-index:3;background:var(--paper);border-bottom:1px solid var(--rule)}
+  #hud{bottom:auto;height:46vh;z-index:4}
+  #scrim{display:none}
+  .ended #stage{visibility:hidden}
+  .col{width:auto;margin-left:0}
+  #hero{align-items:flex-start;padding-top:calc(46vh + 22px);min-height:auto;padding-bottom:8vh}
+  .back{margin-bottom:16px}
+  h1{}
+  .dek{font-size:16.5px;margin-bottom:22px}
+  .lead{padding-block:var(--band-y)}
+  .lead p{font-size:20px}
+  .sec,#key-figure{min-height:auto;padding-block:var(--band-y)}
+  .sec .in{position:static;padding:0}
+  h2{}
+  .kf .n{font-size:118px}
+  .plain{grid-template-columns:1fr}
+  .plain img{height:140px;min-height:0}
+  .figcap{left:var(--gutter);right:var(--gutter);top:calc(46vh - 34px);bottom:auto;max-width:none;justify-content:space-between;font-size:10.5px;text-align:left;z-index:5;padding:4px 6px}
+  .figcap b{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;min-width:0}
+  .figcap em{padding:2px 5px}
+  #hud .tag:not(.keep){display:none}
+  #more{padding-top:var(--band-y)}
+  .card{min-height:200px}
+}
+@media (max-width:560px){ .foot{grid-template-columns:repeat(2,minmax(0,1fr));gap:var(--s6) var(--s5);padding-block:var(--band-y-sm) calc(var(--s6) + env(safe-area-inset-bottom,0px))} }
+@media (prefers-reduced-motion:reduce){ .card,.tag,.rail a i{transition:none!important} }
+</style>
+</head>
+<body class="stage-band">
+
+<canvas id="stage" aria-hidden="true"></canvas>
+<div id="scrim" aria-hidden="true"></div>
+<div id="hud" aria-hidden="true"></div>
+<p class="figcap" id="figcap" aria-hidden="true"><b id="figT">Fig. 007 Â· the budget leak</b><em>illustrative scene</em></p>
+<nav class="rail" id="rail" aria-label="Section progress">
+  <a href="#hidden-line-item" title="The hidden line item"><i></i>01</a>
+  <a href="#where-waste-hides" title="Where the waste hides"><i></i>02</a>
+  <a href="#key-figure" title="60%"><i></i>60%</a>
+  <a href="#real-example" title="What this looks like in practice"><i></i>03</a>
+  <a href="#catching-early" title="Catching it early"><i></i>04</a>
+</nav>
+
+<nav class="nav" aria-label="Primary">
+  <a class="brand" href="/"><img alt="" src="/design-system/assets/Logos/racktrack-mark.jpg">RackTrack</a>
+  <ul>
+    <li><a href="/pages/why-racktrack/">Why RackTrack</a></li>
+    <li><a href="/pages/solutions/">Solutions</a></li>
+    <li><a href="/pages/use-cases/">Use cases</a></li>
+    <li><a href="/pages/resources/" aria-current="page">Resources</a></li>
+    <li><a href="/pages/trust-security/">Trust</a></li>
+    <li><a href="/pages/about-us/">About</a></li>
+    <li><a href="/pages/sign-in/">Sign in</a></li>
+  </ul>
+  <a class="btn solid" href="/pages/contact-us/"><span class="led"></span>Book a sweep</a>
+</nav>
+
+<main>
+  <section class="ch" id="hero">
+    <div class="col">
+      <a class="back" href="/pages/resources/">â† All resources</a>
+      <p class="meta">File no. 007 Â· FINÂ·01 Â· <span class="chip c-finance">Finance</span> Â· 4 min read</p>
+      <h1>What a wrong inventory actually costs you</h1>
+      <p class="dek">Misidentified hardware and early refresh cycles quietly waste budget. Most teams never measure it until it's already expensive.</p>
+      <nav class="toc" aria-label="On this page">
+        <p>On this page</p>
+        <ol>
+          <li><a href="#hidden-line-item">The hidden line item</a></li>
+          <li><a href="#where-waste-hides">Where the waste hides</a></li>
+          <li><a href="#real-example">What this looks like in practice</a></li>
+          <li><a href="#catching-early">Catching it early</a></li>
+        </ol>
+      </nav>
+    </div>
+  </section>
+
+  <article>
+    <section class="ch lead" id="lead">
+      <div class="col"><p>Finance rarely finds out about a bad inventory number from the inventory system. They find out from a purchase order that shouldn't have been necessary.</p></div>
+    </section>
+
+    <section class="ch sec" id="hidden-line-item" data-fig="Fig. 1 Â· three quiet habits drain the budget">
+      <div class="col in">
+        <p class="no"><b>01</b> Â· The hidden line item</p>
+        <h2>The cost nobody puts a line item on</h2>
+        <p>It shows up as three quiet habits:</p>
+        <ul class="habits">
+          <li>Hardware refreshed earlier than it actually needed to be.</li>
+          <li>Purchases that duplicate gear already sitting somewhere, unused.</li>
+          <li>Capacity budgeted around because the record said it wasn't free.</li>
+        </ul>
+        <blockquote class="pq"><p>â€œNobody approves a budget line called â€œhardware we already owned.â€ It just quietly shows up as next quarter's spend.â€</p></blockquote>
+      </div>
+    </section>
+
+    <section class="ch sec" id="where-waste-hides" data-fig="Fig. 2 Â· wrong model, retired but powered, â€œfullâ€ on paper">
+      <div class="col in">
+        <p class="no"><b>02</b> Â· Where the waste hides</p>
+        <h2>Where the waste actually hides</h2>
+        <p>It's hardware logged under the wrong model or spec. It's an asset marked retired that's quietly still drawing power. It's a rack the record calls full, sitting two-thirds empty.</p>
+      </div>
+    </section>
+
+    <section class="ch sec" id="key-figure" data-fig="Fig. 3 Â· R07: record 42 / 42U, floor 25 / 42U">
+      <div class="col in">
+        <div class="kf" role="group" aria-label="Key figure">
+          <p class="no"><b>Key figure</b> Â· utilization</p>
+          <p class="n" aria-label="60%">60<small>%</small></p>
+          <p class="l">utilization is a common real number teams find in racks logged as â€œfullâ€ on paper.</p>
+          <div class="bars" aria-hidden="true">
+            <span>record</span><i class="r"><b></b></i><em>42 / 42U</em>
+            <span>floor</span><i class="f"><b></b></i><em>25 / 42U</em>
+            <span class="note">R07 in the figure Â· illustrative</span>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="ch sec" id="real-example" data-fig="Fig. 4 Â· a sweep finds the slots; PO-2291 is rewritten">
+      <div class="col in">
+        <p class="no"><b>03</b> Â· What this looks like in practice</p>
+        <h2>What this looks like in practice</h2>
+        <p>A team requests new servers because the record shows every rack at capacity. A physical sweep turns up open slots the record never accounted for, and the purchase order that was about to go out gets quietly rewritten.</p>
+        <aside class="plain" aria-label="In plain terms">
+          <img src="/assets/resources/stock-scan.jpg" alt="A warehouse worker checking stock on the shelves with a handheld scanner" loading="lazy" width="1400" height="875">
+          <div><b>In plain terms</b><p>Picture a warehouse ordering more stock because the shelf looks full on a screen, when a walk down the actual aisle would have shown open space.</p></div>
+        </aside>
+      </div>
+    </section>
+
+    <section class="ch sec" id="catching-early" data-fig="Fig. 5 Â· routine sweeps come before the purchase order">
+      <div class="col in">
+        <p class="no"><b>04</b> Â· Catching it early</p>
+        <h2>Catching it before it hits the budget</h2>
+        <p>Routine sweeps keep the capacity numbers honest before the purchase order gets written, which is the only point in the process where catching the gap actually saves the money.</p>
+      </div>
+    </section>
+  </article>
+
+  <section id="more" aria-labelledby="more-h">
+    <div class="mwrap">
+      <div class="head"><div><h2 id="more-h">Keep reading</h2></div><a href="/pages/resources/">All resources â†’</a></div>
+      <div class="cards">
+        <a class="card" href="/pages/resources/free-port-discovery-and-rack-capacity-planning/" style="--tc:#1FD67C;--tt:#06140d">
+          <span class="tab">INFÂ·03 Â· Infrastructure</span>
+          <span class="fno"><span>File no. 009 Â· INFÂ·03</span><span>4 min</span></span>
+          <h3>Planning your next rack without guessing at free ports</h3>
+          <span class="go">Read â†’<small>/resources/009</small></span>
+        </a>
+        <a class="card" href="/pages/resources/dcim-vs-physical-reality-why-the-gap-matters/" style="--tc:#111614;--tt:#DDE4DF">
+          <span class="tab">OPSÂ·02 Â· Operations</span>
+          <span class="fno"><span>File no. 006 Â· OPSÂ·02</span><span>5 min</span></span>
+          <h3>Your DCIM platform shows a plan. The rack shows what's real</h3>
+          <span class="go">Read â†’<small>/resources/006</small></span>
+        </a>
+      </div>
+    </div>
+  </section>
+
+  <section class="ch" id="cta">
+    <h2>Read the theory. Then verify your own rack</h2>
+    <p class="lede">One sweep of one rack is enough to see the gap these articles describe.</p>
+    <div class="actions">
+      <a class="btn solid" href="/pages/contact-us/"><span class="led"></span>Request a platform brief</a>
+      <a class="btn" href="/pages/resources/">All resources</a>
+    </div>
+  </section>
+
+  <footer class="foot">
+    <div class="foot-brand">
+      <a class="brand" href="/"><img alt="" src="/design-system/assets/Logos/racktrack-mark.jpg">RackTrack</a>
+      <p>Physical infrastructure intelligence for data centers.</p>
+    </div>
+    <nav aria-label="Platform"><b>Platform</b>
+      <a href="/pages/why-racktrack/">Why RackTrack</a><a href="/pages/solutions/">Solutions</a><a href="/pages/use-cases/">Use cases</a><a href="/pages/trust-security/">Trust &amp; security</a></nav>
+    <nav aria-label="Company"><b>Company</b>
+      <a href="/pages/resources/">Resources</a><a href="/pages/about-us/">About us</a><a href="/pages/contact-us/">Contact us</a></nav>
+    <div><b>Contact</b>
+      <p><a href="mailto:info@racktrack.ai">info@racktrack.ai</a></p><p><a href="tel:+18608782448">+1 (860) 878 2448</a></p><p>85 Felt Rd, Suite #604<br>South Windsor, CT 06074</p></div>
+    <div class="fine">
+      <span>Â© 2026 RackTrack Inc. Â· Patent pending</span>
+      <span class="legal"><a href="/pages/legal/privacy-policy/">Privacy</a><a href="/pages/legal/terms-of-use/">Terms</a><a href="/pages/legal/cookie-policy/">Cookies</a><a href="/pages/legal/data-we-collect/">Data we collect</a><a href="/pages/legal/third-party-services/">Third parties</a></span>
+      <span class="social"><a href="https://www.linkedin.com/company/racktrack/" rel="noopener" target="_blank">LinkedIn</a><a href="https://www.instagram.com/racktrack_inc/" rel="noopener" target="_blank">Instagram</a><a href="https://www.facebook.com/share/18depF5xzA/" rel="noopener" target="_blank">Facebook</a></span>
+    </div>
+  </footer>
+</main>
+
+<script type="importmap">
+{ "imports": {
+  "three": "https://cdn.jsdelivr.net/npm/three@0.170.0/build/three.module.js",
+  "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.170.0/examples/jsm/"
+} }
+</script>
+<!--DOMJS-START-->
+<script>
+/* â”€â”€â”€â”€â”€ File 007: scroll value g, progress rail, figure caption, end-of-article state (no WebGL needed) â”€â”€â”€â”€â”€ */
+(()=>{
+const clamp=(x,a=0,b=1)=>Math.min(b,Math.max(a,x)), lerp=(a,b,t)=>a+(b-a)*t;
+const $=s=>document.querySelector(s), $$=s=>[...document.querySelectorAll(s)];
+const BEATS=['hidden-line-item','where-waste-hides','key-figure','real-example','catching-early'].map(id=>document.getElementById(id));
+const more=$('#more'), rail=$$('#rail a'), figT=$('#figT');
+const top=e=>e.getBoundingClientRect().top+scrollY;
+// g: -1 at the top of the page, i at the moment beat i's section reaches the reading line, 5 when the last one leaves
+function G(){const y=scrollY,T=innerHeight*(innerWidth<760?.55:.5);
+  const K=[[0,-1]];BEATS.forEach((e,i)=>K.push([Math.max(K[K.length-1][0]+1,top(e)-T),i]));
+  const L=BEATS[4];K.push([Math.max(K[K.length-1][0]+1,top(L)+L.offsetHeight-T),5]);
+  if(y>=K[K.length-1][0])return 5;
+  for(let i=0;i<K.length-1;i++){if(y<=K[i+1][0])return lerp(K[i][1],K[i+1][1],clamp((y-K[i][0])/((K[i+1][0]-K[i][0])||1)));}return 5;}
+window.RT7={g:-1,ended:false};
+let lastB=-9;
+function frame(){
+  const g=G();RT7.g=g;
+  const mr=more.getBoundingClientRect().top, vh=innerHeight;
+  const ended=mr<vh*(innerWidth<760?.46:.96);RT7.ended=ended;RT7.covered=mr<=0;
+  document.documentElement.classList.toggle('ended',ended);
+  const b=g<-.05?-1:Math.min(4,Math.floor(g+.05));
+  if(b!==lastB){lastB=b;rail.forEach((a,i)=>a.classList.toggle('on',i===b));
+    figT.textContent=b<0?'Fig. 007 Â· the budget leak: R07 and a capex gauge':BEATS[b].dataset.fig;}
+  requestAnimationFrame(frame);
+}
+requestAnimationFrame(frame);
+})();
+</script>
+<!--DOMJS-END-->
+<!--GLJS-START-->
+<script type="module">
+/* â•â•â•â•â•â•â•â•â•â•â•â•â• File 007 Â· FINÂ·01 Â· The budget leak â•â•â•â•â•â•â•â•â•â•â•â•â• */
+import * as THREE from 'three';
+import { RoomEnvironment } from 'three/addons/environments/RoomEnvironment.js';
+
+const reduce=matchMedia('(prefers-reduced-motion: reduce)').matches;
+const SNAP=location.search.includes('snap');
+const clamp=(x,a=0,b=1)=>Math.min(b,Math.max(a,x));
+const smooth=(a,b,x)=>{const t=clamp((x-a)/(b-a));return t*t*(3-2*t)};
+const lerp=(a,b,t)=>a+(b-a)*t;
+const C=h=>new THREE.Color(h);
+const COL={link:C('#1FD67C'),linkInk:C('#04703F'),drift:C('#FF9A2E'),record:C('#7C93A8'),ink:C('#111614')};
+const MONO='"JetBrains Mono", monospace', SANS='"Inter", sans-serif';
+const V3=(x,y,z)=>new THREE.Vector3(x,y,z);
+
+const canvas=document.getElementById('stage');
+let renderer;
+try{ renderer=new THREE.WebGLRenderer({canvas,antialias:true,alpha:true,powerPreference:'high-performance'}); }
+catch(e){ document.documentElement.classList.add('no-webgl'); throw e; }
+renderer.setPixelRatio(SNAP?1:Math.min(devicePixelRatio,2));
+renderer.setClearColor(0,0);
+renderer.toneMapping=THREE.ACESFilmicToneMapping; renderer.toneMappingExposure=1.02;
+renderer.outputColorSpace=THREE.SRGBColorSpace;
+renderer.shadowMap.enabled=true; renderer.shadowMap.type=SNAP?THREE.PCFShadowMap:THREE.PCFSoftShadowMap;
+const scene=new THREE.Scene();
+scene.environment=new THREE.PMREMGenerator(renderer).fromScene(new RoomEnvironment(),.04).texture; scene.environmentIntensity=.85;
+const camera=new THREE.PerspectiveCamera(28,1,.05,300);
+scene.add(new THREE.HemisphereLight(0xffffff,0x9aa39e,.55));
+const sun=new THREE.DirectionalLight(0xffffff,1.75);sun.position.set(-4,11,7);sun.castShadow=true;
+sun.shadow.mapSize.set(SNAP?1024:2048,SNAP?1024:2048);Object.assign(sun.shadow.camera,{left:-4,right:4,top:4,bottom:-4,near:1,far:30});sun.shadow.bias=-.0005;sun.shadow.radius=4;scene.add(sun);
+sun.target.position.set(.6,0,.2);scene.add(sun.target);
+const fill=new THREE.DirectionalLight(0xdfe9ff,.55);fill.position.set(7,4,-5);scene.add(fill);
+const front=new THREE.DirectionalLight(0xffffff,.35);front.position.set(1,2,8);scene.add(front);
+
+function cnv(w,h){const c=document.createElement('canvas');c.width=w;c.height=h;return [c,c.getContext('2d')];}
+function tex(c){const t=new THREE.CanvasTexture(c);t.colorSpace=THREE.SRGBColorSpace;t.anisotropy=Math.min(8,renderer.capabilities.getMaxAnisotropy());return t;}
+const alu=new THREE.MeshStandardMaterial({color:'#dfe3df',metalness:.72,roughness:.3});
+const graph=new THREE.MeshStandardMaterial({color:'#2a302d',metalness:.55,roughness:.45});
+const dark=new THREE.MeshStandardMaterial({color:'#1a1f1d',metalness:.4,roughness:.55});
+const add=(m,p,parent=scene)=>{if(p)m.position.set(...p);parent.add(m);return m;};
+const basic=(o)=>new THREE.MeshBasicMaterial({toneMapped:false,...o});
+function outlineBox(w,h,d,col,dashed,parent,pos){const g=new THREE.EdgesGeometry(new THREE.BoxGeometry(w,h,d));
+  const m=dashed?new THREE.LineDashedMaterial({color:col,dashSize:.03,gapSize:.02,transparent:true,toneMapped:false,depthWrite:false}):new THREE.LineBasicMaterial({color:col,transparent:true,toneMapped:false,depthWrite:false});
+  const l=new THREE.LineSegments(g,m);if(dashed)l.computeLineDistances();if(pos)l.position.set(...pos);(parent||scene).add(l);return l;}
+
+/* â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ drawing sheet â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
+const SX=.6, SZ=.35, BW=4.3, BD=3.5;
+const RX=-.6, RZ=-.2;                 // rack R07
+const TX=.55, TZ=-.35, TR=.3, TH=1.3; // budget gauge
+const TRAY=[.25,.9], SHELF=[1.3,.52], PAL=[1.97,.86], R8=[2.05,-.45], PO=[1.0,1.28], TL=[.6,1.72];
+function sheetCanvas(){const W=2048,H=Math.round(W*BD/BW),s=W/BW;const [c,g]=cnv(W,H);const X=x=>(x-SX+BW/2)*s,Z=z=>(z-SZ+BD/2)*s;
+  g.fillStyle='#F4F6F3';g.fillRect(0,0,W,H);
+  for(let x=0;x<=BW+.01;x+=.2){g.fillStyle='rgba(17,22,20,.05)';g.fillRect(x*s,0,1.2,H);} for(let z=0;z<=BD+.01;z+=.2){g.fillStyle='rgba(17,22,20,.05)';g.fillRect(0,z*s,W,1.2);}
+  g.strokeStyle='#111614';g.lineWidth=3;g.strokeRect(16,16,W-32,H-32);
+  g.font=`400 19px ${MONO}`;g.fillStyle='#4A544F';
+  // R07 footprint (solid) + label
+  g.strokeStyle='#4A544F';g.lineWidth=2;g.strokeRect(X(RX-.34),Z(RZ-.49),.68*s,.98*s);g.fillText('R07 Â· 42U',X(RX-.34),Z(RZ+.6));
+  // R08 planned (dashed, record)
+  g.setLineDash([12,9]);g.strokeStyle='#7C93A8';g.lineWidth=2.5;g.strokeRect(X(R8[0]-.34),Z(R8[1]-.49),.68*s,.98*s);g.setLineDash([]);
+  g.fillStyle='#3F5871';g.fillText('R08 Â· planned',X(R8[0]-.34),Z(R8[1]-.56));
+  // gauge ring
+  g.strokeStyle='#4A544F';g.lineWidth=2;g.beginPath();g.arc(X(TX),Z(TZ),(TR+.08)*s,0,7);g.stroke();
+  g.fillStyle='#4A544F';g.fillText('capex budget Â· FY27',X(TX-.36),Z(TZ-.46));
+  // sinks
+  g.fillText('refresh tray',X(TRAY[0]-.33),Z(TRAY[1]+.44));
+  g.fillText('spares Â· on hand',X(SHELF[0]-.3),Z(SHELF[1]+.3));
+  g.fillText('new stock',X(PAL[0]-.3),Z(PAL[1]+.33));
+  // dimension line along the front
+  g.strokeStyle='#4A544F';g.lineWidth=1.5;g.setLineDash([6,6]);g.beginPath();g.moveTo(X(-.93),Z(1.98));g.lineTo(X(2.38),Z(1.98));g.stroke();g.setLineDash([]);
+  [[-.93],[2.38]].forEach(([x])=>{g.beginPath();g.moveTo(X(x),Z(1.93));g.lineTo(X(x),Z(2.03));g.stroke();});
+  g.fillText('row C Â· 3.3 m',X(.5),Z(1.95)-8);
+  // title block
+  g.fillStyle='#111614';g.fillRect(W-560,H-128,540,108);g.fillStyle='#DDE4DF';g.font=`500 27px ${MONO}`;g.fillText('DC1 Â· row C Â· capex FY27',W-538,H-80);
+  g.fillStyle='#93A19A';g.font=`400 19px ${MONO}`;g.fillText('file 007 Â· 1:12 Â· illustrative scene',W-538,H-44);
+  return c;}
+const sheetMat=new THREE.MeshStandardMaterial({map:tex(sheetCanvas()),roughness:.9,toneMapped:false});
+const base=add(new THREE.Mesh(new THREE.BoxGeometry(BW,.2,BD),[alu,alu,sheetMat,alu,alu,alu]),[SX,-.1,SZ]);base.receiveShadow=true;
+add(new THREE.Mesh(new THREE.BoxGeometry(BW+.14,.04,BD+.14),graph),[SX,-.22,SZ]);
+
+/* â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ R07 â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
+const RW=.66, RD=.96, U=.044, Y0=.1, ZF=RD/2, FACE=ZF-.03;
+const uy=(u,h=1)=>Y0+(u-1)*U+h*U/2;
+const RACK=new THREE.Group();RACK.position.set(RX,0,RZ);scene.add(RACK);
+const W7=(x,y,z)=>V3(x+RX,y,z+RZ);
+[[-1,-1],[1,-1],[-1,1],[1,1]].forEach(([sx,sz])=>{const p=add(new THREE.Mesh(new THREE.BoxGeometry(.035,2.0,.035),graph),[sx*(RW/2-.018),1.0,sz*(RD/2-.018)],RACK);p.castShadow=true;});
+[-1,1].forEach(sx=>{const s=add(new THREE.Mesh(new THREE.BoxGeometry(.012,1.9,RD-.04),new THREE.MeshStandardMaterial({color:'#222826',metalness:.5,roughness:.5})),[sx*(RW/2-.006),1.0,0],RACK);s.castShadow=true;s.receiveShadow=true;});
+add(new THREE.Mesh(new THREE.BoxGeometry(RW,.05,RD),graph),[0,2.0,0],RACK).castShadow=true;
+add(new THREE.Mesh(new THREE.BoxGeometry(RW,.08,RD),graph),[0,.04,0],RACK);
+add(new THREE.Mesh(new THREE.BoxGeometry(RW-.02,1.9,.01),dark),[0,1.0,-RD/2+.02],RACK);
+function railCanvas(){const [c,g]=cnv(24,1024);g.fillStyle='#c9cfcb';g.fillRect(0,0,24,1024);g.fillStyle='#2a302d';for(let i=0;i<126;i++){g.fillRect(8,4+i*8.1,8,4);}return c;}
+const railMat=new THREE.MeshStandardMaterial({map:tex(railCanvas()),metalness:.6,roughness:.35});
+[-1,1].forEach(sx=>add(new THREE.Mesh(new THREE.BoxGeometry(.022,42*U,.012),[alu,alu,alu,alu,railMat,alu]),[sx*(RW/2-.045),Y0+21*U,FACE+.004],RACK));
+
+// 25U in use of 42U (â‰ˆ60%) Â· illustrative
+const EQ=[
+ {u:42,h:1,k:'patch',n:'PP-A'},{u:41,h:1,k:'switch',n:'SW-01'},{u:40,h:1,k:'switch',n:'SW-02'},{u:39,h:1,k:'mgr'},
+ {u:35,h:2,k:'server',n:'SRV-01'},{u:33,h:2,k:'server',n:'SRV-02'},
+ {u:27,h:2,k:'server',n:'SRV-03'},{u:25,h:2,k:'server',n:'SRV-04'},
+ {u:17,h:4,k:'storage',n:'ST-01'},{u:15,h:2,k:'server',n:'SRV-05',ret:1},{u:13,h:2,k:'server',n:'SRV-06'},
+ {u:7,h:2,k:'server',n:'SRV-07'},{u:4,h:3,k:'ups',n:'UPS-1'}];
+const EMPTY=[[37,2],[29,4],[21,4],[9,4],[1,3]];
+const USED=new Set();EQ.forEach(d=>{for(let i=0;i<d.h;i++)USED.add(d.u+i);});
+function faceCanvas(k,n,h,x={}){const W=512,H=Math.round(h*37);const [c,g]=cnv(W,H);
+  const bg={patch:'#1d2321',mgr:'#1a1f1d',switch:'#2a302d',server:'#2f3633',storage:'#262c29',ups:'#2b312e',boxed:'#dfe3df'}[k];
+  g.fillStyle=bg;g.fillRect(0,0,W,H);g.fillStyle='rgba(255,255,255,.06)';g.fillRect(0,0,W,2);g.fillStyle='rgba(0,0,0,.35)';g.fillRect(0,H-2,W,2);
+  if(k==='mgr'){g.fillStyle='#111514';g.fillRect(30,H/2-5,W-60,10);g.fillStyle='#2f3633';for(let xx=34;xx<W-34;xx+=14)g.fillRect(xx,H/2-9,6,18);}
+  if(k==='patch'||k==='switch'){g.fillStyle='#DDE4DF';g.font=`500 13px ${MONO}`;g.fillText(n,14,H/2+5);
+    g.fillStyle='#101413';for(let i=0;i<24;i++)g.fillRect(110+i*15.5,H/2-7,11,14);
+    if(k==='switch'){g.fillStyle='#1FD67C';for(let i=0;i<24;i++)if((i*7)%5<3)g.fillRect(113+i*15.5,H/2-11,5,2);}}
+  if(k==='server'){g.fillStyle='#262c29';for(let i=0;i<8;i++)g.fillRect(150+i*36,8,30,H-16);g.fillStyle='#1d2321';for(let i=0;i<8;i++)g.fillRect(154+i*36,H/2-2,22,3);
+    g.fillStyle='#DDE4DF';g.font=`500 13px ${MONO}`;g.fillText(n,14,22);
+    if(x.model){g.fillStyle='#9fb0a8';g.font=`400 12px ${MONO}`;g.fillText(x.model,14,H-14);}
+    else{g.fillStyle='#1FD67C';g.fillRect(14,H-18,6,6);g.fillStyle='#7C93A8';g.fillRect(26,H-18,6,6);}
+    if(x.psu){g.fillStyle='#0c1110';g.fillRect(W-150,10,128,H-20);g.fillStyle='#1FD67C';g.font=`500 15px ${MONO}`;g.fillText(x.psu,W-140,H/2+6);}
+    else{g.fillStyle='#1a1f1d';for(let y=10;y<H-8;y+=6)g.fillRect(W-72,y,56,3);}}
+  if(k==='storage'){g.fillStyle='#DDE4DF';g.font=`500 13px ${MONO}`;g.fillText(n,14,20);for(let r=0;r<3;r++)for(let i=0;i<4;i++){const xx=90+i*100,y=10+r*(H-20)/3;g.fillStyle='#343b38';g.fillRect(xx,y,92,(H-20)/3-6);g.fillStyle=(r+i)%5?'#1FD67C':'#7C93A8';g.fillRect(xx+80,y+6,5,5);}}
+  if(k==='ups'){g.fillStyle='#DDE4DF';g.font=`500 13px ${MONO}`;g.fillText(n,14,20);g.fillStyle='#0c1110';g.fillRect(W-170,16,140,44);g.fillStyle='#1FD67C';g.font=`500 16px ${MONO}`;g.fillText('230V 38%',W-160,44);
+    g.fillStyle='#1a1f1d';for(let y=12;y<H-8;y+=7)g.fillRect(40,y,W-240,3);}
+  if(k==='boxed'){g.fillStyle='#c9cfcb';g.fillRect(0,0,W,6);g.fillStyle='#111614';g.font=`500 22px ${MONO}`;g.fillText(n,18,H/2+8);g.fillStyle='#4A544F';g.font=`400 16px ${MONO}`;g.fillText(x.sub||'',W-190,H/2+6);}
+  return c;}
+const FACES=[];
+function faceMat(k,n,h,x){const m=new THREE.MeshStandardMaterial({map:tex(faceCanvas(k,n,h,x)),metalness:.35,roughness:.55,toneMapped:false});FACES.push({m,args:[k,n,h,x]});return m;}
+const DEV={};
+EQ.forEach(d=>{const hh=d.h*U-.003;const y=uy(d.u,d.h);
+  const body=add(new THREE.Mesh(new THREE.BoxGeometry(RW-.1,hh,.78),[dark,dark,dark,dark,faceMat(d.k,d.n,d.h,d.ret?{psu:'PSU 212 W'}:{}),dark]),[0,y,FACE-.39],RACK);
+  body.castShadow=true;body.receiveShadow=true;DEV[d.n||('m'+d.u)]={...d,y,mesh:body};});
+
+// record ghosts: the record fills every empty slot, so R07 reads "full"
+const ghostMat=basic({color:COL.record,transparent:true,opacity:0,depthWrite:false});
+const GHOSTS=EMPTY.map(([u,h])=>{const y=uy(u,h);const m=add(new THREE.Mesh(new THREE.BoxGeometry(RW-.1,h*U-.006,.06),ghostMat),[0,y,FACE-.02],RACK);
+  const o=outlineBox(RW-.1,h*U-.006,.06,COL.record,true,RACK,[0,y,FACE-.02]);return {m,o,u,h,y};});
+// open-slot outlines (found by the sweep) + planned units that land in them
+const SLOTS=EMPTY.map(([u,h])=>({o:outlineBox(RW-.08,h*U-.004,.03,COL.link,true,RACK,[0,uy(u,h),FACE+.012]),y:uy(u,h),u,h}));
+const planMat=basic({color:COL.link,transparent:true,opacity:0,depthWrite:false});
+const PLAN=[[29,2],[31,2],[21,2],[23,2]].map(([u,h])=>{const g=new THREE.Group();g.position.set(0,uy(u,h),FACE-.39);RACK.add(g);
+  add(new THREE.Mesh(new THREE.BoxGeometry(RW-.12,h*U-.008,.76),planMat),null,g);
+  const o=outlineBox(RW-.12,h*U-.008,.76,COL.link,false,g);return {g,o};});
+// sweep band
+const band=add(new THREE.Mesh(new THREE.PlaneGeometry(RW+.06,.014),basic({color:COL.link,transparent:true,opacity:0,depthWrite:false})),[0,1,ZF+.02],RACK);
+const wash=add(new THREE.Mesh(new THREE.PlaneGeometry(RW,1),basic({color:COL.link,transparent:true,opacity:0,depthWrite:false})),[0,.5,ZF+.015],RACK);
+// retired-but-powered outline
+const retO=outlineBox(RW-.07,2*U,.03,COL.drift,false,RACK,[0,uy(15,2),FACE+.012]);
+
+// paper asset tags (what the record says), hung on the right rail
+function assetCanvas(lines,kind){const [c,g]=cnv(360,190);g.fillStyle='#F4F6F3';g.fillRect(0,0,360,190);
+  g.strokeStyle=kind==='rec'?'#7C93A8':'#C6CCC7';g.lineWidth=6;g.strokeRect(3,3,354,184);
+  g.fillStyle='#E9ECE8';g.beginPath();g.arc(30,34,12,0,7);g.fill();g.strokeStyle='#4A544F';g.lineWidth=2;g.stroke();
+  g.fillStyle='#3F5871';g.font=`500 20px ${MONO}`;g.fillText(lines[0],54,42);
+  g.fillStyle='#111614';g.font=`500 30px ${SANS}`;g.fillText(lines[1],22,98);
+  g.fillStyle='#4A544F';g.font=`400 21px ${MONO}`;g.fillText(lines[2],22,138);if(lines[3])g.fillText(lines[3],22,168);return c;}
+const ATAGS=[];
+function assetTag(lines,parent,pos,rot,kind){const grp=new THREE.Group();grp.position.set(...pos);grp.rotation.set(...rot);parent.add(grp);
+  const m=add(new THREE.Mesh(new THREE.PlaneGeometry(.18,.095),basic({map:tex(assetCanvas(lines,kind)),side:THREE.DoubleSide})),null,grp);
+  const fr=new THREE.LineSegments(new THREE.EdgesGeometry(new THREE.PlaneGeometry(.19,.105)),new THREE.LineBasicMaterial({color:COL.drift,transparent:true,opacity:0,toneMapped:false}));grp.add(fr);
+  const str=new THREE.Line(new THREE.BufferGeometry().setFromPoints([V3(-.082,.028,0),V3(-.12,.07,-.01)]),new THREE.LineBasicMaterial({color:'#4A544F'}));grp.add(str);
+  const t={grp,m,fr,lines,kind};ATAGS.push(t);return t;}
+const tagSRV5=assetTag(['asset Â· SRV-05','status: retired','since 2024-03'],RACK,[RW/2+.07,uy(15,2)+.02,FACE+.03],[0,-.35,.06]);
+const tagFull=assetTag(['record Â· R07','42 / 42U in use','status: full'],RACK,[RW/2+.07,uy(42)+.06,FACE+.03],[0,-.35,.04],'rec');
+
+/* â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ the budget gauge â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
+const TANK=new THREE.Group();TANK.position.set(TX,0,TZ);scene.add(TANK);
+add(new THREE.Mesh(new THREE.CylinderGeometry(TR+.05,TR+.07,.08,48),graph),[0,.04,0],TANK).castShadow=true;
+const glass=add(new THREE.Mesh(new THREE.CylinderGeometry(TR,TR,TH,48,1,true),new THREE.MeshStandardMaterial({color:'#ffffff',metalness:.1,roughness:.05,transparent:true,opacity:.2,side:THREE.DoubleSide,depthWrite:false})),[0,.08+TH/2,0],TANK);
+[.08,.08+TH].forEach(y=>{const r=add(new THREE.Mesh(new THREE.TorusGeometry(TR+.004,.012,8,48),alu),[0,y,0],TANK);r.rotation.x=Math.PI/2;});
+[0,1,2,3].forEach(i=>{const a=i*Math.PI/2+Math.PI/4;add(new THREE.Mesh(new THREE.BoxGeometry(.014,TH,.014),graph),[Math.cos(a)*(TR+.01),.08+TH/2,Math.sin(a)*(TR+.01)],TANK);});
+const liqMat=new THREE.MeshStandardMaterial({color:'#4A544F',metalness:.25,roughness:.3});
+const liq=add(new THREE.Mesh(new THREE.CylinderGeometry(TR-.012,TR-.012,1,48),liqMat),[0,.5,0],TANK);
+const liqTop=add(new THREE.Mesh(new THREE.CircleGeometry(TR-.012,48),new THREE.MeshStandardMaterial({color:'#6b7671',metalness:.3,roughness:.2})),[0,1,0],TANK);liqTop.rotation.x=-Math.PI/2;
+const LV0=.9, LVH=TH-.04;
+// planned-level ring (dashed amber) = what the budget should still hold
+const planRing=new THREE.LineLoop(new THREE.BufferGeometry().setFromPoints([...Array(64)].map((_,i)=>{const a=i/64*Math.PI*2;return V3(Math.cos(a)*(TR+.012),0,Math.sin(a)*(TR+.012));})),new THREE.LineDashedMaterial({color:COL.drift,dashSize:.04,gapSize:.03,transparent:true,toneMapped:false}));
+planRing.computeLineDistances();planRing.position.y=.1+LV0*LVH;TANK.add(planRing);
+// scale plate
+function scaleCanvas(){const [c,g]=cnv(160,1024);g.fillStyle='#F4F6F3';g.fillRect(0,0,160,1024);g.strokeStyle='#111614';g.lineWidth=3;g.strokeRect(2,2,156,1020);
+  g.fillStyle='#111614';for(let i=0;i<=20;i++){const y=1000-i*48;g.fillRect(8,y,i%5?26:46,i%5?2:4);}
+  g.font=`500 22px ${MONO}`;[['100%',20],['75',15],['50',10],['25',5],['0',0]].forEach(([t,i])=>g.fillText(t,62,1000-i*48+8));
+  g.save();g.translate(130,560);g.rotate(-Math.PI/2);g.fillStyle='#4A544F';g.font=`400 20px ${MONO}`;g.fillText('budget Â· illustrative',0,0);g.restore();return c;}
+const scaleMat=basic({map:tex(scaleCanvas())});
+const scalePlate=add(new THREE.Mesh(new THREE.PlaneGeometry(.12,TH*.99),scaleMat),null,TANK);
+{const a=.55;scalePlate.position.set(Math.sin(a)*(TR+.07),.08+TH/2,Math.cos(a)*(TR+.07));scalePlate.rotation.y=a;}
+add(new THREE.Mesh(new THREE.BoxGeometry(.128,TH,.008),graph),[Math.sin(.55)*(TR+.064),.08+TH/2,Math.cos(.55)*(TR+.064)],TANK).rotation.y=.55;
+
+/* â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ three pipes, three sinks â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
+const PIPES=[
+ {pts:[[.45,.045,-.07],[.4,.045,.2],[.31,.045,.42],[.27,.16,.5],[.26,.14,.62]],sink:'tray'},
+ {pts:[[.76,.045,-.13],[1.15,.045,.08],[1.72,.045,.28],[1.93,.045,.5],[1.96,.2,.6],[1.97,.2,.66]],sink:'pal'},
+ {pts:[[.84,.045,-.42],[1.25,.045,-.46],[1.62,.045,-.45],[1.72,.09,-.45]],sink:'r08'}];
+const pipeMat=new THREE.MeshStandardMaterial({color:'#e8ece9',metalness:.2,roughness:.15,transparent:true,opacity:.42,depthWrite:false});
+const NS=6;
+const slugGeo=new THREE.CapsuleGeometry(.011,.03,4,8);slugGeo.rotateZ(Math.PI/2);
+const slugs=new THREE.InstancedMesh(slugGeo,basic({color:COL.drift}),PIPES.length*NS);scene.add(slugs);slugs.frustumCulled=false;
+PIPES.forEach((p,i)=>{p.curve=new THREE.CatmullRomCurve3(p.pts.map(a=>V3(...a)),false,'catmullrom',.2);
+  const tube=add(new THREE.Mesh(new THREE.TubeGeometry(p.curve,60,.02,10,false),pipeMat));tube.castShadow=true;p.tube=tube;
+  // valve collar
+  const t=.14,pt=p.curve.getPointAt(t),tg=p.curve.getTangentAt(t);
+  const vm=new THREE.MeshStandardMaterial({color:COL.drift,emissive:COL.drift,emissiveIntensity:.35,metalness:.3,roughness:.4});
+  const v=add(new THREE.Mesh(new THREE.TorusGeometry(.03,.011,10,24),vm));v.position.copy(pt);v.lookAt(pt.clone().add(tg));p.valve=v;p.vm=vm;
+  const wheel=add(new THREE.Mesh(new THREE.CylinderGeometry(.004,.004,.07,6),graph));wheel.position.copy(pt).add(V3(0,.05,0));
+  const hw=add(new THREE.Mesh(new THREE.TorusGeometry(.026,.005,6,20),graph));hw.position.copy(pt).add(V3(0,.085,0));hw.rotation.x=Math.PI/2;p.hw=hw;
+  // spout mouth
+  const e=p.curve.getPointAt(1);add(new THREE.Mesh(new THREE.CylinderGeometry(.026,.022,.03,14),graph)).position.copy(e);});
+
+// sink 1: refresh tray with two young servers the record calls old
+const TRAYG=new THREE.Group();TRAYG.position.set(TRAY[0],0,TRAY[1]);scene.add(TRAYG);
+add(new THREE.Mesh(new THREE.BoxGeometry(.66,.012,.7),alu),[0,.006,0],TRAYG).receiveShadow=true;
+[[0,.05,.345,.66,.09,.01],[0,.05,-.345,.66,.09,.01],[.325,.05,0,.01,.09,.7],[-.325,.05,0,.01,.09,.7]].forEach(([x,y,z,w,h,d])=>add(new THREE.Mesh(new THREE.BoxGeometry(w,h,d),graph),[x,y,z],TRAYG).castShadow=true);
+function lipCanvas(){const [c,g]=cnv(512,64);g.fillStyle='#2a302d';g.fillRect(0,0,512,64);g.fillStyle='#FFB25C';g.font=`500 26px ${MONO}`;g.fillText('refresh Â· FY27',18,42);g.fillStyle='#93A19A';g.font=`400 20px ${MONO}`;g.fillText('to dispose',330,42);return c;}
+const lipMat=basic({map:tex(lipCanvas())});
+add(new THREE.Mesh(new THREE.PlaneGeometry(.6,.075),lipMat),[0,.05,.351],TRAYG);
+const TRAYSRV=[0,1].map(i=>{const hh=2*U-.003;const m=new THREE.Mesh(new THREE.BoxGeometry(.56,hh,.6),[dark,dark,dark,dark,faceMat('server',i?'SRV-19':'SRV-12',2,{model:'CX-340 Â· mfg 2022'}),dark]);
+  m.castShadow=true;m.receiveShadow=true;const rest=.013+hh/2+i*(hh+.006);TRAYG.add(m);return {m,rest};});
+const tagTray=assetTag(['record Â· SRV-12','CX-220 Â· 2018','refresh due',''],TRAYG,[.33,.16,.33],[0,-.25,.05]);
+const trayO=outlineBox(.575,2*(2*U)+.012,.615,COL.drift,false,TRAYG,[0,.013+2*U+.003,0]);
+
+// sink 2: shelf of spares on hand + pallet of the same switch, bought again
+const SH=new THREE.Group();SH.position.set(SHELF[0],0,SHELF[1]);scene.add(SH);
+[[-1,-1],[1,-1],[-1,1],[1,1]].forEach(([sx,sz])=>add(new THREE.Mesh(new THREE.BoxGeometry(.016,.52,.016),graph),[sx*.28,.26,sz*.19],SH).castShadow=true);
+[.02,.27,.51].forEach(y=>add(new THREE.Mesh(new THREE.BoxGeometry(.58,.012,.4),alu),[0,y,0],SH).receiveShadow=true);
+const SPARE=[[.026+.022,0],[.026+.044+.004+.022,0],[.276+.022,0]].map(([y],i)=>{const m=add(new THREE.Mesh(new THREE.BoxGeometry(.48,.044,.32),[dark,dark,dark,dark,faceMat('switch','SW-48P Â· spare',1),dark]),[0,y,0],SH);m.castShadow=true;return m;});
+const PALG=new THREE.Group();PALG.position.set(PAL[0],0,PAL[1]);scene.add(PALG);
+[-.2,0,.2].forEach(x=>add(new THREE.Mesh(new THREE.BoxGeometry(.1,.04,.46),graph),[x,.02,0],PALG));
+[-.17,0,.17].forEach(z=>add(new THREE.Mesh(new THREE.BoxGeometry(.56,.014,.1),graph),[0,.047,z],PALG));
+const boxMat=new THREE.MeshStandardMaterial({color:'#dfe3df',metalness:.1,roughness:.7});
+const DUP=[0,1,2].map(i=>{const h=.07;const m=new THREE.Mesh(new THREE.BoxGeometry(.5,h,.36),[boxMat,boxMat,boxMat,boxMat,faceMat('boxed','SW-48P',2,{sub:'new Â· PO-2288'}),boxMat]);m.castShadow=true;m.receiveShadow=true;PALG.add(m);
+  const o=outlineBox(.51,h+.004,.37,COL.drift,false,m);return {m,o,rest:.054+h/2+i*(h+.006)};});
+
+// sink 3: R08, a rack budgeted around R07
+const R8G=new THREE.Group();R8G.position.set(R8[0],0,R8[1]);scene.add(R8G);
+const r8Mat=basic({color:COL.record,transparent:true,opacity:0,depthWrite:false,side:THREE.DoubleSide});
+const r8Box=add(new THREE.Mesh(new THREE.BoxGeometry(RW,2.0,RD),r8Mat),[0,1.0,0],R8G);
+const r8O=outlineBox(RW,2.0,RD,COL.record,true,R8G,[0,1.0,0]);
+function r8Canvas(){const [c,g]=cnv(512,160);g.fillStyle='#F4F6F3';g.fillRect(0,0,512,160);g.strokeStyle='#7C93A8';g.lineWidth=6;g.setLineDash([16,10]);g.strokeRect(3,3,506,154);g.setLineDash([]);
+  g.fillStyle='#3F5871';g.font=`500 40px ${SANS}`;g.fillText('R08 Â· planned',22,62);g.fillStyle='#4A544F';g.font=`400 23px ${MONO}`;g.fillText('rack + PDU + 4 Ã— 2U',22,104);g.fillText('because R07 is "full"',22,138);return c;}
+const r8Plate=add(new THREE.Mesh(new THREE.PlaneGeometry(.52,.162),basic({map:tex(r8Canvas()),transparent:true,opacity:0,depthWrite:false})),[0,1.25,RD/2+.01],R8G);
+
+// the purchase order card
+function poCanvas(rew){const W=600,H=800;const [c,g]=cnv(W,H);g.fillStyle='#F4F6F3';g.fillRect(0,0,W,H);
+  g.strokeStyle='#111614';g.lineWidth=4;g.strokeRect(2,2,W-4,H-4);g.fillStyle='#111614';g.fillRect(0,0,W,86);
+  g.fillStyle='#DDE4DF';g.font=`500 32px ${MONO}`;g.fillText('PO-2291',28,56);g.fillStyle=rew?'#1FD67C':'#FFB25C';g.font=`500 22px ${MONO}`;g.fillText(rew?'rewritten':'pending',W-(rew?160:130),54);
+  g.fillStyle='#4A544F';g.font=`400 22px ${MONO}`;g.fillText('capex Â· FY27 Â· row C',28,132);
+  const rows=[['rack R08 + PDU','1'],['2U compute','4'],['patching','1 lot']];
+  rows.forEach((r,i)=>{const y=210+i*78;g.fillStyle='rgba(17,22,20,.12)';g.fillRect(28,y+26,W-56,2);g.fillStyle='#111614';g.font=`500 28px ${SANS}`;g.fillText(r[0],28,y);g.font=`400 26px ${MONO}`;g.fillText(r[1],W-110,y);
+    if(rew&&i!==1){g.strokeStyle='#FF9A2E';g.lineWidth=5;g.beginPath();g.moveTo(22,y-9);g.lineTo(W-40,y-9);g.stroke();}});
+  if(rew){g.strokeStyle='#04703F';g.lineWidth=5;g.strokeRect(28,470,W-56,190);g.fillStyle='#04703F';g.font=`500 28px ${SANS}`;g.fillText('4 Ã— 2U â†’ R07',50,520);
+    g.font=`400 22px ${MONO}`;g.fillText('U21â€“24 Â· U29â€“32',50,562);g.fillText('slots found by sweep',50,598);g.fillText('R08 not needed',50,634);}
+  else{g.fillStyle='#3F5871';g.font=`400 22px ${MONO}`;g.fillText('reason: record shows',28,520);g.fillText('R07 at 42 / 42U',28,556);}
+  g.fillStyle='#4A544F';g.font=`400 18px ${MONO}`;g.fillText('illustrative',28,H-28);return c;}
+const POG=new THREE.Group();POG.position.set(PO[0],0,PO[1]);scene.add(POG);
+const poTex=tex(poCanvas(false));let poRew=false;
+const poCard=add(new THREE.Mesh(new THREE.BoxGeometry(.36,.48,.008),[dark,dark,dark,dark,basic({map:poTex}),dark]),[0,.28,0],POG);poCard.rotation.x=-.22;poCard.castShadow=true;
+add(new THREE.Mesh(new THREE.BoxGeometry(.3,.02,.14),graph),[0,.01,-.05],POG);
+
+// sweep calendar (catching it early)
+const TLG=new THREE.Group();TLG.position.set(TL[0],0,TL[1]);scene.add(TLG);
+const TLW=2.8;
+function tlCanvas(){const W=2240,H=240;const [c,g]=cnv(W,H);g.fillStyle='#F4F6F3';g.fillRect(0,0,W,H);g.strokeStyle='#111614';g.lineWidth=3;g.strokeRect(2,2,W-4,H-4);
+  const mx=i=>60+i*(W-120)/12;g.font=`500 24px ${MONO}`;
+  ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'].forEach((m,i)=>{g.fillStyle='rgba(17,22,20,.15)';g.fillRect(mx(i),20,2,H-40);g.fillStyle='#4A544F';g.fillText(m,mx(i)+12,54);
+    for(let w=1;w<4;w++){g.fillStyle='rgba(17,22,20,.08)';g.fillRect(mx(i)+w*(W-120)/48,H-50,2,24);}});
+  g.fillStyle='#04703F';g.font=`400 21px ${MONO}`;g.fillText('â— routine sweep, monthly',60,H-24);
+  const px=mx(8)+(W-120)/24;g.strokeStyle='#111614';g.lineWidth=3;g.strokeRect(px-4,80,170,62);g.fillStyle='#111614';g.font=`500 24px ${MONO}`;g.fillText('PO-2291',px+10,120);
+  g.fillStyle='#4A544F';g.font=`400 21px ${MONO}`;g.fillText('written after the Sep sweep Â· illustrative',W-600,H-24);return c;}
+const tlMat=basic({map:tex(tlCanvas())});
+const tlPlate=add(new THREE.Mesh(new THREE.BoxGeometry(TLW,.02,.3),[graph,graph,tlMat,graph,graph,graph]),[0,.01,0],TLG);tlPlate.receiveShadow=true;
+const PINS=new THREE.InstancedMesh(new THREE.CylinderGeometry(.016,.016,1,12),new THREE.MeshStandardMaterial({color:COL.link,emissive:COL.link,emissiveIntensity:.5,roughness:.4}),12);TLG.add(PINS);PINS.frustumCulled=false;
+const pinX=i=>-TLW/2+(60+i*(2240-120)/12+ (2240-120)/24)/2240*TLW;
+
+// key figure: two U-columns beside the rack (record vs floor)
+const CELLS=new THREE.InstancedMesh(new THREE.BoxGeometry(.06,U-.008,.04),new THREE.MeshBasicMaterial({color:0xffffff,toneMapped:false}),84);scene.add(CELLS);CELLS.frustumCulled=false;
+const COLX=[-.13,-.035], COLZ=RZ+FACE+.02;
+const colFrame=[0,1].map(i=>outlineBox(.075,42*U+.01,.05,i?COL.linkInk:COL.record,false,scene,[COLX[i],Y0+21*U,COLZ]));
+
+/* â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ labels â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
+const hud=document.getElementById('hud');const TG=[];
+function tag(k,html,cls,pos){const el=document.createElement('div');el.className='tag '+cls;el.innerHTML=`<i></i><span>${html}</span>`;hud.appendChild(el);const t={k,el,pos:typeof pos==='function'?null:pos,fn:typeof pos==='function'?pos:null};TG.push(t);return t;}
+const WP=(o,v)=>o.localToWorld(v.clone());
+// priority order: earlier tags win collisions
+tag('hB','<b>Capex budget</b>the gauge drains quietly','ink keep',V3(TX+TR,.08+TH*.72,TZ+.08));
+tag('hR','<b>R07</b>the rack on the floor','ink',W7(RW/2,1.7,ZF));
+tag('hL','<b>Three leaks</b>no line item for any of them','drift',()=>PIPES[1].curve.getPointAt(.55));
+tag('aT','<b>Refreshed early</b>hardware with years left','drift up keep',()=>WP(TRAYG,V3(0,.22,0)));
+tag('aD','<b>Bought again</b>beside unused spares','drift keep',()=>WP(PALG,V3(.26,.2,0)));
+tag('aR','<b>Budgeted around</b>R08 planned, R07 has room','rec',V3(R8[0]+RW/2,.9,R8[1]+RD/2));
+tag('aL','<b>Drained</b>next quarter\'s spend','drift',V3(TX+TR,.1+LV0*LVH,TZ));
+tag('wM','<b>Wrong model and age</b>record CX-220 Â· 2018<br>rack CX-340 Â· 2022','drift keep',()=>WP(TRAYG,V3(.42,.2,.33)));
+tag('wR','<b>Marked retired</b>still drawing power','drift keep',W7(RW/2+.16,uy(15,2)+.02,FACE+.03));
+tag('wF','<b>Record: full</b>every empty slot "in use"','rec',W7(RW/2+.16,uy(42)+.06,FACE+.03));
+tag('kR','<b>Record</b>42 / 42U','rec up keep',V3(COLX[0],Y0+42*U+.03,COLZ));
+tag('kF','<b>On the floor</b>25 / 42U â‰ˆ 60%','link keep',V3(COLX[1]+.04,uy(21,2),COLZ));
+tag('sS','<b>Sweep</b>open slots found','link keep',W7(RW/2,uy(30,2),FACE+.02));
+tag('sP','<b>PO-2291 rewritten</b>before it went out','link keep',()=>WP(poCard,V3(.18,.12,0)));
+tag('sX','<b>R08</b>dropped from the PO','rec',V3(R8[0]+RW/2,.05,R8[1]+RD/2));
+tag('tS','<b>Routine sweeps</b>before any purchase order','link keep',()=>WP(TLG,V3(pinX(10),.14,0)));
+tag('tV','<b>Leaks closed</b>the budget holds','link keep',V3(TX+TR,.08+TH*.8,TZ));
+
+/* â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ camera plan â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
+const CAMS=[
+  [-1,[3.7,2.8,5.4],[.55,.8,.15]],      // wide 3/4 establishing
+  [.5,[2.1,4.5,5.4],[.85,.25,.3]],      // high 3/4 over the three sinks
+  [1.5,[1.35,1.4,2.45],[-.12,.9,.35]], // macro: R07's tags + the tray
+  [2.5,[.35,1.05,4.1],[-.05,.98,.1]],  // straight elevation: record vs floor
+  [3.5,[1.95,.5,3.7],[.25,.85,.15]], // low hero angle past the PO card
+  [4.5,[.75,6.2,3.2],[.62,0,.62]]];    // top-down plan with the sweep calendar
+let vw=0,vh=0,W=0,H=0,mobile=false;
+function resize(){vw=innerWidth;vh=innerHeight;mobile=vw<760;W=vw;H=mobile?Math.round(vh*.46):vh;canvas.style.height=H+'px';hud.style.height=H+'px';
+  renderer.setSize(W,H,false);camera.aspect=W/H;camera.updateProjectionMatrix();}
+addEventListener('resize',resize);resize();
+const mouse={x:0,sx:0};addEventListener('pointermove',e=>{mouse.x=e.clientX/innerWidth*2-1;},{passive:true});
+const cp=V3(...CAMS[0][1]),ct=V3(...CAMS[0][2]);let kS=1;
+
+// framing guard: bounding points of every visible object
+const BOXES=[];
+function boxPts(obj,dyn){return {obj,dyn,pts:[]};}
+[RACK,TANK,TRAYG,SH,PALG,R8G,POG,TLG].forEach(o=>BOXES.push(boxPts(o)));
+const B3=new THREE.Box3();
+function refreshBoxes(){BOXES.forEach(b=>{b.pts.length=0;if(!b.obj.visible)return;B3.setFromObject(b.obj);if(B3.isEmpty())return;const {min:a,max:c}=B3;
+  for(const x of [a.x,c.x])for(const y of [a.y,c.y])for(const z of [a.z,c.z])b.pts.push(V3(x,y,z));});}
+const PV=V3();
+function fits(){camera.updateMatrixWorld();const minX=.455*W;
+  for(const b of BOXES)for(const p of b.pts){PV.copy(p).project(camera);if(PV.z>1)return false;const x=(PV.x+1)/2*W,y=(1-PV.y)/2*H;
+    if(mobile){if(x<6||x>W-6||y<64||y>H-34)return false;}else if(x<minX)return false;}
+  return true;}
+function place(P,T,k){camera.position.copy(T).addScaledVector(P.clone().sub(T),k);camera.lookAt(T);}
+function guard(P,T){let lo=1,hi=1;place(P,T,1);if(fits())return 1;
+  hi=1.3;place(P,T,hi);while(!fits()&&hi<5){hi*=1.3;place(P,T,hi);}
+  for(let i=0;i<9;i++){const m=(lo+hi)/2;place(P,T,m);if(fits())hi=m;else lo=m;}return hi;}
+
+const on=(g,a,b)=>smooth(a-.2,a+.15,g)*(1-smooth(b-.15,b+.2,g));
+const clock=new THREE.Clock();const M4=new THREE.Matrix4(),Q=new THREE.Quaternion(),S1=V3(1,1,1),E=new THREE.Euler();
+const dropY=(k,rest)=>rest+(1-k)*(1-k)*.9;
+function frame(){
+  requestAnimationFrame(frame);
+  const dt=Math.min(clock.getDelta(),.05),time=clock.elapsedTime;
+  const R=window.RT7||{g:-1};
+  const hideAll=mobile?R.ended:R.covered;
+  canvas.style.visibility=hideAll?'hidden':'visible';
+  if(R.ended){TG.forEach(t=>t.el.classList.remove('show'));}
+  if(hideAll)return;
+  const g=R.g;
+
+  // â”€â”€ states
+  const wHero=1-smooth(-.35,.05,g);
+  const w1=on(g,0,1),w2=on(g,1,2),wK=on(g,2,3),w3=on(g,3,4),w4=on(g,4,5.6);
+  const drain=smooth(-.1,.45,g), keep=smooth(3.3,3.55,g);
+  const level=LV0-.36*drain+.15*keep;
+  const closeR8=smooth(3.3,3.5,g), closeAll=smooth(4.0,4.35,g);
+  const flows=[1-closeAll,1-closeAll,1-Math.max(closeR8,closeAll)];
+  const tray=[smooth(-.1,.2,g),smooth(0,.3,g)], dup=[smooth(.05,.3,g),smooth(.12,.37,g),smooth(.2,.44,g)];
+  const r8=smooth(.2,.45,g)*(1-closeR8);
+  const ghost=smooth(.85,1.2,g)*(1-smooth(2.15,2.4,g));
+  const cols=smooth(1.9,2.25,g)*(1-smooth(2.95,3.15,g));
+  const sweep=smooth(2.95,3.3,g), found=smooth(2.95,3.1,g)*(1-smooth(4.9,5.2,g)), plan=smooth(3.2,3.45,g);
+  const po=smooth(2.85,3.1,g)*(1-smooth(4.0,4.25,g));
+  const tl=smooth(3.85,4.1,g);
+  const hi2=w2;
+
+  liq.scale.y=level*LVH;liq.position.y=.1+level*LVH/2;liqTop.position.y=.1+level*LVH+.001;
+  planRing.material.opacity=smooth(.15,.5,g)*(1-keep*.4);planRing.visible=planRing.material.opacity>.01;
+  // pipes: slugs of spend run toward the sinks while a valve is open
+  PIPES.forEach((p,i)=>{const f=flows[i];p.vm.color.copy(COL.drift).lerp(COL.link,1-f);p.vm.emissive.copy(p.vm.color);p.hw.rotation.z=(1-f)*1.6;
+    for(let j=0;j<NS;j++){const t=reduce?(j+.5)/NS:((time*.18+j/NS+i*.13)%1);
+      if(f<.5){M4.makeScale(0,0,0);}else{const pt=p.curve.getPointAt(t),tg=p.curve.getTangentAt(t);Q.setFromUnitVectors(V3(1,0,0),tg);M4.compose(pt,Q,S1.setScalar(1));}
+      slugs.setMatrixAt(i*NS+j,M4);}});
+  slugs.instanceMatrix.needsUpdate=true;
+  // sinks fill: clean vertical drops
+  TRAYSRV.forEach((s,i)=>{const k=tray[i];s.m.visible=k>.001;s.m.position.set(0,dropY(k,s.rest),0);});
+  tagTray.grp.visible=tray[1]>.98;
+  trayO.material.opacity=hi2;trayO.visible=hi2>.01;
+  DUP.forEach((d,i)=>{const k=dup[i];d.m.visible=k>.001;d.m.position.set(0,dropY(k,d.rest),0);d.o.material.opacity=Math.max(w1,hi2)*.95;});
+  r8Mat.opacity=.1*r8;r8O.material.opacity=r8;r8Plate.material.opacity=r8;R8G.visible=r8>.01;
+  // record ghosts and flagged asset tags
+  ghostMat.opacity=.3*ghost;GHOSTS.forEach(o=>{o.m.visible=o.o.visible=ghost>.01;o.o.material.opacity=ghost;});
+  ATAGS.forEach(t=>{t.fr.material.opacity=t.kind==='rec'?0:hi2;});
+  retO.material.opacity=Math.max(hi2,0);retO.visible=hi2>.01;
+  // key figure columns
+  CELLS.visible=cols>.01;colFrame.forEach(f=>{f.material.opacity=cols;f.visible=cols>.01;});
+  for(let c=0;c<2;c++)for(let u=1;u<=42;u++){const i=c*42+u-1;const k=clamp(cols*1.6-(u/42)*.6);
+    M4.compose(V3(COLX[c],uy(u),COLZ),Q.identity(),S1.set(k,k,k));CELLS.setMatrixAt(i,M4);
+    CELLS.setColorAt(i,c===0?COL.record:(USED.has(u)?COL.link:C('#d3d8d4')));}
+  CELLS.instanceMatrix.needsUpdate=true;if(CELLS.instanceColor)CELLS.instanceColor.needsUpdate=true;
+  // sweep: band climbs, open slots light up behind it, planned units slide in
+  const bandY=lerp(.1,2.0,sweep);band.position.y=bandY;const bOn=sweep>0&&sweep<1?1:0;band.material.opacity=bOn*w3*(reduce?.9:.75+.25*Math.sin(time*9));
+  wash.scale.y=Math.max(.001,bandY-.1);wash.position.y=.1+(bandY-.1)/2;wash.material.opacity=.08*bOn*w3;
+  SLOTS.forEach(s=>{const k=found*smooth(s.y-.05,s.y+.05,bandY);s.o.material.opacity=k;s.o.visible=k>.01;});
+  planMat.opacity=.16*plan;PLAN.forEach((p,i)=>{const k=clamp(plan*1.5-i*.15);p.g.visible=k>.01;p.g.position.z=FACE-.39+(1-k)*.9;p.o.material.opacity=k;});
+  // PO card
+  POG.visible=po>.01;POG.scale.setScalar(Math.max(.001,po));POG.rotation.y=.37;
+  const rew=g>3.35;if(rew!==poRew){poRew=rew;poTex.image=poCanvas(rew);poTex.needsUpdate=true;}
+  // sweep calendar
+  TLG.visible=tl>.01;TLG.position.y=(tl-1)*.02;
+  for(let i=0;i<12;i++){const k=clamp(smooth(3.9,4.35,g)*1.5-i*.04);const h=.02+.1*k;M4.compose(V3(pinX(i),.02+h/2,-.05),Q.identity(),S1.set(k>0?1:0,h,k>0?1:0));PINS.setMatrixAt(i,M4);}
+  PINS.instanceMatrix.needsUpdate=true;
+
+  // â”€â”€ camera
+  let Pp=V3(...CAMS[0][1]),Tt=V3(...CAMS[0][2]);
+  if(!reduce&&!SNAP){const s=Math.sin(time*.12)*.18*wHero;Pp.x+=s;Pp.z-=s*.4;}
+  for(let i=1;i<CAMS.length;i++){const [gi,p,t]=CAMS[i];const gp=CAMS[i-1][0];const k=smooth(gp+(gi-gp)*.3,gi-(gi-gp)*.15,g);if(k>0){Pp.lerp(V3(...p),k);Tt.lerp(V3(...t),k);}}
+  if(mobile){Pp.sub(Tt).multiplyScalar(1.05).add(Tt);}
+  mouse.sx=lerp(mouse.sx,reduce?0:mouse.x,.05);Pp.x+=mouse.sx*.08;
+  const f=(reduce||SNAP)?1:1-Math.pow(.02,dt);cp.lerp(Pp,f);ct.lerp(Tt,f);
+  camera.setViewOffset(W,H,mobile?0:-(.63-.5)*W,0,W,H);
+  refreshBoxes();
+  const k=guard(cp,ct);kS=(reduce||SNAP)?k:(k>kS?k:lerp(kS,k,1-Math.pow(.05,dt)));
+  place(cp,ct,Math.max(k,kS));camera.updateMatrixWorld();
+
+  // â”€â”€ labels: on/off at 0.5, column + viewport + collision guards
+  const vis={hB:wHero,hR:wHero,hL:wHero,aT:w1*tray[0],aD:w1*dup[0],aR:w1*r8,aL:w1*drain,wM:w2,wR:w2,wF:w2*ghost,kR:wK*cols,kF:wK*cols,
+    sS:w3*found*smooth(.5,.9,sweep),sP:w3*smooth(3.35,3.45,g),sX:w3*smooth(3.1,3.25,g),tS:w4*tl,tV:w4*closeAll};
+  const placed=[];const v=V3();
+  for(const t of TG){let show=!R.ended&&(vis[t.k]||0)>=.5;
+    if(show&&mobile&&!t.el.classList.contains('keep'))show=false;
+    if(show){if(t.fn)t.pos=t.fn();v.copy(t.pos).project(camera);if(v.z>1)show=false;}
+    if(show){const x=(v.x+1)/2*W,y=(1-v.y)/2*H;const cl=t.el.classList,ew=t.el.offsetWidth,eh=t.el.offsetHeight;
+      const tx=cl.contains('left')?x-ew+3.5:cl.contains('up')?x-ew/2:x-3.5,ty=cl.contains('up')?y-eh+3.5:y-eh/2;
+      const box=[tx-6,ty-6,tx+ew+6,ty+eh+6];
+      if(tx<4||tx+ew>W-4||ty<(mobile?60:74)||ty+eh>H-(mobile?34:44))show=false;
+      else if(!mobile&&tx<.38*W)show=false;
+      else if(placed.some(b=>!(box[2]<b[0]||box[0]>b[2]||box[3]<b[1]||box[1]>b[3])))show=false;
+      if(show){placed.push(box);t.el.style.transform=`translate3d(${tx.toFixed(1)}px,${ty.toFixed(1)}px,0)`;}}
+    t.el.classList.toggle('show',show);}
+  renderer.render(scene,camera);
+}
+function redrawText(){sheetMat.map.image=sheetCanvas();sheetMat.map.needsUpdate=true;
+  FACES.forEach(({m,args})=>{m.map.image=faceCanvas(...args);m.map.needsUpdate=true;});
+  ATAGS.forEach(t=>{t.m.material.map.image=assetCanvas(t.lines,t.kind);t.m.material.map.needsUpdate=true;});
+  lipMat.map.image=lipCanvas();lipMat.map.needsUpdate=true;scaleMat.map.image=scaleCanvas();scaleMat.map.needsUpdate=true;
+  r8Plate.material.map.image=r8Canvas();r8Plate.material.map.needsUpdate=true;poTex.image=poCanvas(poRew);poTex.needsUpdate=true;
+  tlMat.map.image=tlCanvas();tlMat.map.needsUpdate=true;}
+document.fonts.ready.then(redrawText);
+{const hid=[];scene.traverse(o=>{if(!o.visible){hid.push(o);o.visible=true;}});try{renderer.compile(scene,camera);}catch(e){}hid.forEach(o=>o.visible=false);}
+requestAnimationFrame(frame);
+</script>
+<!--GLJS-END-->
+<script src="/design-system/nav.js" defer></script>
+</body>
+</html>

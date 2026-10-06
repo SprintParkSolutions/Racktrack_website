@@ -1,0 +1,874 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Compliance &amp; audit owners · RackTrack</title>
+<meta name="description" content="RackTrack gives audit teams source-linked infrastructure evidence: what was seen, where it was seen, and when it was verified.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap">
+<link rel="stylesheet" href="/design-system/base.css">
+<style>
+/* RackTrack · Use case: Compliance & audit owners — design-system/ tokens.
+   Protagonist: one asset record (SRV-06) and its chain of custody: threads to the source image, the location and the time. */
+:root{
+  color-scheme: light;
+  
+}
+*{box-sizing:border-box}
+html{background:var(--paper)}
+body{margin:0;background:var(--paper);color:var(--fg);font:400 16px/1.5 var(--sans);-webkit-font-smoothing:antialiased;overflow-x:hidden}
+a{color:inherit}
+::selection{background:var(--link);color:#06140d}
+:focus-visible{outline:2px solid var(--link-ink);outline-offset:3px;border-radius:2px}
+body::before{content:"";position:fixed;inset:0;z-index:0;pointer-events:none;background:radial-gradient(60% 55% at 64% 50%,rgba(255,255,255,.6),transparent 72%)}
+#stage{position:fixed;inset:0;z-index:1;display:block;width:100%;height:100%;pointer-events:none}
+#scrim{position:fixed;inset:0;z-index:1;pointer-events:none;background:linear-gradient(90deg,var(--paper) 0,rgba(233,236,232,.92) 24%,rgba(233,236,232,0) 45%)}
+#hud{position:fixed;inset:0;z-index:3;pointer-events:none;overflow:hidden}
+main{position:relative;z-index:2}
+
+/* nav */
+.nav{position:fixed;left:0;right:0;top:0;z-index:10;display:flex;align-items:center;gap:28px;height:calc(var(--nav-h) + env(safe-area-inset-top,0px));padding:env(safe-area-inset-top,0px) var(--bleed) 0;background:linear-gradient(var(--paper) 55%,transparent)}
+.brand{display:flex;align-items:center;gap:10px;text-decoration:none;font:700 17px/1 var(--sans);letter-spacing:-.02em;color:var(--ink)}
+.brand img{width:26px;height:26px;border-radius:5px;display:block}
+.nav ul{display:flex;gap:24px;list-style:none;margin:0 0 0 auto;padding:0}
+.nav ul a{font:500 14px/1 var(--sans);text-decoration:none;color:var(--ink-2)}
+.nav ul a:hover{color:var(--ink)}
+.nav ul a[aria-current="page"]{color:var(--ink);text-decoration:underline;text-decoration-color:var(--link);text-decoration-thickness:2px;text-underline-offset:6px}
+.btn{display:inline-flex;align-items:center;gap:10px;height:46px;padding:0 20px;border-radius:3px;border:1px solid var(--fg);font:500 15px/1 var(--sans);text-decoration:none;cursor:pointer;background:transparent;color:var(--fg);transition:background .2s,color .2s,border-color .2s}
+.btn.solid{background:var(--fg);color:var(--bg)}
+.btn.solid:hover{background:var(--link-ink);border-color:var(--link-ink);color:#fff}
+.btn:not(.solid){border-color:var(--line)}
+.btn:not(.solid):hover{border-color:var(--fg)}
+.btn .led{width:7px;height:7px;border-radius:50%;background:var(--link);box-shadow:0 0 8px var(--link)}
+.nav .btn{height:38px;padding:0 16px;font-size:14px}
+
+/* type */
+.ch{position:relative;padding-inline:var(--bleed)}
+.copy{max-width:31rem;}
+h1,h2,h3{margin:0 0 20px;text-wrap:balance}
+h1{max-width:10ch}
+h2{max-width:15ch}
+h3{margin:0 0 12px}
+.lede{color:var(--fg-2);max-width:27rem;margin:0 0 28px}
+.k{margin:0 0 14px;font:400 12px/1 var(--mono);color:var(--link-ink)}
+.actions{display:flex;flex-wrap:wrap;gap:12px}
+
+/* tags */
+.tag{position:absolute;left:0;top:0;display:flex;align-items:center;opacity:0;will-change:transform,opacity;white-space:nowrap}
+.tag::before{content:"";width:7px;height:7px;border-radius:50%;background:var(--c,var(--ink));transform:translate(-3.5px,0);box-shadow:0 0 0 3px color-mix(in oklab,var(--c,var(--ink)) 22%,transparent)}
+.tag i{display:block;width:24px;height:1px;background:var(--c,var(--ink))}
+.tag span{padding:6px 9px;background:var(--paper-2);border:1px solid var(--c,var(--ink));border-radius:2px;font:400 11.5px/1.35 var(--mono);color:var(--ink);box-shadow:0 14px 28px -20px rgba(17,22,20,.45)}
+.tag span b{display:block;font:600 15px/1.15 var(--sans);letter-spacing:-.02em;margin-bottom:2px}
+.tag.left{flex-direction:row-reverse}.tag.left::before{transform:translate(3.5px,0)}
+.tag.up{flex-direction:column-reverse}.tag.up i{width:1px;height:22px}.tag.up::before{transform:translate(0,3.5px)}
+.tag.link{--c:var(--link)} .tag.link span b{color:var(--link-ink)}
+.tag.drift{--c:var(--drift)} .tag.drift span b{color:var(--drift-ink)}
+.tag.rec{--c:var(--record)} .tag.rec span b{color:var(--record-ink)}
+.tag.ink{--c:var(--ink)}
+
+/* hero */
+#hero{min-height:100vh;display:flex;align-items:center;padding-top:90px}
+.back{display:inline-block;margin:0 0 26px;font:400 12px/1 var(--mono);color:var(--ink-2);text-decoration:none;border-bottom:1px solid var(--rule);padding-bottom:4px}
+.back:hover{color:var(--ink);border-color:var(--ink)}
+.chain{display:flex;flex-wrap:wrap;gap:0;margin:0 0 30px;padding:0;list-style:none;font:400 12px/1 var(--mono);color:var(--ink)}
+.chain li{display:flex;align-items:center;gap:8px;padding:9px 14px 9px 0;margin-right:14px;border-top:1px solid var(--ink)}
+.chain li i{width:7px;height:7px;border-radius:50%;background:var(--link);box-shadow:0 0 0 3px rgba(31,214,124,.22)}
+.chain li b{font-weight:500;color:var(--ink-2)}
+
+/* pinned chapters */
+.pinsec{position:relative}
+#plain{min-height:210vh} #how{min-height:480vh} #sees{min-height:450vh} #dec{min-height:330vh}
+.pin{position:sticky;top:0;height:100vh}
+.scopy{position:absolute;left:var(--gutter);top:50%;transform:translateY(-50%);width:min(31rem,40vw);}
+.scopy .h{margin-bottom:30px}
+.scopy .h .lede{margin:0}
+.stack{position:relative;height:250px}
+#how .stack{height:330px}
+.st{position:absolute;inset:0;opacity:0;transform:translateY(14px);transition:opacity .45s,transform .55s var(--ease);pointer-events:none}
+.st.on{opacity:1;transform:none;pointer-events:auto}
+.st .no{font:400 12px/1 var(--mono);color:var(--ink-2);margin:0 0 12px;display:flex;gap:10px;align-items:center}
+.chip{font:500 11px/1 var(--mono);padding:5px 7px;border-radius:2px;border:1px solid var(--link);color:var(--link-ink);background:rgba(31,214,124,.08)}
+.chip.a{border-color:var(--drift);color:var(--drift-ink);background:rgba(255,154,46,.1)}
+.chip.r{border-color:var(--record);color:var(--record-ink);background:rgba(124,147,168,.1)}
+.st p{margin:0 0 14px;color:var(--ink-2);max-width:27rem}
+.st ul,.legend{list-style:none;margin:0;padding:0;font:400 12.5px/1.4 var(--mono)}
+.st li,.legend li{display:flex;gap:10px;padding:7px 0;border-top:1px dashed var(--rule);color:var(--ink-2)}
+.st li b,.legend li b{font-weight:500;color:var(--ink);min-width:7.5rem}
+.legend li b{color:var(--link-ink)}
+.st figure{margin:4px 0 0;max-width:19rem}
+.st figure img{display:block;width:100%;height:auto;aspect-ratio:16/8.4;object-fit:cover;object-position:50% 40%;border-radius:2px;border:1px solid var(--rule)}
+.st figcaption{margin-top:8px;font:400 11.5px/1.3 var(--mono);color:var(--ink-2)}
+.prog{display:flex;gap:5px;align-items:center;margin-top:18px;font:400 11px/1 var(--mono);color:var(--ink-2)}
+.prog i{width:28px;height:3px;background:var(--rule);position:relative;overflow:hidden}
+.prog i b{position:absolute;inset:0 auto 0 0;width:0;background:var(--link-ink)}
+.prog span{margin-left:8px}
+
+/* decisions */
+#dec .scopy{width:min(32rem,41vw)}
+.dq{list-style:none;margin:0;padding:0;border-top:1px solid var(--ink)}
+.dq li{display:flex;align-items:center;justify-content:space-between;gap:14px;padding:13px 0;border-bottom:1px solid var(--rule);font:500 clamp(18px,1.45vw,21px)/1.2 var(--sans);letter-spacing:-.02em;color:var(--ink-2);transition:color .4s}
+.dq li i{font:400 11px/1 var(--mono);font-style:normal;color:var(--ink-2);flex:none;padding:5px 7px;border:1px dashed var(--rule);border-radius:2px;transition:all .35s}
+.dq li.ans{color:var(--ink)}
+.dq li.ans i{border:1px solid var(--link);border-style:solid;color:var(--link-ink);background:rgba(31,214,124,.08)}
+.dq-k{margin:26px 0 10px;font:400 12px/1 var(--mono);color:var(--ink-2)}
+
+/* cta */
+#cta{padding-block:var(--band-y);text-align:center;background:var(--paper);position:relative;z-index:2;border-top:1px solid var(--rule)}
+#cta h2{margin-inline:auto;max-width:14ch}
+#cta .lede{margin-inline:auto}
+#cta .actions{justify-content:center}
+
+/* footer */
+.foot{position:relative;z-index:2;padding:var(--band-y) var(--bleed) calc(var(--s8) + env(safe-area-inset-bottom,0px));background:var(--paper);border-top:1px solid var(--rule);display:grid;grid-template-columns:var(--copy-w) repeat(3,minmax(0,1fr));gap:28px;font-size:14px;color:var(--ink-2)}
+.foot b{display:block;font:500 13px/1 var(--sans);color:var(--link-ink);margin-bottom:16px}
+.foot nav{display:flex;flex-direction:column;gap:11px}
+.foot nav a{color:var(--ink);text-decoration:none;font-size:15px}
+.foot nav a:hover{color:var(--link-ink)}
+.foot p{margin:0 0 11px;color:var(--ink);font-size:15px;line-height:1.45}
+.foot p a{text-decoration:none}.foot p a:hover{color:var(--link-ink)}
+.foot-brand .brand{margin-bottom:16px}
+.foot-brand p{color:var(--ink-2);max-width:18rem}
+.foot .fine{grid-column:1/-1;display:flex;justify-content:space-between;flex-wrap:wrap;gap:12px;margin-top:16px;padding-top:18px;border-top:1px solid var(--rule);font-size:13px}
+.foot .legal{display:flex;gap:18px;flex-wrap:wrap}.foot .legal a{color:var(--ink-2);text-decoration:none}.foot .legal a:hover{color:var(--link-ink)}
+.foot .social{display:flex;gap:18px}
+.foot .social a{color:var(--ink-2);text-decoration:none}
+
+.no-webgl #stage,.no-webgl #hud{display:none}
+@media (max-width:1180px){ .foot{grid-template-columns:repeat(2,minmax(0,1fr))} }
+@media (max-width:760px){
+  #scrim{background:linear-gradient(0deg,var(--paper) 0,rgba(233,236,232,.94) 44%,rgba(233,236,232,0) 64%)}
+  #hud .tag:not(.keep){display:none}
+  #hero{align-items:flex-end;padding-top:46vh;padding-bottom:5vh}
+  #hero .lede,.chain{display:none}
+  .back{margin-bottom:14px}
+  .scopy,#dec .scopy{left:var(--gutter);right:var(--gutter);width:auto;top:auto;bottom:4vh;transform:none;padding-left:0}
+  .scopy .h h2{margin-bottom:10px} .scopy .h .lede{display:none} .scopy .h{margin-bottom:12px}
+  #plain .scopy .h .lede{display:block}
+  .legend{display:none}
+  .stack,#how .stack{height:170px} .st ul,.st figure{display:none}
+  .st p{font-size:15px}
+  #dec h2{} .dq li{font-size:16px;padding:9px 0} .dq-k{margin-top:4px}
+}
+@media (max-width:560px){ .foot{grid-template-columns:repeat(2,minmax(0,1fr));gap:var(--s6) var(--s5);padding-block:var(--band-y-sm) calc(var(--s6) + env(safe-area-inset-bottom,0px))} }
+@media (prefers-reduced-motion:reduce){ .st,.dq li,.dq li i{transition:none!important} }
+</style>
+</head>
+<body>
+
+<canvas id="stage" aria-hidden="true"></canvas>
+<div id="scrim" aria-hidden="true"></div>
+<div id="hud" aria-hidden="true"></div>
+
+<nav class="nav" aria-label="Primary">
+  <a class="brand" href="/"><img alt="" src="/design-system/assets/Logos/racktrack-mark.jpg">RackTrack</a>
+  <ul>
+    <li><a href="/pages/why-racktrack/">Why RackTrack</a></li>
+    <li><a href="/pages/solutions/">Solutions</a></li>
+    <li><a href="/pages/use-cases/" aria-current="page">Use cases</a></li>
+    <li><a href="/pages/resources/">Resources</a></li>
+    <li><a href="/pages/trust-security/">Trust</a></li>
+    <li><a href="/pages/about-us/">About</a></li>
+    <li><a href="/pages/sign-in/">Sign in</a></li>
+  </ul>
+  <a class="btn solid" href="/pages/contact-us/"><span class="led"></span>Book a sweep</a>
+</nav>
+
+<main>
+  <section class="ch" id="hero">
+    <div class="copy">
+      <a class="back" href="/pages/use-cases/">← All use cases</a>
+      <h1>Show where the evidence came from</h1>
+      <p class="lede">RackTrack gives audit teams source-linked infrastructure evidence: what was seen, where it was seen, and when it was verified.</p>
+      <ul class="chain" aria-label="Every record carries">
+        <li><i></i><b>source</b></li><li><i></i><b>location</b></li><li><i></i><b>time</b></li>
+      </ul>
+      <div class="actions">
+        <a class="btn solid" href="/pages/contact-us/"><span class="led"></span>Get a demo</a>
+        <a class="btn" href="#how">How it works ↓</a>
+      </div>
+    </div>
+  </section>
+
+  <section class="ch pinsec" id="plain" data-steps="1">
+    <div class="pin">
+      <div class="scopy">
+        <div class="h"><h2>Audit questions often arrive after infrastructure has already changed</h2>
+          <p class="lede">RackTrack makes evidence easier to defend because each record can point back to a physical source, a location, and a verification time.</p></div>
+        <ul class="legend">
+          <li><b>a physical source</b>the image the device was seen in</li>
+          <li><b>a location</b>site, row, rack and U position</li>
+          <li><b>a verification time</b>when the rack was verified</li>
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <section class="ch pinsec" id="how" data-steps="3">
+    <div class="pin">
+      <div class="scopy">
+        <div class="stack">
+          <div class="st on"><p class="no">01 · Before <span class="chip a">after the fact</span></p><h3>Evidence is usually assembled too late</h3><p>The audit asks for proof, and the team has to collect photos, screenshots, tickets, and spreadsheet exports after the fact.</p>
+            <figure><img src="/assets/use-cases/compliance-binders.jpg" alt="Shelves of labelled binders filed by year and reference" loading="lazy" width="1400" height="875"><figcaption>Filed by year and reference: the evidence trail most teams still assemble by hand.</figcaption></figure></div>
+          <div class="st"><p class="no">02 · During the sweep <span class="chip">the real cabinet</span></p><h3>RackTrack captures the real cabinet</h3><p>RackTrack captures the physical rack state and keeps the source context attached to the asset record.</p>
+            <ul><li><b>source</b>the captured frame</li><li><b>location</b>rack and U position</li><li><b>time</b>when it was verified</li></ul></div>
+          <div class="st"><p class="no">03 · After <span class="chip">source-linked</span></p><h3>The team gets a record it can use</h3><p>Audit owners can answer control questions with a cleaner trail instead of asking engineers to reconstruct the past.</p></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="ch pinsec" id="sees" data-steps="3">
+    <div class="pin">
+      <div class="scopy">
+        <div class="h"><h2>Clear rack evidence, not another mystery report</h2></div>
+        <div class="stack">
+          <div class="st on"><p class="no">i · Time <span class="chip">timestamped</span></p><h3>Timestamped physical evidence</h3>
+            <ul><li><b>what was seen</b>SRV-06 · 2U server</li><li><b>where</b>DC1 · row C · R07 · U20</li><li><b>when</b>2026-09-14 · 09:14:07 UTC</li></ul></div>
+          <div class="st"><p class="no">ii · Source <span class="chip">source-linked</span></p><h3>Asset claims tied to a source image or observation</h3>
+            <ul><li><b>the claim</b>SRV-06 sits at R07 / U20</li><li><b>the source</b>frame #0412 from the sweep</li><li><b>the record</b>checked against the CMDB</li></ul></div>
+          <div class="st"><p class="no">iii · Cadence <span class="chip">repeatable</span></p><h3>A repeatable way to prepare for reviews before the deadline</h3>
+            <ul><li><b>capture</b>during normal site operations</li><li><b>reconcile</b>any gap is visible before the audit</li></ul></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="ch pinsec" id="dec" data-steps="1">
+    <div class="pin">
+      <div class="scopy">
+        <div class="h"><h2>SOC 2 evidence without the scramble</h2><p class="lede">Use one verified sweep to show how audit evidence can stay ready instead of being rebuilt later.</p></div>
+        <p class="dq-k">Primary decisions</p>
+        <ul class="dq">
+          <li>Which evidence is defensible <i>open</i></li>
+          <li>Which control has source proof <i>open</i></li>
+          <li>Which record needs review <i>open</i></li>
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <section class="ch" id="cta">
+    <h2>Bring one audit. We’ll show you the source evidence</h2>
+    <div class="actions">
+      <a class="btn solid" href="/pages/contact-us/"><span class="led"></span>Get a demo</a>
+      <a class="btn" href="/pages/use-cases/">All use cases</a>
+    </div>
+  </section>
+
+  <footer class="foot">
+    <div class="foot-brand">
+      <a class="brand" href="/"><img alt="" src="/design-system/assets/Logos/racktrack-mark.jpg">RackTrack</a>
+      <p>Physical infrastructure intelligence for data centers.</p>
+    </div>
+    <nav aria-label="Platform"><b>Platform</b>
+      <a href="/pages/why-racktrack/">Why RackTrack</a><a href="/pages/solutions/">Solutions</a><a href="/pages/use-cases/">Use cases</a><a href="/pages/trust-security/">Trust &amp; security</a></nav>
+    <nav aria-label="Company"><b>Company</b>
+      <a href="/pages/resources/">Resources</a><a href="/pages/about-us/">About us</a><a href="/pages/contact-us/">Contact us</a></nav>
+    <div><b>Contact</b>
+      <p><a href="mailto:info@racktrack.ai">info@racktrack.ai</a></p><p><a href="tel:+18608782448">+1 (860) 878 2448</a></p><p>85 Felt Rd, Suite #604<br>South Windsor, CT 06074</p></div>
+    <div class="fine">
+      <span>© 2026 RackTrack Inc. · Patent pending</span>
+      <span class="legal"><a href="/pages/legal/privacy-policy/">Privacy</a><a href="/pages/legal/terms-of-use/">Terms</a><a href="/pages/legal/cookie-policy/">Cookies</a><a href="/pages/legal/data-we-collect/">Data we collect</a><a href="/pages/legal/third-party-services/">Third parties</a></span>
+      <span class="social"><a href="https://www.linkedin.com/company/racktrack/" rel="noopener" target="_blank">LinkedIn</a><a href="https://www.instagram.com/racktrack_inc/" rel="noopener" target="_blank">Instagram</a><a href="https://www.facebook.com/share/18depF5xzA/" rel="noopener" target="_blank">Facebook</a></span>
+    </div>
+  </footer>
+</main>
+
+<script type="importmap">
+{ "imports": {
+  "three": "https://cdn.jsdelivr.net/npm/three@0.170.0/build/three.module.js",
+  "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.170.0/examples/jsm/"
+} }
+</script>
+<!--DOMJS-START-->
+<script>
+/* ───── Compliance & audit owners: pinned step copy, decision answers, ruler (no WebGL needed) ───── */
+(()=>{
+const clamp=(x,a=0,b=1)=>Math.min(b,Math.max(a,x));
+const $=s=>document.querySelector(s), $$=s=>[...document.querySelectorAll(s)];
+const secs=$$('.pinsec').filter(el=>+el.dataset.steps>1).map(el=>({el,n:+el.dataset.steps,st:[...el.querySelectorAll('.st')],bars:[...el.querySelectorAll('.prog i b')],lbl:el.querySelector('.prog .n'),cur:-1}));
+const prog=el=>{const r=el.getBoundingClientRect();return -r.top/(r.height-innerHeight);};
+const dec=$('#dec'), dqs=$$('.dq li'), TH=[.33,.58,.83];
+function frame(){
+  const vh=innerHeight,S=scrollY/(document.documentElement.scrollHeight-vh||1);
+  secs.forEach(s=>{const p=clamp(prog(s.el));const x=p*s.n;const k=Math.min(s.n-1,Math.floor(x));
+    if(k!==s.cur){s.cur=k;s.st.forEach((e,i)=>e.classList.toggle('on',i===k));if(s.lbl)s.lbl.textContent=(k+1)+' / '+s.n;}
+    s.bars.forEach((b,i)=>b.style.width=(clamp(x-i)*100)+'%');});
+  const dp=prog(dec);
+  dqs.forEach((li,i)=>{const a=dp>=TH[i];if(li.classList.contains('ans')!==a){li.classList.toggle('ans',a);li.querySelector('i').textContent=a?'answered':'open';}});
+  requestAnimationFrame(frame);
+}
+requestAnimationFrame(frame);
+})();
+</script>
+<!--DOMJS-END-->
+<!--GLJS-START-->
+<script type="module">
+/* ═════════════ Compliance & audit owners · 3D ═════════════
+   Chain of custody. One asset record (SRV-06, R07 / U20) lies on a drawing sheet. Three green threads run from it:
+   to the SOURCE (a framed capture of the device), the LOCATION (a pin in a cabinet maquette at U20) and the TIME (a verification seal).
+   Before: the record is buried under an evidence pile (binders, screenshots, tickets, exports, an audit request, a deadline tag).
+   During: a phone sweeps the real cabinet; the frame develops, the pin goes in, the seal is dated, threads draw.
+   After: the pile collapses into one evidence packet of source-linked records.
+   Sees: seal macro (time) · thread to the source image · review cadence strip.   Decisions: three records stand up, sealed or flagged. */
+import * as THREE from 'three';
+import { RoomEnvironment } from 'three/addons/environments/RoomEnvironment.js';
+import { RoundedBoxGeometry } from 'three/addons/geometries/RoundedBoxGeometry.js';
+
+const reduce=matchMedia('(prefers-reduced-motion: reduce)').matches;
+const SNAP=location.search.includes('snap');
+const clamp=(x,a=0,b=1)=>Math.min(b,Math.max(a,x));
+const smooth=(a,b,x)=>{const t=clamp((x-a)/(b-a));return t*t*(3-2*t)};
+const lerp=(a,b,t)=>a+(b-a)*t;
+const C=h=>new THREE.Color(h);
+const COL={link:C('#1FD67C'),linkInk:C('#04703F'),drift:C('#FF9A2E'),record:C('#7C93A8'),ink:C('#111614')};
+const MONO='"JetBrains Mono", monospace', SANS='"Inter", sans-serif';
+const V3=(x,y,z)=>new THREE.Vector3(x,y,z);
+
+const canvas=document.getElementById('stage');
+let renderer;
+try{ renderer=new THREE.WebGLRenderer({canvas,antialias:true,alpha:true,powerPreference:'high-performance'}); }
+catch(e){ document.documentElement.classList.add('no-webgl'); throw e; }
+renderer.setPixelRatio(SNAP?1:Math.min(devicePixelRatio,2));
+renderer.setClearColor(0,0);
+renderer.toneMapping=THREE.ACESFilmicToneMapping; renderer.toneMappingExposure=1.02;
+renderer.outputColorSpace=THREE.SRGBColorSpace;
+renderer.shadowMap.enabled=true; renderer.shadowMap.type=SNAP?THREE.PCFShadowMap:THREE.PCFSoftShadowMap;
+const scene=new THREE.Scene();
+scene.environment=new THREE.PMREMGenerator(renderer).fromScene(new RoomEnvironment(),.04).texture; scene.environmentIntensity=.85;
+const camera=new THREE.PerspectiveCamera(28,1,.05,300);
+scene.add(new THREE.HemisphereLight(0xffffff,0x9aa39e,.55));
+const sun=new THREE.DirectionalLight(0xffffff,1.7);sun.position.set(-5,11,7);sun.castShadow=true;
+sun.shadow.mapSize.set(SNAP?1024:2048,SNAP?1024:2048);Object.assign(sun.shadow.camera,{left:-5,right:5,top:5,bottom:-5,near:1,far:30});sun.shadow.bias=-.0005;sun.shadow.normalBias=.01;sun.shadow.radius=4;scene.add(sun);
+const fill=new THREE.DirectionalLight(0xdfe9ff,.55);fill.position.set(7,4,-5);scene.add(fill);
+const front=new THREE.DirectionalLight(0xffffff,.35);front.position.set(1,2,8);scene.add(front);
+
+function cnv(w,h){const c=document.createElement('canvas');c.width=w;c.height=h;return [c,c.getContext('2d')];}
+function tex(c){const t=new THREE.CanvasTexture(c);t.colorSpace=THREE.SRGBColorSpace;t.anisotropy=Math.min(8,renderer.capabilities.getMaxAnisotropy());return t;}
+const alu=new THREE.MeshStandardMaterial({color:'#dfe3df',metalness:.72,roughness:.3});
+const graph=new THREE.MeshStandardMaterial({color:'#2a302d',metalness:.55,roughness:.45});
+const dark=new THREE.MeshStandardMaterial({color:'#1a1f1d',metalness:.4,roughness:.55});
+const paperSide=new THREE.MeshStandardMaterial({color:'#e4e8e3',roughness:.85});
+const add=(m,p,parent=scene)=>{if(p)m.position.set(...p);parent.add(m);return m;};
+const flat=(w,d,map,op={})=>{const m=new THREE.Mesh(new THREE.PlaneGeometry(w,d),new THREE.MeshBasicMaterial({map,toneMapped:false,transparent:true,depthWrite:false,...op}));m.rotation.x=-Math.PI/2;return m;};
+function check(g,x,y,s,col,w){g.strokeStyle=col;g.lineWidth=w||s*.16;g.lineCap='round';g.lineJoin='round';g.beginPath();g.moveTo(x-s*.42,y);g.lineTo(x-s*.1,y+s*.32);g.lineTo(x+s*.45,y-s*.34);g.stroke();}
+
+/* ─────────── layout (world, metres of the maquette) ─────────── */
+const C0=V3(0,0,.3);                          // the record / the packet
+const PHP=V3(-1.5,0,-.98), PHR=.52;         // source: photo frame
+const CBP=V3(1.6,0,-1.0), CBR=-.42;         // location: cabinet maquette
+const SLP=V3(1.55,0,1.12);                    // time: verification seal
+const STP=V3(-1.22,0,1.86), STL=2.7, STD=.4;   // cadence strip
+
+/* ─────────── drawing sheet ─────────── */
+const BW=6.6, BD=4.8;
+function sheetCanvas(){const W=2048,H=Math.round(W*BD/BW),s=W/BW;const [c,g]=cnv(W,H);const X=x=>(x+BW/2)*s,Z=z=>(z+BD/2)*s;
+  g.fillStyle='#F4F6F3';g.fillRect(0,0,W,H);
+  for(let x=-BW/2;x<=BW/2+.01;x+=.2){g.fillStyle='rgba(17,22,20,.05)';g.fillRect(X(x),0,1.2,H);} for(let z=-BD/2;z<=BD/2+.01;z+=.2){g.fillStyle='rgba(17,22,20,.05)';g.fillRect(0,Z(z),W,1.2);}
+  g.strokeStyle='#111614';g.lineWidth=3;g.strokeRect(16,16,W-32,H-32);
+  // packet footprint
+  g.setLineDash([12,9]);g.strokeStyle='#7C93A8';g.lineWidth=2.5;g.strokeRect(X(C0.x-.78),Z(C0.z-.56),1.56*s,1.12*s);
+  // plan projections of the three threads (construction lines)
+  g.strokeStyle='rgba(17,22,20,.35)';g.lineWidth=2;g.setLineDash([4,8]);
+  [[PHP,'A · source'],[CBP,'B · location'],[SLP,'C · time']].forEach(([p,t])=>{g.beginPath();g.moveTo(X(C0.x),Z(C0.z));g.lineTo(X(p.x),Z(p.z));g.stroke();});
+  g.setLineDash([]);g.fillStyle='#4A544F';g.font=`400 20px ${MONO}`;
+  g.fillText('A · source',X(-1.35),Z(-.1));g.fillText('B · location',X(.72),Z(-.52));g.fillText('C · time',X(1.02),Z(.98));
+  // cabinet footprint + seal circle
+  g.strokeStyle='#4A544F';g.lineWidth=2;g.save();g.translate(X(CBP.x),Z(CBP.z));g.rotate(-CBR);g.strokeRect(-.29*s,-.39*s,.58*s,.78*s);g.restore();
+  g.fillText('R07 · 42U',X(CBP.x-.3),Z(CBP.z+.62));
+  g.beginPath();g.arc(X(SLP.x),Z(SLP.z),.42*s,0,7);g.setLineDash([6,8]);g.stroke();g.setLineDash([]);
+  // dimension: record → cabinet
+  g.strokeStyle='#4A544F';g.lineWidth=1.5;const dy=Z(-2.02);g.beginPath();g.moveTo(X(C0.x),dy);g.lineTo(X(CBP.x),dy);g.moveTo(X(C0.x),dy-10);g.lineTo(X(C0.x),dy+10);g.moveTo(X(CBP.x),dy-10);g.lineTo(X(CBP.x),dy+10);g.stroke();
+  g.fillText('record ↔ rack · one chain',X(.45),dy-12);
+  // title block
+  g.fillStyle='#111614';g.fillRect(W-560,H-120,540,100);g.fillStyle='#DDE4DF';g.font=`500 28px ${MONO}`;g.fillText('DC1 · R07 · evidence file',W-540,H-74);
+  g.fillStyle='#93A19A';g.font=`400 20px ${MONO}`;g.fillText('chain of custody · sheet 04 · 1:12',W-540,H-40);
+  return c;}
+const sheetMat=new THREE.MeshStandardMaterial({map:tex(sheetCanvas()),roughness:.9});
+const baseSide=new THREE.MeshStandardMaterial({color:'#d3d8d4',metalness:.25,roughness:.55});
+const base=add(new THREE.Mesh(new THREE.BoxGeometry(BW,.2,BD),[baseSide,baseSide,sheetMat,baseSide,baseSide,baseSide]),[0,-.1,0]);base.receiveShadow=true;
+add(new THREE.Mesh(new THREE.BoxGeometry(BW+.14,.04,BD+.14),graph),[0,-.22,0]);
+
+/* ─────────── pins (evidence-board tacks) ─────────── */
+const pinHeadMat=new THREE.MeshStandardMaterial({color:COL.link,emissive:COL.link,emissiveIntensity:.55,roughness:.35});
+function tack(parent,pos,scale=1){const g=new THREE.Group();g.position.copy(pos);parent.add(g);
+  add(new THREE.Mesh(new THREE.CylinderGeometry(.024*scale,.03*scale,.018*scale,20),pinHeadMat),[0,.02*scale,0],g).castShadow=true;
+  add(new THREE.Mesh(new THREE.CylinderGeometry(.012*scale,.012*scale,.014*scale,12),pinHeadMat),[0,.036*scale,0],g);
+  add(new THREE.Mesh(new THREE.CylinderGeometry(.003,.003,.02*scale,6),alu),[0,.005,0],g);return g;}
+
+/* ─────────── the asset record (protagonist) ─────────── */
+const CW=1.16, CD=.74, CT=.008;
+const RPX=(x,z)=>[(x/CW+.5)*1024,(z/CD+.5)*654];
+const ANCH={src:V3(-.52,0,-.31),loc:V3(.52,0,-.31),time:V3(.52,0,.31)};
+function recordCanvas(d){const W=1024,H=654,sc=d.sc||1;const [c,g]=cnv(W*sc,H*sc);g.scale(sc,sc);
+  g.fillStyle='#F4F6F3';g.fillRect(0,0,W,H);g.strokeStyle='#111614';g.lineWidth=4;g.strokeRect(2,2,W-4,H-4);
+  g.strokeStyle='#C6CCC7';g.lineWidth=2;g.strokeRect(14,14,W-28,H-28);
+  // corner pin rings + labels
+  const ring=(k,lbl,al)=>{const [x,y]=RPX(ANCH[k].x,ANCH[k].z);g.strokeStyle=d.v?'#04703F':'#C6CCC7';g.lineWidth=3;g.beginPath();g.arc(x,y,20,0,7);g.stroke();
+    g.fillStyle=d.v?'#04703F':'#4A544F';g.font=`500 19px ${MONO}`;g.textAlign=al;g.fillText(lbl,x+(al==='left'?32:-32),y+7);g.textAlign='left';};
+  ring('src','A · source','left');ring('loc','B · location','right');ring('time','C · time','right');
+  g.fillStyle='#4A544F';g.font=`400 25px ${MONO}`;g.fillText(d.kind||'Asset record',48,118);
+  g.fillStyle='#111614';g.font=`500 88px ${SANS}`;g.fillText(d.n,44,200);
+  g.fillStyle='#4A544F';g.font=`400 26px ${MONO}`;g.fillText(d.sub,48,240);
+  g.font=`500 27px ${MONO}`;
+  d.rows.forEach((r,i)=>{const y=312+i*62;g.fillStyle='rgba(17,22,20,.12)';g.fillRect(48,y+20,W-96,2);
+    g.fillStyle='#4A544F';g.fillText(r[0],50,y);g.fillStyle={i:'#111614',g:'#04703F',a:'#9C4C00',r:'#3F5871'}[r[2]||'i'];g.fillText(r[1],250,y);
+    if(r[2]==='g')check(g,W-86,y-8,26,'#04703F',4);
+    if(r[2]==='a'){g.fillStyle='#FF9A2E';g.fillRect(W-100,y-24,26,26);g.fillStyle='#111614';g.font=`500 22px ${MONO}`;g.fillText('?',W-93,y-3);g.font=`500 27px ${MONO}`;}});
+  return c;}
+const REC_PRE={n:'SRV-06',sub:'2U server · SN 4K1-93',rows:[['source','not attached','a'],['location','R07 / U20 (per CMDB)','r'],['verified','—','a'],['record','CMDB CI-2057 · claimed','r']]};
+const REC_OK={v:1,n:'SRV-06',sub:'2U server · SN 4K1-93',rows:[['source','frame #0412 · sweep','g'],['location','DC1 · row C · R07 · U20','g'],['verified','2026-09-14 · 09:14:07 UTC','g'],['record','CMDB CI-2057 · matches','g']]};
+function stampCanvas(){const [c,g]=cnv(256,256);g.translate(128,128);g.rotate(-.2);g.strokeStyle='rgba(4,112,63,.85)';g.lineWidth=7;g.beginPath();g.arc(0,0,112,0,7);g.stroke();g.lineWidth=3;g.beginPath();g.arc(0,0,96,0,7);g.stroke();
+  g.fillStyle='rgba(4,112,63,.9)';g.textAlign='center';g.font=`500 26px ${MONO}`;g.fillText('verified',0,-30);g.font=`500 44px ${MONO}`;g.fillText('09:14',0,20);g.font=`400 20px ${MONO}`;g.fillText('2026-09-14 UTC',0,56);return c;}
+function makeCard(d0,d1){const grp=new THREE.Group();scene.add(grp);
+  const top=new THREE.MeshStandardMaterial({map:tex(recordCanvas(d0)),roughness:.85,color:'#e3e7e2',toneMapped:false,envMapIntensity:.6});
+  const m=add(new THREE.Mesh(new THREE.BoxGeometry(CW,CT,CD),[paperSide,paperSide,top,paperSide,paperSide,paperSide]),null,grp);m.castShadow=true;m.receiveShadow=true;
+  let ov=null;if(d1){ov=add(flat(CW,CD,tex(recordCanvas(d1)),{opacity:0}),[0,CT/2+.0008,0],grp);}
+  return {grp,m,top,ov,d0,d1};}
+const CARD=makeCard(REC_PRE,REC_OK);
+const stamp=add(flat(.34,.34,tex(stampCanvas()),{opacity:0}),[.26,CT/2+.0016,.17],CARD.grp);
+const cardPins={};Object.entries(ANCH).forEach(([k,p])=>{cardPins[k]=tack(CARD.grp,V3(p.x,CT/2,p.z),1);});
+
+/* ─────────── SOURCE: a framed capture of the device ─────────── */
+const FW=.98, FH=.74, IW=.9, IH=.66;
+const PHOTO=new THREE.Group();PHOTO.position.copy(PHP);PHOTO.rotation.y=PHR;scene.add(PHOTO);
+const FT=new THREE.Group();FT.rotation.x=-.2;PHOTO.add(FT);           // tilt around the bottom edge
+[[0,FH-.02,FW,.04],[0,.02,FW,.04]].forEach(([x,y,w,h])=>add(new THREE.Mesh(new THREE.BoxGeometry(w,h,.035),alu),[x,y,0],FT).castShadow=true);
+[[-FW/2+.02],[FW/2-.02]].forEach(([x])=>add(new THREE.Mesh(new THREE.BoxGeometry(.04,FH,.035),alu),[x,FH/2,0],FT).castShadow=true);
+add(new THREE.Mesh(new THREE.BoxGeometry(FW-.04,FH-.04,.01),graph),[0,FH/2,-.008],FT).castShadow=true;
+{const strut=add(new THREE.Mesh(new THREE.BoxGeometry(.05,.62,.012),graph),[0,.3,-.16],PHOTO);strut.rotation.x=.28;strut.castShadow=true;}
+const PIX=(px,py)=>V3((px/1024-.5)*IW,FH/2+(.5-py/734)*IH,.004);
+const SRVBOX=[250,300,560,400];   // x,y,w,h of SRV-06 in the capture
+function photoCanvas(ok){const W=1024,H=734;const [c,g]=cnv(W,H);
+  if(!ok){g.fillStyle='#EEF1ED';g.fillRect(0,0,W,H);g.strokeStyle='#FF9A2E';g.lineWidth=4;g.setLineDash([18,12]);g.strokeRect(40,40,W-80,H-80);g.setLineDash([]);
+    g.fillStyle='#9C4C00';g.font=`500 40px ${MONO}`;g.textAlign='center';g.fillText('no source image',W/2,H/2-6);g.fillStyle='#4A544F';g.font=`400 26px ${MONO}`;g.fillText('the claim has nothing behind it',W/2,H/2+40);return c;}
+  // the captured rack face
+  const gr=g.createLinearGradient(0,0,0,H);gr.addColorStop(0,'#1d2321');gr.addColorStop(1,'#141816');g.fillStyle=gr;g.fillRect(0,0,W,H);
+  g.fillStyle='#8c9590';g.fillRect(170,0,24,H-70);g.fillRect(W-194,0,24,H-70);
+  g.fillStyle='#2a302d';for(let y=4;y<H-70;y+=14){g.fillRect(176,y,12,6);g.fillRect(W-188,y,12,6);}
+  const devs=[[10,70,'SRV-05'],[90,86,''],[186,100,'ST-02'],[SRVBOX[1],SRVBOX[3]-4,'SRV-06'],[512,76,'SRV-07'],[594,66,'']];
+  devs.forEach(([y,h,n])=>{g.fillStyle=n==='SRV-06'?'#343b38':'#2b312e';g.fillRect(200,y,W-400,h-6);g.fillStyle='#232926';for(let i=0;i<8;i++)g.fillRect(330+i*50,y+10,40,h-26);
+    if(n){g.fillStyle='#DDE4DF';g.font=`500 20px ${MONO}`;g.fillText(n,214,y+30);g.fillStyle='#1FD67C';g.fillRect(216,y+h-26,8,8);}});
+  // capture brackets on SRV-06
+  const [bx,by,bw,bh]=SRVBOX;g.strokeStyle='#1FD67C';g.lineWidth=6;const L=40;
+  [[bx,by,1,1],[bx+bw,by,-1,1],[bx,by+bh,1,-1],[bx+bw,by+bh,-1,-1]].forEach(([x,y,sx,sy])=>{g.beginPath();g.moveTo(x,y+sy*L);g.lineTo(x,y);g.lineTo(x+sx*L,y);g.stroke();});
+  g.fillStyle='#1FD67C';g.fillRect(bx,by-40,250,34);g.fillStyle='#06140d';g.font=`500 22px ${MONO}`;g.fillText('SRV-06 · U20–21',bx+10,by-16);
+  // caption bar
+  g.fillStyle='#F4F6F3';g.fillRect(0,H-70,W,70);g.fillStyle='#111614';g.font=`500 25px ${MONO}`;g.fillText('frame #0412',24,H-26);
+  g.fillStyle='#4A544F';g.font=`400 22px ${MONO}`;g.fillText('R07 · 2026-09-14 09:14:07 UTC',W-420,H-26);
+  return c;}
+const photoBase=add(new THREE.Mesh(new THREE.PlaneGeometry(IW,IH),new THREE.MeshBasicMaterial({map:tex(photoCanvas(false)),toneMapped:false})),[0,FH/2,.002],FT);
+const photoOK=add(new THREE.Mesh(new THREE.PlaneGeometry(IW,IH),new THREE.MeshBasicMaterial({map:tex(photoCanvas(true)),toneMapped:false,transparent:true,opacity:0,depthWrite:false})),[0,FH/2,.003],FT);
+const photoPin=tack(FT,PIX(SRVBOX[0]+SRVBOX[2],SRVBOX[1]),1.1);photoPin.rotation.x=Math.PI/2;
+
+/* ─────────── LOCATION: the cabinet maquette (R07) ─────────── */
+const RW=.52, RD=.72, U=.032, Y0=.08, ZF=RD/2, FACE=ZF-.03;
+const uy=(u,h=1)=>Y0+(u-1)*U+h*U/2;
+const RACK=new THREE.Group();RACK.position.copy(CBP);RACK.rotation.y=CBR;scene.add(RACK);
+const RH=42*U+.1;
+[[-1,-1],[1,-1],[-1,1],[1,1]].forEach(([sx,sz])=>{add(new THREE.Mesh(new THREE.BoxGeometry(.03,RH,.03),graph),[sx*(RW/2-.015),RH/2,sz*(RD/2-.015)],RACK).castShadow=true;});
+[-1,1].forEach(sx=>{const s=add(new THREE.Mesh(new THREE.BoxGeometry(.01,RH-.08,RD-.04),new THREE.MeshStandardMaterial({color:'#222826',metalness:.5,roughness:.5})),[sx*(RW/2-.005),RH/2,0],RACK);s.castShadow=true;s.receiveShadow=true;});
+add(new THREE.Mesh(new THREE.BoxGeometry(RW,.04,RD),graph),[0,RH,0],RACK).castShadow=true;
+add(new THREE.Mesh(new THREE.BoxGeometry(RW,.06,RD),graph),[0,.03,0],RACK);
+add(new THREE.Mesh(new THREE.BoxGeometry(RW-.02,RH-.06,.01),dark),[0,RH/2,-RD/2+.02],RACK);
+function railCanvas(){const [c,g]=cnv(24,1024);g.fillStyle='#c9cfcb';g.fillRect(0,0,24,1024);g.fillStyle='#2a302d';for(let i=0;i<126;i++){g.fillRect(8,4+i*8.1,8,4);}return c;}
+const railMat=new THREE.MeshStandardMaterial({map:tex(railCanvas()),metalness:.6,roughness:.35});
+[-1,1].forEach(sx=>add(new THREE.Mesh(new THREE.BoxGeometry(.02,42*U,.01),[alu,alu,alu,alu,railMat,alu]),[sx*(RW/2-.036),Y0+21*U,FACE+.004],RACK));
+const EQ=[
+ {u:42,h:1,k:'blank'},{u:41,h:1,k:'patch',n:'PP-A'},{u:40,h:1,k:'mgr'},{u:39,h:1,k:'switch',n:'SW-04'},{u:38,h:1,k:'switch',n:'SW-05'},{u:37,h:1,k:'blank'},
+ {u:35,h:2,k:'server',n:'SRV-01'},{u:34,h:1,k:'blank'},{u:32,h:2,k:'server',n:'SRV-02'},{u:30,h:2,k:'server',n:'SRV-03'},{u:28,h:2,k:'blank'},
+ {u:24,h:4,k:'storage',n:'ST-01'},{u:22,h:2,k:'server',n:'SRV-05'},{u:20,h:2,k:'server',n:'SRV-06'},{u:16,h:4,k:'storage',n:'ST-02'},
+ {u:14,h:2,k:'blank'},{u:12,h:2,k:'server',n:'SRV-07'},{u:10,h:2,k:'server',n:'SRV-08'},{u:6,h:4,k:'blank'},{u:3,h:3,k:'ups',n:'UPS-1'},{u:1,h:2,k:'blank'}];
+function faceCanvas(k,n,h){const W=512,H=Math.round(h*37);const [c,g]=cnv(W,H);
+  const bg={blank:'#222826',patch:'#1d2321',mgr:'#1a1f1d',switch:'#2a302d',server:'#2f3633',storage:'#262c29',ups:'#2b312e'}[k];
+  g.fillStyle=bg;g.fillRect(0,0,W,H);g.fillStyle='rgba(255,255,255,.06)';g.fillRect(0,0,W,2);g.fillStyle='rgba(0,0,0,.35)';g.fillRect(0,H-2,W,2);
+  if(k==='blank'){g.fillStyle='rgba(255,255,255,.05)';for(let y=6;y<H-4;y+=8)g.fillRect(40,y,W-80,2);}
+  if(k==='mgr'){g.fillStyle='#111514';g.fillRect(30,H/2-5,W-60,10);}
+  if(k==='patch'||k==='switch'){g.fillStyle='#DDE4DF';g.font=`500 13px ${MONO}`;g.fillText(n,14,H/2+5);g.fillStyle='#101413';for(let i=0;i<24;i++)g.fillRect(110+i*15,H/2-6,11,12);}
+  if(k==='server'){g.fillStyle='#262c29';for(let i=0;i<8;i++)g.fillRect(120+i*38,8,32,H-16);g.fillStyle='#DDE4DF';g.font=`500 13px ${MONO}`;g.fillText(n,14,20);g.fillStyle='#1FD67C';g.fillRect(14,H-16,6,6);g.fillStyle='#7C93A8';g.fillRect(26,H-16,6,6);}
+  if(k==='storage'){g.fillStyle='#DDE4DF';g.font=`500 13px ${MONO}`;g.fillText(n,14,20);for(let r=0;r<3;r++)for(let i=0;i<4;i++){const x=90+i*100,y=10+r*(H-20)/3;g.fillStyle='#343b38';g.fillRect(x,y,92,(H-20)/3-6);}}
+  if(k==='ups'){g.fillStyle='#DDE4DF';g.font=`500 13px ${MONO}`;g.fillText(n,14,20);g.fillStyle='#0c1110';g.fillRect(W-170,16,140,44);g.fillStyle='#1FD67C';g.font=`500 16px ${MONO}`;g.fillText('230V 41%',W-160,44);}
+  return c;}
+EQ.forEach(d=>{const body=add(new THREE.Mesh(new THREE.BoxGeometry(RW-.09,d.h*U-.003,.6),[dark,dark,dark,dark,new THREE.MeshStandardMaterial({map:tex(faceCanvas(d.k,d.n,d.h)),metalness:.35,roughness:.55}),dark]),[0,uy(d.u,d.h),FACE-.3],RACK);body.castShadow=true;body.receiveShadow=true;});
+const srvOutline=new THREE.LineSegments(new THREE.EdgesGeometry(new THREE.BoxGeometry(RW-.06,2*U,.02)),new THREE.LineBasicMaterial({color:COL.link,transparent:true,opacity:0,toneMapped:false}));srvOutline.position.set(0,uy(20,2),FACE+.006);RACK.add(srvOutline);
+// the location pin: a map pin pushed into SRV-06 at U20
+const LPIN=new THREE.Group();LPIN.position.set(.13,uy(20,2),FACE);RACK.add(LPIN);
+const LPIN_IN=new THREE.Group();LPIN.add(LPIN_IN);
+{const nd=add(new THREE.Mesh(new THREE.CylinderGeometry(.004,.002,.09,8),alu),[0,0,.045],LPIN_IN);nd.rotation.x=Math.PI/2;
+ const hd=add(new THREE.Mesh(new THREE.SphereGeometry(.034,24,16),pinHeadMat),[0,0,.105],LPIN_IN);hd.castShadow=true;}
+const lpRing=add(new THREE.Mesh(new THREE.RingGeometry(.03,.042,40),new THREE.MeshBasicMaterial({color:COL.link,transparent:true,opacity:0,side:THREE.DoubleSide,toneMapped:false,depthWrite:false})),[0,0,.002],LPIN);
+// scan band + frustum
+const band=add(new THREE.Mesh(new THREE.PlaneGeometry(RW+.04,.01),new THREE.MeshBasicMaterial({color:COL.link,transparent:true,opacity:0,toneMapped:false,depthWrite:false})),[0,1,ZF+.01],RACK);
+const wash=add(new THREE.Mesh(new THREE.PlaneGeometry(RW,1),new THREE.MeshBasicMaterial({color:COL.link,transparent:true,opacity:0,toneMapped:false,depthWrite:false})),[0,.5,ZF+.008],RACK);
+
+/* ─────────── the phone ─────────── */
+/* ─────────── the capture phone (shared model): aluminium frame, glass front with a live sweep viewfinder, camera bump ─────────── */
+function makePhone(parent,W,label){
+  const H=W*2.06, D=W*.105, R=W*.15;
+  const frameM=new THREE.MeshStandardMaterial({color:'#c9cfcb',metalness:.85,roughness:.22});
+  const backM=new THREE.MeshStandardMaterial({color:'#2a302d',metalness:.35,roughness:.28});
+  const body=new THREE.Mesh(new RoundedBoxGeometry(W,H,D,6,R*.55),frameM);body.castShadow=true;parent.add(body);
+  // back glass + camera bump with three lenses and a flash
+  const back=new THREE.Mesh(new RoundedBoxGeometry(W*.965,H*.975,D*.2,5,R*.5),backM);back.position.z=-D/2+D*.06;parent.add(back);
+  const bump=new THREE.Mesh(new RoundedBoxGeometry(W*.46,W*.46,D*.5,5,W*.09),backM);bump.position.set(-W*.2,H*.34,-D/2-D*.14);parent.add(bump);
+  const lensM=new THREE.MeshStandardMaterial({color:'#0b0e0d',metalness:.6,roughness:.08}),ringM=new THREE.MeshStandardMaterial({color:'#9aa39e',metalness:.9,roughness:.25});
+  [[-.3,.1],[-.1,.1],[-.2,-.1]].forEach(([x,y])=>{const r=new THREE.Mesh(new THREE.CylinderGeometry(W*.085,W*.085,D*.28,24),ringM);r.rotation.x=Math.PI/2;r.position.set(W*x,H*.34+W*y,-D/2-D*.42);parent.add(r);
+    const l=new THREE.Mesh(new THREE.CircleGeometry(W*.062,24),lensM);l.rotation.y=Math.PI;l.position.set(W*x,H*.34+W*y,-D/2-D*.57);parent.add(l);});
+  // side buttons
+  [[W/2+D*.02,H*.18,H*.12],[-W/2-D*.02,H*.24,H*.06],[-W/2-D*.02,H*.14,H*.06]].forEach(([x,y,h])=>{const b=new THREE.Mesh(new THREE.BoxGeometry(D*.28,h,D*.42),frameM);b.position.set(x,y,0);parent.add(b);});
+  // screen: canvas with rounded corners, live viewfinder UI
+  const cw=420,ch=Math.round(cw*2.06);
+  function draw(t){const c=document.createElement('canvas');c.width=cw;c.height=ch;const g=c.getContext('2d');const r=58;
+    g.beginPath();g.roundRect(0,0,cw,ch,r);g.clip();g.fillStyle='#050706';g.fillRect(0,0,cw,ch);
+    const b=10;g.save();g.beginPath();g.roundRect(b,b,cw-2*b,ch-2*b,r-b);g.clip();
+    // viewfinder: the cabinet seen by the camera
+    g.fillStyle='#cfd5d0';g.fillRect(0,0,cw,ch);g.fillStyle='#b9c0bb';g.fillRect(0,ch*.62,cw,ch*.38);
+    const rx=cw*.2,rw=cw*.6,ry=ch*.12,rh=ch*.6;g.fillStyle='#1d2321';g.fillRect(rx,ry,rw,rh);
+    for(let i=0;i<16;i++){const y=ry+10+i*(rh-20)/16;g.fillStyle=i%4===1?'#343b38':'#2a302d';g.fillRect(rx+12,y,rw-24,(rh-20)/16-5);for(let k=0;k<6;k++){g.fillStyle=(i+k)%3?'#1FD67C':'#56605b';g.fillRect(rx+rw-60+k*7,y+6,4,3);}}
+    // detections
+    g.strokeStyle='#1FD67C';g.lineWidth=4;[[2,2],[7,1],[11,3]].forEach(([i,n])=>{const y=ry+10+i*(rh-20)/16;g.strokeRect(rx+8,y-3,rw-16,n*(rh-20)/16+1);});
+    const sy=ry+rh*(.25+.5*t);g.fillStyle='rgba(31,214,124,.9)';g.fillRect(rx-18,sy,rw+36,4);g.fillStyle='rgba(31,214,124,.16)';g.fillRect(rx,ry,rw,sy-ry);
+    g.fillStyle='rgba(12,17,16,.78)';g.fillRect(rx+rw-8,ry+10+7*(rh-20)/16-34,150,28);g.fillStyle='#DDE4DF';g.font='500 17px "JetBrains Mono", monospace';g.fillText('SW-12 · U39',rx+rw,ry+10+7*(rh-20)/16-14);
+    // status bar + dynamic island
+    g.fillStyle='rgba(0,0,0,.28)';g.fillRect(0,0,cw,78);g.fillStyle='#fff';g.font='600 24px "Inter", sans-serif';g.fillText('9:41',40,50);
+    g.fillRect(cw-78,34,34,16);g.fillRect(cw-116,38,6,12);g.fillRect(cw-106,34,6,16);g.fillRect(cw-96,30,6,20);
+    g.fillStyle='#000';g.beginPath();g.roundRect(cw/2-62,22,124,36,18);g.fill();
+    // top chip
+    g.fillStyle='rgba(12,17,16,.8)';g.beginPath();g.roundRect(cw/2-110,92,220,40,20);g.fill();g.fillStyle='#1FD67C';g.beginPath();g.arc(cw/2-84,112,7,0,7);g.fill();
+    g.fillStyle='#fff';g.font='500 18px "JetBrains Mono", monospace';g.fillText(label,cw/2-66,118);
+    // bottom camera controls
+    g.fillStyle='rgba(5,7,6,.88)';g.fillRect(0,ch-230,cw,230);
+    g.font='600 17px "Inter", sans-serif';g.fillStyle='#93A19A';g.fillText('photo',64,ch-190);g.fillText('video',cw-116,ch-190);g.fillStyle='#1FD67C';g.fillText('SWEEP',cw/2-30,ch-190);
+    g.strokeStyle='#fff';g.lineWidth=6;g.beginPath();g.arc(cw/2,ch-104,46,0,7);g.stroke();g.fillStyle='#1FD67C';g.beginPath();g.roundRect(cw/2-20,ch-124,40,40,8);g.fill();
+    g.fillStyle='#6d7772';g.beginPath();g.roundRect(56,ch-130,52,52,10);g.fill();g.strokeStyle='#DDE4DF';g.lineWidth=2;g.beginPath();g.arc(cw-82,ch-104,24,0,7);g.stroke();
+    g.fillStyle='#fff';g.beginPath();g.roundRect(cw/2-70,ch-30,140,7,4);g.fill();
+    g.restore();return c;}
+  const tx=new THREE.CanvasTexture(draw(.5));tx.colorSpace=THREE.SRGBColorSpace;tx.anisotropy=8;
+  const scr=new THREE.Mesh(new THREE.PlaneGeometry(W*.965,H*.975),new THREE.MeshBasicMaterial({map:tx,transparent:true,toneMapped:false}));scr.position.z=D/2+.0004*W/.08;parent.add(scr);
+  let last=-1;parent.userData.phoneTick=t=>{const k=Math.round(((t%1)+1)%1*24)/24;if(k===last)return;last=k;tx.image=draw(k);tx.needsUpdate=true;};
+  document.fonts&&document.fonts.ready.then(()=>{tx.image=draw(.5);tx.needsUpdate=true;});
+  return parent;}
+const PHONE=new THREE.Group();scene.add(PHONE);makePhone(PHONE,.16,'R07 · sweep');
+const frustum=new THREE.LineSegments(new THREE.BufferGeometry(),new THREE.LineBasicMaterial({color:COL.link,transparent:true,opacity:0,toneMapped:false,depthWrite:false}));scene.add(frustum);
+
+/* ─────────── TIME: the verification seal ─────────── */
+const SEAL=new THREE.Group();SEAL.position.copy(SLP);scene.add(SEAL);
+const SR=.36;
+function sealCanvas(ok){const S=1024;const [c,g]=cnv(S,S);const m=S/2;
+  g.fillStyle='#F4F6F3';g.fillRect(0,0,S,S);
+  g.strokeStyle=ok?'#04703F':'#C6CCC7';g.lineWidth=10;g.beginPath();g.arc(m,m,470,0,7);g.stroke();g.lineWidth=3;g.beginPath();g.arc(m,m,395,0,7);g.stroke();
+  for(let i=0;i<60;i++){const a=i/60*Math.PI*2;const r1=i%5?452:440;g.lineWidth=i%5?2:4;g.beginPath();g.moveTo(m+Math.cos(a)*r1,m+Math.sin(a)*r1);g.lineTo(m+Math.cos(a)*470,m+Math.sin(a)*470);g.stroke();}
+  g.textAlign='center';g.fillStyle=ok?'#04703F':'#4A544F';g.font=`500 40px ${MONO}`;g.fillText(ok?'verified sweep':'not verified',m,m-200);
+  if(ok){g.fillStyle='#111614';g.font=`500 170px ${SANS}`;g.fillText('09:14',m,m+40);g.font=`500 64px ${MONO}`;g.fillText(':07 UTC',m,m+130);
+    g.fillStyle='#4A544F';g.font=`400 44px ${MONO}`;g.fillText('2026-09-14',m,m+215);g.font=`400 34px ${MONO}`;g.fillText('R07 · sweep 38',m,m+280);}
+  else{g.fillStyle='#9C4C00';g.font=`500 150px ${SANS}`;g.fillText('--:--',m,m+50);g.fillStyle='#4A544F';g.font=`400 40px ${MONO}`;g.fillText('no timestamp',m,m+150);}
+  return c;}
+const sealTop0=new THREE.MeshStandardMaterial({map:tex(sealCanvas(false)),roughness:.8,color:'#e3e7e2',toneMapped:false,envMapIntensity:.6});
+add(new THREE.Mesh(new THREE.CylinderGeometry(SR,SR+.01,.035,72),alu),[0,.0175,0],SEAL).castShadow=true;
+{const b0=add(new THREE.Mesh(new THREE.CircleGeometry(SR-.004,72),sealTop0),[0,.0353,0],SEAL);b0.rotation.x=-Math.PI/2;b0.receiveShadow=true;}
+const sealOK=add(new THREE.Mesh(new THREE.CircleGeometry(SR-.004,72),new THREE.MeshBasicMaterial({map:tex(sealCanvas(true)),transparent:true,opacity:0,toneMapped:false,depthWrite:false})),[0,.0356,0],SEAL);sealOK.rotation.x=-Math.PI/2;
+const sealRing=add(new THREE.Mesh(new THREE.TorusGeometry(SR+.004,.006,8,96),new THREE.MeshBasicMaterial({color:COL.link,transparent:true,opacity:0,toneMapped:false})),[0,.036,0],SEAL);sealRing.rotation.x=Math.PI/2;
+const toCard=C0.clone().sub(SLP).setY(0).normalize();
+const sealPin=tack(SEAL,V3(toCard.x*.29,.035,toCard.z*.29),1.1);
+
+/* ─────────── cadence strip (review calendar) ─────────── */
+const STRIP=new THREE.Group();STRIP.position.copy(STP);scene.add(STRIP);
+const NW=13, SWEEP=[0,2,4,6,8,10], REVIEW=12;
+function stripCanvas(){const W=2048,H=Math.round(W*STD/STL);const [c,g]=cnv(W,H);g.fillStyle='#F4F6F3';g.fillRect(0,0,W,H);
+  g.strokeStyle='#111614';g.lineWidth=4;g.strokeRect(2,2,W-4,H-4);const cw=W/NW;
+  g.font=`400 26px ${MONO}`;
+  for(let i=0;i<NW;i++){const x=i*cw;g.strokeStyle='#C6CCC7';g.lineWidth=2;if(i)g.beginPath(),g.moveTo(x,0),g.lineTo(x,H),g.stroke();
+    g.fillStyle='#4A544F';g.fillText('W'+(26+i),x+16,42);
+    if(SWEEP.includes(i)){g.fillStyle='#04703F';g.fillText('sweep',x+16,H-26);}
+    if(i===REVIEW){g.fillStyle='rgba(17,22,20,.06)';g.fillRect(x+2,2,cw-4,H-4);g.fillStyle='#111614';g.font=`500 26px ${MONO}`;g.fillText('review',x+16,H-26);g.font=`400 26px ${MONO}`;}}
+  g.fillStyle='#4A544F';g.font=`400 22px ${MONO}`;return c;}
+const stripMat=new THREE.MeshStandardMaterial({map:tex(stripCanvas()),roughness:.85,color:'#e3e7e2',toneMapped:false,envMapIntensity:.6});
+add(new THREE.Mesh(new THREE.BoxGeometry(STL,.006,STD),[paperSide,paperSide,stripMat,paperSide,paperSide,paperSide]),[0,.003,0],STRIP).receiveShadow=true;
+const cellX=i=>-STL/2+(i+.5)*STL/NW;
+const PEGS=SWEEP.map(i=>{const g=new THREE.Group();g.position.set(cellX(i),.006,-.02);STRIP.add(g);
+  add(new THREE.Mesh(new THREE.CylinderGeometry(.006,.006,.1,8),alu),[0,.05,0],g).castShadow=true;
+  add(new THREE.Mesh(new THREE.SphereGeometry(.024,16,12),pinHeadMat),[0,.11,0],g).castShadow=true;g.scale.setScalar(.0001);return g;});
+function flagCanvas(){const [c,g]=cnv(512,256);g.fillStyle='#F4F6F3';g.fillRect(0,0,512,256);g.strokeStyle='#111614';g.lineWidth=6;g.strokeRect(3,3,506,250);
+  g.fillStyle='#111614';g.font=`500 60px ${SANS}`;g.fillText('Review',30,100);g.fillStyle='#04703F';g.font=`500 32px ${MONO}`;g.fillText('evidence filed',30,170);check(g,440,150,50,'#04703F',8);return c;}
+const FLAG=new THREE.Group();FLAG.position.set(cellX(REVIEW),.006,0);STRIP.add(FLAG);
+add(new THREE.Mesh(new THREE.CylinderGeometry(.006,.006,.36,8),graph),[0,.18,0],FLAG).castShadow=true;
+add(new THREE.Mesh(new THREE.PlaneGeometry(.28,.14),new THREE.MeshBasicMaterial({map:tex(flagCanvas()),toneMapped:false,side:THREE.DoubleSide})),[.14,.28,0],FLAG);
+FLAG.rotation.y=-.35;FLAG.scale.setScalar(.0001);
+
+/* ─────────── the evidence pile (before) ─────────── */
+function paperCanvas(kind,a,D){const W=kind==='ticket'||kind==='tag'?512:768,H=Math.round(W*a);const [c,g]=cnv(W*.6,H*.6);g.scale(.6,.6);
+  const t=(s,x,y,f,col)=>{g.font=f;g.fillStyle=col;g.fillText(s,x,y);};
+  if(kind==='binder'){g.fillStyle=a.col;g.fillRect(0,0,W,H);g.fillStyle='rgba(255,255,255,.06)';g.fillRect(W-60,0,60,H);
+    g.fillStyle='#F4F6F3';g.fillRect(90,90,W-240,170);g.strokeStyle='#C6CCC7';g.strokeRect(100,100,W-260,150);t(a.t1,120,160,`500 40px ${SANS}`,'#111614');t(a.t2,122,215,`400 26px ${MONO}`,'#4A544F');
+    g.fillStyle='#0c1110';g.beginPath();g.arc(W-110,H/2,34,0,7);g.fill();return c;}
+  g.fillStyle='#F4F6F3';g.fillRect(0,0,W,H);g.strokeStyle='#C6CCC7';g.lineWidth=3;g.strokeRect(1.5,1.5,W-3,H-3);
+  if(kind==='sheet'){t(D.t,30,52,`500 24px ${MONO}`,'#111614');const cols=[30,150,330,520];
+    for(let r=0;r<22;r++){const y=80+r*40;g.fillStyle=r%2?'#F4F6F3':'#eceFeb';g.fillRect(24,y,W-48,40);g.fillStyle=r===0?'#111614':'#4A544F';
+      const amber=D.amb&&D.amb.includes(r);if(amber){g.fillStyle='rgba(255,154,46,.25)';g.fillRect(326,y,190,40);g.fillStyle='#9C4C00';}
+      g.font=`400 19px ${MONO}`;if(y<H-30){g.fillText(r?'U'+(40-r*2):'u',cols[0],y+27);g.fillStyle=amber?'#9C4C00':'#4A544F';g.fillText(r?['SRV-0'+(r%8+1),'SW-0'+(r%5+1),'ST-0'+(r%2+1)][r%3]:'asset',cols[1],y+27);g.fillText(r?(amber?'#REF!':'in service'):'status',cols[2],y+27);g.fillText(r?'2025-0'+(r%9+1)+'-1'+r%10:'updated',cols[3],y+27);}}
+    g.strokeStyle='#C6CCC7';cols.slice(1).forEach(x=>{g.beginPath();g.moveTo(x-10,80);g.lineTo(x-10,H-20);g.stroke();});return c;}
+  if(kind==='shot'){g.fillStyle='#3F5871';g.fillRect(0,0,W,58);t(D.t,24,38,`500 24px ${MONO}`,'#F4F6F3');
+    g.fillStyle='#dfe3df';g.fillRect(24,80,210,H-110);for(let i=0;i<7;i++){g.fillStyle=i===2?'#7C93A8':'#c9cfcb';g.fillRect(36,96+i*38,186,24);}
+    for(let i=0;i<8;i++){g.fillStyle='rgba(63,88,113,.18)';g.fillRect(260,90+i*(H-130)/8,W-290,(H-130)/8-10);}
+    t(D.s,262,H-24,`400 20px ${MONO}`,'#4A544F');return c;}
+  if(kind==='ticket'){g.fillStyle='#7C93A8';g.fillRect(0,0,14,H);t(D.t,40,62,`500 36px ${MONO}`,'#111614');t(D.s,40,112,`400 26px ${SANS}`,'#4A544F');t(D.u,40,H-34,`400 22px ${MONO}`,'#3F5871');return c;}
+  if(kind==='photo'){g.fillStyle='#2a302d';g.fillRect(0,0,W,H);g.filter='blur(6px)';for(let i=0;i<9;i++){g.fillStyle=i%3?'#3a413e':'#4a524e';g.fillRect(90,30+i*50,W-180,40);}g.filter='none';
+    g.fillStyle='#F4F6F3';g.fillRect(0,H-64,W,64);t('IMG_2291.jpg · date unknown',24,H-22,`400 24px ${MONO}`,'#9C4C00');return c;}
+  if(kind==='req'){g.strokeStyle='#111614';g.lineWidth=8;g.strokeRect(4,4,W-8,H-8);t('Audit request · 07',36,62,`400 26px ${MONO}`,'#4A544F');
+    g.font=`500 58px ${SANS}`;g.fillStyle='#111614';g.fillText('Provide evidence',34,150);g.fillText('for control CC-x.',34,215);
+    t('physical asset inventory · illustrative',36,H-40,`400 22px ${MONO}`,'#3F5871');return c;}
+  if(kind==='tag'){g.fillStyle='#F4F6F3';g.fillRect(0,0,W,H);g.strokeStyle='#FF9A2E';g.lineWidth=10;g.strokeRect(5,5,W-10,H-10);g.fillStyle='#FF9A2E';g.fillRect(0,0,70,H);
+    g.fillStyle='#F4F6F3';g.beginPath();g.arc(35,H/2,14,0,7);g.fill();t('Deadline',100,90,`500 50px ${SANS}`,'#9C4C00');t('Friday · 3 days',102,150,`400 26px ${MONO}`,'#111614');return c;}
+  return c;}
+const P=[ // x,z,w,d,rot,thick,kind,data
+ [-.98,.02,.64,.8,.26,.06,'binder',{col:'#2a302d',t1:'Evidence 2025',t2:'vol. 2 · walk-through'}],
+ [-.86,-.06,.62,.78,-.14,.055,'binder',{col:'#3F5871',t1:'Asset register',t2:'export · Q2'}],
+ [1.02,-.08,.62,.78,-.34,.06,'binder',{col:'#4A544F',t1:'Change tickets',t2:'2025 · closed'}],
+ [.3,.12,.58,.8,.16,.004,'sheet',{t:'asset_export_final_v3.csv',amb:[3,9]}],
+ [-.36,.82,.58,.8,-.42,.004,'sheet',{t:'rack_audit_2025.xlsx',amb:[6]}],
+ [.74,.66,.7,.46,.14,.004,'shot',{t:'CMDB · CI-2057',s:'screenshot · 03-11'}],
+ [-1.02,1.02,.62,.4,.38,.004,'shot',{t:'DCIM · R07 elevation',s:'screenshot · planned'}],
+ [-.92,.0,.46,.3,-.24,.004,'shot',{t:'Port view · SW-04',s:'screenshot · 01-22'}],
+ [.58,1.1,.42,.24,-.52,.004,'ticket',{t:'CHG-4471',s:'Move SRV-06 to U20',u:'closed · no photo'}],
+ [-.06,1.22,.42,.24,.2,.004,'ticket',{t:'CHG-4502',s:'Replace PSU, SRV-03',u:'closed · no photo'}],
+ [1.12,.36,.42,.24,.72,.004,'ticket',{t:'INC-1180',s:'Label missing, R07',u:'resolved'}],
+ [.2,.62,.4,.3,-.18,.004,'photo',{}],
+ [.02,.38,.8,.5,-.06,.005,'req',{}],
+ [.58,.58,.34,.17,.42,.004,'tag',{}]];
+// oriented-rectangle overlap (SAT) to stack items without intersecting
+function corners(x,z,w,d,r){const c=Math.cos(r),s=Math.sin(r);return [[-w/2,-d/2],[w/2,-d/2],[w/2,d/2],[-w/2,d/2]].map(([a,b])=>[x+a*c+b*s,z-a*s+b*c]);}
+function overlap(A,B){for(const Pp of [A,B])for(let i=0;i<4;i++){const [x1,z1]=Pp[i],[x2,z2]=Pp[(i+1)%4];const nx=z2-z1,nz=x1-x2;
+  const pa=A.map(([x,z])=>x*nx+z*nz),pb=B.map(([x,z])=>x*nx+z*nz);if(Math.max(...pa)<Math.min(...pb)||Math.max(...pb)<Math.min(...pa))return false;}return true;}
+const placed=[{c:corners(C0.x,C0.z,CW,CD,0),top:CT}];
+const PILE=P.map((p,i)=>{const [x,z,w,d,r,t,kind,data]=p;const cs=corners(x,z,w,d,r);
+  let y0=0;placed.forEach(q=>{if(overlap(cs,q.c))y0=Math.max(y0,q.top);});y0+=.0015;placed.push({c:cs,top:y0+t});
+  const map=kind==='binder'?null:tex(paperCanvas(kind,d/w,data));
+  return {x,z,w,d,r,t,y:y0+t/2,kind,map,i};});
+// binder canvases need an aspect; rebuild them properly
+PILE.forEach(p=>{if(p.kind==='binder'){const W=768,H=Math.round(W*p.d/p.w);const [c,g]=cnv(W*.6,H*.6);g.scale(.6,.6);const src=P[p.i][7];
+  g.fillStyle=src.col;g.fillRect(0,0,W,H);g.fillStyle='rgba(255,255,255,.07)';g.fillRect(W-70,0,70,H);g.fillStyle='rgba(0,0,0,.25)';g.fillRect(W-74,0,4,H);
+  g.fillStyle='#F4F6F3';g.fillRect(80,110,W-250,190);g.strokeStyle='#C6CCC7';g.lineWidth=3;g.strokeRect(92,122,W-274,166);
+  g.font=`500 50px ${SANS}`;g.fillStyle='#111614';g.fillText(src.t1,112,200);g.font=`400 28px ${MONO}`;g.fillStyle='#4A544F';g.fillText(src.t2,114,256);
+  p.map=tex(c);}});
+PILE.forEach(p=>{const side=p.kind==='binder'?new THREE.MeshStandardMaterial({color:P[p.i][7].col,roughness:.6,metalness:.1,transparent:true}):new THREE.MeshStandardMaterial({color:'#e4e8e3',roughness:.85,transparent:true});
+  const top=new THREE.MeshStandardMaterial({map:p.map,roughness:p.kind==='photo'?.4:.85,transparent:true,color:'#e3e7e2',toneMapped:false,envMapIntensity:.6});
+  p.mats=[side,top];p.mesh=new THREE.Mesh(new THREE.BoxGeometry(1,1,1),[side,side,top,side,side,side]);p.mesh.castShadow=true;p.mesh.receiveShadow=true;scene.add(p.mesh);
+  });
+{const hx=[-.62,0,.62],hy=[0,0,0];PILE.forEach((p,i)=>{const h=i%3;p.sx=hx[h]+Math.sin(i*2.3)*.05;p.sz=-1.5+Math.cos(i*1.7)*.05;p.sr=Math.sin(i*1.3)*.18;p.sy=hy[h]+.0015+p.t/2;hy[h]+=p.t+.0015;});}
+
+/* ─────────── the evidence packet (after) ─────────── */
+const TRAY=new THREE.Group();TRAY.position.copy(C0);scene.add(TRAY);
+const TW=1.42, TD=1.0, FL=.015;
+add(new THREE.Mesh(new THREE.BoxGeometry(TW,FL,TD),alu),[0,FL/2,0],TRAY).receiveShadow=true;
+[[0,-TD/2+.008,TW,.016,.09],[-TW/2+.008,0,.016,TD,.09],[TW/2-.008,0,.016,TD,.09]].forEach(([x,z,w,d,h])=>{const m=add(new THREE.Mesh(new THREE.BoxGeometry(w,h,d),alu),[x,h/2,z],TRAY);m.castShadow=true;m.receiveShadow=true;});
+function lipCanvas(){const [c,g]=cnv(1024,40);g.fillStyle='#dfe3df';g.fillRect(0,0,1024,40);g.fillStyle='#111614';g.font=`500 24px ${MONO}`;g.fillText('Evidence packet · R07 · sweep 38',24,29);g.fillStyle='#04703F';g.fillText('source-linked',800,29);return c;}
+add(new THREE.Mesh(new THREE.BoxGeometry(TW,.04,.016),[alu,alu,alu,alu,new THREE.MeshStandardMaterial({map:tex(lipCanvas()),metalness:.5,roughness:.4}),alu]),[0,.02,TD/2-.008],TRAY).castShadow=true;
+const STACKN=6, SH=.0085;
+const STK=[['UPS-1','3U UPS · U03'],['SRV-08','2U server · U10'],['ST-02','4U storage · U16'],['SRV-03','2U server · U30'],['SRV-02','2U server · U32'],['SW-04','1U switch · U39']];
+const stack=STK.map(([n,sub],i)=>{const d={v:1,sc:.5,n,sub,rows:[['source','frame #04'+(20+i*7)+' · sweep','g'],['location','DC1 · row C · R07','g'],['verified','2026-09-14 · 09:1'+(2+i%3)+' UTC','g'],['record','CMDB · matches','g']]};
+  const cd=makeCard(d);TRAY.add(cd.grp);cd.grp.position.set((i%2?.006:-.004),FL+SH*i+CT/2,(i%3-1)*.006);
+  const tab=add(new THREE.Mesh(new THREE.BoxGeometry(.06,.006,.1),new THREE.MeshStandardMaterial({color:i===4?'#FF9A2E':'#1FD67C',emissive:i===4?'#5a2a00':'#0b3a22',emissiveIntensity:.5,roughness:.5})),[CW/2+.025,0,-.28+i*.1],cd.grp);
+  cd.grp.visible=false;return cd;});
+const TOPY=FL+SH*STACKN+CT/2;
+
+/* ─────────── decisions: a control card and a record that needs review ─────────── */
+const CTRL_D={v:1,kind:'Control · illustrative',n:'CC-x',sub:'physical asset inventory · R07',rows:[['evidence','12 records · this sweep','g'],['source proof','frame #0412 attached','g'],['verified','2026-09-14 · 09:14 UTC','g']]};
+const REV_D={kind:'Asset record',n:'SRV-02',sub:'2U server · U32',rows:[['source','no image attached','a'],['location','R07 / U32','i'],['verified','—','a']]};
+const CTRL=makeCard(CTRL_D), REV=makeCard(REV_D);
+[CTRL,REV].forEach(c=>{c.grp.visible=false;});
+const ctrlPin=tack(CTRL.grp,V3(ANCH.src.x,CT/2,ANCH.src.z),1);
+const revPin=add(new THREE.Mesh(new THREE.RingGeometry(.02,.03,32),new THREE.MeshBasicMaterial({color:COL.drift,side:THREE.DoubleSide,toneMapped:false})),[ANCH.src.x,CT/2+.002,ANCH.src.z],REV.grp);revPin.rotation.x=-Math.PI/2;
+const stub=new THREE.Line(new THREE.BufferGeometry().setFromPoints([V3(ANCH.src.x,CT/2,ANCH.src.z),V3(-.7,.14,-.46),V3(-.86,.2,-.58)]),new THREE.LineDashedMaterial({color:COL.drift,dashSize:.03,gapSize:.022,toneMapped:false,transparent:true}));stub.computeLineDistances();REV.grp.add(stub);
+const stubEnd=add(new THREE.Mesh(new THREE.RingGeometry(.022,.032,32),new THREE.MeshBasicMaterial({color:COL.drift,side:THREE.DoubleSide,toneMapped:false,transparent:true})),[-.86,.2,-.58],REV.grp);stubEnd.rotation.x=-Math.PI/2;
+function badgeCanvas(ok){const [c,g]=cnv(256,256);g.fillStyle=ok?'#F4F6F3':'#F4F6F3';g.beginPath();g.arc(128,128,124,0,7);g.fill();
+  g.strokeStyle=ok?'#04703F':'#FF9A2E';g.lineWidth=12;g.beginPath();g.arc(128,128,112,0,7);g.stroke();g.lineWidth=3;g.beginPath();g.arc(128,128,92,0,7);g.stroke();
+  if(ok)check(g,128,104,86,'#04703F',14);else{g.fillStyle='#9C4C00';g.font=`500 96px ${SANS}`;g.textAlign='center';g.fillText('?',128,140);}
+  g.fillStyle=ok?'#04703F':'#9C4C00';g.font=`500 22px ${MONO}`;g.textAlign='center';g.fillText(ok?'defensible':'review',128,190);return c;}
+function badge(parent,ok,pos){const g=new THREE.Group();g.position.copy(pos);parent.add(g);
+  add(new THREE.Mesh(new THREE.CylinderGeometry(.1,.1,.012,48),new THREE.MeshStandardMaterial({color:ok?'#1FD67C':'#FF9A2E',emissive:ok?'#0b3a22':'#5a2a00',emissiveIntensity:.6,roughness:.4})),[0,.006,0],g).castShadow=true;
+  const f=add(new THREE.Mesh(new THREE.CircleGeometry(.098,48),new THREE.MeshBasicMaterial({map:tex(badgeCanvas(ok)),toneMapped:false})),[0,.0125,0],g);f.rotation.x=-Math.PI/2;
+  g.scale.setScalar(.0001);return g;}
+const B1=badge(CARD.grp,true,V3(.3,CT/2,.2)), B2=badge(CTRL.grp,true,V3(.4,CT/2,.2)), B3=badge(REV.grp,false,V3(.4,CT/2,.2));
+
+/* ─────────── threads (chain of custody) ─────────── */
+const thrMat=new THREE.MeshBasicMaterial({color:COL.link,toneMapped:false});
+const W3=o=>o.getWorldPosition(V3());
+const THR=[
+  {a:()=>W3(cardPins.src).add(V3(0,.02,0)), b:()=>W3(photoPin), lift:.42},
+  {a:()=>W3(cardPins.loc).add(V3(0,.02,0)), b:()=>LPIN_IN.localToWorld(V3(0,0,.105)), lift:.5},
+  {a:()=>W3(cardPins.time).add(V3(0,.02,0)), b:()=>W3(sealPin).add(V3(0,.03,0)), lift:.3},
+  {a:()=>W3(ctrlPin).add(V3(0,.02,0)), b:()=>W3(photoPin), lift:.25}].map(t=>{t.mesh=new THREE.Mesh(new THREE.BufferGeometry(),thrMat);t.mesh.frustumCulled=false;scene.add(t.mesh);t.key='';t.n=0;return t;});
+function threadCurve(a,b,lift){const m=a.clone().lerp(b,.5);m.y=Math.max(a.y,b.y)+lift;const d=b.clone().sub(a).setY(0).normalize();
+  return new THREE.CatmullRomCurve3([a,a.clone().add(V3(0,lift*.45,0)).addScaledVector(d,.1),m,b.clone().add(V3(0,lift*.4,0)).addScaledVector(d,-.1),b]);}
+function updThread(t,p){if(p<=.001){t.mesh.visible=false;return;}t.mesh.visible=true;
+  const a=t.a(),b=t.b();const key=a.toArray().concat(b.toArray()).map(v=>v.toFixed(3)).join();
+  if(key!==t.key){t.key=key;t.curve=threadCurve(a,b,t.lift);t.mesh.geometry.dispose();t.mesh.geometry=new THREE.TubeGeometry(t.curve,72,.0062,6,false);t.n=t.mesh.geometry.index.count;}
+  t.mesh.geometry.setDrawRange(0,Math.floor(p*t.n/6)*6);}
+
+[...PILE.map(p=>p.mesh)].forEach(m=>m.frustumCulled=false);
+/* ─────────── tags ─────────── */
+const hud=document.getElementById('hud');const TG={};
+function tag(k,html,cls,fn){const el=document.createElement('div');el.className='tag '+cls;el.innerHTML=`<i></i><span>${html}</span>`;hud.appendChild(el);TG[k]={el,fn,cur:0,t:0};}
+const cardW=(x,z,y=0)=>()=>CARD.grp.localToWorld(V3(x,y,z));
+const photoW=()=>W3(photoPin);
+const pinW=()=>LPIN_IN.localToWorld(V3(0,0,.11));
+const sealW=()=>SEAL.localToWorld(V3(SR*.7,.04,-SR*.7));
+tag('hR','<b>SRV-06 · asset record</b>claim, source, location, time','ink left keep',cardW(-.58,.2));
+tag('hS','<b>Source</b>frame #0412','link up keep',()=>PHOTO.localToWorld(V3(0,FH+.02,0)));
+tag('hL','<b>Location</b>DC1 · row C · R07 · U20','link up keep',pinW);
+tag('hT','<b>Time</b>09:14:07 UTC · verified','link keep',()=>SEAL.localToWorld(V3(SR+.02,.03,0)));
+tag('bA','<b>Audit request</b>provide evidence for control CC-x','ink up keep',()=>{const p=PILE[12];return V3(p.x,p.y+pileLift,p.z-.2);});
+tag('bD','<b>Deadline</b>the proof is due first','drift left keep',()=>{const p=PILE[13];return V3(p.x-.14,p.y+pileLift,p.z+.05);});
+tag('bX','<b>Photos · screenshots · tickets · exports</b>collected after the fact','rec',()=>{const p=PILE[10];return V3(p.x+.2,p.y+pileLift,p.z);});
+tag('dC','<b>One sweep</b>the real cabinet, bottom to top','link keep',()=>PHONE.position.clone().add(V3(.05,.06,0)));
+tag('dL','<b>Pinned where it was seen</b>R07 · U20–21','link left keep',pinW);
+tag('dS','<b>Source attached</b>frame #0412','link up',()=>PHOTO.localToWorld(V3(0,FH+.02,0)));
+tag('dT','<b>Verified</b>2026-09-14 · 09:14:07 UTC','link',sealW);
+tag('aP','<b>One evidence packet</b>source-linked records','link keep',()=>TRAY.localToWorld(V3(TW/2,.09,TD/2)));
+tag('aC','<b>Control question</b>answered with a trail','ink left',()=>TRAY.localToWorld(V3(-TW/2,.09,-.1)));
+tag('s1','<b>09:14:07 UTC</b>2026-09-14 · physical sweep','link keep',()=>SEAL.localToWorld(V3(SR,.03,0)));
+tag('s2','<b>The claim</b>SRV-06 · R07 / U20','ink keep',cardW(-.52,-.31,.02));
+tag('s2b','<b>The source</b>frame #0412 · the device itself','link keep',()=>FT.localToWorld(V3(FW/2,FH*.78,0)));
+tag('s3','<b>Sweep on a cadence</b>illustrative · every other week','link up keep',()=>STRIP.localToWorld(V3(cellX(6),.14,-.02)));
+tag('s3b','<b>Review</b>evidence already filed','ink up keep',()=>FLAG.localToWorld(V3(.14,.36,0)));
+tag('q1','<b>Defensible</b>source · location · time','link up keep',()=>CARD.grp.localToWorld(V3(.1,0,-CD/2-.02)));
+tag('q2','<b>Control CC-x</b>source proof attached','link up',()=>CTRL.grp.localToWorld(V3(.1,0,-CD/2-.02)));
+tag('q3','<b>Needs review</b>no source image','drift up keep',()=>REV.grp.localToWorld(V3(.1,0,-CD/2-.02)));
+
+/* ─────────── scroll → global g ─────────── */
+const ids=['plain','how','sees','dec'], secEls=ids.map(id=>document.getElementById(id));
+const R=[[-.5,0],[1,4],[4.5,7.5],[8,9]];
+function G(){const y=scrollY,vh=innerHeight;const K=[[0,-1]];
+  secEls.forEach((e,i)=>{const t=e.offsetTop;K.push([t,R[i][0]],[t+e.offsetHeight-vh,R[i][1]]);});
+  for(let i=0;i<K.length-1;i++){if(y<=K[i+1][0])return lerp(K[i][1],K[i+1][1],clamp((y-K[i][0])/((K[i+1][0]-K[i][0])||1)));}return 9;}
+const on=(g,a,b)=>smooth(a-.2,a+.15,g)*(1-smooth(b-.15,b+.2,g));
+const CAMS=[[-1,null],
+  [-.25,[3.95,3.35,6.75],[.05,.3,-.12]],
+  [1.4,[.15,6.9,1.75],[0,0,.42]],
+  [2.35,[2.65,1.75,2.75],[1.45,.7,-.9]],
+  [2.88,[3.1,4.5,6.2],[0,.28,-.15]],
+  [3.7,[-1.62,1.12,3.3],[.14,.1,.2]],
+  [5,[2.45,1.55,2.8],[1.36,.05,1.1]],
+  [6,[.85,1.5,2.4],[-1.05,.32,-.5]],
+  [7,[-.72,3.55,4.5],[-1.02,0,1.76]],
+  [8.5,[2.1,2.85,7.8],[-.22,.5,-.1]]];
+let vw=0,vh=0,mobile=false;
+function resize(){vw=innerWidth;vh=innerHeight;mobile=vw<760;renderer.setSize(vw,vh,false);camera.aspect=vw/vh;camera.updateProjectionMatrix();}
+addEventListener('resize',resize);resize();
+const cp=V3(5,5.4,7.4),ct=V3(0,.3,0);
+const clock=new THREE.Clock();
+let pileLift=0;
+const decEl=document.getElementById('dec');
+function frame(){
+  requestAnimationFrame(frame);
+  const dt=Math.min(clock.getDelta(),.05),time=clock.elapsedTime;
+  const show=decEl.getBoundingClientRect().bottom>0;{const _c=document.getElementById('cta');const _t=_c?_c.getBoundingClientRect().top:1e9;{const _o=Math.min(1,Math.max(0,(_t-innerHeight*.35)/(innerHeight*.3)));hud.style.opacity=String(_o);hud.style.visibility=_o<.01?'hidden':'visible';}}/*HUDFADE*/
+  canvas.style.visibility=hud.style.visibility=show?'visible':'hidden';if(!show)return;
+  scene.updateMatrixWorld();
+  const g=G();
+  // camera
+  const sway=reduce?0:Math.sin(time*.12)*.12;
+  const hp=V3(Math.sin(.6+sway)*7.9,4.1,Math.cos(.6+sway)*7.9);
+  let Pp=hp.clone(),Tt=V3(.05,.28,-.12);
+  for(let i=1;i<CAMS.length;i++){const [gi,p,t]=CAMS[i];const gp=CAMS[i-1][0];const k=smooth(gp+(gi-gp)*.3,gi-(gi-gp)*.15,g);if(k>0){Pp.lerp(V3(...p),k);Tt.lerp(V3(...t),k);}}
+  if(mobile){Pp.sub(Tt).multiplyScalar(clamp(.95/camera.aspect,1.45,2.15)).add(Tt);Pp.x+=.3;Tt.x+=.3;}
+  const f=(reduce||SNAP)?1:1-Math.pow(.02,dt);cp.lerp(Pp,f);ct.lerp(Tt,f);camera.position.copy(cp);camera.lookAt(ct);
+  camera.setViewOffset(vw,vh,mobile?0:-(.63-.5)*vw,mobile?vh*.2:0,vw,vh);camera.updateMatrixWorld();
+
+  // chain state: complete in hero/plain, undone for "before", rebuilt during the sweep
+  const undo=smooth(.3,.8,g), pre=1-undo;
+  const photoOn=Math.max(pre,smooth(2.52,2.62,g));
+  const pinOn=Math.max(pre,smooth(2.27,2.36,g));
+  const sealOn=Math.max(pre,smooth(2.78,2.88,g));
+  const cardOn=Math.max(pre,smooth(2.84,2.94,g));
+  const tp=[Math.max(pre,smooth(2.52,2.7,g)),Math.max(pre,smooth(2.62,2.78,g)),Math.max(pre,smooth(2.76,2.92,g))];
+  photoOK.material.opacity=photoOn;
+  srvOutline.material.opacity=on(g,2.25,2.9)*.95;
+  LPIN_IN.position.z=(1-pinOn)*.14;LPIN_IN.scale.setScalar(Math.max(.0001,Math.min(1,pinOn*1.6)));
+  lpRing.material.opacity=on(g,2.3,3.2)*(reduce?1:.5+.5*Math.sin(time*4));lpRing.scale.setScalar(1+(reduce?0:(time*.8)%1)*1.5);
+  sealOK.material.opacity=sealOn;sealRing.material.opacity=sealOn;
+  CARD.ov.material.opacity=cardOn;stamp.material.opacity=Math.max(pre,smooth(2.9,2.98,g));
+  [cardPins.src,cardPins.loc,cardPins.time,photoPin,sealPin].forEach((p,i)=>{const s=i<3?tp[i]:i===3?tp[0]:tp[2];p.scale.setScalar(Math.max(.0001,Math.min(1,s*2+ (i<3?0:0))));});
+
+  // capture: phone sweeps the cabinet
+  const wCap=on(g,2.08,2.5);
+  const cp01=smooth(2.08,2.5,g);const sweepY=lerp(.12,1.4,cp01);
+  band.position.y=sweepY;band.material.opacity=wCap*(reduce?.9:.75+.25*Math.sin(time*9));
+  wash.scale.y=Math.max(.001,sweepY-.08);wash.position.y=.08+(sweepY-.08)/2;wash.material.opacity=wCap*.1;
+  PHONE.visible=wCap>.01;if(PHONE.visible&&PHONE.userData.phoneTick)PHONE.userData.phoneTick(reduce?.5:time*.35);PHONE.scale.setScalar(Math.max(.0001,wCap));
+  PHONE.position.copy(RACK.localToWorld(V3(.02,sweepY,FACE+.42)));PHONE.rotation.set(-.06,CBR,0);
+  {const pts=[];if(wCap>.02){const a=PHONE.position;[[-RW/2,sweepY+.06],[RW/2,sweepY+.06],[-RW/2,sweepY-.06],[RW/2,sweepY-.06]].forEach(([x,y])=>pts.push(a.clone(),RACK.localToWorld(V3(x,y,ZF+.01))));}
+   frustum.geometry.setFromPoints(pts.length?pts:[V3(),V3()]);frustum.material.opacity=wCap*.55;}
+
+  // card placement: flat on the sheet → onto the packet → standing for decisions
+  const up=smooth(3.0,3.14,g), settle=smooth(3.55,3.78,g), trayUp=smooth(3.04,3.26,g);
+  const st1=smooth(8.0,8.28,g), st2=smooth(8.08,8.34,g);
+  const flatY=lerp(lerp(CT/2,.24,up),C0.y+TOPY+.001,settle);
+  const STAND=Math.PI/2-.26, SY=.62, SZ=-.05;
+  const place=(c,from,to,k)=>{const p=from.clone().lerp(to,k);p.y+=Math.sin(Math.PI*k)*.25;c.grp.position.copy(p);c.grp.rotation.set(STAND*k,0,0);};
+  place(CARD,V3(C0.x,flatY,C0.z),V3(0,SY,SZ),st1);
+  TRAY.position.y=lerp(-.12,0,trayUp);TRAY.visible=trayUp>.001;TRAY.updateMatrixWorld();
+  // decisions cards rise out of the packet
+  const sTop=i=>TRAY.localToWorld(V3(0,FL+SH*i+CT/2,0));
+  CTRL.grp.visible=REV.grp.visible=st2>.001;
+  if(st2>.001){place(CTRL,sTop(5),V3(-1.34,SY,SZ),st2);place(REV,sTop(4),V3(1.34,SY,SZ),st2);}
+
+  // the pile
+  pileLift=0;
+  const push=smooth(1.98,2.3,g);const flyQ=smooth(3.12,3.62,g);
+  const filled=new Array(STACKN).fill(0);
+  PILE.forEach((p,i)=>{const drop=smooth(.8+i*.022,1.0+i*.022,g);
+    const pk=clamp(push*1.5-i*.035);const pkk=smooth(0,1,pk);
+    let x=lerp(p.x,p.sx,pkk), z=lerp(p.z,p.sz,pkk), y=lerp(p.y,p.sy,pkk)+(1-drop)*.9+Math.sin(Math.PI*pkk)*.3, r=lerp(p.r,p.sr,pkk), sx=p.w, sy=p.t, sz=p.d, op=drop;
+    const k=clamp(flyQ*1.6-i*.045);const slot=i%STACKN;
+    if(k>0){const to=sTop(slot);const kk=smooth(0,1,k);x=lerp(x,to.x,kk);z=lerp(z,to.z,kk);y=lerp(y,to.y,kk)+Math.sin(Math.PI*kk)*.35;r=lerp(r,0,kk);
+      sx=lerp(sx,CW,kk);sz=lerp(sz,CD,kk);sy=lerp(sy,CT,kk);op=lerp(op,1,kk)*(1-smooth(.82,1,k));if(k>.9)filled[slot]=1;}
+    p.mesh.visible=op>.01&&drop>.001;p.mesh.position.set(x,y,z);p.mesh.rotation.set(0,r,0);p.mesh.scale.set(sx,sy,sz);
+    p.mats.forEach(m=>{m.opacity=op;m.depthWrite=op>.9;});
+    if(i===12)pileLift=(1-drop)*.9;});
+  stack.forEach((c,i)=>{c.grp.visible=trayUp>.5&&(filled[i]||flyQ>=1)&&!(st2>.001&&(i===5||i===4));});
+
+  // cadence strip
+  PEGS.forEach((p,i)=>{const k=smooth(6.5+i*.055,6.6+i*.055,g);p.scale.setScalar(Math.max(.0001,k));});
+  FLAG.scale.setScalar(Math.max(.0001,smooth(6.82,6.95,g)));
+
+  // decision badges
+  const bp=(a)=>{const k=smooth(a,a+.1,g);return Math.max(.0001,k<1?k*(1+.25*Math.sin(Math.PI*k)):1);};
+  B1.scale.setScalar(bp(8.28));B2.scale.setScalar(bp(8.53));B3.scale.setScalar(bp(8.78));
+  stub.material.opacity=stubEnd.material.opacity=smooth(8.78,8.9,g);
+
+  scene.updateMatrixWorld();
+  // threads
+  updThread(THR[0],tp[0]);updThread(THR[1],tp[1]);updThread(THR[2],tp[2]);updThread(THR[3],smooth(8.53,8.7,g));
+  ctrlPin.scale.setScalar(Math.max(.0001,smooth(8.5,8.56,g)));
+
+  // tags
+  const wHero=1-smooth(-.9,-.62,g), wPl=on(g,-.45,.05), hv=Math.max(wHero,wPl);
+  const vis={hR:hv,hS:hv,hL:hv,hT:hv,
+    bA:on(g,1.15,1.95),bD:on(g,1.2,1.95),bX:on(g,1.25,1.95),
+    dC:wCap,dL:on(g,2.32,2.9)*pinOn,dS:on(g,2.6,3.0),dT:on(g,2.86,3.05),
+    aP:on(g,3.7,4.3),aC:on(g,3.75,4.3),
+    s1:on(g,4.6,5.5),s2:on(g,5.6,6.5),s2b:on(g,5.6,6.5),s3:on(g,6.7,7.6),s3b:on(g,6.92,7.6),
+    q1:smooth(8.33,8.4,g),q2:smooth(8.58,8.65,g),q3:smooth(8.83,8.9,g)};
+  const v=V3();
+  const _pl=[];for(const [n,t] of Object.entries(TG)){t.t=(vis[n]||0)>.5?1:0;t.cur=(reduce||SNAP)?t.t:lerp(t.cur,t.t,1-Math.pow(.001,dt));
+    if(t.cur<.01){t.el.style.opacity=0;continue;}
+    v.copy(t.fn());v.project(camera);if(v.z>1){t.el.style.opacity=0;continue;}const x=(v.x+1)/2*vw,y=(1-v.y)/2*vh;if(x<(mobile?4:vw*.4)||x>vw-4||y<70||y>vh-8){t.el.style.opacity=0;continue;}const cl=t.el.classList,ew=t.el.offsetWidth,eh=t.el.offsetHeight;
+    const tx=clamp(cl.contains('left')?x-ew+3.5:cl.contains('up')?x-ew/2:x-3.5,8,vw-ew-8),ty=clamp(cl.contains('up')?y-eh+3.5:y-eh/2,70,vh-eh-8);
+    const colFade=mobile?1:smooth(vw*.36,vw*.42,tx);
+    {if(!mobile&&tx<vw*.38){t.el.style.opacity=0;continue;}const _b=[tx,ty,tx+ew,ty+eh];if(_pl.some(q=>_b[0]<q[2]+6&&_b[2]>q[0]-6&&_b[1]<q[3]+6&&_b[3]>q[1]-6)){t.el.style.opacity=0;continue;}_pl.push(_b);}t.el.style.transform=`translate3d(${tx.toFixed(1)}px,${ty.toFixed(1)}px,0)`;t.el.style.opacity=(t.cur*colFade).toFixed(3);}
+  renderer.render(scene,camera);
+}
+function redrawText(){sheetMat.map.image=sheetCanvas();sheetMat.map.needsUpdate=true;
+  const re=(mat,c)=>{mat.map.image=c;mat.map.needsUpdate=true;};
+  [CARD,CTRL,REV,...stack].forEach(c=>{re(c.top,recordCanvas(c.d0));if(c.ov)re(c.ov.material,recordCanvas(c.d1));});
+  re(photoBase.material,photoCanvas(false));re(photoOK.material,photoCanvas(true));re(sealTop0,sealCanvas(false));re(sealOK.material,sealCanvas(true));re(stripMat,stripCanvas());}
+document.fonts.ready.then(redrawText);
+requestAnimationFrame(frame);
+</script>
+<!--GLJS-END-->
+<script src="/design-system/nav.js" defer></script>
+</body>
+</html>

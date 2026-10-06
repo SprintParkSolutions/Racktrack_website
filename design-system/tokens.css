@@ -1,0 +1,121 @@
+/* RackTrack design tokens (type v3 · hamina-calibrated scale) — generated from tokens.json */
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap');
+
+:root, [data-theme="paper"] {
+  --paper: #e9ece8;
+  --paper-raised: #f4f6f3;
+  --rule: #c6ccc7;
+  --ink: #111614;
+  --ink-muted: #4a544f;
+  --hall: #0c1110;
+  --link: #1fd67c;
+  --link-ink: #04703f;
+  --drift: #ff9a2e;
+  --drift-ink: #9c4c00;
+  --record: #7c93a8;
+  --record-ink: #3f5871;
+  --aluminium: #dfe3df;
+  --chassis: #232927;
+  --focus: #04703f;
+  --chart-track: #e2e6e2;
+  --chart-grid: #dce0dc;
+  --chart-used: #2a302d;
+  --chart-free: #d3d8d4;
+  --heat-1: #f6ddbb;
+  --heat-2: #fbbe78;
+  --heat-3: #ee8f2e;
+  --heat-4: #b35a00;
+  --chart-track: #e2e6e2;
+  --chart-grid: #dce0dc;
+  --chart-used: #2a302d;
+  --chart-free: #d3d8d4;
+  --heat-1: #f6ddbb;
+  --heat-2: #fbbe78;
+  --heat-3: #ee8f2e;
+  --heat-4: #b35a00;
+}
+[data-theme="hall"] {
+  --paper: #0c1110;
+  --paper-raised: #151b19;
+  --rule: #26302c;
+  --ink: #dde4df;
+  --ink-muted: #93a19a;
+  --hall: #0c1110;
+  --link: #1fd67c;
+  --link-ink: #1fd67c;
+  --drift: #ff9a2e;
+  --drift-ink: #ff9a2e;
+  --record: #7c93a8;
+  --record-ink: #9db2c5;
+  --aluminium: #dfe3df;
+  --chassis: #232927;
+  --focus: #1fd67c;
+  --chart-track: #1c2421;
+  --chart-grid: #26302c;
+  --chart-used: #c3cac5;
+  --chart-free: #3a4541;
+  --heat-1: #4a3218;
+  --heat-2: #7a4a14;
+  --heat-3: #c46f16;
+  --heat-4: #ff9a2e;
+  --chart-track: #1c2421;
+  --chart-grid: #26302c;
+  --chart-used: #c3cac5;
+  --chart-free: #3a4541;
+  --heat-1: #4a3218;
+  --heat-2: #7a4a14;
+  --heat-3: #c46f16;
+  --heat-4: #ff9a2e;
+  color-scheme: dark;
+}
+:root {
+  --font-sans: "Inter", "Helvetica Neue", Arial, system-ui, sans-serif;
+  --font-mono: "JetBrains Mono", ui-monospace, SFMono-Regular, Menlo, monospace;
+
+  /* layout + spacing */
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 16px;
+  --space-5: 20px;
+  --space-6: 24px;
+  --space-8: 32px;
+  --space-10: 40px;
+  --space-12: 48px;
+  --space-16: 64px;
+  --space-20: 80px;
+  --space-24: 96px;
+  --shell: 80rem;
+  --gutter: clamp(20px, 5vw, 48px);
+  --nav-h: 72px;
+  --copy-w: clamp(20rem, 38vw, 42rem);
+  --stage-h: max(220px, 44vh);
+  --chapter: 170vh;
+  /* the padding that holds --shell centred: the gutter on small screens,
+     growing on large ones. Every band pads to this, giving one left edge. */
+  --bleed: max(var(--gutter), calc((100% - var(--shell)) / 2));
+
+  --radius-none: 0px;
+  --radius-sm: 2px;
+  --radius-md: 3px;
+  --radius-device: 38px;
+  --shadow-slip: 0 30px 60px -30px rgba(17,22,20,0.35);
+}
+
+/* type scale — hamina steps: 700 headings at -0.025em, text-lg/1.625 lede,
+   text-sm as the UI workhorse. Mono is reserved for machine readouts. */
+.display-hero { font-family: var(--font-sans); font-size: 72px; line-height: 1.1; font-weight: 700; letter-spacing: -0.025em; }
+.display-chapter { font-family: var(--font-sans); font-size: 36px; line-height: 1.15; font-weight: 700; letter-spacing: -0.025em; }
+.figure { font-family: var(--font-sans); font-size: 36px; line-height: 1.0; font-weight: 700; letter-spacing: -0.025em; }
+.lede { font-family: var(--font-sans); font-size: 18px; line-height: 1.625; font-weight: 400; letter-spacing: 0em; }
+.body { font-family: var(--font-sans); font-size: 16px; line-height: 1.5; font-weight: 400; letter-spacing: 0em; }
+.ui { font-family: var(--font-sans); font-size: 14px; line-height: 1.0; font-weight: 600; letter-spacing: 0em; }
+.small { font-family: var(--font-sans); font-size: 14px; line-height: 1.5; font-weight: 400; letter-spacing: 0em; }
+.readout { font-family: var(--font-mono); font-size: 11.5px; line-height: 1.5; font-weight: 400; letter-spacing: 0em; }
+.record { font-family: var(--font-mono); font-size: 12px; line-height: 1.55; font-weight: 400; letter-spacing: 0em; }
+.figure-mono { font-family: var(--font-mono); font-size: 12px; line-height: 1.0; font-weight: 400; letter-spacing: 0em; }
+
+/* responsive steps for the two display sizes and the lede */
+.display-hero { font-size: clamp(2.5rem, 5.2vw, 4.5rem); text-wrap: balance; }
+.display-chapter { font-size: clamp(1.875rem, 3vw, 2.25rem); text-wrap: balance; }
+.lede { color: var(--ink-muted); }

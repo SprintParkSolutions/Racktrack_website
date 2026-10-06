@@ -1,0 +1,825 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>The security gap your network tools can't see · RackTrack</title>
+<meta name="description" content="Network monitoring only shows what's active on the network, not what's actually sitting in the rack. That blind spot is where risk builds up.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap">
+<link rel="stylesheet" href="/design-system/base.css">
+<style>
+/* RackTrack · Resources · File no. 004 · SEC·01 — "What the network can see".
+   CONCEPT. One 42U rack on a drawing sheet, wrapped in the network's visibility volume. The volume is built from echoes:
+   monitoring pings out from the top-of-rack switch (sonar ripples on the sheet and across the volume's glass face),
+   and every device that answers returns an echo and gets a blue-grey lamella of volume in front of it. Three devices never
+   answer, so the volume has notches where they sit: a leftover migration server, an unticketed vendor appliance and an
+   unplugged, decommissioned server. The physical sweep (a green plane rising through the rack) meets every device by
+   presence; the silent three turn amber, then are reconciled into the record (green) and flagged.
+   BEATS (scroll value g).  hero −1: low hero angle, sonar running, the notched volume.
+   01 what-tools-see (0–1): wide establishing 3/4; pings, echoes light the lamellae; silent notches stay dark.
+   02 blind-spot (1–2): three macro stops, one per bullet (U30 leftover · U25 vendor · U13 unplugged), dashed ink outlines.
+   Key figure (2–3): top-down plan of row F; four more racks rise; a green curtain sweeps the row; 4 rings green, R14 amber.
+   03 why-it-matters (3–4): low 3/4 macro on U30 with the "network reports" list standing on the sheet; U30 is not on it.
+   04 closing-it (4–5): straight front elevation while the sweep rises; then high 3/4 as the physical list arcs in and
+   the two lists are reconciled (green links, three amber "present but silent" rows flagged).
+   CAMERA: 9 keys: low hero · wide 3/4 · macro right · macro left · macro low · top-down plan · low side · front elevation · high 3/4.
+   Framing guard projects the subject every frame (shift, then dolly) so nothing enters the left 46%; tags are on/off with a
+   placed-box collision list, a text-column guard, and the whole HUD hides once Keep reading rises. */
+:root{
+  color-scheme: light;
+  
+}
+*{box-sizing:border-box}
+html{background:var(--paper)}
+body{margin:0;background:var(--paper);color:var(--fg);font:400 16px/1.5 var(--sans);-webkit-font-smoothing:antialiased;overflow-x:hidden}
+a{color:inherit}
+::selection{background:var(--link);color:#06140d}
+:focus-visible{outline:2px solid var(--link-ink);outline-offset:3px;border-radius:2px}
+body::before{content:"";position:fixed;inset:0;z-index:0;pointer-events:none;background:radial-gradient(60% 55% at 66% 50%,rgba(255,255,255,.6),transparent 72%)}
+#stage{position:fixed;inset:0;z-index:1;display:block;width:100%;height:100%;pointer-events:none}
+#scrim{position:fixed;inset:0;z-index:1;pointer-events:none;background:linear-gradient(90deg,var(--paper) 0,rgba(233,236,232,.96) 33%,rgba(233,236,232,0) 49%)}
+#hud{position:fixed;inset:0;z-index:3;pointer-events:none;overflow:hidden}
+main{position:relative;z-index:2}
+
+/* nav */
+.nav{position:fixed;left:0;right:0;top:0;z-index:10;display:flex;align-items:center;gap:28px;height:calc(var(--nav-h) + env(safe-area-inset-top,0px));padding:env(safe-area-inset-top,0px) var(--bleed) 0;background:linear-gradient(var(--paper) 55%,transparent)}
+.brand{display:flex;align-items:center;gap:10px;text-decoration:none;font:700 17px/1 var(--sans);letter-spacing:-.02em;color:var(--ink)}
+.brand img{width:26px;height:26px;border-radius:5px;display:block}
+.nav ul{display:flex;gap:24px;list-style:none;margin:0 0 0 auto;padding:0}
+.nav ul a{font:500 14px/1 var(--sans);text-decoration:none;color:var(--ink-2)}
+.nav ul a:hover{color:var(--ink)}
+.nav ul a[aria-current="page"]{color:var(--ink);text-decoration:underline;text-decoration-color:var(--link);text-decoration-thickness:2px;text-underline-offset:6px}
+.btn{display:inline-flex;align-items:center;gap:10px;height:46px;padding:0 20px;border-radius:3px;border:1px solid var(--fg);font:500 15px/1 var(--sans);text-decoration:none;cursor:pointer;background:transparent;color:var(--fg);transition:background .2s,color .2s,border-color .2s}
+.btn.solid{background:var(--fg);color:var(--bg)}
+.btn.solid:hover{background:var(--link-ink);border-color:var(--link-ink);color:#fff}
+.btn:not(.solid){border-color:var(--line)}
+.btn:not(.solid):hover{border-color:var(--fg)}
+.btn .led{width:7px;height:7px;border-radius:50%;background:var(--link);box-shadow:0 0 8px var(--link)}
+.nav .btn{height:38px;padding:0 16px;font-size:14px}
+
+/* type */
+.ch{position:relative;padding-inline:var(--bleed)}
+h1,h2,h3{margin:0 0 20px;text-wrap:balance}
+h2{max-width:16ch}
+h3{margin:0 0 10px}
+.lede{color:var(--fg-2);max-width:27rem;margin:0 0 28px}
+.k{margin:0 0 14px;font:400 12px/1 var(--mono);color:var(--link-ink)}
+.actions{display:flex;flex-wrap:wrap;gap:12px}
+.chip{font:500 11px/1 var(--mono);padding:5px 7px;border-radius:2px;border:1px solid var(--rule);color:var(--ink);background:rgba(244,246,243,.8)}
+.chip.c-security{border-color:var(--drift);color:var(--drift-ink);background:rgba(255,154,46,.1)}
+
+/* tags */
+.tag{position:absolute;left:0;top:0;display:flex;align-items:center;opacity:0;visibility:hidden;will-change:transform;white-space:nowrap}
+.tag::before{content:"";width:7px;height:7px;border-radius:50%;background:var(--c,var(--ink));transform:translate(-3.5px,0);box-shadow:0 0 0 3px color-mix(in oklab,var(--c,var(--ink)) 22%,transparent)}
+.tag i{display:block;width:24px;height:1px;background:var(--c,var(--ink))}
+.tag span{padding:6px 9px;background:var(--paper-2);border:1px solid var(--c,var(--ink));border-radius:2px;font:400 11.5px/1.35 var(--mono);color:var(--ink);box-shadow:0 14px 28px -20px rgba(17,22,20,.45)}
+.tag span b{display:block;font:600 15px/1.15 var(--sans);letter-spacing:-.02em;margin-bottom:2px}
+.tag.left{flex-direction:row-reverse}.tag.left::before{transform:translate(3.5px,0)}
+.tag.down{flex-direction:column}.tag.up{flex-direction:column-reverse}.tag.up i{width:1px;height:18px}.tag.down i{width:1px;height:18px}.tag.down::before{transform:translate(0,0)}
+.tag.link{--c:var(--link)} .tag.link span b{color:var(--link-ink)}
+.tag.drift{--c:var(--drift)} .tag.drift span b{color:var(--drift-ink)}
+.tag.rec{--c:var(--record)} .tag.rec span b{color:var(--record-ink)}
+.tag.ink{--c:var(--ink)}
+
+/* hero */
+#hero{min-height:100vh;display:flex;align-items:center;padding-top:96px;padding-bottom:40px}
+.copy{width:min(35rem,42vw);}
+.back{display:inline-flex;gap:8px;margin:0 0 26px;font:500 13px/1 var(--mono);color:var(--link-ink);text-decoration:none;border-bottom:1px solid transparent;padding-bottom:3px}
+.back:hover{border-bottom-color:var(--link-ink)}
+.meta{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin:0 0 18px;font:400 12px/1 var(--mono);color:var(--ink-2)}
+h1{max-width:13ch;margin-bottom:22px}
+.dek{font-size:clamp(17px,1.35vw,20px);line-height:1.45;color:var(--ink-2);max-width:29rem;margin:0 0 30px}
+.toc{max-width:27rem;border-top:1px solid var(--ink);padding-top:12px}
+.toc p{margin:0 0 8px;font:400 12px/1 var(--mono);color:var(--ink-2)}
+.toc ol{list-style:none;margin:0;padding:0}
+.toc li a{display:flex;gap:14px;padding:8px 0;border-bottom:1px solid var(--rule);text-decoration:none;font:500 15px/1.2 var(--sans);color:var(--ink)}
+.toc li a i{font:400 11.5px/1.5 var(--mono);font-style:normal;color:var(--ink-2);width:1.6rem}
+.toc li a:hover{color:var(--link-ink)}
+
+/* article */
+#lead{padding-top:var(--band-y);padding-bottom:var(--band-y)}
+.leadp{width:min(33rem,38vw);margin:0}
+.leadp p{margin:0;font:500 clamp(22px,1.95vw,29px)/1.32 var(--sans);letter-spacing:-.02em;color:var(--ink)}
+.leadp p::first-letter{color:var(--drift-ink)}
+.beat{position:relative;min-height:190vh;padding-inline:var(--bleed)}
+#blind-spot{min-height:250vh} #figure{min-height:200vh} #closing-it{min-height:230vh}
+.inner{position:sticky;top:clamp(92px,15vh,150px);width:min(33rem,38vw);padding-bottom:var(--band-y)}
+.no{display:flex;gap:10px;align-items:center;margin:0 0 16px;font:400 12px/1 var(--mono);color:var(--ink-2)}
+.no b{font-weight:500;color:var(--ink)}
+.inner p.t{margin:0 0 16px;font-size:clamp(16.5px,1.2vw,18px);line-height:1.62;color:var(--ink-2);max-width:33rem}
+.pq{margin:28px 0 0;padding:4px 0 4px 20px;border-left:2px solid var(--drift);font:500 clamp(20px,1.65vw,25px)/1.3 var(--sans);letter-spacing:-.018em;color:var(--ink);max-width:30rem}
+.bl{list-style:none;margin:6px 0 0;padding:0;border-top:1px solid var(--rule);max-width:31rem}
+.bl li{display:grid;grid-template-columns:2.4rem 1fr;gap:6px;padding:13px 0 13px 0;border-bottom:1px solid var(--rule);font-size:clamp(16px,1.15vw,17.5px);line-height:1.5;color:var(--ink-2);transition:color .3s,padding .3s var(--ease);position:relative}
+.bl li i{font:400 11.5px/1.9 var(--mono);font-style:normal;color:var(--ink-2)}
+.bl li::before{content:"";position:absolute;left:-14px;top:14px;bottom:14px;width:2px;background:var(--ink);transform:scaleY(0);transition:transform .3s var(--ease)}
+.bl li.on{color:var(--ink)} .bl li.on::before{transform:none} .bl li.on i{color:var(--ink)}
+.plain{margin:26px 0 0;padding:16px 20px 18px;background:var(--paper-2);border:1px solid var(--rule);border-top:2px solid var(--ink);border-radius:2px;max-width:31rem}
+.plain .k{color:var(--ink-2);margin-bottom:10px}
+.plain p.pt{margin:0;font:500 clamp(17px,1.3vw,19px)/1.42 var(--sans);letter-spacing:-.01em;color:var(--ink)}
+/* key figure */
+.kf{margin:0 0 10px;font:500 clamp(104px,11vw,176px)/.86 var(--sans);letter-spacing:-.065em;color:var(--ink);display:flex;align-items:baseline;gap:.12em}
+.kf span{font-size:.42em;letter-spacing:-.04em;color:var(--ink-2)}
+.kf b{font-weight:500}
+.kf b.one{color:var(--drift-ink)}
+.kfl{margin:0 0 22px;padding-top:14px;border-top:1px solid var(--ink);font:500 clamp(19px,1.5vw,23px)/1.3 var(--sans);letter-spacing:-.015em;max-width:25rem}
+.cap{margin:0;font:400 11.5px/1.45 var(--mono);color:var(--ink-2);max-width:26rem}
+.cap b{color:var(--drift-ink);font-weight:500}
+
+/* progress rail + figure caption */
+.rail{position:fixed;left:18px;top:50%;transform:translateY(-50%);z-index:4;display:flex;flex-direction:column;gap:0;opacity:0;visibility:hidden;transition:opacity .3s}
+.rail.on{opacity:1;visibility:visible}
+.rail a{position:relative;display:flex;align-items:center;justify-content:center;width:26px;height:44px;text-decoration:none;font:500 10px/1 var(--mono);color:var(--ink-2)}
+.rail a::before{content:"";position:absolute;left:12px;top:0;bottom:0;width:1px;background:var(--rule)}
+.rail a:first-child::before{top:50%}.rail a:last-child::before{bottom:50%}
+.rail a span{position:relative;background:var(--paper);padding:3px 0;border:1px solid var(--rule);width:24px;text-align:center;border-radius:2px}
+.rail a.on span{background:var(--ink);color:var(--paper);border-color:var(--ink)}
+.rail a.done span{border-color:var(--link-ink);color:var(--link-ink)}
+.figcap{position:fixed;right:var(--gutter);bottom:20px;z-index:4;max-width:min(30rem,44vw);display:flex;gap:10px;align-items:flex-start;font:400 11.5px/1.45 var(--mono);color:var(--ink-2);opacity:0;visibility:hidden;transition:opacity .3s;text-align:right;justify-content:flex-end}
+.figcap.on{opacity:1;visibility:visible}
+.figcap .ct{background:rgba(233,236,232,.88);padding:3px 6px;border-radius:2px}
+.snap *,.snap *::before{transition:none!important}
+.figcap b{color:var(--ink);font-weight:500}
+.figcap em{font-style:normal;padding:2px 5px;border:1px solid var(--rule);border-radius:2px;white-space:nowrap}
+
+/* keep reading */
+#more{position:relative;z-index:2;background:var(--paper);border-top:1px solid var(--rule);padding:var(--band-y) var(--bleed)}
+.mwrap{max-width:1180px;margin-inline:auto;}
+.mhead{display:flex;justify-content:space-between;align-items:end;gap:24px;margin-bottom:44px;flex-wrap:wrap}
+.mhead h2{margin:0}
+.mhead a{font:500 13px/1 var(--mono);color:var(--link-ink);text-decoration:none}
+.cards{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:clamp(20px,3vw,40px)}
+.card{position:relative;display:grid;grid-template-rows:auto auto 1fr auto;margin-top:22px;padding:26px 26px 22px;min-height:250px;background:var(--paper-2);border:1px solid var(--rule);border-radius:0 2px 2px 2px;text-decoration:none;color:var(--ink);transition:border-color .25s,transform .35s var(--ease),box-shadow .35s var(--ease);}
+.card:hover,.card:focus-visible{border-color:var(--ink);transform:translateY(-4px);box-shadow:0 24px 40px -30px rgba(17,22,20,.5)}
+.card .tabb{position:absolute;left:-1px;top:-23px;height:23px;padding:0 12px;display:flex;align-items:center;gap:8px;font:500 11.5px/1 var(--mono);color:var(--paper-2);background:var(--tab);border-radius:2px 2px 0 0}
+.card .file{margin:0 0 14px;padding-bottom:12px;border-bottom:1px solid var(--ink);font:400 12px/1.2 var(--mono);color:var(--ink-2)}
+.card h3{max-width:20ch}
+.card p{margin:0 0 18px;font-size:15px;line-height:1.5;color:var(--ink-2);max-width:30rem}
+.card .go{font:500 15px/1 var(--sans);color:var(--link-ink)}
+.card .hole{position:absolute;right:22px;top:22px;width:10px;height:10px;border-radius:50%;border:1px solid var(--rule);background:var(--paper)}
+
+/* cta */
+#cta{padding-block:var(--band-y);text-align:center;background:var(--paper);position:relative;z-index:2;border-top:1px solid var(--rule)}
+#cta h2{margin-inline:auto;max-width:13ch}
+#cta .actions{justify-content:center;margin-top:34px}
+
+/* footer */
+.foot{position:relative;z-index:2;padding:var(--band-y) var(--bleed) calc(var(--s8) + env(safe-area-inset-bottom,0px));background:var(--paper);border-top:1px solid var(--rule);display:grid;grid-template-columns:var(--copy-w) repeat(3,minmax(0,1fr));gap:28px;font-size:14px;color:var(--ink-2)}
+.foot b{display:block;font:500 13px/1 var(--sans);color:var(--link-ink);margin-bottom:16px}
+.foot nav{display:flex;flex-direction:column;gap:11px}
+.foot nav a{color:var(--ink);text-decoration:none;font-size:15px}
+.foot nav a:hover{color:var(--link-ink)}
+.foot p{margin:0 0 11px;color:var(--ink);font-size:15px;line-height:1.45}
+.foot p a{text-decoration:none}.foot p a:hover{color:var(--link-ink)}
+.foot-brand .brand{margin-bottom:16px}
+.foot-brand p{color:var(--ink-2);max-width:18rem}
+.foot .fine{grid-column:1/-1;display:flex;justify-content:space-between;flex-wrap:wrap;gap:12px;margin-top:16px;padding-top:18px;border-top:1px solid var(--rule);font-size:13px}
+.foot .legal{display:flex;gap:18px;flex-wrap:wrap}.foot .legal a{color:var(--ink-2);text-decoration:none}.foot .legal a:hover{color:var(--link-ink)}
+.foot .social{display:flex;gap:18px}
+.foot .social a{color:var(--ink-2);text-decoration:none}
+
+.no-webgl #stage,.no-webgl #hud{display:none}
+@media (max-width:1180px){ .foot{grid-template-columns:repeat(2,minmax(0,1fr))} }
+@media (max-width:960px){ .rail{display:none} .cards{grid-template-columns:1fr} }
+@media (max-width:760px){
+  #scrim{background:linear-gradient(0deg,var(--paper) 0,rgba(233,236,232,.96) 50%,rgba(233,236,232,0) 58%)}
+  #hud .tag:not(.keep){display:none}
+  #hero{align-items:flex-start;min-height:auto;padding-top:48vh;padding-bottom:8vh}
+  .copy{width:auto;padding-left:0}
+  .back{margin-bottom:16px}
+  h1{margin-bottom:14px}
+  .dek{font-size:16px;margin-bottom:22px}
+  #lead{padding-top:0;padding-bottom:var(--band-y)}
+  .leadp{width:auto;padding-left:0;background:var(--paper)}
+  .leadp p{font-size:21px}
+  .beat{min-height:175vh} #blind-spot{min-height:230vh} #figure{min-height:180vh} #closing-it{min-height:210vh}
+  .inner{top:48vh;width:auto;padding-left:0;padding-top:12px;background:var(--paper);min-height:52vh}
+  .inner h2{margin-bottom:12px}
+  .inner p.t{font-size:15.5px;line-height:1.55;margin-bottom:10px}
+  .pq{font-size:17.5px;margin-top:14px}
+  .bl li{padding:8px 0;font-size:14.5px;grid-template-columns:1.8rem 1fr}
+  .plain{margin-top:14px;padding:12px 14px}
+  .plain p.pt{font-size:15.5px}
+  .kf{font-size:92px}
+  .kfl{font-size:18px}
+  .figcap{top:calc(48vh - 30px);bottom:auto;right:var(--gutter);left:var(--gutter);max-width:none;font-size:10.5px}
+  .figcap .ct{display:none}
+  #more{padding-top:var(--band-y)}
+  .card{padding:22px 18px 18px;min-height:0}
+}
+@media (max-width:560px){ .foot{grid-template-columns:repeat(2,minmax(0,1fr));gap:var(--s6) var(--s5);padding-block:var(--band-y-sm) calc(var(--s6) + env(safe-area-inset-bottom,0px))} }
+@media (prefers-reduced-motion:reduce){ .bl li,.bl li::before,.card,.rail,.figcap{transition:none!important} }
+</style>
+</head>
+<body>
+
+<canvas id="stage" aria-hidden="true"></canvas>
+<div id="scrim" aria-hidden="true"></div>
+<div id="hud" aria-hidden="true"></div>
+<nav class="rail" id="rail" aria-label="On this page">
+  <a href="#what-tools-see" title="What your tools see"><span>01</span></a>
+  <a href="#blind-spot" title="Where the blind spot comes from"><span>02</span></a>
+  <a href="#why-it-matters" title="Why it matters"><span>03</span></a>
+  <a href="#closing-it" title="Closing the blind spot"><span>04</span></a>
+</nav>
+<p class="figcap" id="figcap" aria-hidden="true"><span class="ct" id="figtxt"></span><em>illustrative scene</em></p>
+
+<nav class="nav" aria-label="Primary">
+  <a class="brand" href="/"><img alt="" src="/design-system/assets/Logos/racktrack-mark.jpg">RackTrack</a>
+  <ul>
+    <li><a href="/pages/why-racktrack/">Why RackTrack</a></li>
+    <li><a href="/pages/solutions/">Solutions</a></li>
+    <li><a href="/pages/use-cases/">Use cases</a></li>
+    <li><a href="/pages/resources/" aria-current="page">Resources</a></li>
+    <li><a href="/pages/trust-security/">Trust</a></li>
+    <li><a href="/pages/about-us/">About</a></li>
+    <li><a href="/pages/sign-in/">Sign in</a></li>
+  </ul>
+  <a class="btn solid" href="/pages/contact-us/"><span class="led"></span>Book a sweep</a>
+</nav>
+
+<main>
+  <header class="ch" id="hero">
+    <div class="copy">
+      <a class="back" href="/pages/resources/">← All resources</a>
+      <p class="meta">File no. 004 · SEC·01 · <span class="chip c-security">Security</span> · 5 min read</p>
+      <h1>The security gap your network tools can't see</h1>
+      <p class="dek">Network monitoring only shows what's active on the network, not what's actually sitting in the rack. That blind spot is where risk builds up.</p>
+      <nav class="toc" aria-label="On this page">
+        <p>On this page</p>
+        <ol>
+          <li><a href="#what-tools-see"><i>01</i>What your tools see</a></li>
+          <li><a href="#blind-spot"><i>02</i>Where the blind spot comes from</a></li>
+          <li><a href="#why-it-matters"><i>03</i>Why it matters</a></li>
+          <li><a href="#closing-it"><i>04</i>Closing the blind spot</a></li>
+        </ol>
+      </nav>
+    </div>
+  </header>
+
+  <article>
+    <section class="ch" id="lead">
+      <div class="leadp"><p>Ask a security team to list every device physically installed across their racks, and most will hand you a network report instead: a list of what's talking, not what's there.</p></div>
+    </section>
+
+    <section class="beat" id="what-tools-see">
+      <div class="inner">
+        <p class="no"><b>01</b> / 04</p>
+        <h2>What your monitoring stack actually sees</h2>
+        <p class="t">Network monitoring is built to watch traffic and addressable devices, and it does that well. But anything dormant, misconfigured, or simply not yet plugged into the network falls outside that view by design, not by accident.</p>
+        <blockquote class="pq">“A device sitting quietly in a rack, powered but not talking, is invisible to almost every tool your security team already owns.”</blockquote>
+      </div>
+    </section>
+
+    <section class="beat" id="blind-spot">
+      <div class="inner">
+        <p class="no"><b>02</b> / 04</p>
+        <h2>Where the blind spot comes from</h2>
+        <p class="t">It's rarely dramatic. It's usually:</p>
+        <ul class="bl" id="bl">
+          <li><i>a</i><span>Leftover hardware from a migration that was never physically removed.</span></li>
+          <li><i>b</i><span>Vendor equipment installed during a maintenance window, with no ticket filed.</span></li>
+          <li><i>c</i><span>Decommissioned gear unplugged from the network, but never taken out of the rack.</span></li>
+        </ul>
+      </div>
+    </section>
+
+    <section class="beat" id="figure" aria-label="Key figure">
+      <div class="inner">
+        <p class="no"><b>Key figure</b></p>
+        <p class="kf" aria-label="1 in 5"><b class="one">1</b><span>in</span><b>5</b></p>
+        <p class="kfl">racks reviewed in a physical sweep turns up at least one device nobody on the security team knew was there.</p>
+        <p class="cap">Figure: five racks in one row, swept; one turns up a device nobody knew. <b>Illustrative scene.</b></p>
+      </div>
+    </section>
+
+    <section class="beat" id="why-it-matters">
+      <div class="inner">
+        <p class="no"><b>03</b> / 04</p>
+        <h2>Why this actually matters</h2>
+        <p class="t">An unmonitored device is unpatched, uncontrolled, and absent from every dashboard your team relies on, which means nobody's job is currently to worry about it, even though it's real, powered, and sitting a few feet away.</p>
+        <aside class="plain" aria-label="In plain terms">
+          <p class="pt">Your firewall and your inventory system can both be completely accurate about what they can see, and still both be wrong about what's actually in the room.</p>
+        </aside>
+      </div>
+    </section>
+
+    <section class="beat" id="closing-it">
+      <div class="inner">
+        <p class="no"><b>04</b> / 04</p>
+        <h2>Closing the physical blind spot</h2>
+        <p class="t">Closing that gap means pairing what a physical sweep finds with what the network already reports, and reconciling the two lists against each other, so anything present but silent gets flagged, instead of quietly forgotten.</p>
+      </div>
+    </section>
+  </article>
+
+  <section id="more" aria-labelledby="more-h">
+    <div class="mwrap">
+      <div class="mhead"><h2 id="more-h">Keep reading</h2><a href="/pages/resources/">All resources →</a></div>
+      <div class="cards">
+        <a class="card" href="/pages/resources/how-infrastructure-teams-prepare-for-soc-2-audits/" style="--tab:#04703F">
+          <span class="tabb">Compliance</span><span class="hole" aria-hidden="true"></span>
+          <p class="file">File no. 005 · CMP·01 · 5 min read</p>
+          <h3>Getting ready for a SOC 2 audit without the scramble</h3>
+          <p>Auditors want continuous proof of asset control, not a snapshot from last quarter. Here's how teams generate it as they go.</p>
+          <span class="go">Read →</span>
+        </a>
+        <a class="card" href="/pages/resources/why-every-enterprise-cmdb-is-40-wrong/" style="--tab:#111614">
+          <span class="tabb">Operations</span><span class="hole" aria-hidden="true"></span>
+          <p class="file">File no. 001 · OPS·01 · 6 min read</p>
+          <h3>Why your infrastructure records are wrong more often than you think</h3>
+          <p>When the system of record drifts from what's actually installed, every decision built on it gets a little less safe, and the gap is more common than most teams assume.</p>
+          <span class="go">Read →</span>
+        </a>
+      </div>
+    </div>
+  </section>
+
+  <section class="ch" id="cta">
+    <h2>Read the theory. Then verify your own rack</h2>
+    <div class="actions">
+      <a class="btn solid" href="/pages/contact-us/"><span class="led"></span>Request a platform brief</a>
+      <a class="btn" href="/pages/resources/">All resources</a>
+    </div>
+  </section>
+
+  <footer class="foot">
+    <div class="foot-brand">
+      <a class="brand" href="/"><img alt="" src="/design-system/assets/Logos/racktrack-mark.jpg">RackTrack</a>
+      <p>Physical infrastructure intelligence for data centers.</p>
+    </div>
+    <nav aria-label="Platform"><b>Platform</b>
+      <a href="/pages/why-racktrack/">Why RackTrack</a><a href="/pages/solutions/">Solutions</a><a href="/pages/use-cases/">Use cases</a><a href="/pages/trust-security/">Trust &amp; security</a></nav>
+    <nav aria-label="Company"><b>Company</b>
+      <a href="/pages/resources/">Resources</a><a href="/pages/about-us/">About us</a><a href="/pages/contact-us/">Contact us</a></nav>
+    <div><b>Contact</b>
+      <p><a href="mailto:info@racktrack.ai">info@racktrack.ai</a></p><p><a href="tel:+18608782448">+1 (860) 878 2448</a></p><p>85 Felt Rd, Suite #604<br>South Windsor, CT 06074</p></div>
+    <div class="fine">
+      <span>© 2026 RackTrack Inc. · Patent pending</span>
+      <span class="legal"><a href="/pages/legal/privacy-policy/">Privacy</a><a href="/pages/legal/terms-of-use/">Terms</a><a href="/pages/legal/cookie-policy/">Cookies</a><a href="/pages/legal/data-we-collect/">Data we collect</a><a href="/pages/legal/third-party-services/">Third parties</a></span>
+      <span class="social"><a href="https://www.linkedin.com/company/racktrack/" rel="noopener" target="_blank">LinkedIn</a><a href="https://www.instagram.com/racktrack_inc/" rel="noopener" target="_blank">Instagram</a><a href="https://www.facebook.com/share/18depF5xzA/" rel="noopener" target="_blank">Facebook</a></span>
+    </div>
+  </footer>
+</main>
+
+<script type="importmap">
+{ "imports": {
+  "three": "https://cdn.jsdelivr.net/npm/three@0.170.0/build/three.module.js",
+  "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.170.0/examples/jsm/"
+} }
+</script>
+<!--DOMJS-START-->
+<script>
+/* ───── File 004: scroll value g, progress rail, bullet focus, figure caption (no WebGL needed) ───── */
+(()=>{
+const clamp=(x,a=0,b=1)=>Math.min(b,Math.max(a,x));
+const $=s=>document.querySelector(s), $$=s=>[...document.querySelectorAll(s)];
+const beats=['what-tools-see','blind-spot','figure','why-it-matters','closing-it'].map(id=>document.getElementById(id));
+const more=$('#more'), rail=$('#rail'), railA=$$('#rail a'), bl=$$('#bl li'), cap=$('#figcap'), capT=$('#figtxt');
+const CAPS=['<b>Fig. 1</b> · what the network can see: every device that answers the poll, drawn as volume',
+  '<b>Fig. 1</b> · what the network can see: every device that answers the poll, drawn as volume',
+  '<b>Fig. 2</b> · three silent devices, three ordinary reasons',
+  '<b>Fig. 3</b> · row F, five racks swept; one turns up a device nobody knew',
+  '<b>Fig. 4</b> · powered, unpatched, and missing from the list the network reports',
+  '<b>Fig. 5</b> · the physical sweep reconciled against what the network reports'];
+const A=window.ART={g:-1,more:1e9};
+if(location.search.includes('snap'))document.documentElement.classList.add('snap');
+function G(){const vh=innerHeight,c=vh*.5;const r0=beats[0].getBoundingClientRect();
+  if(r0.top>c){const end=r0.top+scrollY-c;return -1+clamp(scrollY/Math.max(1,end));}
+  for(let i=0;i<beats.length;i++){const r=beats[i].getBoundingClientRect();if(r.bottom>c||i===beats.length-1)return i+clamp((c-r.top)/r.height);}
+  return 5;}
+let lastCap=-2;
+function update(){
+  const g=G();A.g=g;const mt=more.getBoundingClientRect().top;A.more=mt;const vh=innerHeight;
+  const sec=g<0?-1:g<1?0:g<2?1:g<3?1.5:g<4?2:3;
+  rail.classList.toggle('on',g>-.35&&mt>vh*.6);
+  railA.forEach((a,i)=>{a.classList.toggle('on',sec===i);a.classList.toggle('done',sec>i);});
+  const sub=g<1.05||g>1.97?-1:g<1.4?0:g<1.6?1:2;bl.forEach((li,i)=>li.classList.toggle('on',i===sub));
+  cap.classList.toggle('on',g>-.9&&mt>vh*.9);
+  const ci=Math.max(0,Math.min(5,Math.floor(g)+1));if(ci!==lastCap){lastCap=ci;capT.innerHTML=CAPS[ci];}
+}
+function frame(){update();requestAnimationFrame(frame);}
+addEventListener('scroll',update,{passive:true});
+requestAnimationFrame(frame);
+})();
+</script>
+<!--DOMJS-END-->
+<!--GLJS-START-->
+<script type="module">
+/* ═════════════ File 004 · What the network can see · 3D ═════════════
+   A 42U rack (R14, row F) on a drawing sheet. Monitoring pings out from SW-01; answering devices echo and earn a
+   blue-grey lamella of "visibility volume". Three silent devices leave notches. A physical sweep fills them in. */
+import * as THREE from 'three';
+import { RoomEnvironment } from 'three/addons/environments/RoomEnvironment.js';
+
+const reduce=matchMedia('(prefers-reduced-motion: reduce)').matches;
+const SNAP=location.search.includes('snap');
+const clamp=(x,a=0,b=1)=>Math.min(b,Math.max(a,x));
+const smooth=(a,b,x)=>{const t=clamp((x-a)/(b-a));return t*t*(3-2*t)};
+const lerp=(a,b,t)=>a+(b-a)*t;
+const C=h=>new THREE.Color(h);
+const COL={link:C('#1FD67C'),linkInk:C('#04703F'),drift:C('#FF9A2E'),driftInk:C('#9C4C00'),record:C('#7C93A8'),recInk:C('#3F5871'),ink:C('#111614')};
+const MONO='"JetBrains Mono", monospace', SANS='"Inter", sans-serif';
+const V3=(x,y,z)=>new THREE.Vector3(x,y,z);
+const ART=window.ART||{g:-1,more:1e9};
+
+const canvas=document.getElementById('stage');
+let renderer;
+try{ renderer=new THREE.WebGLRenderer({canvas,antialias:true,alpha:true,powerPreference:'high-performance'}); }
+catch(e){ document.documentElement.classList.add('no-webgl'); throw e; }
+renderer.setPixelRatio(SNAP?1:Math.min(devicePixelRatio,2));
+renderer.setClearColor(0,0);
+renderer.toneMapping=THREE.ACESFilmicToneMapping; renderer.toneMappingExposure=1.02;
+renderer.outputColorSpace=THREE.SRGBColorSpace;
+renderer.shadowMap.enabled=true; renderer.shadowMap.type=SNAP?THREE.PCFShadowMap:THREE.PCFSoftShadowMap;
+const scene=new THREE.Scene();
+scene.environment=new THREE.PMREMGenerator(renderer).fromScene(new RoomEnvironment(),.04).texture; scene.environmentIntensity=.85;
+const camera=new THREE.PerspectiveCamera(28,1,.05,300);
+scene.add(new THREE.HemisphereLight(0xffffff,0x9aa39e,.55));
+const sun=new THREE.DirectionalLight(0xffffff,1.7);sun.position.set(-5,11,7);sun.castShadow=true;
+sun.shadow.mapSize.set(SNAP?1024:2048,SNAP?1024:2048);Object.assign(sun.shadow.camera,{left:-4,right:5,top:5,bottom:-4,near:1,far:30});sun.shadow.bias=-.0005;sun.shadow.radius=4;scene.add(sun);
+const fill=new THREE.DirectionalLight(0xdfe9ff,.55);fill.position.set(7,4,-5);scene.add(fill);
+const front=new THREE.DirectionalLight(0xffffff,.4);front.position.set(1,2,8);scene.add(front);
+
+function cnv(w,h){const c=document.createElement('canvas');c.width=w;c.height=h;return [c,c.getContext('2d')];}
+function tex(c){const t=new THREE.CanvasTexture(c);t.colorSpace=THREE.SRGBColorSpace;t.anisotropy=Math.min(8,renderer.capabilities.getMaxAnisotropy());return t;}
+const alu=new THREE.MeshStandardMaterial({color:'#dfe3df',metalness:.72,roughness:.3});
+const graph=new THREE.MeshStandardMaterial({color:'#2a302d',metalness:.55,roughness:.45});
+const dark=new THREE.MeshStandardMaterial({color:'#1a1f1d',metalness:.4,roughness:.55});
+const add=(m,p,parent=scene)=>{if(p)m.position.set(...p);parent.add(m);return m;};
+const REDRAW=[];  // canvas textures to repaint once webfonts are ready
+
+/* ─────────── rack geometry constants ─────────── */
+const RW=.66, RD=.96, U=.044, Y0=.1, ZF=RD/2, FACE=ZF-.03;
+const uy=(u,h=1)=>Y0+(u-1)*U+h*U/2;
+const VZ0=FACE+.06, VD=.15, VZ1=VZ0+VD, VW=RW-.04;   // visibility lamellae: in front of the face, clear of the posts
+const ROW=[{x:0,n:'R14',main:1},{x:.9,n:'R15'},{x:1.8,n:'R16'},{x:2.7,n:'R17'},{x:3.6,n:'R18'}];
+
+/* ─────────── drawing sheet ─────────── */
+const BW=5.0, BD=3.9, BX=1.75, BZ=.25;
+function sheetCanvas(){const W=2400,H=Math.round(W*BD/BW),s=W/BW;const [c,g]=cnv(W,H);const X=x=>(x-BX+BW/2)*s,Z=z=>(z-BZ+BD/2)*s;
+  g.fillStyle='#F4F6F3';g.fillRect(0,0,W,H);
+  for(let x=-BW/2;x<=BW/2+.01;x+=.2){g.fillStyle='rgba(17,22,20,.05)';g.fillRect((x+BW/2)*s,0,1.2,H);} for(let z=-BD/2;z<=BD/2+.01;z+=.2){g.fillStyle='rgba(17,22,20,.05)';g.fillRect(0,(z+BD/2)*s,W,1.2);}
+  g.strokeStyle='#111614';g.lineWidth=3;g.strokeRect(16,16,W-32,H-32);
+  // printed range rings: the sonar scope around R14
+  const cx=X(0),cz=Z(FACE);g.strokeStyle='rgba(63,88,113,.45)';g.lineWidth=2;g.setLineDash([10,9]);
+  g.save();g.beginPath();g.rect(X(-.36),0,W,H);g.clip();
+  [.7,1.05,1.4].forEach(r=>{g.beginPath();g.arc(cx,cz,r*s,0,Math.PI*2);g.stroke();});g.setLineDash([]);
+  g.strokeStyle='rgba(63,88,113,.55)';for(let a=0;a<360;a+=10){const r0=1.4*s,r1=r0+(a%30?10:22),t=a*Math.PI/180;g.beginPath();g.moveTo(cx+Math.cos(t)*r0,cz+Math.sin(t)*r0);g.lineTo(cx+Math.cos(t)*r1,cz+Math.sin(t)*r1);g.stroke();}
+  g.restore();g.fillStyle='#3F5871';g.font=`400 19px ${MONO}`;g.fillText('poll range · from SW-01',cx+1.05*s*.72+8,cz+1.05*s*.72+24);
+  // rack footprints of row F
+  ROW.forEach(r=>{g.strokeStyle=r.main?'#111614':'#4A544F';g.lineWidth=r.main?2.5:2;g.setLineDash(r.main?[]:[9,7]);g.strokeRect(X(r.x-RW/2),Z(-RD/2),RW*s,RD*s);g.setLineDash([]);
+    g.fillStyle=r.main?'#111614':'#4A544F';g.font=`${r.main?500:400} 22px ${MONO}`;g.fillText(r.n,X(r.x-RW/2),Z(-RD/2)-14);});
+  g.fillStyle='#4A544F';g.font=`400 19px ${MONO}`;g.fillText('row F · hot aisle behind',X(-.3),Z(-RD/2)-56);
+  // dimension line across the row
+  g.strokeStyle='#4A544F';g.lineWidth=1.5;g.setLineDash([6,6]);g.beginPath();g.moveTo(X(-RW/2),Z(-1.3));g.lineTo(X(3.6+RW/2),Z(-1.3));g.stroke();g.setLineDash([]);
+  [X(-RW/2),X(3.6+RW/2)].forEach(x=>{g.beginPath();g.moveTo(x,Z(-1.3)-12);g.lineTo(x,Z(-1.3)+12);g.stroke();});
+  g.fillText('5 racks · 42U each',X(1.8)-90,Z(-1.3)-12);
+  // title block
+  g.strokeStyle='#111614';g.lineWidth=2;g.strokeRect(W-520,H-110,490,82);g.beginPath();g.moveTo(W-520,H-66);g.lineTo(W-30,H-66);g.stroke();g.fillStyle='#111614';g.font=`500 22px ${MONO}`;g.fillText('DC2 · hall B · row F · R14',W-505,H-80);
+  g.fillStyle='#4A544F';g.font=`400 18px ${MONO}`;g.fillText('network visibility study · sheet 004',W-505,H-40);
+  return c;}
+const sheetMat=new THREE.MeshStandardMaterial({map:tex(sheetCanvas()),roughness:.9});REDRAW.push(()=>{sheetMat.map.image=sheetCanvas();sheetMat.map.needsUpdate=true;});
+const sheetSide=new THREE.MeshStandardMaterial({color:'#e4e8e4',metalness:.1,roughness:.8});
+const base=add(new THREE.Mesh(new THREE.BoxGeometry(BW,.06,BD),[sheetSide,sheetSide,sheetMat,sheetSide,sheetSide,sheetSide]),[BX,-.03,BZ]);base.receiveShadow=true;
+
+/* ─────────── the rack ─────────── */
+const RACK=new THREE.Group();scene.add(RACK);
+function rackFrame(parent){
+  [[-1,-1],[1,-1],[-1,1],[1,1]].forEach(([sx,sz])=>{const p=add(new THREE.Mesh(new THREE.BoxGeometry(.035,2.0,.035),graph),[sx*(RW/2-.018),1.0,sz*(RD/2-.018)],parent);p.castShadow=true;});
+  [-1,1].forEach(sx=>{const s=add(new THREE.Mesh(new THREE.BoxGeometry(.012,1.9,RD-.04),new THREE.MeshStandardMaterial({color:'#222826',metalness:.5,roughness:.5})),[sx*(RW/2-.006),1.0,0],parent);s.castShadow=true;s.receiveShadow=true;});
+  add(new THREE.Mesh(new THREE.BoxGeometry(RW,.05,RD),graph),[0,2.0,0],parent).castShadow=true;
+  add(new THREE.Mesh(new THREE.BoxGeometry(RW,.08,RD),graph),[0,.04,0],parent);}
+rackFrame(RACK);
+add(new THREE.Mesh(new THREE.BoxGeometry(RW-.02,1.9,.01),dark),[0,1.0,-RD/2+.02],RACK);
+function railCanvas(){const [c,g]=cnv(24,1024);g.fillStyle='#c9cfcb';g.fillRect(0,0,24,1024);g.fillStyle='#2a302d';for(let i=0;i<126;i++){g.fillRect(8,4+i*8.1,8,4);}return c;}
+const railMat=new THREE.MeshStandardMaterial({map:tex(railCanvas()),metalness:.6,roughness:.35});
+[-1,1].forEach(sx=>add(new THREE.Mesh(new THREE.BoxGeometry(.022,42*U,.012),[alu,alu,alu,alu,railMat,alu]),[sx*(RW/2-.045),Y0+21*U,FACE+.004],RACK));
+
+// equipment (illustrative). s: silent category
+const EQ=[
+ {u:42,h:1,k:'switch',n:'SW-01'},{u:41,h:1,k:'switch',n:'SW-02'},{u:39,h:2,k:'fw',n:'FW-01'},{u:38,h:1,k:'con',n:'CON-01'},
+ {u:36,h:2,k:'server',n:'SRV-01'},{u:34,h:2,k:'server',n:'SRV-02'},{u:32,h:2,k:'server',n:'SRV-03'},
+ {u:30,h:2,k:'server',n:'SRV-MIG-07',s:'mig'},{u:28,h:2,k:'server',n:'SRV-04'},{u:26,h:2,k:'server',n:'SRV-05'},
+ {u:25,h:1,k:'vendor',n:'unlabelled',s:'vnd'},{u:21,h:4,k:'storage',n:'ST-01'},{u:19,h:2,k:'server',n:'SRV-06'},
+ {u:17,h:2,k:'server',n:'SRV-07'},{u:15,h:2,k:'server',n:'SRV-08'},{u:13,h:2,k:'server',n:'DEC-02',s:'dec'},
+ {u:9,h:4,k:'storage',n:'ST-02'},{u:7,h:2,k:'server',n:'SRV-09'},{u:5,h:2,k:'blank'},{u:1,h:4,k:'ups',n:'UPS-1'}];
+function faceCanvas(d){const {k,n,h,s}=d;const W=512,H=Math.round(h*37);const [c,g]=cnv(W,H);
+  const bg={blank:'#222826',switch:'#2a302d',fw:'#262c29',con:'#1d2321',server:'#2f3633',storage:'#262c29',ups:'#2b312e',vendor:'#cfd4d0'}[k];
+  g.fillStyle=bg;g.fillRect(0,0,W,H);g.fillStyle='rgba(255,255,255,.06)';g.fillRect(0,0,W,2);g.fillStyle='rgba(0,0,0,.35)';g.fillRect(0,H-2,W,2);
+  const txt=(t,x,y,col='#DDE4DF')=>{g.fillStyle=col;g.font=`500 13px ${MONO}`;g.fillText(t,x,y);};
+  if(k==='blank'){g.fillStyle='rgba(255,255,255,.05)';for(let y=6;y<H-4;y+=8)g.fillRect(40,y,W-80,2);}
+  if(k==='switch'){txt(n,12,H/2+5);g.fillStyle='#1FD67C';g.fillRect(W-22,H/2-3,6,6);}
+  if(k==='fw'){txt(n,14,22);g.fillStyle='#0c1110';g.fillRect(150,14,110,H-28);g.fillStyle='#7C93A8';g.font=`500 12px ${MONO}`;g.fillText('HA · active',158,H/2+4);
+    for(let i=0;i<8;i++){g.fillStyle='#111514';g.fillRect(290+i*25,H/2-9,19,15);g.fillStyle=i<6?'#1FD67C':'#2f3633';g.fillRect(292+i*25,H/2-12,4,3);}}
+  if(k==='con'){txt(n,12,H/2+5);for(let i=0;i<16;i++){g.fillStyle='#0f1312';g.fillRect(120+i*22,H/2-8,17,14);}g.fillStyle='#7C93A8';g.fillRect(W-24,H/2-3,6,6);}
+  if(k==='server'){g.fillStyle='#262c29';for(let i=0;i<8;i++)g.fillRect(120+i*38,8,32,H-16);g.fillStyle='#1d2321';for(let i=0;i<8;i++)g.fillRect(124+i*38,H/2-2,24,3);
+    txt(n,14,20);g.fillStyle='#1a1f1d';for(let y=10;y<H-8;y+=6)g.fillRect(W-72,y,56,3);
+    // status LEDs: power · NIC. Silent ones: powered, NIC dark
+    const pw=s==='dec'?'#8f9b95':'#DDE4DF';g.fillStyle=pw;g.fillRect(14,H-16,6,6);g.fillStyle=s?'#0f1312':'#1FD67C';g.fillRect(26,H-16,6,6);g.fillStyle=s?'#0f1312':'#7C93A8';g.fillRect(38,H-16,6,6);
+    g.fillStyle='#0f1312';g.fillRect(W-150,H-19,18,12);g.fillRect(W-128,H-19,18,12);}
+  if(k==='storage'){txt(n,14,20);for(let r=0;r<3;r++)for(let i=0;i<4;i++){const x=90+i*100,y=10+r*(H-20)/3;g.fillStyle='#343b38';g.fillRect(x,y,92,(H-20)/3-6);g.fillStyle=(r+i)%5?'#1FD67C':'#7C93A8';g.fillRect(x+80,y+6,5,5);}}
+  if(k==='ups'){txt(n,14,20);g.fillStyle='#0c1110';g.fillRect(W-170,16,140,44);g.fillStyle='#1FD67C';g.font=`500 16px ${MONO}`;g.fillText('230V 38%',W-160,44);
+    g.fillStyle='#1a1f1d';for(let y=12;y<H-8;y+=7)g.fillRect(40,y,W-240,3);}
+  if(k==='vendor'){g.fillStyle='rgba(17,22,20,.14)';for(let x=40;x<300;x+=9)g.fillRect(x,8,4,H-16);g.fillStyle='#2a302d';g.fillRect(330,H/2-7,26,14);g.fillRect(362,H/2-7,26,14);g.fillStyle='#DDE4DF';g.fillRect(W-40,H/2-4,8,8);g.strokeStyle='#8f9b95';g.lineWidth=1.5;g.strokeRect(W-41,H/2-5,10,10);}
+  return c;}
+const DEVS=[];
+const bodyGeo=new THREE.BoxGeometry(1,1,1);
+EQ.forEach(d=>{const hh=d.h*U-.003;const y=uy(d.u,d.h);
+  const body=add(new THREE.Mesh(bodyGeo,dark),[0,y,FACE-.39],RACK);body.scale.set(RW-.1,hh,.78);body.castShadow=true;body.receiveShadow=true;
+  const fm=new THREE.MeshStandardMaterial({map:tex(faceCanvas(d)),metalness:d.k==='vendor'?.55:.35,roughness:d.k==='vendor'?.35:.55,toneMapped:false});
+  add(new THREE.Mesh(new THREE.PlaneGeometry(RW-.1,hh),fm),[0,y,FACE+.0005],RACK);REDRAW.push(()=>{fm.map.image=faceCanvas(d);fm.map.needsUpdate=true;});
+  if(d.k!=='blank')DEVS.push({...d,y,hh});});
+const DV=Object.fromEntries(DEVS.map(d=>[d.s||d.n,d]));
+// switch ports (instanced)
+const PX=c=>-.205+c*.0191;const PORTS=[];
+['SW-01','SW-02'].forEach((sw,si)=>{for(let r=0;r<2;r++)for(let c=0;c<24;c++)PORTS.push({x:PX(c),y:uy(si?41:42)+(r?-.0092:.0092),used:si?(c<14):(c<20)});});
+const ports=new THREE.InstancedMesh(new THREE.PlaneGeometry(.0135,.0075),new THREE.MeshBasicMaterial({color:0xffffff,toneMapped:false}),PORTS.length);RACK.add(ports);
+{const m=new THREE.Matrix4();PORTS.forEach((p,i)=>{m.makeTranslation(p.x,p.y,FACE+.0015);ports.setMatrixAt(i,m);ports.setColorAt(i,C(p.used?'#56605b':'#0d1110'));});}
+// patch cables from the switches down the right lane (physical, dark), kept behind the volume
+const cabMat=new THREE.MeshStandardMaterial({color:'#3a4541',roughness:.6,metalness:.1});
+const LANE=.262, CZ=FACE+.03;
+[[3,'SRV-01'],[6,'SRV-03'],[9,'SRV-05'],[12,'ST-01'],[15,'SRV-07'],[18,'ST-02']].forEach(([pc,to],i)=>{const a=PORTS[pc+(i%2)*24];const d=DEVS.find(x=>x.n===to);
+  const pts=[V3(a.x,a.y,FACE+.004),V3(a.x+.01,a.y-.01,CZ),V3(LANE-.004*i,a.y-.05,CZ+.004),V3(LANE-.004*i,d.y+.03,CZ+.004),V3(.2,d.y,CZ-.012),V3(.19,d.y-.004,FACE+.004)];
+  add(new THREE.Mesh(new THREE.TubeGeometry(new THREE.CatmullRomCurve3(pts),48,.0028,6,false),cabMat),null,RACK);});
+// the unplugged cable at DEC-02: hangs loose in front of the face, plug end free
+const dec=DV.dec;
+const plugCurve=new THREE.CatmullRomCurve3([V3(LANE,dec.y+.07,CZ+.004),V3(LANE-.01,dec.y-.02,CZ+.006),V3(.2,dec.y-.075,CZ+.012),V3(.15,dec.y-.06,CZ+.016),V3(.13,dec.y-.03,CZ+.018)]);
+const loose=add(new THREE.Mesh(new THREE.TubeGeometry(plugCurve,40,.0032,6,false),new THREE.MeshStandardMaterial({color:'#5b6e80',roughness:.55})),null,RACK);
+const plug=add(new THREE.Mesh(new THREE.BoxGeometry(.012,.02,.009),new THREE.MeshStandardMaterial({color:'#cfd6da',roughness:.3,metalness:.2})),[.128,dec.y-.018,CZ+.018],RACK);plug.rotation.z=.5;
+const plugTip=V3(.126,dec.y-.008,CZ+.02);
+
+/* ─────────── the visibility volume: one lamella per device ─────────── */
+const NV=DEVS.length;
+const slabMat=new THREE.MeshBasicMaterial({color:0xffffff,transparent:true,opacity:.44,depthWrite:false,toneMapped:false});
+const slabs=new THREE.InstancedMesh(new THREE.BoxGeometry(1,1,1),slabMat,NV);slabs.frustumCulled=false;scene.add(slabs);slabs.renderOrder=2;
+DEVS.forEach((d,i)=>{d.i=i;d.c=V3(0,d.y,VZ0+VD/2);d.sh=d.hh-.006;slabs.setColorAt(i,COL.record);});
+function edgeGeo(list){const pos=[],col=[];list.forEach(d=>{const e=new THREE.EdgesGeometry(new THREE.BoxGeometry(VW,d.sh,VD));const p=e.attributes.position;d.e0=pos.length/3;
+    for(let j=0;j<p.count;j++){pos.push(p.getX(j),p.getY(j)+d.y,p.getZ(j)+VZ0+VD/2);col.push(0,0,0,0);}d.e1=pos.length/3;});
+  const g=new THREE.BufferGeometry();g.setAttribute('position',new THREE.Float32BufferAttribute(pos,3));g.setAttribute('color',new THREE.Float32BufferAttribute(col,4));return g;}
+const ACT=DEVS.filter(d=>!d.s), SIL=DEVS.filter(d=>d.s);
+const actEdges=new THREE.LineSegments(edgeGeo(ACT),new THREE.LineBasicMaterial({vertexColors:true,transparent:true,toneMapped:false,depthWrite:false}));scene.add(actEdges);actEdges.renderOrder=3;
+const silEdges=new THREE.LineSegments(edgeGeo(SIL),new THREE.LineDashedMaterial({vertexColors:true,transparent:true,dashSize:.016,gapSize:.011,toneMapped:false,depthWrite:false}));silEdges.computeLineDistances();scene.add(silEdges);silEdges.renderOrder=3;
+function setEdge(obj,d,c,a){const ca=obj.geometry.attributes.color;for(let j=d.e0;j<d.e1;j++)ca.setXYZW(j,c.r,c.g,c.b,a);}
+// flags on the silent three (after reconcile)
+const flags=new THREE.InstancedMesh(new THREE.BoxGeometry(.07,.026,.006),new THREE.MeshStandardMaterial({color:'#FF9A2E',roughness:.5,emissive:'#5a2a00',emissiveIntensity:.35}),3);scene.add(flags);flags.frustumCulled=false;
+
+/* ─────────── sonar: ripples across the volume's face and on the sheet ─────────── */
+const SRC=V3(-.05,uy(42),FACE+.02);
+const FZ=VZ1+.002;
+const NOTCH=SIL.map(d=>new THREE.Vector2(d.y-d.sh/2-.003,d.y+d.sh/2+.003)).concat([new THREE.Vector2(uy(5,2)-U,uy(5,2)+U)]);
+const rip={uR:{value:new THREE.Vector3()},uF:{value:new THREE.Vector3()},uA:{value:0},uCol:{value:C('#56708a')}};
+const faceRip=add(new THREE.Mesh(new THREE.PlaneGeometry(VW,42*U),new THREE.ShaderMaterial({transparent:true,depthWrite:false,toneMapped:false,
+  uniforms:{...rip,uSrc:{value:new THREE.Vector2(SRC.x,SRC.y)},uDz:{value:FZ-SRC.z},uN:{value:NOTCH}},
+  vertexShader:`varying vec3 vW;void main(){vec4 w=modelMatrix*vec4(position,1.);vW=w.xyz;gl_Position=projectionMatrix*viewMatrix*w;}`,
+  fragmentShader:`uniform vec3 uR;uniform vec3 uF;uniform float uA;uniform vec3 uCol;uniform vec2 uSrc;uniform float uDz;uniform vec2 uN[4];varying vec3 vW;
+   void main(){for(int i=0;i<4;i++){if(vW.y>uN[i].x&&vW.y<uN[i].y)discard;}
+    float d=sqrt(pow(distance(vW.xy,uSrc),2.)+uDz*uDz);float a=0.;
+    for(int k=0;k<3;k++){float r=uR[k];a+=uF[k]*(.85*exp(-pow((d-r)/.0042,2.))+.1*smoothstep(r-.1,r,d)*step(d,r));}
+    gl_FragColor=vec4(uCol,clamp(a,0.,1.)*uA);}`})),[0,Y0+21*U,FZ]);faceRip.renderOrder=4;
+const floorRip=add(new THREE.Mesh(new THREE.PlaneGeometry(3.2,3.2),new THREE.ShaderMaterial({transparent:true,depthWrite:false,toneMapped:false,
+  uniforms:{...rip,uC:{value:new THREE.Vector2(0,FACE)}},
+  vertexShader:`varying vec3 vW;void main(){vec4 w=modelMatrix*vec4(position,1.);vW=w.xyz;gl_Position=projectionMatrix*viewMatrix*w;}`,
+  fragmentShader:`uniform vec3 uR;uniform vec3 uF;uniform float uA;uniform vec3 uCol;uniform vec2 uC;varying vec3 vW;
+   void main(){float d=distance(vW.xz,uC);float a=0.;
+    for(int k=0;k<3;k++){float r=uR[k]*.72;a+=uF[k]*exp(-pow((d-r)/.008,2.));}
+    a*=smoothstep(1.45,1.1,d)*smoothstep(.34,.5,d)*smoothstep(-.36,-.3,vW.x);gl_FragColor=vec4(uCol,clamp(a,0.,1.)*uA*.95);}`})),[0,.004,FACE]);floorRip.rotation.x=-Math.PI/2;floorRip.renderOrder=1;
+// the poll source: a small ring on SW-01
+const srcRing=add(new THREE.Mesh(new THREE.RingGeometry(.012,.018,32),new THREE.MeshBasicMaterial({color:COL.recInk,transparent:true,toneMapped:false,depthWrite:false})),[SRC.x,SRC.y,FACE+.012]);
+
+/* ─────────── the physical sweep (a rising green plane) ─────────── */
+const sweep=new THREE.Group();scene.add(sweep);
+const swPlane=add(new THREE.Mesh(new THREE.PlaneGeometry(RW+.14,VZ1-FACE+.12),new THREE.MeshBasicMaterial({color:COL.link,transparent:true,opacity:.22,side:THREE.DoubleSide,depthWrite:false,toneMapped:false})),[0,0,(FACE+VZ1)/2+.03],sweep);swPlane.rotation.x=-Math.PI/2;
+const swBar=add(new THREE.Mesh(new THREE.BoxGeometry(RW+.14,.006,.006),new THREE.MeshBasicMaterial({color:COL.link,toneMapped:false})),[0,0,VZ1+.09],sweep);
+const swWash=add(new THREE.Mesh(new THREE.PlaneGeometry(RW-.02,1),new THREE.MeshBasicMaterial({color:COL.link,transparent:true,opacity:.1,depthWrite:false,toneMapped:false})),[0,0,FACE+.012]);
+
+/* ─────────── two lists standing on the sheet ─────────── */
+const LW=.62, LH=.95, LZ=1.12, LEAN=-.3, HDR=150, RH=37;
+const NET=ACT, PHY=DEVS;
+function listCanvas(kind){const W=620,H=950;const [c,g]=cnv(W,H);const phy=kind==='phy';
+  g.fillStyle='#F4F6F3';g.fillRect(0,0,W,H);g.strokeStyle=phy?'#04703F':'#3F5871';g.lineWidth=6;g.strokeRect(3,3,W-6,H-6);
+  g.fillStyle='#111614';g.font=`500 40px ${SANS}`;g.fillText(phy?'Physical sweep':'Network reports',30,62);
+  g.fillStyle=phy?'#04703F':'#3F5871';g.font=`400 19px ${MONO}`;g.fillText(phy?'R14 · 19 devices · by presence':'R14 · 16 devices · answered the poll',32,96);
+  g.fillStyle='#111614';g.fillRect(30,HDR-26,W-60,2);
+  const L=phy?PHY:NET;g.font=`400 19px ${MONO}`;
+  L.forEach((d,i)=>{const y=HDR+i*RH+RH/2+6;const bad=phy&&d.s;
+    if(bad){g.fillStyle='rgba(255,154,46,.18)';g.fillRect(24,y-RH/2-5,W-48,RH-2);}
+    g.fillStyle='rgba(17,22,20,.08)';g.fillRect(30,y+RH/2-7,W-60,1.5);
+    g.fillStyle='#4A544F';g.fillText('U'+String(d.u).padStart(2,'0'),34,y);g.fillStyle='#111614';g.fillText(d.s==='vnd'?'unlabelled box':d.n,112,y);
+    g.fillStyle=bad?'#9C4C00':phy?'#04703F':'#3F5871';g.fillText(bad?'silent · flagged':phy?'present':'answering',phy?384:390,y);});
+  return c;}
+function makeList(kind){const grp=new THREE.Group();scene.add(grp);const lean=new THREE.Group();lean.rotation.x=LEAN;grp.add(lean);
+  add(new THREE.Mesh(new THREE.BoxGeometry(LW,LH,.012),alu),[0,LH/2,0],lean).castShadow=true;
+  const fm=new THREE.MeshBasicMaterial({map:tex(listCanvas(kind)),toneMapped:false});add(new THREE.Mesh(new THREE.PlaneGeometry(LW,LH),fm),[0,LH/2,.0065],lean);
+  REDRAW.push(()=>{fm.map.image=listCanvas(kind);fm.map.needsUpdate=true;});
+  add(new THREE.Mesh(new THREE.BoxGeometry(LW+.06,.024,.16),graph),[0,.012,-.02],grp).castShadow=true;
+  return {grp,lean};}
+const LNET=makeList('net'), LPHY=makeList('phy');
+const NETX=1.02, PHYX=1.88;
+const rowPt=(L,i,side)=>L.lean.localToWorld(V3(side*LW/2,LH/2-(HDR+i*RH+RH/2)/1000,.008));
+const links=new THREE.LineSegments(new THREE.BufferGeometry(),new THREE.LineBasicMaterial({vertexColors:true,toneMapped:false,transparent:true}));scene.add(links);links.frustumCulled=false;
+const lpos=new Float32Array(PHY.length*6),lcol=new Float32Array(PHY.length*6);links.geometry.setAttribute('position',new THREE.BufferAttribute(lpos,3));links.geometry.setAttribute('color',new THREE.BufferAttribute(lcol,3));
+
+/* ─────────── row F: four more racks for the key figure ─────────── */
+function genericFace(seed){const W=256,H=1024;const [c,g]=cnv(W,H);g.fillStyle='#222826';g.fillRect(0,0,W,H);let y=8,k=seed;
+  while(y<H-20){k=(k*9301+49297)%233280;const h=[20,20,40,40,40,80][k%6];g.fillStyle=['#2f3633','#2a302d','#262c29','#1d2321'][k%4];g.fillRect(10,y,W-20,h-3);
+    g.fillStyle=(k%7)?'#1FD67C':'#7C93A8';g.fillRect(18,y+h/2-3,5,5);y+=h;}return c;}
+const NB=ROW.filter(r=>!r.main).map((r,i)=>{const grp=new THREE.Group();grp.position.x=r.x;scene.add(grp);
+  add(new THREE.Mesh(new THREE.BoxGeometry(RW,1.98,RD),graph),[0,.99,0],grp).castShadow=true;
+  add(new THREE.Mesh(new THREE.PlaneGeometry(RW-.08,1.84),new THREE.MeshStandardMaterial({map:tex(genericFace(i*37+11)),toneMapped:false,roughness:.6})),[0,1.0,RD/2+.001],grp);
+  const vol=add(new THREE.Mesh(new THREE.BoxGeometry(VW,1.82,VD),new THREE.MeshBasicMaterial({color:COL.record,transparent:true,opacity:.26,depthWrite:false,toneMapped:false})),[0,1.0,VZ0+VD/2],grp);
+  const ve=add(new THREE.LineSegments(new THREE.EdgesGeometry(new THREE.BoxGeometry(VW,1.82,VD)),new THREE.LineBasicMaterial({color:COL.recInk,transparent:true,toneMapped:false})),[0,1.0,VZ0+VD/2],grp);
+  return {grp,vol,ve,x:r.x};});
+const ringGeo=new THREE.RingGeometry(.2,.235,48);
+const RINGS=ROW.map(r=>{const m=add(new THREE.Mesh(ringGeo,new THREE.MeshBasicMaterial({color:r.main?COL.drift:COL.link,transparent:true,toneMapped:false,depthWrite:false,side:THREE.DoubleSide})),[r.x,.006,1.1]);m.rotation.x=-Math.PI/2;return {m,x:r.x,main:r.main};});
+const curtain=new THREE.Group();scene.add(curtain);
+add(new THREE.Mesh(new THREE.PlaneGeometry(1.9,2.2),new THREE.MeshBasicMaterial({color:COL.link,transparent:true,opacity:.18,side:THREE.DoubleSide,depthWrite:false,toneMapped:false})),[0,1.1,.3],curtain).rotation.y=Math.PI/2;
+add(new THREE.Mesh(new THREE.BoxGeometry(.008,.008,1.9),new THREE.MeshBasicMaterial({color:COL.link,toneMapped:false})),[0,2.2,.3],curtain);
+add(new THREE.Mesh(new THREE.BoxGeometry(.012,.004,1.9),new THREE.MeshBasicMaterial({color:COL.link,toneMapped:false})),[0,.004,.3],curtain);
+
+/* ─────────── tags ─────────── */
+const hud=document.getElementById('hud');const TG=[];
+function tag(k,html,cls,pos,follow){const el=document.createElement('div');el.className='tag '+cls;el.innerHTML=`<i></i><span>${html}</span>`;hud.appendChild(el);const t={k,el,pos:pos.clone?pos:V3(...pos),follow,modes:cls.includes('down')?['d']:cls.includes('up')?['u','r']:cls.includes('left')?['l','r']:['r','l'],on:false};TG.push(t);return t;}
+const R=(d,x=VW/2)=>V3(x,d.y,VZ1);
+tag('hVol','<b>What the network can see</b>16 devices answer the poll','rec keep',[VW/2,uy(41),VZ1]);
+tag('hSil','<b>Not talking</b>so not in the picture','ink',R(DV.mig));
+tag('aSrc','<b>Monitoring</b>polls what is addressable','rec keep',[VW/2,SRC.y,VZ1]);
+tag('aSil','<b>Powered, not talking</b>no echo, outside the volume','ink keep',R(DV.mig));
+tag('aSil2','<b>Not on the network yet</b>no echo','ink',R(DV.vnd));
+tag('aAns','<b>Answers</b>lit, inside the volume','rec',[VW/2,uy(21,4),VZ1]);
+tag('bMig','<b>U30 · leftover from a migration</b>never physically removed','ink keep',R(DV.mig));
+tag('bVnd','<b>U25 · vendor equipment</b>no ticket filed','ink keep',R(DV.vnd));
+tag('bDec','<b>U13 · decommissioned</b>unplugged, still in the rack','ink keep',plugTip);
+tag('fOne','<b>1 rack in 5</b>a device nobody knew was there','drift keep down',[ROW[0].x,.01,1.1+.235]);
+tag('fOk','<b>4 racks</b>nothing unexpected','link down',[ROW[3].x-.45,.01,1.1+.235]);
+tag('cPat','<b>Unpatched, uncontrolled</b>firmware unknown','drift keep',R(DV.mig));
+tag('cPow','<b>Powered</b>PSU LED on','ink left',[-.262,DV.mig.y-.012,FACE]);
+tag('cDash','<b>Network reports</b>16 devices · U30 not listed','rec keep',V3(),()=>LNET.lean.localToWorld(V3(LW/2,LH*.82,0)));
+tag('dSw','<b>Physical sweep</b>every device, by presence','link keep',V3(),()=>V3(VW/2+.07,sweep.position.y,VZ1+.09));
+tag('dF1','<b>Present, silent</b>U30','drift',R(DV.mig));
+tag('dF2','<b>Present, silent</b>U25','drift',R(DV.vnd));
+tag('dF3','<b>Present, silent</b>U13','drift',R(DV.dec));
+tag('dPhy','<b>Physical sweep</b>19 devices','link keep up',V3(),()=>LPHY.lean.localToWorld(V3(0,LH,0)));
+tag('dNet','<b>Network reports</b>16 devices','rec up',V3(),()=>LNET.lean.localToWorld(V3(0,LH,0)));
+tag('dRec','<b>3 present but silent</b>flagged, not forgotten','drift keep',V3(),()=>rowPt(LPHY,PHY.indexOf(DV.vnd),1));
+
+/* ─────────── camera keys ─────────── g, position, target, span (how much of the rack must stay clear of the text) */
+const CAMS=[
+  [-1.0,[.95,.55,4.7],[.04,1.1,.3],9],
+  [-.25,[1.2,2.0,5.6],[.08,.98,.3],9],
+  [.5,[1.35,2.6,6.0],[.1,.94,.3],9],
+  [1.3,[.7,1.85,3.75],[.04,1.36,.5],.62],
+  [1.5,[-.32,1.5,3.8],[0,1.15,.5],.62],
+  [1.7,[.7,.45,3.75],[.02,.74,.5],.62],
+  [2.5,[2.0,6.9,4.0],[1.8,0,.25],9],
+  [3.5,[1.1,1.3,3.7],[.55,.95,.7],9],
+  [4.3,[.4,1.02,5.8],[.1,1.0,.4],9],
+  [4.6,[1.75,2.2,5.3],[.85,.7,.75],9],
+  [6.0,[1.75,2.2,5.3],[.85,.7,.75],9]];
+function camAt(g){if(g<=CAMS[0][0])return [V3(...CAMS[0][1]),V3(...CAMS[0][2]),CAMS[0][3]];
+  for(let i=0;i<CAMS.length-1;i++){const a=CAMS[i],b=CAMS[i+1];if(g<=b[0]){const h=(b[0]-a[0])*.22;const t=smooth(a[0]+h,b[0]-h,g);
+    return [V3(...a[1]).lerp(V3(...b[1]),t),V3(...a[2]).lerp(V3(...b[2]),t),Math.exp(lerp(Math.log(a[3]),Math.log(b[3]),t))];}}
+  const z=CAMS[CAMS.length-1];return [V3(...z[1]),V3(...z[2]),z[3]];}
+
+let vw=0,vh=0,mobile=false;
+function resize(){vw=innerWidth;vh=innerHeight;mobile=vw<760;renderer.setSize(vw,vh,false);camera.aspect=vw/vh;camera.updateProjectionMatrix();}
+addEventListener('resize',resize);resize();
+
+/* framing guard: project the subject; shift the view, then dolly out, until nothing enters the reading column */
+const GPTS=[];const _v=V3();
+function subjectPoints(T,span,st){GPTS.length=0;
+  for(let y=0;y<=2.001;y+=.1){if(Math.abs(y-T.y)>span)continue;[[-RW/2,-RD/2],[RW/2,-RD/2],[-RW/2,VZ1],[RW/2,VZ1]].forEach(([x,z])=>GPTS.push(V3(x,y,z)));}
+  if(!GPTS.length)[[-RW/2,VZ1],[RW/2,VZ1]].forEach(([x,z])=>GPTS.push(V3(x,T.y,z)));
+  if(st.rip>.3)for(let a=0;a<12;a++){const t=a/12*Math.PI*2;GPTS.push(V3(Math.cos(t)*1.05,0,FACE+Math.sin(t)*1.05));}
+  if(st.nb>.05)NB.forEach(n=>[[-RW/2,-RD/2],[RW/2,-RD/2],[-RW/2,1.35],[RW/2,1.35]].forEach(([x,z])=>{GPTS.push(V3(n.x+x,0,z));GPTS.push(V3(n.x+x,2*st.nb,z));}));
+  [[LNET,st.net],[LPHY,st.phy]].forEach(([L,w])=>{if(w>.05){L.grp.updateMatrixWorld(true);[[-1,0],[1,0],[-1,1],[1,1]].forEach(([sx,sy])=>GPTS.push(L.lean.localToWorld(V3(sx*LW/2,sy*LH,0))));}});}
+function measure(){let x0=1e9,x1=-1e9,y0=1e9,y1=-1e9;camera.updateMatrixWorld();
+  for(const p of GPTS){_v.copy(p).applyMatrix4(camera.matrixWorldInverse);if(_v.z>-.05)continue;_v.applyMatrix4(camera.projectionMatrix);const sx=(_v.x+1)/2*vw,sy=(1-_v.y)/2*vh;
+    if(!mobile&&(sy<-.02*vh||sy>1.02*vh))continue;x0=Math.min(x0,sx);x1=Math.max(x1,sx);y0=Math.min(y0,sy);y1=Math.max(y1,sy);}
+  return {x0,x1,y0,y1};}
+const OFFY=()=>mobile?vh*.27:0, OFFX=()=>mobile?0:-(.63-.5)*vw;
+function placeCam(P,T,dolly,shift){camera.position.copy(T).addScaledVector(_d.copy(P).sub(T),dolly);camera.lookAt(T);camera.setViewOffset(vw,vh,OFFX()-shift,OFFY(),vw,vh);}
+const _d=V3();
+function fit(P,T,span){let shift=0,dolly=1;const wide=span>3;
+  for(let it=0;it<16;it++){placeCam(P,T,dolly,shift);const m=measure();if(m.x0>1e8)break;
+    if(mobile){const need=Math.max(78-m.y0,m.y1-vh*.455,10-m.x0,m.x1-(vw-10));if(need<=0)break;dolly*=1+Math.min(.3,need/vh*2.2);continue;}
+    const L=.465*vw-m.x0, Rr=wide?m.x1-.975*vw:0, V=wide?Math.max(96-m.y0,m.y1-.88*vh):0;
+    if(L<=0&&Rr<=0&&V<=0)break;
+    if(L>0&&!wide&&shift<.2*vw){shift=Math.min(.2*vw,shift+L+2);continue;}
+    dolly*=1+Math.min(.3,Math.max(L,Rr,V)/vw*1.6);}
+  return {shift,dolly};}
+
+/* ─────────── frame ─────────── */
+const clock=new THREE.Clock();const M4=new THREE.Matrix4(),Q=new THREE.Quaternion(),S1=V3(1,1,1);
+const cp=V3(2.7,.8,4.5),ct=V3(.1,1.08,.25);let gShift=0,gDolly=1,first=true;
+const cWhite=C('#c9d6e2'),cTmp=new THREE.Color();
+const more=document.getElementById('more');
+const TXT=[...document.querySelectorAll('#hero .copy,.leadp,.inner')];
+function frame(){requestAnimationFrame(frame);step();}
+function step(){
+  const dt=Math.min(clock.getDelta(),.05),time=clock.elapsedTime;
+  const g=ART.g, mt=more.getBoundingClientRect().top;
+  const showCanvas=mt>0, showHud=mt>vh*1.0;
+  canvas.style.visibility=showCanvas?'visible':'hidden';hud.style.visibility=showHud?'visible':'hidden';hud.style.opacity=showHud?1:0;
+  if(!showCanvas)return;
+
+  // ── state weights
+  const wHero=1-smooth(-.7,-.2,g);
+  const wS1=smooth(-.2,.1,g)*(1-smooth(.92,1.05,g));
+  const wS2=smooth(.95,1.1,g)*(1-smooth(1.93,2.05,g));
+  const nb=smooth(2.0,2.2,g)*(1-smooth(2.85,3.0,g));             // neighbour racks up
+  const wFig=smooth(2.1,2.25,g)*(1-smooth(2.85,2.98,g));
+  const wS3=smooth(3.0,3.15,g)*(1-smooth(3.93,4.05,g));
+  const netL=smooth(3.02,3.3,g);
+  const sw=smooth(4.06,4.36,g);                                    // sweep progress
+  const wSweep=smooth(4.02,4.08,g)*(1-smooth(4.36,4.42,g));
+  const phyL=smooth(4.38,4.52,g);
+  const linkP=smooth(4.5,4.6,g);
+  const recon=smooth(4.58,4.64,g);
+  const wRip=Math.max(1-smooth(1.9,2.05,g),smooth(3.0,3.2,g)*(1-smooth(3.95,4.08,g))*.8);
+
+  // ── camera + framing guard
+  const [Pp,Tt,span]=camAt(g);
+  if(mobile){Pp.sub(Tt).multiplyScalar(1.12).add(Tt);}
+  const f=(reduce||SNAP||first)?1:1-Math.pow(.02,dt);cp.lerp(Pp,f);ct.lerp(Tt,f);first=false;
+  subjectPoints(ct,span,{rip:wRip*(1-wS2),nb,net:netL,phy:phyL});
+  const fitR=fit(cp,ct,span);
+  const fk=(reduce||SNAP)?1:1-Math.pow(.004,dt);gShift=lerp(gShift,fitR.shift,fk);gDolly=lerp(gDolly,fitR.dolly,fk);
+  placeCam(cp,ct,gDolly,gShift);
+
+  // ── sonar pings
+  const tt=(reduce||SNAP)?.45:time;
+  const rr=[0,1,2].map(k=>{const fr=((tt*.32+k/3)%1);return [fr*2.05,Math.pow(1-fr,1.3)*smooth(0,.06,fr)];});
+  rip.uR.value.set(rr[0][0],rr[1][0],rr[2][0]);rip.uF.value.set(rr[0][1],rr[1][1],rr[2][1]);rip.uA.value=wRip;
+  faceRip.visible=floorRip.visible=wRip>.01;srcRing.material.opacity=wRip;srcRing.scale.setScalar(1+(reduce||SNAP?.4:(tt*1.3)%1)*.8);
+
+  // ── lamellae (volume)
+  const sweepY=lerp(.02,2.02,sw);sweep.position.y=sweepY;sweep.visible=wSweep>.01;swPlane.material.opacity=.22*wSweep;swBar.visible=wSweep>.3;
+  swWash.visible=wSweep>.01;swWash.scale.y=Math.max(.001,sweepY-.1);swWash.position.y=.1+(sweepY-.1)/2;swWash.material.opacity=.08*wSweep;
+  const focus=g<1.4?'mig':g<1.6?'vnd':'dec';
+  DEVS.forEach(d=>{const swept=g>4.04&&(d.y<sweepY||sw>=1);let sc=1,c;
+    if(!d.s){let e=0;for(const [r,fa] of rr){const dd=Math.hypot(d.y-SRC.y,SRC.x,FZ-SRC.z);e+=fa*Math.exp(-Math.pow((r-dd)/.09,2));}
+      c=cTmp.copy(COL.record).lerp(COL.recInk,clamp(e*wRip*.9));if(swept)c.copy(COL.link);
+      setEdge(actEdges,d,swept?COL.linkInk:COL.recInk,swept?.95:.8);}
+    else{sc=swept?1:0;c=cTmp.copy(COL.drift).lerp(COL.link,recon);
+      let ea=0,ec=COL.ink;
+      if(wS2>.02){ea=wS2*(d.s===focus?1:.4);}
+      if(wS3>.02&&d.s==='mig'){ea=wS3;ec=COL.drift;}
+      if(swept){ea=1;ec=recon>.5?COL.linkInk:COL.driftInk;}
+      setEdge(silEdges,d,ec,ea);}
+    M4.compose(d.c,Q.identity(),S1.set(VW,d.sh,sc?VD:0.0001).multiplyScalar(sc?1:0));slabs.setMatrixAt(d.i,M4);slabs.setColorAt(d.i,c);});
+  slabs.instanceMatrix.needsUpdate=true;slabs.instanceColor.needsUpdate=true;
+  actEdges.geometry.attributes.color.needsUpdate=true;silEdges.geometry.attributes.color.needsUpdate=true;
+  SIL.forEach((d,i)=>{const k=recon;M4.compose(V3(VW/2+.035*k,d.y,VZ1-.03),Q.identity(),S1.set(k,k,k));flags.setMatrixAt(i,M4);});flags.instanceMatrix.needsUpdate=true;flags.visible=recon>.01;
+  loose.material.color.set(wS2>.3&&focus==='dec'?'#FF9A2E':'#5b6e80');
+
+  // ── row F + curtain
+  const cx=lerp(-.7,4.2,smooth(2.18,2.6,g));
+  curtain.position.x=cx;curtain.visible=wFig>.01&&cx<4.15;
+  NB.forEach(n=>{n.grp.visible=nb>.01;n.grp.scale.set(1,Math.max(.001,nb),1);const hit=cx>n.x&&wFig>.01;n.vol.material.color.copy(hit?COL.link:COL.record);n.ve.material.color.copy(hit?COL.linkInk:COL.recInk);});
+  RINGS.forEach(r=>{const on=wFig*smooth(r.x-.05,r.x+.2,cx);r.m.visible=on>.01;r.m.material.opacity=on;const pulse=(r.main&&!reduce&&!SNAP)?1+.12*Math.sin(time*4):1;r.m.scale.setScalar(Math.max(.001,on)*pulse);});
+
+  // ── lists
+  LNET.grp.visible=netL>.01;LNET.grp.position.set(NETX,0,LZ);LNET.grp.scale.setScalar(Math.max(.001,netL));
+  LPHY.grp.visible=phyL>.01;{const t=phyL;LPHY.grp.position.set(lerp(PHYX+.9,PHYX,t),Math.sin(Math.PI*t)*.28,lerp(LZ+.25,LZ,t));LPHY.grp.scale.setScalar(Math.max(.001,.6+.4*t));}
+  links.visible=linkP>.01;
+  if(links.visible){LNET.grp.updateMatrixWorld(true);LPHY.grp.updateMatrixWorld(true);let n=0;
+    PHY.forEach((d,i)=>{const b=rowPt(LPHY,i,-1);let a,c;
+      if(d.s){a=b.clone().add(V3(-.07,0,0));c=COL.drift;}else{a=rowPt(LNET,NET.indexOf(d),1);c=COL.link;}
+      const k=clamp(linkP*1.4-i/PHY.length*.4);const e=b.clone().lerp(a,k);
+      lpos.set([b.x,b.y,b.z,e.x,e.y,e.z],n*6);lcol.set([c.r,c.g,c.b,c.r,c.g,c.b],n*6);n++;});
+    links.geometry.attributes.position.needsUpdate=true;links.geometry.attributes.color.needsUpdate=true;}
+
+  // ── tags: on/off at 0.5, collision list, text-column guard, viewport guard
+  const vis={hVol:wHero,hSil:wHero,aSrc:wS1,aSil:wS1,aSil2:wS1,aAns:wS1,
+    bMig:wS2*(g<1.4?1:0),bVnd:wS2*(g>=1.4&&g<1.6?1:0),bDec:wS2*(g>=1.6?1:0),
+    fOne:wFig*smooth(.2,.4,(cx-ROW[0].x)),fOk:wFig*(cx>3.9?1:0),
+    cPat:wS3,cPow:wS3,cDash:wS3*netL,
+    dSw:wSweep*(sw>.04&&sw<.97?1:0),dF1:(g>4.08&&g<4.5&&sweepY>DV.mig.y)?1:0,dF2:(g>4.08&&g<4.5&&sweepY>DV.vnd.y)?1:0,dF3:(g>4.08&&g<4.5&&sweepY>DV.dec.y)?1:0,
+    dPhy:phyL>.95?1:0,dNet:phyL>.95?1:0,dRec:recon};
+  let textTop=vh,textRight=.38*vw;
+  TXT.forEach(el=>{const r=el.getBoundingClientRect();if(r.bottom>0&&r.top<vh){textTop=Math.min(textTop,r.top);textRight=Math.max(textRight,r.right+14);}});
+  if(mobile)textTop=Math.min(textTop,vh*.46);
+  const placed=[];
+  for(const t of TG){let show=showHud&&(vis[t.k]||0)>=.5&&!(mobile&&!t.el.classList.contains('keep'));
+    if(show){if(t.follow)t.pos.copy(t.follow());_v.copy(t.pos).project(camera);if(_v.z>1||_v.z<-1)show=false;}
+    if(show){const x=(_v.x+1)/2*vw,y=(1-_v.y)/2*vh;const ew=t.el.offsetWidth,eh=t.el.offsetHeight;let ok=false,bx,by;
+      for(const md of t.modes){bx=md==='l'?x-ew+3.5:(md==='d'||md==='u')?x-ew/2:x-3.5;by=md==='d'?y-3.5:md==='u'?y-eh+3.5:y-eh/2;
+        const inV=bx>=6&&bx+ew<=vw-6&&by>=70&&by+eh<=vh-8;const inCol=mobile?by+eh>textTop-4:bx<textRight;
+        const hit=placed.some(p=>bx<p[2]+6&&bx+ew>p[0]-6&&by<p[3]+6&&by+eh>p[1]-6);
+        if(inV&&!inCol&&!hit){ok=true;t.el.classList.toggle('left',md==='l');break;}}
+      if(ok){placed.push([bx,by,bx+ew,by+eh]);t.el.style.transform=`translate3d(${bx.toFixed(1)}px,${by.toFixed(1)}px,0)`;}
+      show=ok;}
+    if(show!==t.on){t.on=show;t.el.style.opacity=show?1:0;t.el.style.visibility=show?'visible':'hidden';}}
+
+  renderer.render(scene,camera);
+}
+document.fonts.ready.then(()=>REDRAW.forEach(f=>f()));
+if(SNAP)addEventListener('scroll',()=>step(),{passive:true});
+requestAnimationFrame(frame);
+</script>
+<!--GLJS-END-->
+<script src="/design-system/nav.js" defer></script>
+</body>
+</html>

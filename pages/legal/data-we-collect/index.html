@@ -1,0 +1,244 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Data we collect · RackTrack</title>
+<meta name="description" content="A complete list of the data racktrack.ai handles: what, when, who receives it, why and for how long.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap">
+<link rel="stylesheet" href="/design-system/base.css">
+<style>
+/* RackTrack · legal documents — design-system/ tokens. A drawing-sheet document: title block, contents rail, hairline tables. */
+:root{
+  color-scheme: light;
+  
+}
+*{box-sizing:border-box}
+html{background:var(--paper);scroll-behavior:smooth}
+body{margin:0;background:var(--paper);color:var(--ink);font:400 16px/1.6 var(--sans);-webkit-font-smoothing:antialiased;overflow-x:hidden}
+a{color:inherit}
+::selection{background:var(--link);color:#06140d}
+:focus-visible{outline:2px solid var(--link-ink);outline-offset:3px;border-radius:2px}
+body::before{content:"";position:fixed;inset:0;z-index:0;pointer-events:none;background:
+  linear-gradient(rgba(17,22,20,.035) 1px,transparent 1px) 0 0/24px 24px,
+  linear-gradient(90deg,rgba(17,22,20,.035) 1px,transparent 1px) 0 0/24px 24px}
+main,.foot{position:relative;z-index:1}
+
+/* nav */
+.nav{position:sticky;left:0;right:0;top:0;z-index:10;display:flex;align-items:center;gap:28px;height:calc(var(--nav-h) + env(safe-area-inset-top,0px));padding:env(safe-area-inset-top,0px) var(--bleed) 0;background:rgba(233,236,232,.94);border-bottom:1px solid var(--rule);backdrop-filter:saturate(1.2)}
+.brand{display:flex;align-items:center;gap:10px;text-decoration:none;font:700 17px/1 var(--sans);letter-spacing:-.02em;color:var(--ink)}
+.brand img{width:26px;height:26px;border-radius:5px;display:block}
+.nav ul{display:flex;gap:24px;list-style:none;margin:0 0 0 auto;padding:0}
+.nav ul a{font:500 14px/1 var(--sans);text-decoration:none;color:var(--ink-2)}
+.nav ul a:hover{color:var(--ink)}
+.btn{display:inline-flex;align-items:center;gap:10px;height:46px;padding:0 20px;border-radius:3px;border:1px solid var(--ink);font:500 15px/1 var(--sans);text-decoration:none;cursor:pointer;background:transparent;color:var(--ink);transition:background .2s,color .2s,border-color .2s}
+.btn.solid{background:var(--ink);color:var(--paper)}
+.btn.solid:hover{background:var(--link-ink);border-color:var(--link-ink);color:#fff}
+.btn .led{width:7px;height:7px;border-radius:50%;background:var(--link);box-shadow:0 0 8px var(--link)}
+.nav .btn{height:38px;padding:0 16px;font-size:14px}
+
+/* document header */
+.dhead{padding:var(--band-y) var(--bleed) 0}
+.dwrap{max-width:none;margin-inline:0}
+.k{margin:0 0 14px;font:400 12px/1 var(--mono);color:var(--link-ink)}
+h1{margin:0 0 20px;max-width:14ch;text-wrap:balance}
+.lede{color:var(--ink-2);max-width:38rem;margin:0}
+.top{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,25rem);gap:48px;align-items:end}
+.tblock{border:1px solid var(--ink);background:var(--paper-2);font:400 12px/1.35 var(--mono)}
+.tblock div{display:grid;grid-template-columns:8.5rem 1fr;border-top:1px solid var(--rule)}
+.tblock div:first-child{border-top:0}
+.tblock dt,.tblock dd{margin:0;padding:9px 12px}
+.tblock dt{color:var(--ink-2);border-right:1px solid var(--rule)}
+.tblock dd{color:var(--ink)}
+.tblock .hd{background:var(--ink);color:#DDE4DF;display:flex;justify-content:space-between;padding:9px 12px;font-weight:500}
+.tblock .hd span{color:#93A19A}
+.tabs{display:flex;flex-wrap:wrap;gap:0;margin:48px 0 0;border-top:1px solid var(--ink);border-bottom:1px solid var(--rule)}
+.tabs a{padding:14px 18px 13px;font:500 14px/1 var(--sans);text-decoration:none;color:var(--ink-2);border-right:1px solid var(--rule);display:flex;gap:10px;align-items:baseline}
+.tabs a i{font:400 11px/1 var(--mono);font-style:normal;color:var(--ink-2)}
+.tabs a:hover{color:var(--ink);background:rgba(255,255,255,.5)}
+.tabs a[aria-current="page"]{color:var(--ink);background:var(--paper-2);box-shadow:inset 0 -3px 0 var(--link-ink)}
+
+/* summary */
+.sum{margin:40px 0 0;display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:0;border:1px solid var(--rule);background:var(--paper-2)}
+.sum div{padding:18px 20px;border-left:1px solid var(--rule)}
+.sum div:first-child{border-left:0}
+.sum b{display:flex;align-items:center;gap:8px;font:500 12px/1 var(--mono);color:var(--link-ink);margin-bottom:10px}
+.sum b::before{content:"";width:7px;height:7px;border-radius:50%;background:var(--link);box-shadow:0 0 6px var(--link)}
+.sum p{margin:0;color:var(--ink);font-size:15.5px;line-height:1.45}
+
+/* body */
+.dbody{padding:var(--band-y) var(--bleed)}
+.grid{display:grid;grid-template-columns:15rem minmax(0,1fr);gap:clamp(32px,6vw,96px);align-items:start}
+.toc{position:sticky;top:96px;font:400 12.5px/1.35 var(--mono)}
+.toc p{margin:0 0 12px;color:var(--ink-2)}
+.toc ol{list-style:none;margin:0;padding:0;border-left:1px solid var(--rule)}
+.toc a{display:block;padding:6px 0 6px 14px;margin-left:-1px;border-left:2px solid transparent;text-decoration:none;color:var(--ink-2)}
+.toc a:hover{color:var(--ink)}
+.toc a.on{color:var(--ink);border-left-color:var(--link-ink)}
+article{max-width:46rem;min-width:0}
+article section{padding:8px 0 30px;scroll-margin-top:90px;border-top:1px solid var(--rule)}
+article section:first-child{border-top:0;padding-top:0}
+article h2{display:flex;gap:14px;align-items:baseline;margin:22px 0 14px}
+article h2 i{font:400 12px/1 var(--mono);font-style:normal;color:var(--ink-2);min-width:1.8rem}
+article h3{margin:22px 0 8px}
+article p,article li{color:#2b3330;font-size:16px}
+article p{margin:0 0 14px}
+article ul{margin:0 0 16px;padding-left:1.2rem}
+article li{margin:0 0 7px}
+article li::marker{color:var(--ink-2)}
+article a{color:var(--link-ink);text-decoration-thickness:1px;text-underline-offset:3px}
+article strong{font-weight:600;color:var(--ink)}
+.note{margin:18px 0;padding:14px 16px;border-left:2px solid var(--record);background:rgba(124,147,168,.1);font-size:15px;color:var(--ink)}
+.note.g{border-left-color:var(--link-ink);background:rgba(31,214,124,.08)}
+.note.a{border-left-color:var(--drift);background:rgba(255,154,46,.1)}
+.tw{overflow-x:auto;margin:10px 0 20px;border:1px solid var(--rule);background:var(--paper-2)}
+table{border-collapse:collapse;width:100%;min-width:560px;font-size:14.5px}
+th,td{text-align:left;vertical-align:top;padding:11px 13px;border-top:1px solid var(--rule)}
+th{font:500 11.5px/1.3 var(--mono);color:var(--ink-2);border-top:0;background:rgba(17,22,20,.03)}
+td{color:#2b3330}
+td:first-child{color:var(--ink);font-weight:500}
+td .m{font:400 12.5px/1.4 var(--mono);color:var(--ink-2)}
+.yes,.no{font:500 12px/1 var(--mono);padding:4px 7px;border-radius:2px;white-space:nowrap}
+.no{color:var(--link-ink);border:1px solid var(--link);background:rgba(31,214,124,.08)}
+.yes{color:var(--record-ink);border:1px solid var(--record);background:rgba(124,147,168,.1)}
+figure{margin:18px 0 26px;border:1px solid var(--ink);background:var(--paper-2)}
+figure svg{display:block;width:100%;height:auto}
+.fwrap{overflow-x:auto}
+figcaption{display:flex;justify-content:space-between;gap:16px;flex-wrap:wrap;padding:10px 14px;border-top:1px solid var(--rule);font:400 12px/1.4 var(--mono);color:var(--ink-2)}
+figcaption b{color:var(--ink);font-weight:500}
+.contact{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:0;border:1px solid var(--rule);background:var(--paper-2);margin:8px 0 10px}
+.contact div{padding:14px 16px;border-left:1px solid var(--rule)}
+.contact div:first-child{border-left:0}
+.contact b{display:block;font:400 11.5px/1 var(--mono);color:var(--ink-2);margin-bottom:8px}
+.contact a,.contact span{font:500 15.5px/1.35 var(--sans);color:var(--ink);text-decoration:none}
+.end{margin-top:26px;padding-top:16px;border-top:1px solid var(--ink);display:flex;justify-content:space-between;gap:16px;flex-wrap:wrap;font:400 12px/1.4 var(--mono);color:var(--ink-2)}
+
+/* footer */
+.foot{padding:var(--band-y) var(--bleed) calc(var(--s8) + env(safe-area-inset-bottom,0px));background:var(--paper);border-top:1px solid var(--rule);display:grid;grid-template-columns:var(--copy-w) repeat(3,minmax(0,1fr));gap:28px;font-size:14px;color:var(--ink-2)}
+.foot b{display:block;font:500 13px/1 var(--sans);color:var(--link-ink);margin-bottom:16px}
+.foot nav{display:flex;flex-direction:column;gap:11px}
+.foot nav a{color:var(--ink);text-decoration:none;font-size:15px}
+.foot nav a:hover{color:var(--link-ink)}
+.foot p{margin:0 0 11px;color:var(--ink);font-size:15px;line-height:1.45}
+.foot p a{text-decoration:none}.foot p a:hover{color:var(--link-ink)}
+.foot-brand .brand{margin-bottom:16px}
+.foot-brand p{color:var(--ink-2);max-width:18rem}
+.foot .fine{grid-column:1/-1;display:flex;justify-content:space-between;flex-wrap:wrap;gap:12px;margin-top:16px;padding-top:18px;border-top:1px solid var(--rule);font-size:13px}
+.foot .social,.foot .legal{display:flex;gap:18px;flex-wrap:wrap}
+.foot .social a,.foot .legal a{color:var(--ink-2);text-decoration:none}
+.foot .social a:hover,.foot .legal a:hover{color:var(--link-ink)}
+
+@media (max-width:1180px){ .foot{grid-template-columns:repeat(2,minmax(0,1fr))} }
+@media (max-width:960px){ .top{grid-template-columns:1fr;gap:28px} .grid{grid-template-columns:1fr} .toc{position:static;display:none} .sum{grid-template-columns:1fr} .sum div{border-left:0;border-top:1px solid var(--rule)} .sum div:first-child{border-top:0} }
+@media (max-width:760px){ .dhead{padding-top:40px} .tabs{flex-wrap:nowrap;overflow-x:auto;scrollbar-width:none} .tabs a{white-space:nowrap} .contact{grid-template-columns:1fr} .contact div{border-left:0;border-top:1px solid var(--rule)} .contact div:first-child{border-top:0} .tblock div{grid-template-columns:7rem 1fr} .fwrap svg{min-width:680px} }
+@media (max-width:560px){ .foot{grid-template-columns:repeat(2,minmax(0,1fr));gap:var(--s6) var(--s5);padding-block:var(--band-y-sm) calc(var(--s6) + env(safe-area-inset-bottom,0px))} }
+@media (prefers-reduced-motion:reduce){ html{scroll-behavior:auto} }
+</style>
+</head>
+<body>
+<nav class="nav" aria-label="Primary">
+  <a class="brand" href="/"><img alt="" src="/design-system/assets/Logos/racktrack-mark.jpg">RackTrack</a>
+  <ul>
+    <li><a href="/pages/why-racktrack/">Why RackTrack</a></li>
+    <li><a href="/pages/solutions/">Solutions</a></li>
+    <li><a href="/pages/use-cases/">Use cases</a></li>
+    <li><a href="/pages/resources/">Resources</a></li>
+    <li><a href="/pages/trust-security/">Trust</a></li>
+    <li><a href="/pages/about-us/">About</a></li>
+    <li><a href="/pages/sign-in/">Sign in</a></li>
+  </ul>
+  <a class="btn solid" href="/pages/contact-us/"><span class="led"></span>Book a sweep</a>
+</nav>
+<main>
+  <header class="dhead"><div class="dwrap">
+    <div class="top">
+      <div><h1>Data we collect</h1><p class="lede">Every piece of data the website handles, in one table: what it is, when it happens, who receives it and why.</p></div>
+      <dl class="tblock"><div class="hd">RackTrack Inc.<span>LGL-04</span></div>
+        <div><dt>Document</dt><dd>Data we collect</dd></div>
+        <div><dt>Applies to</dt><dd>racktrack.ai website</dd></div>
+        <div><dt>Last updated</dt><dd>28 September 2026</dd></div>
+        <div><dt>Questions</dt><dd><a href="mailto:info@racktrack.ai">info@racktrack.ai</a></dd></div></dl>
+    </div>
+    <nav class="tabs" aria-label="Legal documents"><a href="/pages/legal/privacy-policy/"><i>01</i>Privacy policy</a><a href="/pages/legal/terms-of-use/"><i>02</i>Terms of use</a><a href="/pages/legal/cookie-policy/"><i>03</i>Cookie policy</a><a href="/pages/legal/data-we-collect/" aria-current="page"><i>04</i>Data we collect</a><a href="/pages/legal/third-party-services/"><i>05</i>Third-party services</a></nav>
+    <div class="sum" aria-label="Summary"><div><b>Your enquiry</b><p>Name, email, mobile, company, scope and requirement, and only when you send the email the form prepares.</p></div><div><b>Technical requests</b><p>IP address and browser details reach the providers that deliver pages, fonts and the 3D library.</p></div><div><b>Nothing else</b><p>No cookies, profiles, analytics, location or payment data. The form stores nothing on a server.</p></div></div>
+  </div></header>
+  <div class="dbody"><div class="dwrap grid">
+    <nav class="toc" aria-label="On this page"><p>On this page</p><ol><li><a href="#map">01 · Where your data goes</a></li><li><a href="#table">02 · The complete list</a></li><li><a href="#form">03 · How the contact form works</a></li><li><a href="#not">04 · What we do not collect</a></li><li><a href="#rights">05 · Seeing, correcting or deleting your data</a></li></ol></nav>
+    <article><section id="map" aria-labelledby="h-map"><h2 id="h-map"><i>01</i>Where your data goes</h2><figure>
+<div class="fwrap"><svg viewBox="0 0 900 500" role="img" aria-labelledby="flowT flowD">
+<title id="flowT">Where data goes when you use racktrack.ai</title>
+<desc id="flowD">Your browser requests pages from our hosting provider, fonts from Google Fonts and the 3D library from jsDelivr; each receives your IP address and browser details. Your enquiry reaches RackTrack only when you send the email your own email app prepares. Social sites receive nothing unless you click a link. The site sets no cookies and runs no analytics or tracking.</desc>
+<defs>
+ <marker id="ah" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0L10 5L0 10z" fill="#4A544F"/></marker>
+ <marker id="ag" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0L10 5L0 10z" fill="#04703F"/></marker>
+ <pattern id="gridp" width="20" height="20" patternUnits="userSpaceOnUse"><path d="M20 0H0V20" fill="none" stroke="rgba(17,22,20,.05)"/></pattern>
+</defs>
+<rect width="900" height="500" fill="url(#gridp)"/>
+<g font-family="JetBrains Mono, monospace" font-size="14" fill="#4A544F">
+ <rect x="20" y="140" width="236" height="178" fill="#fff" stroke="#111614" stroke-width="1.5"/>
+ <rect x="20" y="140" width="236" height="32" fill="#111614"/>
+ <circle cx="38" cy="156" r="4.5" fill="#1FD67C"/><text x="52" y="161" fill="#DDE4DF">your browser</text>
+ <text x="38" y="202" fill="#111614" font-family="Inter, sans-serif" font-size="20" font-weight="600">racktrack.ai</text>
+ <text x="38" y="230">no cookies</text><text x="38" y="252">no analytics or pixels</text><text x="38" y="274">no browser storage</text><text x="38" y="296">no tracking</text>
+ <rect x="530" y="20" width="350" height="84" fill="#fff" stroke="#7C93A8" stroke-width="1.5"/>
+ <text x="548" y="50" fill="#111614" font-family="Inter, sans-serif" font-size="18" font-weight="600">Hosting provider</text>
+ <text x="548" y="73">serves every page</text><text x="548" y="93" fill="#3F5871">gets IP · browser · page</text>
+ <rect x="530" y="118" width="350" height="84" fill="#fff" stroke="#7C93A8" stroke-width="1.5"/>
+ <text x="548" y="148" fill="#111614" font-family="Inter, sans-serif" font-size="18" font-weight="600">Google Fonts</text>
+ <text x="548" y="171">the two typefaces</text><text x="548" y="191" fill="#3F5871">gets IP · browser · referrer</text>
+ <rect x="530" y="216" width="350" height="84" fill="#fff" stroke="#7C93A8" stroke-width="1.5"/>
+ <text x="548" y="246" fill="#111614" font-family="Inter, sans-serif" font-size="18" font-weight="600">jsDelivr</text>
+ <text x="548" y="269">the three.js 3D library</text><text x="548" y="289" fill="#3F5871">gets IP · browser · referrer</text>
+ <path d="M256 190 C 400 190, 400 62, 526 62" fill="none" stroke="#4A544F" stroke-width="1.5" marker-end="url(#ah)"/>
+ <path d="M256 212 C 400 212, 400 160, 526 160" fill="none" stroke="#4A544F" stroke-width="1.5" marker-end="url(#ah)"/>
+ <path d="M256 234 C 400 234, 400 258, 526 258" fill="none" stroke="#4A544F" stroke-width="1.5" marker-end="url(#ah)"/>
+ <text x="300" y="112" fill="#3F5871">every page load</text>
+ <rect x="530" y="326" width="350" height="84" fill="#fff" stroke="#04703F" stroke-width="2"/>
+ <text x="548" y="356" fill="#111614" font-family="Inter, sans-serif" font-size="18" font-weight="600">RackTrack · info@racktrack.ai</text>
+ <text x="548" y="379">your brief, as an email</text><text x="548" y="399" fill="#04703F">only when you press send</text>
+ <rect x="312" y="336" width="170" height="64" fill="#F4F6F3" stroke="#111614" stroke-dasharray="5 4"/>
+ <text x="326" y="362" fill="#111614">your email app</text><text x="326" y="384">prepares a draft</text>
+ <path d="M210 318 C 210 368, 250 368, 308 368" fill="none" stroke="#04703F" stroke-width="1.7" stroke-dasharray="6 5" marker-end="url(#ag)"/>
+ <path d="M482 368 L 526 368" fill="none" stroke="#04703F" stroke-width="1.7" marker-end="url(#ag)"/>
+ <text x="100" y="352" fill="#04703F">contact form</text>
+ <rect x="530" y="428" width="350" height="52" fill="none" stroke="#C6CCC7" stroke-dasharray="3 4"/>
+ <text x="548" y="452" fill="#111614">LinkedIn · Instagram · Facebook</text><text x="548" y="471">other sites you choose to visit</text>
+ <path d="M70 318 C 70 454, 300 454, 526 454" fill="none" stroke="#9aa39e" stroke-width="1.5" stroke-dasharray="3 5" marker-end="url(#ah)"/>
+ <text x="190" y="428">plain links · load nothing until clicked</text>
+</g>
+</svg></div>
+<figcaption><span><b>Fig. 01</b> where your data goes when you use racktrack.ai</span><span>checked against every page of the site · 28 September 2026</span></figcaption>
+</figure></section><section id="table" aria-labelledby="h-table"><h2 id="h-table"><i>02</i>The complete list</h2><div class="tw"><table><thead><tr><th>Data</th><th>When</th><th>Who receives it</th><th>Why</th><th>How long</th></tr></thead><tbody><tr><td>Name, email, mobile number</td><td>You send the email the contact form prepares, or email us yourself</td><td>RackTrack, via info@racktrack.ai and our email provider</td><td>To reply and arrange a demo or assessment</td><td>As long as needed for your request and any relationship that follows</td></tr><tr><td>Company, scope, requirement <span class="m">optional</span></td><td>Same, if you fill them in</td><td>RackTrack</td><td>To shape the demo around your question</td><td>Same as above</td></tr><tr><td>What you say in emails or calls</td><td>You contact us at info@racktrack.ai or +1 (860) 878 2448</td><td>RackTrack</td><td>To answer you</td><td>Same as above</td></tr><tr><td>IP address, browser and device type, page requested, time</td><td>Every page load</td><td>Our hosting provider</td><td>To deliver the page and keep the site secure</td><td>Per the provider's policy</td></tr><tr><td>IP address, browser type, referring page</td><td>Every page load (typefaces)</td><td>Google Fonts</td><td>To deliver the Schibsted Grotesk and JetBrains Mono typefaces</td><td>Per Google's policy</td></tr><tr><td>IP address, browser type, referring site</td><td>Pages with 3D scenes</td><td>jsDelivr</td><td>To deliver the three.js 3D library</td><td>Per jsDelivr's policy</td></tr><tr><td>Work email and password</td><td>You type them on the Sign in page</td><td>No one yet: sign-in is not connected, so they stay in your browser</td><td>Once connected: to sign you in to the platform</td><td>Not stored by the website</td></tr><tr><td>Whatever the other site collects</td><td>Only if you click a LinkedIn, Instagram, Facebook or portal link</td><td>That site</td><td>You have left racktrack.ai</td><td>Per that site's policy</td></tr></tbody></table></div></section><section id="form" aria-labelledby="h-form"><h2 id="h-form"><i>03</i>How the contact form works</h2><p>The form on <a href="/pages/contact-us/">Contact us</a> is deliberately simple:</p><ul><li>It checks your entries <strong>inside your browser</strong>. Nothing you type is sent to a server while you fill it in.</li><li>The 3D preview of your brief, which shows your name, company and scope, is drawn in your browser and disappears when you leave the page.</li><li>When you press <strong>Request platform brief</strong>, your own email app opens with a draft addressed to info@racktrack.ai. You can read, edit or discard it. <strong>We receive nothing unless you send it.</strong></li></ul></section><section id="not" aria-labelledby="h-not"><h2 id="h-not"><i>04</i>What we do not collect</h2><ul><li>Cookies or any browser storage</li><li>Analytics, visit counts, heatmaps or session recordings</li><li>Advertising or social media pixels</li><li>Device fingerprints or precise location</li><li>Payment details</li><li>Sensitive categories of personal information</li></ul><div class="note a">Please do not send passwords, access keys, network configurations or rack video by email or the contact form. If an evaluation needs them, we will agree a secure way to exchange them.</div></section><section id="rights" aria-labelledby="h-rights"><h2 id="h-rights"><i>05</i>Seeing, correcting or deleting your data</h2><p>Email <a href="mailto:info@racktrack.ai?subject=Privacy%20request">info@racktrack.ai</a> with the subject "Privacy request". Your rights are set out in the <a href="/pages/legal/privacy-policy/#rights">Privacy policy</a>.</p></section>
+      <p class="end"><span>RackTrack Inc. · Data we collect</span><span>Last updated 28 September 2026</span></p>
+    </article>
+  </div></div>
+</main>
+  <footer class="foot">
+    <div class="foot-brand">
+      <a class="brand" href="/"><img alt="" src="/design-system/assets/Logos/racktrack-mark.jpg">RackTrack</a>
+      <p>Physical infrastructure intelligence for data centers.</p>
+    </div>
+    <nav aria-label="Platform"><b>Platform</b>
+      <a href="/pages/why-racktrack/">Why RackTrack</a><a href="/pages/solutions/">Solutions</a><a href="/pages/use-cases/">Use cases</a><a href="/pages/trust-security/">Trust &amp; security</a></nav>
+    <nav aria-label="Company"><b>Company</b>
+      <a href="/pages/resources/">Resources</a><a href="/pages/about-us/">About us</a><a href="/pages/contact-us/">Contact us</a></nav>
+    <div><b>Contact</b>
+      <p><a href="mailto:info@racktrack.ai">info@racktrack.ai</a></p><p><a href="tel:+18608782448">+1 (860) 878 2448</a></p><p>85 Felt Rd, Suite #604<br>South Windsor, CT 06074</p></div>
+    <div class="fine">
+      <span>© 2026 RackTrack Inc. · Patent pending</span>
+      <span class="legal"><a href="/pages/legal/privacy-policy/">Privacy</a><a href="/pages/legal/terms-of-use/">Terms</a><a href="/pages/legal/cookie-policy/">Cookies</a><a href="/pages/legal/data-we-collect/">Data we collect</a><a href="/pages/legal/third-party-services/">Third parties</a></span>
+      <span class="social"><a href="https://www.linkedin.com/company/racktrack/" rel="noopener" target="_blank">LinkedIn</a><a href="https://www.instagram.com/racktrack_inc/" rel="noopener" target="_blank">Instagram</a><a href="https://www.facebook.com/share/18depF5xzA/" rel="noopener" target="_blank">Facebook</a></span>
+    </div>
+  </footer>
+<script>
+/* contents rail: mark the section being read */
+(()=>{const links=[...document.querySelectorAll('.toc a')];if(!links.length||!('IntersectionObserver' in window))return;
+const map=new Map(links.map(a=>[a.getAttribute('href').slice(1),a]));let cur=null;
+const io=new IntersectionObserver(es=>{es.forEach(e=>{if(e.isIntersecting){const a=map.get(e.target.id);if(a&&a!==cur){cur&&cur.classList.remove('on');a.classList.add('on');cur=a;}}});},{rootMargin:'-20% 0px -70% 0px'});
+document.querySelectorAll('article section[id]').forEach(s=>io.observe(s));})();
+</script>
+<script src="/design-system/nav.js" defer></script>
+</body>
+</html>

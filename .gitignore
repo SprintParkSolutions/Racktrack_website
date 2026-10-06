@@ -1,15 +1,36 @@
-.DS_Store
-.claude/scheduled_tasks.lock
-.worktrees/
-unused/
-RackTrackWebsiteSuggestions 2.docx
-~$ckTrackWebsiteSuggestions 2.docx
-CLAUDE.md
-PROGRESS.md
-docs/
-node_modules/
-dist/
-racktrack-dist.zip
+# This repo publishes the website only: the pages and the files they load.
+# Everything else (docs, specs, design notes, CLAUDE.md, tools, spare photos)
+# stays on this computer and is never pushed.
 
-# Local Jira API token — never commit
-.jira-token
+# 1. ignore everything at the top level …
+/*
+
+# 2. … except the website
+!/.gitignore
+!/index.html
+!/pages/
+!/assets/
+
+# 3. the design system is public: colours, type, tokens, logo
+!/design-system/
+
+# 4. photos no page uses (kept locally as spares)
+/assets/resources/access-badge.jpg
+/assets/resources/port-link-led.jpg
+/assets/use-cases/compliance-archive.jpg
+/assets/use-cases/compliance-sitework.jpg
+/assets/use-cases/incident-panel.jpg
+/assets/use-cases/incident-rack.jpg
+/assets/use-cases/leaders-hall.jpg
+/assets/use-cases/leaders-site.jpg
+/assets/use-cases/leaders-survey.jpg
+/assets/use-cases/migration-cabinets.jpg
+/assets/use-cases/migration-hands.jpg
+/assets/use-cases/network-trunks.jpg
+/assets/use-cases/network-uplink.jpg
+/assets/use-cases/security-rails.jpg
+/assets/use-cases/security-rows.jpg
+/assets/why/scan-app.jpg
+
+# 5. system files
+.DS_Store

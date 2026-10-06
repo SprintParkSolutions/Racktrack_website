@@ -1,0 +1,1151 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Why RackTrack</title>
+<meta name="description" content="Most tools trust the record. RackTrack starts at the port and checks every record against what is physically installed.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap">
+<link rel="stylesheet" href="/design-system/base.css">
+<style>
+/* RackTrack · Why RackTrack (v2) — design-system/ tokens. Protagonist on this page: one 48-port switch, read port by port. */
+:root{
+  color-scheme: light;
+  --hall-2:#151B19;
+  --alu:#DFE3DF; --chassis:#232927;
+  
+}
+.hall{--bg:var(--hall);--fg:#DDE4DF;--fg-2:#93A19A;--line:#26302C;--link-ink:#1FD67C;--drift-ink:#FF9A2E;--paper-2:var(--hall-2);color-scheme:dark}
+*{box-sizing:border-box}
+html{background:var(--paper)}
+body{margin:0;background:var(--paper);color:var(--fg);font:400 16px/1.5 var(--sans);-webkit-font-smoothing:antialiased;overflow-x:hidden}
+a{color:inherit}
+::selection{background:var(--link);color:#06140d}
+:focus-visible{outline:2px solid var(--link-ink);outline-offset:3px;border-radius:2px}
+.sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
+
+/* stage */
+#stage{position:fixed;inset:0;z-index:0;display:block;width:100%;height:100%;pointer-events:none;-webkit-mask-image:linear-gradient(#000 62%,transparent 97%);mask-image:linear-gradient(#000 62%,transparent 97%)}
+#scrim{position:fixed;inset:0;z-index:1;pointer-events:none;opacity:0;background:linear-gradient(90deg,var(--paper) 0,rgba(233,236,232,.94) 26%,rgba(233,236,232,0) 50%)}
+#hud{position:fixed;inset:0;z-index:3;pointer-events:none;overflow:hidden}
+main{position:relative;z-index:2}
+body::before{content:"";position:fixed;inset:0;z-index:0;pointer-events:none;
+  background:radial-gradient(70% 60% at 68% 46%,rgba(255,255,255,.55),transparent 70%)}
+
+/* nav */
+.nav{position:fixed;left:0;right:0;top:0;z-index:10;display:flex;align-items:center;gap:28px;
+  height:calc(var(--nav-h) + env(safe-area-inset-top,0px));padding:env(safe-area-inset-top,0px) var(--bleed) 0;background:linear-gradient(var(--nbg,var(--paper)) 55%,transparent);
+  color:var(--nfg,var(--ink));transition:color .35s}
+.nav.dark{--nbg:var(--hall);--nfg:#DDE4DF;--n2:#93A19A}
+.brand{display:flex;align-items:center;gap:10px;text-decoration:none;color:var(--nfg,var(--ink));font:700 17px/1 var(--sans);letter-spacing:-.02em}
+.brand img{width:26px;height:26px;border-radius:5px;display:block}
+.nav ul{display:flex;gap:24px;list-style:none;margin:0 0 0 auto;padding:0}
+.nav ul a{font:500 14px/1 var(--sans);text-decoration:none;color:var(--n2,var(--ink-2))}
+.nav ul a:hover{color:var(--nfg,var(--ink))}
+.nav ul a[aria-current="page"]{color:var(--nfg,var(--ink));text-decoration:underline;text-decoration-color:var(--link);text-decoration-thickness:2px;text-underline-offset:6px}
+.btn{display:inline-flex;align-items:center;gap:10px;height:46px;padding:0 20px;border-radius:3px;border:1px solid var(--fg);
+  font:500 15px/1 var(--sans);text-decoration:none;cursor:pointer;background:transparent;color:var(--fg);transition:background .2s,color .2s,border-color .2s}
+.btn.solid{background:var(--fg);color:var(--bg)}
+.btn.solid:hover{background:var(--link-ink);border-color:var(--link-ink);color:#fff}
+.btn:not(.solid){border-color:var(--line)}
+.btn:not(.solid):hover{border-color:var(--fg)}
+.btn .led{width:7px;height:7px;border-radius:50%;background:var(--link);box-shadow:0 0 8px var(--link)}
+.nav .btn{height:38px;padding:0 16px;font-size:14px;--fg:var(--nfg,var(--ink));--bg:var(--nbg,var(--paper))}
+.nav.dark .btn.solid:hover{color:#fff}
+
+
+/* type */
+.ch{position:relative;padding-inline:var(--bleed)}
+.copy{max-width:28rem;}
+h1,h2,h3{margin:0 0 20px;text-wrap:balance}
+h1{max-width:11.5ch}
+/* The hero headline is two sentences and breaks once, at the full stop. It needs
+   a wider measure than the 11.5ch above and a size that fits the longer sentence
+   on one line, so the hero column is widened past the 28rem default and the
+   headline is sized to it. The lede keeps the original reading measure. */
+#hero .copy{max-width:clamp(28rem,42vw,36rem)}
+#hero h1{max-width:none;font-size:clamp(28px,2.7vw,44px)}
+#hero .lede{max-width:30rem}
+/* too narrow for the first sentence to hold a line — let it wrap on its own */
+@media (max-width:820px){ #hero h1 br{display:none} }
+h2{max-width:13ch}
+h3{margin:0 0 6px}
+.lede{color:var(--fg-2);max-width:26rem;margin:0 0 28px}
+.actions{display:flex;flex-wrap:wrap;gap:12px}
+.k{margin:0 0 14px;font:400 12px/1 var(--mono);color:var(--link-ink)}
+.mono{font-family:var(--mono)}
+
+/* 00 · hero */
+#hero{min-height:100vh;display:flex;align-items:center;padding-top:var(--nav-h)}
+.hero-read{margin-top:44px;display:flex;gap:28px;font:400 12px/1.5 var(--mono);color:var(--fg-2)}
+.hero-read b{display:block;font:500 28px/1 var(--sans);letter-spacing:-.03em;color:var(--fg);margin-bottom:6px}
+.hero-read div{border-top:1px solid var(--line);padding-top:12px;min-width:7.5rem}
+.hero-read .g b{color:var(--link-ink)} .hero-read .a b{color:var(--drift-ink)}
+
+/* 01 · layers — sticky copy, 4 states */
+#layers{min-height:520vh}
+.steps{position:sticky;top:max(120px,22vh);height:380px;max-width:28rem}
+.st{position:absolute;inset:0 0 auto 0;opacity:0;transform:translateY(14px);transition:opacity .45s,transform .45s var(--ease);pointer-events:none}
+.st.on{opacity:1;transform:none;pointer-events:auto}
+.st .fact{margin-top:-8px;display:inline-flex;gap:10px;align-items:center;font:400 12px/1 var(--mono);color:var(--fg-2);border:1px solid var(--line);padding:8px 10px;border-radius:2px;background:color-mix(in oklab,var(--paper) 70%,transparent)}
+.st .fact i{width:8px;height:8px;border-radius:1px;background:var(--link)}
+.st .fact i.a{background:var(--drift)} .st .fact i.r{background:none;border:1.5px dashed var(--record)}
+.stepbar{position:absolute;left:18px;bottom:0;display:flex;gap:6px;align-items:center;font:400 11px/1 var(--mono);color:var(--fg-2)}
+.stepbar i{display:block;width:34px;height:3px;background:var(--line);position:relative;overflow:hidden}
+.stepbar i b{position:absolute;inset:0 auto 0 0;width:0;background:var(--link-ink)}
+.stepbar span{margin-left:8px}
+
+/* 3D-anchored tags */
+.tag{position:absolute;left:0;top:0;display:flex;align-items:center;opacity:0;will-change:transform,opacity;white-space:nowrap}
+.tag::before{content:"";width:7px;height:7px;border-radius:50%;background:var(--c,var(--ink));transform:translate(-3.5px,0);box-shadow:0 0 0 3px color-mix(in oklab,var(--c,var(--ink)) 22%,transparent)}
+.tag i{display:block;width:28px;height:1px;background:var(--c,var(--ink))}
+.tag span{padding:6px 9px;background:var(--paper-2);border:1px solid var(--c,var(--ink));border-radius:2px;font:400 11.5px/1.35 var(--mono);color:var(--ink)}
+.tag span b{display:block;font:600 16px/1.1 var(--sans);letter-spacing:-.02em;margin-bottom:2px}
+.tag.left{flex-direction:row-reverse}.tag.left::before{transform:translate(3.5px,0)}
+.tag.up{flex-direction:column-reverse}.tag.up i{width:1px;height:22px}.tag.up::before{transform:translate(0,3.5px)}
+.tag.down{flex-direction:column}.tag.down i{width:1px;height:22px}.tag.down::before{transform:translate(0,-3.5px)}
+.tag.drift{--c:var(--drift)} .tag.drift span b{color:var(--drift-ink)}
+.tag.rec{--c:var(--record)} .tag.rec span b{color:var(--record-ink)}
+.tag.link{--c:var(--link)} .tag.link span b{color:var(--link-ink)}
+.tag.bare::before,.tag.bare i{display:none}
+.tag.date span{background:transparent;border:0;padding:0;color:var(--record-ink)} .tag.date span b{color:var(--ink)}
+
+/* reticle */
+.reticle{position:fixed;left:0;top:0;z-index:5;pointer-events:none;opacity:0;transition:opacity .15s}
+.reticle .box{position:absolute;left:-14px;top:-12px;width:28px;height:24px;
+  background:
+   linear-gradient(var(--link),var(--link)) left top/7px 1.5px no-repeat,linear-gradient(var(--link),var(--link)) left top/1.5px 7px no-repeat,
+   linear-gradient(var(--link),var(--link)) right top/7px 1.5px no-repeat,linear-gradient(var(--link),var(--link)) right top/1.5px 7px no-repeat,
+   linear-gradient(var(--link),var(--link)) left bottom/7px 1.5px no-repeat,linear-gradient(var(--link),var(--link)) left bottom/1.5px 7px no-repeat,
+   linear-gradient(var(--link),var(--link)) right bottom/7px 1.5px no-repeat,linear-gradient(var(--link),var(--link)) right bottom/1.5px 7px no-repeat}
+.reticle .lbl{position:absolute;left:22px;top:12px;background:var(--hall);color:#DDE4DF;padding:7px 10px;border-radius:2px;font:400 11.5px/1.5 var(--mono);white-space:nowrap}
+.reticle .lbl b{color:var(--link);font-weight:500}
+.reticle .lbl .d{color:var(--drift)} .reticle .lbl .o{color:#93A19A}
+
+/* ═══ hall chapter: steps + compare ═══ */
+.chapter{background:var(--paper);color:var(--fg);position:relative;z-index:2}
+.sec{padding-block:var(--band-y)}
+#how .lede{margin-bottom:40px}
+.how{display:grid;grid-template-columns:minmax(0,38rem) minmax(0,540px);justify-content:space-between;gap:48px;align-items:center;max-width:1720px;margin-inline:auto}
+.shotwrap{position:relative}
+.shotwrap .ftag{position:absolute;z-index:3;display:flex;align-items:center;gap:0;font:400 11.5px/1.35 var(--mono);color:var(--ink);white-space:nowrap;opacity:0;transform:translateX(-8px);transition:opacity .5s,transform .6s var(--ease)}
+.shotwrap .ftag span{background:var(--paper-2);border:1px solid var(--link);border-radius:2px;padding:6px 9px;box-shadow:0 16px 30px -20px rgba(17,22,20,.5)}
+.shotwrap .ftag span b{display:block;font:600 14px/1.2 var(--sans);letter-spacing:-.02em;color:var(--link-ink)}
+.shotwrap .ftag i{display:block;width:34px;height:1px;background:var(--link)}
+.shotwrap .ftag.l{flex-direction:row-reverse}
+.shot.in~.ftag{opacity:1;transform:none}
+.shot .vbox{position:absolute;border:1.5px solid var(--link);border-radius:2px;box-shadow:0 0 0 1px rgba(12,17,16,.25);opacity:0;transform:scale(1.08);transition:opacity .5s .5s,transform .7s .5s var(--ease)}
+.shot.in .vbox{opacity:1;transform:none}
+.shot{position:relative;border-radius:4px;overflow:hidden;aspect-ratio:880/1100;max-height:82vh;background:#050807;box-shadow:0 40px 80px -46px rgba(17,22,20,.55)}
+.shot img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;filter:saturate(.9) contrast(1.03);transform:scale(1.06);transition:transform 1.6s var(--ease)}
+.shot.in img{transform:scale(1)}
+.shot .scan{position:absolute;left:0;right:0;top:0;height:30%;background:linear-gradient(to bottom,transparent,rgba(31,214,124,.14) 85%,rgba(31,214,124,.55) 99%,transparent);mix-blend-mode:screen;opacity:0;pointer-events:none}
+.shot.in .scan{animation:sweep 5.5s 1s var(--ease) infinite}
+@keyframes sweep{0%{transform:translateY(-100%);opacity:0}10%{opacity:1}70%{transform:translateY(330%);opacity:1}80%,100%{transform:translateY(330%);opacity:0}}
+.shot .brk{position:absolute;inset:18px;pointer-events:none;
+  background:
+   linear-gradient(#DDE4DF,#DDE4DF) left top/18px 1.5px no-repeat,linear-gradient(#DDE4DF,#DDE4DF) left top/1.5px 18px no-repeat,
+   linear-gradient(#DDE4DF,#DDE4DF) right top/18px 1.5px no-repeat,linear-gradient(#DDE4DF,#DDE4DF) right top/1.5px 18px no-repeat,
+   linear-gradient(#DDE4DF,#DDE4DF) left bottom/18px 1.5px no-repeat,linear-gradient(#DDE4DF,#DDE4DF) left bottom/1.5px 18px no-repeat,
+   linear-gradient(#DDE4DF,#DDE4DF) right bottom/18px 1.5px no-repeat,linear-gradient(#DDE4DF,#DDE4DF) right bottom/1.5px 18px no-repeat;opacity:.8}
+.chip{position:absolute;font:400 11.5px/1.35 var(--mono);padding:7px 9px;border-radius:2px;background:rgba(12,17,16,.82);color:#DDE4DF;backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px);white-space:nowrap}
+.chip b{color:var(--link);font-weight:500}
+.chip .dot{display:inline-block;width:7px;height:7px;border-radius:50%;background:#ff5a4a;margin-right:8px;vertical-align:1px;animation:rec 1.4s steps(2) infinite}
+@keyframes rec{50%{opacity:.2}}
+.howlist{list-style:none;margin:0;padding:0;position:relative}
+.howlist::before{content:"";position:absolute;left:0;top:8px;bottom:8px;width:1px;background:var(--line)}
+.howlist .rail{position:absolute;left:0;top:8px;width:1px;height:0;background:var(--link);box-shadow:0 0 10px var(--link)}
+.howlist li{padding:6px 0 44px 32px;position:relative;opacity:.32;transition:opacity .5s}
+.howlist li.on{opacity:1}
+.howlist li::before{content:"";position:absolute;left:-4px;top:12px;width:9px;height:9px;border-radius:50%;background:var(--paper);border:1.5px solid var(--fg-2);transition:all .4s}
+.howlist li.on::before{background:var(--link);border-color:var(--link);box-shadow:0 0 10px var(--link)}
+.howlist .n{font:400 12px/1 var(--mono);color:var(--link-ink);display:block;margin-bottom:12px}
+.howlist p{margin:0;color:var(--fg-2);max-width:26rem}
+.howlist .out{display:flex;flex-wrap:wrap;gap:6px;margin-top:14px}
+.howlist .out span{font:400 11.5px/1 var(--mono);padding:6px 8px;border:1px solid var(--line);border-radius:2px;color:var(--fg)}
+.howlist .out span::before{content:"";display:inline-block;width:7px;height:7px;border-radius:1px;margin-right:7px;background:var(--c,var(--fg-2))}
+
+/* compare slider */
+#compare{padding-top:var(--band-y)}
+/* The slider is the subject of this section, so it takes the room the band has
+   rather than a fixed 660px that left ~430px of dead air beside it on a wide
+   display. The column and the figure's own cap have to move together: capping
+   the figure alone just leaves it floating inside an oversized track. */
+.two{display:grid;grid-template-columns:minmax(0,34rem) minmax(0,52rem);justify-content:space-between;gap:48px;align-items:center;max-width:1720px;margin-inline:auto}
+.cmp{position:relative;aspect-ratio:880/795;max-width:min(52rem,82vh);width:100%;justify-self:end;border-radius:3px;overflow:hidden;background:#111;user-select:none;touch-action:pan-y;box-shadow:0 40px 90px -40px rgba(0,0,0,.8)}
+.cmp img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;display:block;pointer-events:none}
+.cmp .raw{filter:grayscale(1) contrast(.95) brightness(.7)}
+.cmp .ver{clip-path:inset(0 calc(100% - var(--x,50%)) 0 0)}
+.cmp .ver img{filter:saturate(.5) brightness(.6) contrast(1.05)}
+.cmp .layer{position:absolute;inset:0}
+.vb{position:absolute;left:2.5%;right:3%;border:1.5px solid var(--link);border-radius:2px;opacity:0;transform:scaleX(.96);transition:opacity .5s,transform .5s var(--ease)}
+.vb.dr{border-color:var(--drift)}
+.vb span{position:absolute;left:8px;top:-1px;transform:translateY(-100%);background:var(--link);color:#06140d;font:500 10.5px/1 var(--mono);padding:4px 6px;border-radius:2px 2px 0 0;white-space:nowrap}
+.vb.dr span{background:var(--drift);color:#2a1400}
+.cmp.in .vb{opacity:1;transform:none}
+.q{position:absolute;right:6%;width:22px;height:22px;border-radius:50%;border:1.5px dashed #FFC37A;color:#FFC37A;font:500 12px/19px var(--mono);text-align:center;opacity:.8}
+.cmp .tagv,.cmp .tagu{position:absolute;bottom:14px;font:500 11px/1 var(--mono);padding:7px 9px;border-radius:2px}
+.cmp .tagv{left:14px;background:var(--link);color:#06140d}
+.cmp .tagu{right:14px;background:#2a2f2d;color:#DDE4DF}
+.handle{position:absolute;top:0;bottom:0;left:var(--x,50%);width:2px;margin-left:-1px;background:#fff;box-shadow:0 0 0 1px rgba(0,0,0,.25)}
+.handle i{position:absolute;top:50%;left:50%;width:40px;height:40px;margin:-20px 0 0 -20px;border-radius:50%;background:#fff;color:#111614;display:grid;place-items:center;box-shadow:0 8px 24px rgba(0,0,0,.35);cursor:ew-resize}
+.cmp input{position:absolute;inset:0;width:100%;height:100%;opacity:0;cursor:ew-resize;margin:0}
+.cmp input:focus-visible + .handle i{outline:2px solid var(--link);outline-offset:3px}
+.legend2{display:flex;flex-wrap:wrap;gap:8px 18px;margin:0;padding:0;list-style:none;font:400 12px/1.3 var(--mono);color:var(--fg-2)}
+.legend2 li{display:flex;align-items:center;gap:7px}
+.legend2 i{width:12px;height:12px;border-radius:2px;border:1.5px solid var(--link)}
+/* The compare copy sits beside a ~780px photo with a lot of empty column between
+   them, so it is set a step up from the page defaults and given a wider measure
+   to carry it. Scoped to #compare: the other sections keep the base scale. */
+#compare .copy{max-width:34rem}
+#compare h2{font-size:clamp(26px,3.9vw,50px);max-width:14ch}
+#compare .lede{font-size:clamp(18px,1.55vw,25px);max-width:32rem}
+#compare .legend2{font-size:14px;gap:10px 22px}
+#compare .legend2 i{width:15px;height:15px}
+.legend2 i.dr{border-color:var(--drift)}
+.legend2 i.qq{border-radius:50%;border:1.5px dashed var(--drift-ink)}
+
+/* ═══ matrix: a stack of 1U panels, one per tool; capabilities are ports ═══ */
+.paper{background:var(--paper);position:relative;z-index:2}
+#matrix .head{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,24rem);gap:40px;align-items:end;margin-bottom:48px}
+#matrix .head .lede{margin:0}
+.mxwrap{overflow-x:auto;padding:4px 2px 12px;margin-inline:-2px}
+.mx{min-width:760px;--cols:minmax(180px,1.25fr) repeat(4,minmax(0,1fr)) 92px}
+.mx .cols{display:grid;grid-template-columns:var(--cols);padding:0 34px;margin-bottom:12px;font:400 12px/1.3 var(--mono);color:var(--fg-2)}
+.mx .cols span{text-align:center;padding:0 8px}
+.mx .cols span:first-child,.mx .cols span:last-child{text-align:left}
+.rackstack{position:relative;padding:14px 0;background:linear-gradient(90deg,#1a1f1d,#141816 12%,#141816 88%,#1a1f1d);border-radius:3px;box-shadow:0 40px 80px -46px rgba(17,22,20,.6)}
+.u1{position:relative;display:grid;grid-template-columns:var(--cols);align-items:center;height:78px;margin:0 34px 6px;padding:0 18px;
+  background:linear-gradient(#262c2a,#1f2523 45%,#1b201e);border-radius:2px;box-shadow:inset 0 1px 0 rgba(255,255,255,.07),inset 0 -1px 0 rgba(0,0,0,.5);
+  opacity:0;transform:translateX(-26px);transition:opacity .6s var(--ease),transform .7s var(--ease)}
+.u1:last-child{margin-bottom:0}
+.u1::before,.u1::after{content:"";position:absolute;top:0;bottom:0;width:26px;background:linear-gradient(90deg,#cfd4d0,#e7ebe7 50%,#c3c9c5);
+  -webkit-mask:radial-gradient(circle 3.5px at 50% 24%,transparent 3px,#000 3.6px),radial-gradient(circle 3.5px at 50% 76%,transparent 3px,#000 3.6px);-webkit-mask-composite:source-in;mask-composite:intersect}
+.u1::before{left:-30px;border-radius:2px 0 0 2px}.u1::after{right:-30px;border-radius:0 2px 2px 0}
+.mx.in .u1{opacity:1;transform:none}
+.u1 .lab{display:flex;align-items:center;gap:10px}
+.u1 .lab span{background:#E9ECE8;color:#111614;font:500 12.5px/1 var(--mono);padding:6px 8px;border-radius:1px;white-space:nowrap}
+.u1 .cell{display:flex;justify-content:center;align-items:center;gap:10px}
+.u1 .score{font:400 12px/1.3 var(--mono);color:#93A19A;padding-left:10px}
+.u1.rt{background:linear-gradient(#27302c,#1f2724 45%,#1a211e);box-shadow:inset 0 1px 0 rgba(255,255,255,.08),0 0 0 1px rgba(31,214,124,.35),0 0 38px -8px rgba(31,214,124,.35)}
+.u1.rt .lab span{background:var(--link);color:#06140d}
+.u1.rt .score{color:var(--link)}
+/* RJ45 port */
+.port{position:relative;width:48px;height:40px;background:#050706;
+  clip-path:polygon(0 0,100% 0,100% 80%,68% 80%,68% 100%,32% 100%,32% 80%,0 80%);
+  box-shadow:inset 0 0 0 2px #0e1211}
+.port::before{content:"";position:absolute;left:12px;right:12px;top:6px;height:12px;background:repeating-linear-gradient(90deg,#b8923c 0 1.5px,transparent 1.5px 3.5px);opacity:.75}
+.port .plug{position:absolute;inset:0;background:radial-gradient(circle at 50% 44%,#aab3ae 0 7px,#8a948f 7.5px 8.5px,transparent 9px),linear-gradient(#e6ebe7,#c9d0cb);
+  transform:translateY(-120%);transition:transform .55s cubic-bezier(.3,1.35,.5,1)}
+.port.half .plug{background:radial-gradient(circle at 50% 44%,#7f8a85 0 7px,#5f6965 7.5px 8.5px,transparent 9px),linear-gradient(#9aa39e,#7c8580)}
+.led{width:8px;height:8px;border-radius:1px;background:#2a322f;transition:background .3s,box-shadow .3s}
+.cell.full .led.on{background:var(--link);box-shadow:0 0 10px 1px var(--link)}
+.cell.part .led.on{background:transparent;box-shadow:inset 0 0 0 1.5px var(--link)}
+.cell.none .port{opacity:.9}
+.cell.lit .plug{transform:none}
+.mxleg{display:flex;flex-wrap:wrap;gap:10px 26px;margin-top:20px;font:400 12px/1 var(--mono);color:var(--fg-2)}
+.mxleg span{display:flex;align-items:center;gap:9px}
+.mxleg .port{width:26px;height:22px}
+.mxleg .port::before{left:6px;right:6px;top:3px;height:7px}
+.mxleg .port .plug{transform:none;background:radial-gradient(circle at 50% 44%,#aab3ae 0 4px,transparent 4.5px),linear-gradient(#e6ebe7,#c9d0cb)}
+.mxleg .port.half .plug{background:radial-gradient(circle at 50% 44%,#7f8a85 0 4px,transparent 4.5px),linear-gradient(#9aa39e,#7c8580)}
+.mxleg .led{display:inline-block}
+.mxleg .l-full .led{background:var(--link);box-shadow:0 0 8px var(--link)}
+.mxleg .l-part .led{background:transparent;box-shadow:inset 0 0 0 1.5px var(--link-ink)}
+
+/* ═══ evidence: pinned, four properties, each shown on a real frame ═══ */
+#evidence{min-height:430vh}
+#matrix>*{max-width:var(--shell);margin-inline:auto}
+.evpin{max-width:var(--shell);margin-inline:auto}
+.evpin{position:sticky;top:0;height:100vh;display:grid;grid-template-columns:minmax(0,25rem) minmax(0,1fr);gap:clamp(32px,5vw,80px);align-items:center;padding-top:60px}
+.props{list-style:none;margin:0;padding:0;border-top:1px solid var(--line)}
+.props li{border-bottom:1px solid var(--line);padding:16px 0 16px 18px;position:relative;cursor:pointer}
+.props li::before{content:"";position:absolute;left:0;top:16px;bottom:16px;width:2px;background:var(--line)}
+.props li .fill{position:absolute;left:0;top:16px;bottom:16px;width:2px;background:var(--link-ink);transform:scaleY(0);transform-origin:top}
+.props .ico{display:block;font:400 11.5px/1 var(--mono);color:var(--fg-2);margin-bottom:8px;transition:color .3s}
+.props b{display:block;font:500 20px/1.2 var(--sans);letter-spacing:-.02em;color:var(--fg-2);transition:color .3s}
+.props p{margin:0;max-height:0;overflow:hidden;opacity:0;color:var(--fg-2);font-size:15px;line-height:1.45;transition:max-height .5s var(--ease),opacity .4s,margin .4s}
+.props li.on .ico{color:var(--link-ink)} .props li.on b{color:var(--fg)}
+.props li.on p{max-height:5em;opacity:1;margin-top:8px}
+.frame{position:relative;aspect-ratio:4/3;max-height:74vh;width:100%;justify-self:end;border-radius:3px;overflow:visible}
+.frame .ph{position:absolute;inset:0;border-radius:3px;overflow:hidden;background:#111}
+.frame .ph figure{position:absolute;inset:0;margin:0;opacity:0;transition:opacity .7s}
+.frame .ph figure.on{opacity:1}
+.frame .ph img{width:100%;height:100%;object-fit:cover;display:block;filter:saturate(.55) contrast(1.02) brightness(.9);transform:scale(1.05);transition:transform 2.4s var(--ease)}
+.frame .ph figure.on img{transform:scale(1)}
+.frame .ph figure[data-p="1"] img{filter:saturate(.18) contrast(1.05) brightness(.85)}
+.ob{position:absolute;border:1.5px solid var(--link);border-radius:2px;opacity:0;transform:scale(1.08);transition:opacity .45s .35s,transform .6s .35s var(--ease);box-shadow:0 0 0 9999px rgba(12,17,16,0)}
+.frame figure.on .ob{opacity:1;transform:none}
+.ob.dash{border-style:dashed}
+.ob span{position:absolute;left:-1.5px;bottom:100%;margin-bottom:6px;background:var(--link);color:#06140d;font:500 11px/1.35 var(--mono);padding:5px 7px;border-radius:2px;white-space:nowrap}
+.ob span.below{bottom:auto;top:100%;margin:6px 0 0}
+.ob span.dk{background:rgba(12,17,16,.85);color:#DDE4DF}
+.frame .fid{position:absolute;right:14px;top:14px;z-index:2}
+.slip{position:absolute;left:-44px;bottom:-40px;z-index:3;width:min(330px,70%);background:var(--paper-2);color:var(--ink);border:1px solid var(--rule);border-radius:3px;font:400 12px/1.55 var(--mono);box-shadow:0 30px 60px -30px rgba(17,22,20,.45)}
+.slip header{display:flex;justify-content:space-between;padding:10px 14px;border-bottom:1px dashed var(--rule)}
+.slip header .ok{color:var(--link-ink);display:flex;align-items:center;gap:6px;font-weight:500;opacity:.25;transition:opacity .4s}
+.slip header .ok::before{content:"";width:7px;height:7px;border-radius:50%;background:var(--link)}
+.slip.done header .ok{opacity:1}
+.slip dl{display:grid;grid-template-columns:5.6rem 1fr;margin:0;padding:10px 14px;gap:4px 10px}
+.slip dt{color:var(--ink-2)} .slip dd{margin:0}
+.slip .row{display:contents}
+.slip .row > *{transition:background .4s,color .4s;opacity:.55}
+.slip .row.seen > *{opacity:1}
+.slip .row.hl dd{background:linear-gradient(90deg,rgba(31,214,124,.28),rgba(31,214,124,0));color:#032a18}
+.evbar{display:flex;gap:6px;align-items:center;margin-top:26px;font:400 11px/1 var(--mono);color:var(--fg-2)}
+
+/* ═══ cta: the last cable goes in ═══ */
+#cta{min-height:230vh}
+.ctapin{position:sticky;top:0;height:100vh;display:flex;align-items:center}
+#cta h2{max-width:12ch}
+
+/* footer */
+.foot{position:relative;z-index:2;padding:var(--band-y) var(--bleed) calc(var(--s8) + env(safe-area-inset-bottom,0px));background:var(--paper);border-top:1px solid var(--rule);
+  display:grid;grid-template-columns:var(--copy-w) repeat(3,minmax(0,1fr));gap:28px;font-size:14px;color:var(--ink-2)}
+.foot b{display:block;font:500 13px/1 var(--sans);color:var(--link-ink);margin-bottom:16px}
+.foot nav{display:flex;flex-direction:column;gap:11px}
+.foot nav a{color:var(--ink);text-decoration:none;font-size:15px}
+.foot nav a:hover{color:var(--link-ink)}
+.foot p{margin:0 0 11px;color:var(--ink);font-size:15px;line-height:1.45}
+.foot p a{text-decoration:none}.foot p a:hover{color:var(--link-ink)}
+.foot-brand .brand{margin-bottom:16px}
+.foot-brand p{color:var(--ink-2);max-width:18rem}
+.foot .fine{grid-column:1/-1;display:flex;justify-content:space-between;flex-wrap:wrap;gap:12px;margin-top:16px;padding-top:18px;border-top:1px solid var(--rule);font-size:13px}
+.foot .legal{display:flex;gap:18px;flex-wrap:wrap}.foot .legal a{color:var(--ink-2);text-decoration:none}.foot .legal a:hover{color:var(--link-ink)}
+.foot .social{display:flex;gap:18px}
+.foot .social a{color:var(--ink-2);text-decoration:none}
+.foot .social a:hover{color:var(--ink)}
+
+.no-webgl #stage,.no-webgl #hud{display:none}
+@media (max-width:1180px){ .foot{grid-template-columns:repeat(2,minmax(0,1fr))} }
+@media (max-width:960px){
+  .shotwrap .ftag{display:none}
+  .two,.how,#matrix .head{grid-template-columns:1fr} .shot{max-width:420px} .cmp{justify-self:stretch}
+  #evidence{min-height:auto}
+  .evpin{position:relative;height:auto;grid-template-columns:1fr;padding-block:var(--band-y)}
+  .props p{max-height:none;opacity:1;margin-top:8px} .props b{color:var(--fg)}
+  .slip{position:relative;left:auto;bottom:auto;margin:-30px 0 0 12px}
+  
+}
+@media (max-width:760px){
+  /* the matrix forced a 760px min-width, so a phone had to scroll it
+     sideways. Drop the floor and compress the frame: the tool column keeps
+     the labels, the four capability columns only carry port glyphs, so they
+     survive being narrow. */
+  .mxwrap{overflow-x:auto;padding-inline:0;margin-inline:0}
+  .mx{min-width:0;--cols:minmax(68px,1.1fr) repeat(4,minmax(0,1fr)) 0px}
+  .mx .cols{padding:0 4px;font-size:9px;line-height:1.2;gap:0}
+  .mx .cols span{padding:0 2px}
+  .mx .cols span:last-child{display:none}
+  .u1{margin:0 4px 6px;padding:0 5px;height:62px}
+  .mxleg{gap:8px 14px;font-size:10px;margin-top:14px}
+
+  #scrim{background:linear-gradient(0deg,var(--paper) 0,rgba(233,236,232,.94) 34%,rgba(233,236,232,0) 58%)}
+  #hud .tag:not(.keep){display:none} .reticle{display:none}
+  #hero{align-items:flex-end;padding-top:50vh;padding-bottom:7vh}
+  .hero-read{margin-top:28px}
+  .steps{top:54vh;height:310px}
+  /* the 3D runs full-bleed behind the page on phones: every copy block that
+     overlaps it gets a paper panel, so the text is legible over any frame */
+  #hero .copy,.steps .copy,#cta .copy{
+    background:color-mix(in oklab,var(--paper) 92%,transparent);
+    backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);
+    padding:16px 18px;border-radius:3px}
+  .stepbar{bottom:-18px}
+  .ctapin{align-items:flex-end;padding-bottom:var(--band-y)}
+}
+@media (max-width:560px){ .foot{grid-template-columns:repeat(2,minmax(0,1fr));gap:var(--s6) var(--s5);padding-block:var(--band-y-sm) calc(var(--s6) + env(safe-area-inset-bottom,0px))} .hero-read{gap:16px} .hero-read div{min-width:0;flex:1} }
+@media (prefers-reduced-motion:reduce){
+  .st,.vb,.u1,.port .plug,.props p,.ob,.frame .ph figure,.frame img,.shot img,.howlist li{transition:none!important}
+  .shot .scan{display:none} .chip .dot{animation:none}
+}
+</style>
+</head>
+<body>
+
+<canvas id="stage" aria-hidden="true"></canvas>
+<div id="scrim" aria-hidden="true"></div>
+<div id="hud" aria-hidden="true"></div>
+<div class="reticle" id="reticle" aria-hidden="true"><div class="box"></div><div class="lbl" id="reticleLbl"></div></div>
+
+<nav class="nav" id="nav" aria-label="Primary">
+  <a class="brand" href="/"><img alt="" src="/design-system/assets/Logos/racktrack-mark.jpg">RackTrack</a>
+  <ul>
+    <li><a href="/pages/why-racktrack/" aria-current="page">Why RackTrack</a></li>
+    <li><a href="/pages/solutions/">Solutions</a></li>
+    <li><a href="/pages/use-cases/">Use cases</a></li>
+    <li><a href="/pages/resources/">Resources</a></li>
+    <li><a href="/pages/trust-security/">Trust</a></li>
+    <li><a href="/pages/about-us/">About</a></li>
+    <li><a href="/pages/sign-in/">Sign in</a></li>
+  </ul>
+  <a class="btn solid" href="/pages/contact-us/"><span class="led"></span>Book a sweep</a>
+</nav>
+
+<main>
+  <!-- 00 · hero -->
+  <section class="ch" id="hero">
+    <div class="copy">
+      <h1>Most tools trust the record. <br>We check the rack</h1>
+      <p class="lede">RackTrack starts at the port, then checks every record against what's physically plugged in.</p>
+      <div class="actions">
+        <a class="btn solid" href="/pages/contact-us/"><span class="led"></span>Book a sweep</a>
+        <a class="btn" href="#layers">See how ↓</a>
+      </div>
+      <div class="hero-read" aria-label="Example reading of switch TOR-A">
+        <div><b>48</b>ports read</div>
+        <div class="g"><b>37</b>match the record</div>
+        <div class="a"><b>1</b>on no record</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 01 · three layers, one switch -->
+  <section class="ch" id="layers">
+    <div class="steps" id="steps">
+      <div class="st on"><div class="copy"><h2>The rack becomes readable</h2><p class="lede">One phone video reads every device, label and port. Nothing to install on the network.</p><span class="fact"><i></i><span id="readCount">0</span>&nbsp;/ 48 ports read</span></div></div>
+      <div class="st"><div class="copy"><h2>Then it's checked against the network</h2><p class="lede">What the camera saw is matched to live switch data over LLDP and CDP, port by port.</p><span class="fact"><i></i>37 agree&nbsp;&nbsp;<i class="a"></i>1 on no record</span></div></div>
+      <div class="st"><div class="copy"><h2>And compared with every sweep before it</h2><p class="lede">Each sweep is checked against the last, so every move, add and removal is on record.</p><span class="fact"><i class="r"></i>3 sweeps&nbsp;&nbsp;<i class="a"></i>1 removed&nbsp;&nbsp;<i></i>1 added</span></div></div>
+      <div class="st"><div class="copy"><h2>Three layers. One switch you can trust</h2><p class="lede">When the port, the network and the history agree, the record is verified.</p><span class="fact"><i></i>38 of 38 cabled ports on record</span></div></div>
+      <div class="stepbar" aria-hidden="true"><i><b></b></i><i><b></b></i><i><b></b></i><i><b></b></i><span id="stepLbl">1 / 4</span></div>
+    </div>
+  </section>
+
+  <!-- hall chapter -->
+  <div class="chapter" id="hall">
+    <section class="ch sec" id="how">
+      <div class="how">
+        <div>
+          <h2>No new hardware. One walk down the aisle</h2>
+          <p class="lede">You don't learn a new system. Here's the whole process, start to finish.</p>
+          <ol class="howlist" id="howlist">
+            <span class="rail" id="howRail"></span>
+            <li><span class="n">01</span><h3>Walk the aisle, film the rack</h3><p>Walk the row with your phone recording, then upload the video. RackTrack finds every rack in the footage, picks the clearest frame for each, and maps every cable and port. No special hardware, no downtime.</p></li>
+            <li><span class="n">02</span><h3>We check it against your records</h3><p>What the camera saw is compared with your CMDB, spreadsheets and network tools, in the background.</p></li>
+            <li><span class="n">03</span><h3>You see exactly what's different</h3><p>A plain list, not a dashboard to decode.</p>
+              <div class="out"><span style="--c:var(--link)">matches</span><span style="--c:var(--drift)">missing</span><span style="--c:var(--drift)">moved</span><span style="--c:var(--record)">changed since last sweep</span></div></li>
+          </ol>
+        </div>
+        <div class="shotwrap">
+        <div class="shot" id="shot">
+          <img src="/assets/why/scan-app-tall.jpg" alt="A technician holds a phone running RackTrack up to a rack in a data hall aisle" loading="lazy">
+          <div class="scan"></div><div class="brk"></div>
+          <span class="vbox" style="left:52%;top:33%;width:32%;height:24%"></span>
+          <span class="vbox" style="left:2%;top:25%;width:17%;height:6%;transition-delay:.8s"></span>
+          <span class="chip" style="left:26px;top:26px"><span class="dot"></span>Sweeping aisle 4 · R03</span>
+          <span class="chip" style="left:26px;bottom:26px"><b>22</b> devices · <b>168</b> ports read</span>
+        </div>
+          <span class="ftag l" style="right:calc(100% - 12px);top:26%;transition-delay:.9s"><i></i><span><b>R03-RACK 4</b>label read</span></span>
+          <span class="ftag l" style="right:calc(100% - 12px);top:60%;transition-delay:1.2s"><i></i><span><b>Cable 11A-03</b>P-12 → P-14 · traced</span></span>
+        </div>
+      </div>
+    </section>
+
+    <section class="ch sec" id="compare">
+      <div class="two">
+        <div class="copy">
+          <h2>Same rack. Now you know what's in it</h2>
+          <p class="lede">Drag across the photo. On the left, what RackTrack verified. On the right, what you had before: a picture.</p>
+          <ul class="legend2"><li><i></i>Verified</li><li><i class="dr"></i>Not in any record</li><li><i class="qq"></i>Unknown</li></ul>
+        </div>
+        <div class="cmp" id="cmp" style="--x:50%">
+          <img class="raw" src="/assets/why-rack-face.jpg" alt="Front of a network rack with patch panels and switches, unlabelled" loading="lazy">
+          <div class="layer" aria-hidden="true">
+            <span class="q" style="top:4%">?</span><span class="q" style="top:19%">?</span><span class="q" style="top:34%">?</span><span class="q" style="top:49%">?</span><span class="q" style="top:63%">?</span><span class="q" style="top:78%">?</span><span class="q" style="top:92%">?</span>
+          </div>
+          <div class="layer ver">
+            <img src="/assets/why-rack-face.jpg" alt="" loading="lazy">
+            <div class="vb" style="top:1.6%;height:9.6%;transition-delay:.05s"><span>SW-01 · 24/28 linked</span></div>
+            <div class="vb" style="top:12.8%;height:17%;transition-delay:.15s"><span>PP-4.2 · 24/24 patched</span></div>
+            <div class="vb" style="top:30.9%;height:9.5%;transition-delay:.25s"><span>SW-02 · 26/28 linked</span></div>
+            <div class="vb dr" style="top:41.5%;height:18.1%;transition-delay:.35s"><span>PP-4.4 · port 17 not on record</span></div>
+            <div class="vb" style="top:60.1%;height:9.6%;transition-delay:.45s"><span>SW-03 · 25/28 linked</span></div>
+            <div class="vb" style="top:71.3%;height:17%;transition-delay:.55s"><span>PP-4.5 · 24/24 patched</span></div>
+            <div class="vb" style="top:89.4%;height:9.5%;transition-delay:.65s"><span>SW-04 · 27/28 linked</span></div>
+            <span class="tagv">Verified by RackTrack</span>
+          </div>
+          <span class="tagu" aria-hidden="true">Unverified</span>
+          <input type="range" min="0" max="100" value="50" id="cmpRange" aria-label="Compare verified and unverified views">
+          <div class="handle" aria-hidden="true"><i><svg width="18" height="10" viewBox="0 0 18 10" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M5 1 1 5l4 4M13 1l4 4-4 4M1 5h16"/></svg></i></div>
+        </div>
+      </div>
+    </section>
+  </div>
+
+  <!-- 03 · matrix -->
+  <section class="ch sec paper" id="matrix">
+    <div class="head">
+      <h2>Other tools see part of the picture</h2>
+      <p class="lede">Each tool is a panel. Each capability is a port. Only one panel is fully patched.</p>
+    </div>
+    <div class="mxwrap">
+      <div class="mx" id="mx" role="table" aria-label="Capability comparison">
+        <div class="cols" role="row"><span role="columnheader">Tool</span><span role="columnheader">Physical sensing</span><span role="columnheader">Network identification</span><span role="columnheader">Enriched data</span><span role="columnheader">Single source of truth</span><span role="columnheader">Covered</span></div>
+        <div class="rackstack" id="rackstack">
+          <div class="u1" role="row" data-v="ppnn"><div class="lab" role="rowheader"><span>DCIM platforms</span></div></div>
+          <div class="u1" role="row" data-v="fpnn"><div class="lab" role="rowheader"><span>Network discovery</span></div></div>
+          <div class="u1" role="row" data-v="fnnn"><div class="lab" role="rowheader"><span>Manual rack audits</span></div></div>
+          <div class="u1" role="row" data-v="nnfn"><div class="lab" role="rowheader"><span>CMDB</span></div></div>
+          <div class="u1 rt" role="row" data-v="ffff"><div class="lab" role="rowheader"><span>RackTrack</span></div></div>
+        </div>
+      </div>
+    </div>
+    <div class="mxleg" aria-hidden="true">
+      <span class="l-full"><i class="port"><i class="plug"></i></i><i class="led"></i>Full</span>
+      <span class="l-part"><i class="port half"><i class="plug"></i></i><i class="led"></i>Partial</span>
+      <span class="l-none"><i class="port"></i><i class="led"></i>None</span>
+    </div>
+  </section>
+
+  <!-- 04 · evidence -->
+  <section class="ch paper" id="evidence">
+    <div class="evpin">
+      <div>
+        <h2>Evidence that holds up</h2>
+        <p class="lede">Every record RackTrack keeps can be traced, checked, dated and defended.</p>
+        <ol class="props" id="props">
+          <li data-p="0"><span class="fill"></span><span class="ico">01 · Source-linked</span><b>Traceable to the frame</b><p>Each record points back to the sweep frame it came from. No guessing where a number came from.</p></li>
+          <li data-p="1"><span class="fill"></span><span class="ico">02 · Network-verified</span><b>Checked against the switch</b><p>Nothing is marked verified until live network data agrees with what the camera saw.</p></li>
+          <li data-p="2"><span class="fill"></span><span class="ico">03 · Timestamped</span><b>Dated, every time</b><p>Arrivals, moves and removals all carry the time they were seen.</p></li>
+          <li data-p="3"><span class="fill"></span><span class="ico">04 · Audit-ready</span><b>Ready before it's asked for</b><p>Mapped to SOC 2, ISO 27001, HIPAA and PCI-DSS Req. 9. Hand over proof, not a spreadsheet.</p></li>
+        </ol>
+      </div>
+      <div class="frame" id="frame">
+        <div class="ph">
+          <figure data-p="0" class="on"><img src="/assets/why/ev-source.jpg" alt="Labelled patch cables in a rack" loading="lazy">
+            <div class="ob" style="left:43%;top:28%;width:13%;height:11%"><span>frame #0412 · label "10S" read</span></div>
+            <div class="ob dash" style="left:40%;top:50%;width:11%;height:14%"><span class="below dk">→ record RT-EV-0419</span></div></figure>
+          <figure data-p="1"><img src="/assets/why/ev-network.jpg" alt="Patch cables between two switches" loading="lazy">
+            <div class="ob" style="left:34%;top:17%;width:14%;height:16%"><span>TOR-A Gi1/0/47 · link up</span></div>
+            <div class="ob" style="left:41%;top:67%;width:12%;height:15%"><span class="below">LLDP neighbour · APP-219 eth0 ✓</span></div></figure>
+          <figure data-p="2"><img src="/assets/why/ev-time.jpg" alt="A technician checks a rack with a tablet" loading="lazy">
+            <div class="ob" style="left:9%;top:49%;width:40%;height:13%"><span>added · 2026-09-24 14:02 UTC</span></div>
+            <div class="ob dash" style="left:9%;top:29%;width:40%;height:10%"><span class="dk">moved · U12 → U14 · 2026-08-30</span></div></figure>
+          <figure data-p="3"><img src="/assets/why/ev-audit.jpg" alt="Printed floor plans and rack drawings on a desk" loading="lazy">
+            <div class="ob" style="left:12%;top:22%;width:48%;height:58%"><span>SOC 2 · ISO 27001 · HIPAA · PCI-DSS 9</span></div></figure>
+        </div>
+        <span class="chip fid" id="fid">sweep 09 · frame #0412</span>
+        <article class="slip" id="slip" aria-label="Example evidence record">
+          <header><span>RT-EV-0419</span><span class="ok">Verified</span></header>
+          <dl>
+            <div class="row" data-r="0"><dt>Seen</dt><dd>Sweep frame #0412</dd></div>
+            <div class="row" data-r="1"><dt>Signalled</dt><dd>LLDP · TOR-A Gi1/0/47</dd></div>
+            <div class="row" data-r="2"><dt>Time</dt><dd id="evTime">2026-09-24 14:02 UTC</dd></div>
+            <div class="row" data-r="3"><dt>Mapped to</dt><dd>4 frameworks</dd></div>
+          </dl>
+        </article>
+      </div>
+    </div>
+  </section>
+
+  <!-- 05 · cta -->
+  <section class="ch" id="cta">
+    <div class="ctapin">
+      <div class="copy">
+        <h2>Bring one rack. See where it stops matching</h2>
+        <p class="lede">We'll sweep it live and show you where it matches your records, and where it doesn't.</p>
+        <div class="actions">
+          <a class="btn solid" href="/pages/contact-us/"><span class="led"></span>Book a sweep</a>
+          <a class="btn" href="/pages/solutions/">Explore solutions</a>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <footer class="foot" id="siteFooter">
+    <div class="foot-brand">
+      <a class="brand" href="/"><img alt="" src="/design-system/assets/Logos/racktrack-mark.jpg">RackTrack</a>
+      <p>Physical infrastructure intelligence for data centers.</p>
+    </div>
+    <nav aria-label="Platform"><b>Platform</b>
+      <a href="/pages/why-racktrack/">Why RackTrack</a><a href="/pages/solutions/">Solutions</a><a href="/pages/use-cases/">Use cases</a><a href="/pages/trust-security/">Trust &amp; security</a></nav>
+    <nav aria-label="Company"><b>Company</b>
+      <a href="/pages/resources/">Resources</a><a href="/pages/about-us/">About us</a><a href="/pages/contact-us/">Contact us</a></nav>
+    <div><b>Contact</b>
+      <p><a href="mailto:info@racktrack.ai">info@racktrack.ai</a></p><p><a href="tel:+18608782448">+1 (860) 878 2448</a></p><p>85 Felt Rd, Suite #604<br>South Windsor, CT 06074</p></div>
+    <div class="fine">
+      <span>© 2026 RackTrack Inc. · Patent pending</span>
+      <span class="legal"><a href="/pages/legal/privacy-policy/">Privacy</a><a href="/pages/legal/terms-of-use/">Terms</a><a href="/pages/legal/cookie-policy/">Cookies</a><a href="/pages/legal/data-we-collect/">Data we collect</a><a href="/pages/legal/third-party-services/">Third parties</a></span>
+      <span class="social"><a href="https://www.linkedin.com/company/racktrack/" rel="noopener" target="_blank">LinkedIn</a><a href="https://www.instagram.com/racktrack_inc/" rel="noopener" target="_blank">Instagram</a><a href="https://www.facebook.com/share/18depF5xzA/" rel="noopener" target="_blank">Facebook</a></span>
+    </div>
+  </footer>
+</main>
+
+<script type="importmap">
+{ "imports": {
+  "three": "https://cdn.jsdelivr.net/npm/three@0.170.0/build/three.module.js",
+  "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.170.0/examples/jsm/"
+} }
+</script>
+<!--DOMJS-START-->
+<script>
+/* ───── page logic that doesn't need WebGL: nav, ruler, copy states, how list, slider, matrix, evidence ───── */
+(()=>{
+const reduce=matchMedia('(prefers-reduced-motion: reduce)').matches;
+const clamp=(x,a=0,b=1)=>Math.min(b,Math.max(a,x));
+const smooth=(a,b,x)=>{const t=clamp((x-a)/(b-a));return t*t*(3-2*t)};
+const $=s=>document.querySelector(s), $$=s=>[...document.querySelectorAll(s)];
+const nav=$('#nav'), hall=$('#hall'), layers=$('#layers');
+const sts=$$('.st'), bars=$$('.stepbar i b'), stepLbl=$('#stepLbl'), readCount=$('#readCount');
+const howLis=$$('#howlist li'), howRail=$('#howRail'), how=$('#how');
+const ev=$('#evidence'), props=$$('#props li'), figs=$$('#frame figure'), rows=$$('#slip .row'), slip=$('#slip'), fid=$('#fid');
+const FID=['sweep 09 · frame #0412','sweep 09 · frame #0413','sweep 09 · frame #0415','report · SOC 2 evidence pack'];
+const X0=-1.46,P=.108,G=.07; const portX=n=>{const c=Math.floor((n-1)/2);return X0+c*P+Math.floor(c/6)*G};
+let curStep=-1, curProp=-1;
+
+function frame(){
+  const vh=innerHeight;
+  // nav theme
+  const hr=hall.getBoundingClientRect(); const dark=false;
+  nav.classList.toggle('dark',dark);
+  const S=scrollY/(document.documentElement.scrollHeight-vh||1);
+  // layers copy states
+  const lr=layers.getBoundingClientRect(); const t=clamp(-lr.top/(lr.height-vh));
+  const st=t<.33?0:t<.6?1:t<.82?2:3;
+  if(st!==curStep){curStep=st;sts.forEach((e,i)=>e.classList.toggle('on',i===st));stepLbl.textContent=(st+1)+' / 4';}
+  const segs=[[0,.33],[.33,.6],[.6,.82],[.82,1]];
+  bars.forEach((b,i)=>b.style.width=(clamp((t-segs[i][0])/(segs[i][1]-segs[i][0]))*100)+'%');
+  const sweepX=-2.5+4.8*smooth(.04,.28,t); let n=0; for(let k=1;k<=48;k++) if(portX(k)<sweepX) n++;
+  readCount.textContent=n;
+  // how list
+  const hw=how.getBoundingClientRect(); const hp=clamp((vh*.72-hw.top)/(hw.height*.62));
+  howLis.forEach((li,i)=>li.classList.toggle('on',reduce||hp>i/3+.02));
+  howRail.style.height=(reduce?100:hp*100)+'%';
+  // evidence
+  const er=ev.getBoundingClientRect();
+  if(innerWidth>960){
+    const p=clamp(-er.top/(er.height-vh)); const k=Math.min(3,Math.floor(p*4)); const loc=clamp(p*4-k);
+    props.forEach((li,i)=>{li.classList.toggle('on',i===k);li.querySelector('.fill').style.transform=`scaleY(${i<k?1:i===k?loc:0})`});
+    if(k!==curProp){curProp=k;figs.forEach((f,i)=>f.classList.toggle('on',i===k));fid.textContent=FID[k];}
+    rows.forEach((r,i)=>{r.classList.toggle('seen',i<=k);r.classList.toggle('hl',i===k)});
+    slip.classList.toggle('done',k===3&&loc>.35);
+  }
+  requestAnimationFrame(frame);
+}
+requestAnimationFrame(frame);
+
+// click a property → scroll to it
+props.forEach((li,i)=>li.addEventListener('click',()=>{ if(innerWidth<=960) return;
+  const er=ev.getBoundingClientRect(); const y=scrollY+er.top+(er.height-innerHeight)*(i/4+.06); scrollTo({top:y,behavior:reduce?'auto':'smooth'});}));
+if(innerWidth<=960){ figs.forEach((f,i)=>f.classList.toggle('on',i===0)); rows.forEach(r=>r.classList.add('seen')); slip.classList.add('done');
+  // tap a property on mobile swaps the frame
+  props.forEach((li,i)=>{li.classList.add('on');li.addEventListener('click',()=>{figs.forEach((f,j)=>f.classList.toggle('on',j===i));rows.forEach((r,j)=>r.classList.toggle('hl',j===i));fid.textContent=FID[i];})}); }
+
+// live UTC time in the record
+const pad=n=>String(n).padStart(2,'0');
+const tick=()=>{const d=new Date();$('#evTime').textContent=`${d.getUTCFullYear()}-${pad(d.getUTCMonth()+1)}-${pad(d.getUTCDate())} ${pad(d.getUTCHours())}:${pad(d.getUTCMinutes())} UTC`;};
+tick(); setInterval(tick,30000);
+
+// reveal observers
+const io=(el,th,fn)=>{const o=new IntersectionObserver(es=>es.forEach(e=>{if(e.isIntersecting){fn();o.disconnect();}}),{threshold:th});o.observe(el);};
+io($('#shot'),.35,()=>$('#shot').classList.add('in'));
+
+// compare slider
+const cmp=$('#cmp'), range=$('#cmpRange');
+const setX=v=>cmp.style.setProperty('--x',v+'%');
+range.addEventListener('input',()=>{setX(range.value);swept=true;});
+let swept=false;
+io(cmp,.45,()=>{cmp.classList.add('in'); if(reduce) return; const t0=performance.now();
+  const f=now=>{ if(swept) return; const k=(now-t0)/2200; if(k>=1){setX(50);return;} setX(50+Math.sin(k*Math.PI*2)*28*(1-k)); requestAnimationFrame(f);}; requestAnimationFrame(f);});
+
+// matrix: build the ports, then patch them in
+const W={f:'Full',p:'Partial',n:'None'};
+const u1s=$$('#rackstack .u1');
+u1s.forEach(r=>{ const v=r.dataset.v; let full=0,part=0;
+  [...v].forEach(c=>{ const cell=document.createElement('div'); cell.setAttribute('role','cell');
+    cell.className='cell '+({f:'full',p:'part',n:'none'}[c]);
+    cell.innerHTML=`<i class="port${c==='p'?' half':''}">${c!=='n'?'<i class="plug"></i>':''}</i><i class="led"></i><span class="sr">${W[c]}</span>`;
+    r.appendChild(cell); if(c==='f')full++; if(c==='p')part++; });
+  const s=document.createElement('div'); s.className='score'; s.setAttribute('role','cell');
+  s.textContent=full===4?'4 of 4':`${full} of 4${part?` · ${part} partial`:''}`; r.appendChild(s);
+});
+io($('#mx'),.35,()=>{ $('#mx').classList.add('in');
+  u1s.forEach((r,ri)=>{ const cells=[...r.querySelectorAll('.cell')];
+    cells.forEach((c,ci)=>{ const d=reduce?0:500+ri*260+ci*110+(ri===4?350:0);
+      setTimeout(()=>c.classList.add('lit'),d); setTimeout(()=>c.querySelector('.led').classList.add('on'),d+(reduce?0:260)); }); });
+});
+})();
+</script>
+<!--DOMJS-END-->
+<!--GLJS-START-->
+<script type="module">
+/* ═════════════ Why RackTrack · 3D ═════════════
+   One object carries the page: TOR-A, a 48-port switch, built procedurally (no GLB needed).
+   Hero: it floats, cabled, and the cursor reads its ports.
+   Layers: Perceive (a viewfinder reads it port by port) → Reconcile (the network's view rises above it,
+   one thread per port) → Track (earlier sweeps stack above it like rack units) → Verified (they press back in).
+   CTA: the last cable goes into port 48 and its LED turns green.                                      */
+import * as THREE from 'three';
+import { RoomEnvironment } from 'three/addons/environments/RoomEnvironment.js';
+import { RoundedBoxGeometry } from 'three/addons/geometries/RoundedBoxGeometry.js';
+
+const reduce=matchMedia('(prefers-reduced-motion: reduce)').matches;
+const clamp=(x,a=0,b=1)=>Math.min(b,Math.max(a,x));
+const smooth=(a,b,x)=>{const t=clamp((x-a)/(b-a));return t*t*(3-2*t)};
+const lerp=(a,b,t)=>a+(b-a)*t;
+const C=h=>new THREE.Color(h);
+const COL={link:C('#1FD67C'),drift:C('#FF9A2E'),record:C('#7C93A8'),off:C('#1a201e'),act:C('#9CF7C6'),black:C('#000')};
+
+/* renderer */
+const canvas=document.getElementById('stage');
+let renderer;
+try{ renderer=new THREE.WebGLRenderer({canvas,antialias:true,alpha:true,powerPreference:'high-performance'}); }
+catch(e){ document.documentElement.classList.add('no-webgl'); throw e; }
+renderer.setPixelRatio(Math.min(devicePixelRatio,2));
+renderer.setClearColor(0x000000,0);
+renderer.toneMapping=THREE.ACESFilmicToneMapping; renderer.toneMappingExposure=1.0;
+renderer.outputColorSpace=THREE.SRGBColorSpace;
+const scene=new THREE.Scene();
+const pmrem=new THREE.PMREMGenerator(renderer);
+scene.environment=pmrem.fromScene(new RoomEnvironment(),0.04).texture;
+scene.environmentIntensity=.9;
+const camera=new THREE.PerspectiveCamera(30,1,0.05,120);
+scene.add(new THREE.HemisphereLight(0xffffff,0x8d9690,.55));
+const key=new THREE.DirectionalLight(0xffffff,1.7); key.position.set(3,6,6); scene.add(key);
+const rim=new THREE.DirectionalLight(0xcfe3ff,.7); rim.position.set(-5,2,-4); scene.add(rim);
+const torch=new THREE.PointLight(0xdfffee,0,2.2,1.4); scene.add(torch);
+
+function tex(c,aniso=8){const t=new THREE.CanvasTexture(c);t.colorSpace=THREE.SRGBColorSpace;t.anisotropy=Math.min(aniso,renderer.capabilities.getMaxAnisotropy());return t;}
+function glowTex(){const c=document.createElement('canvas');c.width=c.height=64;const g=c.getContext('2d');const r=g.createRadialGradient(32,32,0,32,32,32);
+  r.addColorStop(0,'rgba(255,255,255,1)');r.addColorStop(.25,'rgba(255,255,255,.45)');r.addColorStop(1,'rgba(255,255,255,0)');g.fillStyle=r;g.fillRect(0,0,64,64);return new THREE.CanvasTexture(c);}
+const GLOW=glowTex();
+const glowBlend={blending:THREE.CustomBlending,blendEquation:THREE.AddEquation,blendSrc:THREE.SrcAlphaFactor,blendDst:THREE.OneFactor,blendSrcAlpha:THREE.ZeroFactor,blendDstAlpha:THREE.OneFactor};
+
+
+/* ─────────── TOR-A geometry ─────────── */
+const W=4.4,H=.44,D=2.0,CAV=.1;
+const P=.108,G=.07,X0=-1.46,ROWY=[.095,-.085],PW=.086,PH=.07;
+const EMPTY=new Set([6,14,22,29,31,38,44,45,46,48]);
+const HOSTS=['APP-218','APP-219','APP-221','DB-101','DB-102','DB-103','DB-104','DB-105','DB-106','SAN-07','BAK-31','BAK-32','FW-02','OOB-3'];
+const IFS=['eth0','eth1','eno1','eno2'];
+const ports=[];
+for(let n=1;n<=48;n++){const col=Math.floor((n-1)/2),row=(n-1)%2;
+  const p={n,col,row,grp:Math.floor(col/6),x:X0+col*P+Math.floor(col/6)*G,y:ROWY[row],linked:!EMPTY.has(n)};
+  p.nb=p.linked?`${HOSTS[(n*5)%HOSTS.length]} ${IFS[n%4]}`:'';
+  ports.push(p);}
+const PORT=n=>ports[n-1];
+PORT(47).nb='APP-219 eth0'; PORT(17).nb='';            // 17: cabled and link-up, but on no record
+PORT(9).added=true;                                      // 9: new since the last sweep
+const SFP=[{n:49,x:1.47,y:ROWY[0],on:true},{n:50,x:1.47,y:ROWY[1],on:true},{n:51,x:1.615,y:ROWY[0]},{n:52,x:1.615,y:ROWY[1]}];
+const CON={x:-1.73,y:ROWY[1]}, MGMT={x:-1.73,y:ROWY[0]};
+
+const SW=new THREE.Group(); scene.add(SW);
+
+// front face texture (alpha holes where ports are)
+const CW=4096, CH=Math.round(CW*H/W), s=CW/W;
+const PX=x=>(x+W/2)*s, PY=y=>(H/2-y)*s;
+function faceCanvas(){
+  const c=document.createElement('canvas');c.width=CW;c.height=CH;const g=c.getContext('2d');
+  const gr=g.createLinearGradient(0,0,0,CH);gr.addColorStop(0,'#323a37');gr.addColorStop(.08,'#262d2a');gr.addColorStop(.9,'#1d2321');gr.addColorStop(1,'#141816');
+  g.fillStyle=gr;g.fillRect(0,0,CW,CH);
+  let sd=3;const r=()=>((sd=(sd*16807)%2147483647)/2147483647);
+  for(let i=0;i<2600;i++){g.fillStyle=`rgba(255,255,255,${.012+r()*.02})`;g.fillRect(r()*CW,r()*CH,40+r()*400,1);}
+  g.fillStyle='rgba(255,255,255,.16)';g.fillRect(0,0,CW,2);g.fillStyle='rgba(0,0,0,.5)';g.fillRect(0,CH-3,CW,3);
+  // port group recesses
+  for(let k=0;k<4;k++){const a=PORT(k*12+1),b=PORT(k*12+12);const x0=PX(a.x-PW/2-.016),x1=PX(b.x+PW/2+.016),y0=PY(ROWY[0]+PH/2+.014),y1=PY(ROWY[1]-PH/2-.014);
+    g.fillStyle='#101413';g.fillRect(x0,y0,x1-x0,y1-y0);g.strokeStyle='rgba(255,255,255,.07)';g.lineWidth=2;g.strokeRect(x0+1,y0+1,x1-x0-2,y1-y0-2);}
+  // SFP block recess
+  g.fillStyle='#101413';g.fillRect(PX(1.39),PY(.15),PX(1.695)-PX(1.39),PY(-.15)-PY(.15));
+  // port numbers
+  g.fillStyle='#98a39d';g.font='500 17px "JetBrains Mono", monospace';g.textBaseline='alphabetic';
+  ports.forEach(p=>{ const y=p.row?PY(p.y-PH/2-.03):PY(p.y+PH/2+.022); g.fillText(String(p.n),PX(p.x-PW/2),y); });
+  SFP.forEach(q=>g.fillText(String(q.n),PX(q.x-.062),q.y>0?PY(q.y+.058):PY(q.y-.072)));
+  g.font='500 15px "JetBrains Mono", monospace';g.fillStyle='#7f8a85';
+  g.fillText('10G SFP+',PX(1.40),PY(.182));g.fillText('MGMT',PX(-1.77),PY(.182));g.fillText('CON',PX(-1.76),PY(-.178));
+  g.fillText('SYS   PWR   FAN',PX(-2.08),PY(-.125));
+  // model + sticker
+  g.fillStyle='#c9d0cb';g.font='600 30px "Inter", sans-serif';g.fillText('RT-48G',PX(-2.08),PY(.12));
+  g.fillStyle='#E9ECE8';g.fillRect(PX(-2.09),PY(.055),PX(-1.86)-PX(-2.09),PY(-.035)-PY(.055));
+  g.fillStyle='#111614';g.font='500 34px "JetBrains Mono", monospace';g.fillText('TOR-A',PX(-2.075),PY(-.022));
+  // vents at the right end
+  g.fillStyle='#0b0e0d';for(let i=0;i<7;i++)for(let j=0;j<6;j++){g.beginPath();g.arc(PX(1.8+i*.052),PY(.13-j*.052),6,0,7);g.fill();}
+  // cut the openings
+  g.globalCompositeOperation='destination-out';
+  const hole=(x,y,w,h)=>g.fillRect(PX(x-w/2),PY(y+h/2),w*s,h*s);
+  ports.forEach(p=>hole(p.x,p.y,PW,PH)); SFP.forEach(q=>hole(q.x,q.y,.124,.062)); hole(CON.x,CON.y,PW,PH); hole(MGMT.x,MGMT.y,PW,PH);
+  g.globalCompositeOperation='source-over';
+  // metal lip around each opening
+  g.strokeStyle='#59625d';g.lineWidth=3;
+  const lip=(x,y,w,h)=>g.strokeRect(PX(x-w/2)-1.5,PY(y+h/2)-1.5,w*s+3,h*s+3);
+  ports.forEach(p=>lip(p.x,p.y,PW,PH)); SFP.forEach(q=>lip(q.x,q.y,.124,.062)); lip(CON.x,CON.y,PW,PH); lip(MGMT.x,MGMT.y,PW,PH);
+  return c;
+}
+const chassisMat=new THREE.MeshStandardMaterial({color:'#2a302d',metalness:.62,roughness:.42});
+const faceMat=new THREE.MeshStandardMaterial({map:tex(faceCanvas(),16),alphaTest:.5,metalness:.5,roughness:.5});
+const face=new THREE.Mesh(new THREE.PlaneGeometry(W,H),faceMat); SW.add(face);
+const body=new THREE.Mesh(new RoundedBoxGeometry(W,H,D-CAV,2,.014),chassisMat); body.position.z=-CAV-(D-CAV)/2; SW.add(body);
+// sleeve between the face and the body
+[[W,.004,0,H/2-.002],[W,.004,0,-H/2+.002],[.004,H,-W/2+.002,0],[.004,H,W/2-.002,0]].forEach(([w,h,x,y])=>{const m=new THREE.Mesh(new THREE.BoxGeometry(w,h,CAV),chassisMat);m.position.set(x,y,-CAV/2);SW.add(m);});
+// top-cover seam + vent slots
+{const c=document.createElement('canvas');c.width=1024;c.height=512;const g=c.getContext('2d');g.fillStyle='#2b312e';g.fillRect(0,0,1024,512);
+ for(let i=0;i<1400;i++){g.fillStyle=`rgba(255,255,255,${Math.random()*.025})`;g.fillRect(Math.random()*1024,Math.random()*512,80+Math.random()*300,1);}
+ g.fillStyle='#161a19';for(let i=0;i<22;i++)g.fillRect(620+i*16,40,6,120);
+ g.fillStyle='rgba(0,0,0,.4)';g.fillRect(0,24,1024,2);
+ const top=new THREE.Mesh(new THREE.PlaneGeometry(W-.03,D-CAV-.03),new THREE.MeshStandardMaterial({map:tex(c),metalness:.6,roughness:.45}));
+ top.rotation.x=-Math.PI/2;top.position.set(0,H/2+.0015,-CAV-(D-CAV)/2);SW.add(top);}
+
+// rack ears: pale aluminium, the brand's cabinet metal
+const aluMat=new THREE.MeshStandardMaterial({color:'#dfe3df',metalness:.72,roughness:.3});
+const holeMat=new THREE.MeshBasicMaterial({color:'#0b0e0d'});
+[-1,1].forEach(sx=>{
+  const ear=new THREE.Mesh(new RoundedBoxGeometry(.22,H+.012,.028,2,.006),aluMat); ear.position.set(sx*(W/2+.11),0,-.012); SW.add(ear);
+  const fl=new THREE.Mesh(new THREE.BoxGeometry(.022,H,.34),aluMat); fl.position.set(sx*(W/2+.011),0,-.19); SW.add(fl);
+  [.12,-.12].forEach(y=>{const h=new THREE.Mesh(new THREE.CircleGeometry(.024,20),holeMat);h.position.set(sx*(W/2+.12),y,.003);SW.add(h);
+    const sc=new THREE.Mesh(new THREE.CylinderGeometry(.02,.02,.012,16),aluMat);sc.rotation.x=Math.PI/2;sc.position.set(sx*(W/2+.12),y,.008);SW.add(sc);});
+});
+
+// port cavities (inside walls) + contact pins
+const cavMat=new THREE.MeshStandardMaterial({color:'#070909',roughness:.9,metalness:.1,side:THREE.BackSide});
+const openings=[...ports.map(p=>({x:p.x,y:p.y,w:PW,h:PH})),...SFP.map(q=>({x:q.x,y:q.y,w:.124,h:.062})),{x:CON.x,y:CON.y,w:PW,h:PH},{x:MGMT.x,y:MGMT.y,w:PW,h:PH}];
+{const im=new THREE.InstancedMesh(new THREE.BoxGeometry(1,1,1),cavMat,openings.length);const m=new THREE.Matrix4();
+ openings.forEach((o,i)=>{m.compose(new THREE.Vector3(o.x,o.y,-CAV/2),new THREE.Quaternion(),new THREE.Vector3(o.w,o.h,CAV));im.setMatrixAt(i,m);});SW.add(im);
+ const pc=document.createElement('canvas');pc.width=128;pc.height=104;const g=pc.getContext('2d');g.fillStyle='#0a0c0b';g.fillRect(0,0,128,104);
+ for(let i=0;i<8;i++){g.fillStyle='#c9a24e';g.fillRect(22+i*11.5,8,4,34);g.fillStyle='rgba(201,162,78,.35)';g.fillRect(22+i*11.5,42,4,6);}
+ g.fillStyle='#1b201e';g.fillRect(40,78,48,26);
+ const rj=[...ports,CON,MGMT];const pm=new THREE.InstancedMesh(new THREE.PlaneGeometry(1,1),new THREE.MeshStandardMaterial({map:tex(pc),metalness:.5,roughness:.5}),rj.length);
+ rj.forEach((o,i)=>{m.compose(new THREE.Vector3(o.x,o.y,-CAV+.004),new THREE.Quaternion(),new THREE.Vector3(PW*.98,PH*.98,1));pm.setMatrixAt(i,m);});SW.add(pm);}
+
+// LEDs: one per port + SFP + status; each has a soft additive glow
+const leds=[];
+ports.forEach(p=>leds.push({x:p.x+.028,y:p.row?-.158:.158,port:p}));
+SFP.forEach(q=>leds.push({x:q.x+.04,y:q.y>0?.158:-.158,sfp:q}));
+[-2.075,-1.985,-1.895].forEach(x=>leds.push({x,y:-.095,status:true}));
+const ledMesh=new THREE.InstancedMesh(new THREE.PlaneGeometry(.024,.013),new THREE.MeshBasicMaterial({color:0xffffff,toneMapped:false}),leds.length);
+const glowMesh=new THREE.InstancedMesh(new THREE.PlaneGeometry(.1,.07),new THREE.MeshBasicMaterial({map:GLOW,color:0xffffff,transparent:true,depthWrite:false,toneMapped:false,...glowBlend}),leds.length);
+{const m=new THREE.Matrix4();leds.forEach((l,i)=>{m.makeTranslation(l.x,l.y,.002);ledMesh.setMatrixAt(i,m);ledMesh.setColorAt(i,COL.off);m.makeTranslation(l.x,l.y,.004);glowMesh.setMatrixAt(i,m);glowMesh.setColorAt(i,COL.black);});}
+SW.add(ledMesh,glowMesh);
+
+// plugs, boots, cables
+const CABLE=['#c9d1cc','#6d8397','#c9d1cc','#39403d'].map(C);
+const linked=ports.filter(p=>p.linked);
+const plugGeo=new THREE.BoxGeometry(PW*.93,PH*.86,.13);
+const bootGeo=new THREE.CylinderGeometry(.027,.042,.16,12,1); bootGeo.rotateX(Math.PI/2); bootGeo.scale(1.12,.86,1);
+const plugMat=new THREE.MeshPhysicalMaterial({color:'#e3e9e5',roughness:.22,metalness:0,transmission:0,clearcoat:.6,transparent:true,opacity:.93});
+const bootMat=new THREE.MeshStandardMaterial({color:0xffffff,roughness:.55,metalness:0});
+const plugs=new THREE.InstancedMesh(plugGeo,plugMat,linked.length), boots=new THREE.InstancedMesh(bootGeo,bootMat,linked.length);
+const cableMats=CABLE.map(c=>new THREE.MeshStandardMaterial({color:c,roughness:.58,metalness:0}));
+const cables=new THREE.Group(); SW.add(cables);
+{const m=new THREE.Matrix4(); let sd=11; const r=()=>((sd=(sd*16807)%2147483647)/2147483647)-.5;
+ linked.forEach((p,i)=>{
+  const ci=p.n===17?2:(p.grp===3&&p.n%3===0)?1:p.grp; const col=CABLE[ci];
+  m.makeTranslation(p.x,p.y,-.035);plugs.setMatrixAt(i,m);
+  m.makeTranslation(p.x,p.y,.11);boots.setMatrixAt(i,m);boots.setColorAt(i,col);
+  const out=p.row?.4:.62, bx=(PORT(p.grp*12+1).x+PORT(p.grp*12+12).x)/2+(p.col%6-2.5)*.018;
+  const pts=[[p.x,p.y,.185],[p.x,p.y+(p.row?-.02:.03),.185+out*.5],[lerp(p.x,bx,.25),p.y-.2,.2+out],[lerp(p.x,bx,.7),-.85,.2+out*.85+r()*.08],[bx+r()*.05,-1.8,.55+r()*.05],[bx+r()*.1,-3.6,.3]];
+  const cv=new THREE.CatmullRomCurve3(pts.map(q=>new THREE.Vector3(...q)),false,'catmullrom',.4);
+  const mesh=new THREE.Mesh(new THREE.TubeGeometry(cv,48,.019,8,false),cableMats[ci]); mesh.userData.port=p; cables.add(mesh); p.cable=mesh;
+ });
+ SW.add(plugs,boots);}
+// SFP transceivers + fibre
+{const tMat=new THREE.MeshStandardMaterial({color:'#b9c1bc',metalness:.85,roughness:.28}), tab=new THREE.MeshStandardMaterial({color:'#15191a',roughness:.6});
+ const fMat=new THREE.MeshStandardMaterial({color:'#e3e8e4',roughness:.4});
+ SFP.filter(q=>q.on).forEach((q,k)=>{const t=new THREE.Mesh(new THREE.BoxGeometry(.116,.054,.36),tMat);t.position.set(q.x,q.y,.08);SW.add(t);
+  const b=new THREE.Mesh(new THREE.BoxGeometry(.1,.012,.07),tab);b.position.set(q.x,q.y+.033,.23);SW.add(b);
+  [-.024,.024].forEach(dx=>{const cv=new THREE.CatmullRomCurve3([[q.x+dx,q.y,.26],[q.x+dx*1.2+.02,q.y-.03,.52],[q.x+.22+dx*1.5,-.4-k*.06,.72],[q.x+.42+dx*2,-1.5,.62],[q.x+.5+dx*2,-3.4,.3]].map(a=>new THREE.Vector3(...a)),false,'centripetal');
+    SW.add(new THREE.Mesh(new THREE.TubeGeometry(cv,40,.008,6,false),fMat));});});}
+
+/* ─────────── Perceive: viewfinder + per-port read boxes ─────────── */
+const addMat=(o={})=>Object.assign({transparent:true,depthWrite:false,toneMapped:false},o);
+const THREAD=C('#12a862');
+const vf=new THREE.Group(); SW.add(vf);
+const VFW=.98,VFH=.6,VFZ=.26;
+const vfMat=new THREE.LineBasicMaterial(addMat({color:0xffffff,vertexColors:true,opacity:0,depthTest:false}));
+{const b=.1,v=[],c=[];const L=(a,bb,ca=1,cb=1)=>{v.push(...a,...bb);c.push(ca,cb);};
+ const x=VFW/2,y=VFH/2;
+ [[-1,1],[1,1],[-1,-1],[1,-1]].forEach(([sx,sy])=>{L([sx*x,sy*y,0],[sx*(x-b),sy*y,0]);L([sx*x,sy*y,0],[sx*x,sy*(y-b*.8),0]);});
+ [[-1,1],[1,1],[-1,-1],[1,-1]].forEach(([sx,sy])=>L([sx*x,sy*y,0],[sx*x*.12,.25+sy*.04,3.2],.9,0));  // frustum, fading to the phone
+ const gm=new THREE.BufferGeometry();gm.setAttribute('position',new THREE.Float32BufferAttribute(v,3));
+ const cc=[];c.forEach(k=>cc.push(.12,.84,.49,k));gm.setAttribute('color',new THREE.Float32BufferAttribute(cc,4));
+ const ls=new THREE.LineSegments(gm,vfMat);ls.renderOrder=10;vf.add(ls);
+ const fill=new THREE.Mesh(new THREE.PlaneGeometry(VFW,VFH),new THREE.MeshBasicMaterial(addMat({color:COL.link,opacity:0,depthTest:false})));fill.renderOrder=9;vf.add(fill);vf.userData.fill=fill;
+ const scanl=new THREE.Mesh(new THREE.PlaneGeometry(.012,VFH),new THREE.MeshBasicMaterial(addMat({color:COL.link,opacity:0,depthTest:false})));scanl.renderOrder=11;vf.add(scanl);vf.userData.line=scanl;}
+vf.position.z=VFZ;
+// read boxes: one merged LineSegments; colour per vertex = state × intensity
+const boxes=new THREE.LineSegments(new THREE.BufferGeometry(),new THREE.LineBasicMaterial(addMat({vertexColors:true,depthTest:false})));
+{const v=[];ports.forEach(p=>{const w=PW/2+.012,h=PH/2+.012,z=.2;const q=[[p.x-w,p.y-h],[p.x+w,p.y-h],[p.x+w,p.y+h],[p.x-w,p.y+h]];
+  for(let k=0;k<4;k++){const a=q[k],b=q[(k+1)%4];v.push(a[0],a[1],z,b[0],b[1],z);} });
+ boxes.geometry.setAttribute('position',new THREE.Float32BufferAttribute(v,3));
+ boxes.geometry.setAttribute('color',new THREE.Float32BufferAttribute(new Float32Array(v.length/3*4),4));}
+boxes.renderOrder=12; SW.add(boxes);
+// hero idle scan line
+const idle=new THREE.Mesh(new THREE.PlaneGeometry(.016,H*1.25),new THREE.MeshBasicMaterial(addMat({color:COL.link,opacity:0,depthTest:false})));idle.position.z=.21;idle.renderOrder=13;SW.add(idle);
+
+/* ─────────── Reconcile: the network's view, one thread per port ─────────── */
+const NET_Y=1.6, NZ0=-.15, NZD=.95, zc=r=>r?.58:.1;
+const net=new THREE.Group(); SW.add(net);
+function netCanvas(){const c=document.createElement('canvas');c.width=4096;c.height=Math.round(4096*NZD/(W+.3));const g=c.getContext('2d');const sx=4096/(W+.3);
+ const X=x=>(x+(W+.3)/2)*sx, Z=z=>(z-NZ0)/NZD*c.height;
+ g.fillStyle='#F4F6F3';g.fillRect(0,0,4096,c.height);
+ g.strokeStyle='#04703F';g.lineWidth=4;g.strokeRect(2,2,4092,c.height-4);
+ g.fillStyle='#04703F';g.font='500 36px "JetBrains Mono", monospace';g.fillText('LLDP / CDP · TOR-A',X(-2.28),Z(.08));
+ g.font='400 26px "JetBrains Mono", monospace';g.fillStyle='#4A544F';g.fillText('neighbour table · live',X(-2.28),Z(.16));
+ g.fillText('48 ports · 38 up',X(-2.28),Z(.6));
+ ports.forEach(p=>{const cw=PW+.012,ch=.34,x=X(p.x-cw/2),y=Z(zc(p.row)-ch/2),w=cw*sx,h=ch*sx;
+   if(p.n===17){g.fillStyle='rgba(255,154,46,.22)';g.fillRect(x,y,w,h);g.strokeStyle='#FF9A2E';g.lineWidth=4;g.strokeRect(x,y,w,h);
+     g.fillStyle='#9C4C00';g.font='500 20px "JetBrains Mono", monospace';g.fillText('? MAC',x+8,y+34);g.fillText('no rec',x+8,y+62);g.fillText('17',x+8,y+h-14);return;}
+   if(!p.linked){g.setLineDash([8,8]);g.strokeStyle='#9DB2C5';g.lineWidth=2;g.strokeRect(x,y,w,h);g.setLineDash([]);g.fillStyle='#7C93A8';g.font='500 19px "JetBrains Mono", monospace';g.fillText('free',x+8,y+32);g.fillText(String(p.n).padStart(2,'0'),x+8,y+h-14);return;}
+   g.fillStyle='rgba(31,214,124,.14)';g.fillRect(x,y,w,h);g.strokeStyle='#1FD67C';g.lineWidth=3;g.strokeRect(x,y,w,h);
+   const [a,b]=p.nb.split(' ');g.fillStyle='#111614';g.font='500 19px "JetBrains Mono", monospace';g.fillText(a,x+7,y+32);
+   g.fillStyle='#04703F';g.fillText(b,x+7,y+58);g.fillStyle='#4A544F';g.fillText(String(p.n).padStart(2,'0'),x+7,y+h-14);});
+ return c;}
+{const t=new THREE.CanvasTexture(netCanvas());t.anisotropy=renderer.capabilities.getMaxAnisotropy();t.colorSpace=THREE.SRGBColorSpace;
+ const pl=new THREE.Mesh(new THREE.BoxGeometry(W+.3,NZD,.02),[0,1,2,3].map(()=>new THREE.MeshStandardMaterial({color:'#c6ccc7',transparent:true,opacity:0,metalness:.2,roughness:.6})).concat([new THREE.MeshBasicMaterial({map:t,transparent:true,opacity:0,toneMapped:false}),new THREE.MeshStandardMaterial({color:'#dfe3df',transparent:true,opacity:0,metalness:.4,roughness:.5})]));
+ pl.rotation.x=-Math.PI/2;pl.position.set(0,NET_Y,NZ0+NZD/2);net.add(pl);net.userData.plane=pl;}
+const threads=new THREE.LineSegments(new THREE.BufferGeometry(),new THREE.LineBasicMaterial(addMat({vertexColors:true})));
+threads.geometry.setAttribute('position',new THREE.Float32BufferAttribute(new Float32Array(linked.length*6),3));
+threads.geometry.setAttribute('color',new THREE.Float32BufferAttribute(new Float32Array(linked.length*8),4));
+net.add(threads);
+const pulses=new THREE.Points(new THREE.BufferGeometry(),new THREE.PointsMaterial(addMat({size:.075,vertexColors:true,map:GLOW,sizeAttenuation:true})));
+pulses.geometry.setAttribute('position',new THREE.Float32BufferAttribute(new Float32Array(linked.length*3),3));
+pulses.geometry.setAttribute('color',new THREE.Float32BufferAttribute(new Float32Array(linked.length*4),4));
+net.add(pulses);
+
+/* ─────────── Track: earlier sweeps stacked above, like rack units of time ─────────── */
+const SNAP=[{date:'Jul 30',sweep:'sweep 08',has:n=>PORT(n).linked&&n!==9},{date:'Jun 12',sweep:'sweep 07',has:n=>(PORT(n).linked&&n!==9)||n===31}];
+const snapLine=new THREE.LineDashedMaterial({color:COL.record,dashSize:.05,gapSize:.035,transparent:true,opacity:0,depthWrite:false});
+const snapPortLine=new THREE.LineBasicMaterial({color:COL.record,transparent:true,opacity:0,depthWrite:false});
+const snapFill=new THREE.MeshBasicMaterial({color:COL.record,transparent:true,opacity:0,depthWrite:false,side:THREE.DoubleSide});
+const snapSlab=new THREE.MeshBasicMaterial({color:'#dfe6ec',transparent:true,opacity:0,depthWrite:false,side:THREE.DoubleSide});
+const snaps=SNAP.map((sn,k)=>{
+  const g=new THREE.Group(); SW.add(g);
+  const r=(w,h,x=0,y=0)=>[x-w/2,y-h/2,0,x+w/2,y-h/2,0, x+w/2,y-h/2,0,x+w/2,y+h/2,0, x+w/2,y+h/2,0,x-w/2,y+h/2,0, x-w/2,y+h/2,0,x-w/2,y-h/2,0];
+  const og=new THREE.BufferGeometry();og.setAttribute('position',new THREE.Float32BufferAttribute([...r(W+.44,H),...r(.22,H,-(W/2+.11)),...r(.22,H,W/2+.11)],3));
+  const ol=new THREE.LineSegments(og,snapLine);ol.computeLineDistances();g.add(ol);
+  const pv=[];ports.forEach(p=>pv.push(...r(PW,PH,p.x,p.y)));
+  const pg=new THREE.BufferGeometry();pg.setAttribute('position',new THREE.Float32BufferAttribute(pv,3));g.add(new THREE.LineSegments(pg,snapPortLine));
+  const slab=new THREE.Mesh(new THREE.PlaneGeometry(W+.44,H),snapSlab);slab.position.z=-.002;g.add(slab);
+  const has=ports.filter(p=>sn.has(p.n)); const im=new THREE.InstancedMesh(new THREE.PlaneGeometry(PW*.8,PH*.75),snapFill,has.length);
+  const m=new THREE.Matrix4();has.forEach((p,i)=>{m.makeTranslation(p.x,p.y,0);im.setMatrixAt(i,m);});g.add(im);
+  g.userData={k};return g;});
+// port 31 on the June sweep: there then, gone since
+const driftMat=new THREE.MeshBasicMaterial({color:COL.drift,transparent:true,opacity:0,depthWrite:false,toneMapped:false});
+const p31=new THREE.Mesh(new THREE.PlaneGeometry(PW+.03,PH+.03),driftMat); snaps[1].add(p31); p31.position.set(PORT(31).x,PORT(31).y,.002);
+// guides that tie a port's column through time
+const guideMat31=new THREE.LineDashedMaterial({color:COL.drift,dashSize:.04,gapSize:.04,transparent:true,opacity:0,depthWrite:false,toneMapped:false});
+const guideMat9=new THREE.LineDashedMaterial({color:COL.link,dashSize:.04,gapSize:.04,transparent:true,opacity:0,depthWrite:false,toneMapped:false});
+const mkGuide=(x,mat)=>{const gm=new THREE.BufferGeometry().setFromPoints([new THREE.Vector3(x,.06,.21),new THREE.Vector3(x,1.95,.0)]);const l=new THREE.Line(gm,mat);l.computeLineDistances();SW.add(l);return l;};
+const guide31=mkGuide(PORT(31).x,guideMat31), guide9=mkGuide(PORT(9).x,guideMat9);
+
+/* ─────────── CTA: the last cable into port 48 ─────────── */
+const ctaPlug=new THREE.Group(); SW.add(ctaPlug);
+{const p=PORT(48);ctaPlug.position.set(p.x,p.y,0);
+ const pb=new THREE.Mesh(plugGeo,plugMat);pb.position.z=-.035;ctaPlug.add(pb);
+ const bm=new THREE.MeshStandardMaterial({color:CABLE[0],roughness:.55});
+ const bt=new THREE.Mesh(bootGeo,bm);bt.position.z=.11;ctaPlug.add(bt);
+ const latch=new THREE.Mesh(new THREE.BoxGeometry(.03,.008,.09),plugMat);latch.position.set(0,PH*.43+.004,-.01);latch.rotation.x=-.18;ctaPlug.add(latch);
+ const cv=new THREE.CatmullRomCurve3([[0,0,.185],[0,-.01,.5],[-.1,-.28,.95],[-.32,-1.2,1.3],[-.46,-2.6,1.3],[-.52,-4.2,1.1]].map(a=>new THREE.Vector3(...a)));
+ ctaPlug.add(new THREE.Mesh(new THREE.TubeGeometry(cv,60,.019,10,false),new THREE.MeshStandardMaterial({color:CABLE[0],roughness:.58})));}
+ctaPlug.visible=false;
+
+/* ─────────── tags (DOM, projected) ─────────── */
+const hud=document.getElementById('hud');
+const tags=[];
+function tag(html,cls,local,parent=SW){const el=document.createElement('div');el.className='tag '+cls;el.innerHTML=`<i></i><span>${html}</span>`;hud.appendChild(el);
+  const t={el,local:new THREE.Vector3(...local),parent,op:0,cur:0};tags.push(t);return t;}
+const T={
+  sticker:tag('<b>TOR-A</b>read from its label','up link',[-1.975,.07,.03]),
+  reading:tag('<b>Reading</b>Gi1/0/1','up link',[0,VFH/2,0],vf),
+  netHead:tag('<b>Network</b>what the switch reports','link',[W/2+.2,NET_Y,.3]),
+  p47:tag('<b>Gi1/0/47</b>↔ APP-219 eth0 · match','up link',[PORT(47).x,NET_Y+.02,zc(0)]),
+  p17:tag('<b>Gi1/0/17</b>link up · on no record','up drift',[PORT(17).x,NET_Y+.02,zc(0)]),
+  d0:tag('<b>Sep 24</b>sweep 09 · today','date bare',[W/2+.32,0,0]),
+  d1:tag('<b>Jul 30</b>sweep 08','date bare',[W/2+.32,0,0],snaps[0]),
+  d2:tag('<b>Jun 12</b>sweep 07','date bare',[W/2+.32,0,0],snaps[1]),
+  p31:tag('<b>Gi1/0/31</b>removed Jul 30 · recorded','drift',[PORT(31).x+.06,PORT(31).y,0],snaps[1]),
+  p9:tag('<b>Gi1/0/9</b>added Sep 24 · recorded','link',[PORT(9).x+.06,PORT(9).y,.2]),
+  ver:tag('<b>TOR-A verified</b>38 of 38 ports · 3 layers agree','up link keep',[1.1,.3,0]),
+  p48:tag('<b>Gi1/0/48</b>linked · on record','down link keep',[PORT(48).x+.028,-.17,.01]),
+};
+
+/* ─────────── input ─────────── */
+const mouse={x:0,y:0,sx:0,sy:0,px:-1,py:-1,in:false};
+addEventListener('pointermove',e=>{mouse.x=e.clientX/innerWidth*2-1;mouse.y=e.clientY/innerHeight*2-1;mouse.px=e.clientX;mouse.py=e.clientY;mouse.in=true;},{passive:true});
+document.addEventListener('pointerleave',()=>{mouse.in=false;});
+const ray=new THREE.Raycaster(), ndc=new THREE.Vector2();
+const reticle=document.getElementById('reticle'), rlbl=document.getElementById('reticleLbl');
+
+/* ─────────── layout / camera ─────────── */
+const $=s=>document.querySelector(s); const scrim=$('#scrim');
+const layersEl=$('#layers'), hallEl=$('#hall'), ctaEl=$('#cta');
+let vw=innerWidth, vh=innerHeight, mobile=vw<760;
+function resize(){vw=innerWidth;vh=innerHeight;mobile=vw<760;renderer.setSize(vw,vh,false);camera.aspect=vw/vh;camera.updateProjectionMatrix();}
+addEventListener('resize',resize); resize();
+const K=(p,t,fx)=>({p:new THREE.Vector3(...p),t:new THREE.Vector3(...t),fx});
+const CAM={
+  hero:K([3.45,1.5,7.9],[.22,-.14,0],.67),
+  per: K([.55,.42,7.0],[.12,-.02,0],.67),
+  rec: K([1.3,4.6,7.4],[.1,.72,.2],.66),
+  trk: K([1.6,1.55,10.8],[.35,.95,0],.63),
+  ver: K([3.1,1.3,7.8],[.25,-.06,0],.68),
+  dolly: K([0,.6,3.5],[0,0,0],.66),
+  cta: K([2.25,.42,2.25],[1.22,-.1,0],.67),
+};
+const mixK=(a,b,t)=>({p:a.p.clone().lerp(b.p,t),t:a.t.clone().lerp(b.t,t),fx:lerp(a.fx,b.fx,t)});
+const camS={p:CAM.hero.p.clone(),t:CAM.hero.t.clone(),fx:CAM.hero.fx};
+
+/* ─────────── frame ─────────── */
+const clock=new THREE.Clock(); let time=0;
+const v3=new THREE.Vector3(), ledC=new THREE.Color();
+const act=ports.map((p,i)=>({ph:Math.random()*10,sp:.6+Math.random()*2.4}));
+let ctaIns=0, lastMode='';
+
+function frame(){
+  requestAnimationFrame(frame);
+  const dt=Math.min(clock.getDelta(),.05); time+=dt;
+  const lr=layersEl.getBoundingClientRect(), hr=hallEl.getBoundingClientRect(), cr=ctaEl.getBoundingClientRect();
+  const heroK=clamp(1-lr.top/vh), t=clamp(-lr.top/(lr.height-vh));
+  const showLayers=hr.top>0, showCta=cr.top<vh;
+  const mode=showCta?'cta':'layers';
+  canvas.style.visibility=(showLayers||showCta)?'visible':'hidden';
+  hud.style.visibility=canvas.style.visibility;
+  if(!(showLayers||showCta)){reticle.style.opacity=0;lastMode='';return;}
+
+  // story drivers
+  const per=smooth(0,.04,t)*(1-smooth(.3,.36,t));             // perceive visible
+  const sweepX=-2.5+4.8*smooth(.04,.28,t);
+  const rec=smooth(.33,.42,t)*(1-smooth(.57,.63,t));          // reconcile visible
+  const grow=smooth(.36,.5,t);
+  const trk=smooth(.61,.68,t)*(1-smooth(.84,.9,t));           // track visible
+  const spread=smooth(.62,.72,t)*(1-smooth(.82,.9,t));
+  const ver=smooth(.84,.92,t);
+  const cta=mode==='cta'?clamp(-cr.top/(cr.height-vh)):0;
+  const ctaA=mode==='cta'?smooth(vh,vh*.35,cr.top):0;
+
+  // camera
+  const vfx=clamp(sweepX,-2.1,2.1); CAM.dolly.p.set(vfx+.95,.62,3.5); CAM.dolly.t.set(vfx+.08,-.03,0);
+  let k=mixK(CAM.hero,CAM.per,smooth(.25,1,heroK)); k=mixK(k,CAM.dolly,smooth(.01,.05,t)*(1-smooth(.27,.33,t)));
+  k=mixK(k,CAM.rec,smooth(.3,.4,t)); k=mixK(k,CAM.trk,smooth(.57,.65,t)); k=mixK(k,CAM.ver,smooth(.82,.9,t));
+  if(mode==='cta'){ k=mixK(CAM.ver,CAM.cta,smooth(0,.35,cta)); }
+  if(mobile){k.fx=.5; const dm=smooth(.01,.05,t)*(1-smooth(.27,.33,t)); const d=k.p.clone().sub(k.t); k.p=k.t.clone().add(d.multiplyScalar(mode==='cta'?1.9:lerp(2.7,1.7,dm)));}
+  const f=reduce?1:1-Math.pow(.0009,dt);
+  camS.p.lerp(k.p,f);camS.t.lerp(k.t,f);camS.fx=lerp(camS.fx,k.fx,f);
+  camera.position.copy(camS.p);camera.lookAt(camS.t);
+  camera.setViewOffset(vw,vh,-(camS.fx-.5)*vw,mobile?vh*.24:0,vw,vh);
+
+  // object motion: cursor lean + idle float
+  mouse.sx=lerp(mouse.sx,mouse.in?mouse.x:0,reduce?1:.06); mouse.sy=lerp(mouse.sy,mouse.in?mouse.y:0,reduce?1:.06);
+  const lean=mode==='cta'?.25:lerp(1,.35,heroK);
+  SW.rotation.y=reduce?0:mouse.sx*.14*lean; SW.rotation.x=reduce?0:mouse.sy*.07*lean;
+  SW.position.y=reduce?0:Math.sin(time*.7)*.025*lean;
+  SW.updateMatrixWorld();
+
+  scrim.style.opacity=mode==='cta'?ctaA:mobile?1:smooth(.45,1,heroK);
+  const hallFade=mode==='cta'?1:smooth(vh*.15,vh*.85,hr.top);
+  // perceive
+  vf.position.x=clamp(sweepX,-2.1,2.1); vf.position.y=0;
+  const vfA=per*(1-smooth(.26,.3,t)*.0);
+  vfMat.opacity=vfA; vf.userData.fill.material.opacity=vfA*.07; vf.userData.line.material.opacity=vfA*(.6+.4*Math.sin(time*9));
+  vf.userData.line.position.x=Math.sin(time*2.2)*VFW*.45;
+  // read boxes
+  const bc=boxes.geometry.attributes.color; let lastRead=1;
+  ports.forEach((p,i)=>{
+    const read=smooth(p.x-.02,p.x+.06,sweepX); if(read>.5) lastRead=p.n;
+    let c=COL.link, a=read*per*.9;
+    a=Math.max(a,read*smooth(.3,.36,t)*(1-smooth(.56,.62,t))*(p.n===17?1:.28));     // dim during reconcile, 17 stays loud
+    if(p.n===17&&t>.3){c=COL.drift;}
+    if(p.n===9) a=Math.max(a,trk*1);
+    const wave=smooth(p.x-.3,p.x,lerp(-3,3,smooth(.86,.96,t)))*(1-smooth(.97,1,t)*.5);
+    if(ver>0){c=COL.link;a=Math.max(a,wave*.85);}
+    if(mode==='cta') a=p.n===48?smooth(.985,1,ctaIns)*.95:0;
+    for(let j=0;j<8;j++){const o=(i*8+j)*4;bc.array[o]=c.r;bc.array[o+1]=c.g;bc.array[o+2]=c.b;bc.array[o+3]=a;}
+  });
+  bc.needsUpdate=true;
+  // hero idle scan
+  const heroA=(1-smooth(.1,.5,heroK))*(mode==='cta'?0:1);
+  const cyc=(time%6.5)/6.5; idle.position.x=lerp(-2.3,2.3,smooth(.05,.6,cyc)); idle.material.opacity=reduce?0:heroA*Math.sin(Math.PI*clamp((cyc-.05)/.55))*.8;
+
+  // LEDs
+  ledMesh.instanceColor.needsUpdate=true; glowMesh.instanceColor.needsUpdate=true;
+  const vwave=lerp(-3,3,smooth(.86,.96,t));
+  leds.forEach((l,i)=>{
+    let c=COL.off,g=0;
+    if(l.port){const p=l.port;
+      if(p.linked){const a=act[p.n-1];const blink=reduce?1:(Math.sin(time*a.sp*6+a.ph)>.2?1:.35);
+        c=ledC.copy(COL.link).lerp(COL.act,.25*(1-blink));g=.55*blink;
+        if(p.n===17&&rec>.2){c=ledC.copy(COL.drift);g=.9*(.6+.4*Math.sin(time*6));}
+        if(ver>0){const w=smooth(p.x-.25,p.x,vwave)*(1-smooth(p.x+.2,p.x+.8,vwave));g+=w*1.2;}}
+      if(p.n===48&&mode==='cta'&&ctaIns>.985){c=ledC.copy(COL.link);g=.9+.3*Math.sin(time*8);}
+    } else if(l.sfp){ if(l.sfp.on){c=COL.link;g=.5;} } else {c=COL.link;g=.35;}
+    ledMesh.setColorAt(i,c); glowMesh.setColorAt(i,ledC.copy(c).multiplyScalar(g*(c===COL.off?0:1)));
+  });
+
+  // reconcile: plane, threads, pulses
+  net.userData.plane.material.forEach(m=>m.opacity=rec*.96); net.visible=rec>.003;
+  net.position.y=lerp(-.6,0,smooth(.33,.45,t));
+  const tp=threads.geometry.attributes.position, tc=threads.geometry.attributes.color, pp=pulses.geometry.attributes.position, pc=pulses.geometry.attributes.color;
+  linked.forEach((p,i)=>{
+    const top=lerp(p.y+.02,NET_Y,grow), z1=.19, z2=lerp(z1,zc(p.row),grow);
+    tp.setXYZ(i*2,p.x,p.y+.02,z1); tp.setXYZ(i*2+1,p.x,top,z2);
+    const c=p.n===17?COL.drift:THREAD, a=rec*(p.n===17?1:.85);
+    tc.setXYZW(i*2,c.r,c.g,c.b,a*.35); tc.setXYZW(i*2+1,c.r,c.g,c.b,a);
+    const u=reduce?.6:((time*.45+i*.137)%1), yy=lerp(p.y,top,u), zz=lerp(z1,z2,u);
+    pp.setXYZ(i,p.x,yy,zz); const pa=rec*grow*(p.n===17?1.2:.9)*Math.sin(Math.PI*u); pc.setXYZW(i,c.r,c.g,c.b,Math.min(1,pa));
+  });
+  tp.needsUpdate=tc.needsUpdate=pp.needsUpdate=pc.needsUpdate=true;
+  threads.geometry.computeBoundingSphere(); pulses.geometry.computeBoundingSphere(); threads.visible=pulses.visible=rec>.005;
+
+  // track: snapshots stacked above
+  snaps.forEach((g,i)=>{g.position.y=(i+1)*.82*spread+ (1-spread)*.0; g.visible=trk>.001;});
+  snapLine.opacity=trk*.85; snapSlab.opacity=trk*.55; snapPortLine.opacity=trk*.35; snapFill.opacity=trk*.45;
+  driftMat.opacity=trk*(.55+.25*Math.sin(time*4)); guideMat31.opacity=trk*smooth(.68,.72,t)*.8; guideMat9.opacity=trk*smooth(.7,.74,t)*.8;
+  guide31.geometry.attributes.position.setY(1,1.64*spread+.06); guide31.geometry.attributes.position.needsUpdate=true; guide31.computeLineDistances();
+  guide9.geometry.attributes.position.setY(1,1.64*spread+.06); guide9.geometry.attributes.position.needsUpdate=true; guide9.computeLineDistances();
+
+  // cta plug
+  ctaPlug.visible=mode==='cta';
+  if(mode==='cta'){ const target=smooth(.25,.72,cta); ctaIns=reduce?target:lerp(ctaIns,target,1-Math.pow(.004,dt)); if(Math.abs(target-ctaIns)<.004) ctaIns=target;
+    const e=1-ctaIns; ctaPlug.position.z=e*1.05; ctaPlug.position.y=PORT(48).y+e*.06; ctaPlug.position.x=PORT(48).x+e*.05; }
+  // hide the resident plug/cable of 48 (it's empty) — nothing to do; 48 is in EMPTY
+
+  // tags
+  const vis={sticker:per*smooth(-2.2,-1.9,sweepX), reading:per*(sweepX>-2.1&&sweepX<2.05?1:0),
+    netHead:rec*smooth(.4,.44,t), p47:rec*smooth(.45,.48,t), p17:rec*smooth(.47,.5,t),
+    d0:trk*smooth(.66,.7,t), d1:trk*smooth(.66,.7,t), d2:trk*smooth(.67,.71,t), p31:trk*smooth(.69,.72,t), p9:trk*smooth(.71,.74,t),
+    ver:ver*(mode==='layers'?1:0)*(1-smooth(.985,1,t)*0), p48:mode==='cta'&&ctaIns>.985?ctaA:0};
+  T.reading.el.querySelector('span').innerHTML=`<b>Reading</b>Gi1/0/${lastRead} · ${PORT(lastRead).linked?'cabled':'free'}`;
+  for(const [name,tg] of Object.entries(T)){
+    const target=(vis[name]||0)*(mode==='cta'&&name!=='p48'?0:1)*hallFade;
+    if(mode!==lastMode) tg.cur=0;
+    tg.cur=reduce?target:lerp(tg.cur,target,1-Math.pow(.0004,dt));
+    if(tg.cur<.01){tg.el.style.opacity=0;continue;}
+    v3.copy(tg.local); tg.parent.localToWorld(v3); v3.project(camera);
+    const x=(v3.x+1)/2*vw, y=(1-v3.y)/2*vh;
+    const left=tg.el.classList.contains('left'), up=tg.el.classList.contains('up'), down=tg.el.classList.contains('down');
+    const w=tg.el.offsetWidth, h=tg.el.offsetHeight;
+    const tx=left?x-w+3.5:(up||down)?x-w/2:x-3.5, ty=up?y-h+3.5:down?y-3.5:y-h/2;
+    tg.el.style.transform=`translate3d(${tx.toFixed(1)}px,${ty.toFixed(1)}px,0)`; tg.el.style.opacity=tg.cur.toFixed(3);
+  }
+
+  lastMode=mode;
+  // cursor reads ports (hero + first chapter)
+  const canRead=!mobile&&mode==='layers'&&t<.3&&mouse.in;
+  let label='';
+  if(canRead){ ndc.set(mouse.x,-mouse.y); ray.setFromCamera(ndc,camera);
+    const hit=ray.intersectObjects([face,plugs,boots,...cables.children],false)[0];
+    if(hit){ let p=hit.object.userData.port;
+      if(!p){ v3.copy(hit.point); SW.worldToLocal(v3);
+        if(hit.object===plugs||hit.object===boots) p=linked[hit.instanceId];
+        else { let best=null,bd=.08; ports.forEach(q=>{const d=Math.hypot(q.x-v3.x,q.y-v3.y);if(d<bd){bd=d;best=q;}}); p=best;
+          if(!p&&v3.x<-1.84&&v3.x>-2.12&&v3.y<.06&&v3.y>-.04) label='<b>TOR-A</b> · label read · RT-48G'; } }
+      if(p){ label=p.n===17?`<b>Gi1/0/17</b> · link up <span class="d">· on no record</span>`
+        :p.linked?`<b>Gi1/0/${p.n}</b> · cabled <span class="o">→ ${p.nb}</span>`:`<b>Gi1/0/${p.n}</b> <span class="o">· free port</span>`;
+        v3.set(p.x,p.y,.2); SW.localToWorld(v3); torch.position.copy(v3).add(new THREE.Vector3(0,.1,.5)); }
+      else if(!label){ label='<b>TOR-A</b> <span class="o">· 48 × 1G · 4 × 10G</span>'; }
+    }
+  }
+  torch.intensity=lerp(torch.intensity,label?1.6:0,.15);
+  if(label){ rlbl.innerHTML=label; reticle.style.opacity=1; reticle.style.transform=`translate(${mouse.px}px,${mouse.py}px)`; document.body.style.cursor='crosshair'; }
+  else { reticle.style.opacity=0; document.body.style.cursor=''; }
+
+  renderer.render(scene,camera);
+}
+// fonts must be ready before the face texture is final
+document.fonts.ready.then(()=>{ faceMat.map.image=faceCanvas(); faceMat.map.needsUpdate=true; const nm=net.userData.plane.material[4]; nm.map.image=netCanvas(); nm.map.needsUpdate=true; });
+requestAnimationFrame(frame);
+</script>
+<!--GLJS-END-->
+<script src="/design-system/nav.js" defer></script>
+</body>
+</html>

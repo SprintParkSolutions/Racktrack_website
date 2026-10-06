@@ -1,0 +1,218 @@
+/* ─────────────────────────────────────────────────────────────────────────
+   RackTrack base — the system every page shares.
+
+   Loaded before each page's own <style>, so a page can still override, but
+   nothing here should need overriding. Colour, type, spacing and — the point
+   of this file — the vertical rhythm live here once instead of being copied
+   into 28 inline stylesheets that drift apart.
+   ───────────────────────────────────────────────────────────────────────── */
+
+:root{
+  color-scheme:light;
+
+  /* ── colour ───────────────────────────────────────────────────────── */
+  --paper:#E9ECE8; --paper-2:#F4F6F3; --hall:#0C1110;
+  --ink:#111614;   --ink-2:#4A544F;   --rule:#C6CCC7;
+  --link:#1FD67C;  --link-ink:#04703F;
+  --drift:#FF9A2E; --drift-ink:#9C4C00;
+  --record:#7C93A8; --record-ink:#3F5871;
+  /* live aliases — index.html mixes these per frame as the hall goes dark */
+  --bg:var(--paper); --fg:var(--ink); --fg-2:var(--ink-2); --line:var(--rule);
+
+  --sans:"Inter","Helvetica Neue",Arial,system-ui,sans-serif;
+  --mono:"JetBrains Mono",ui-monospace,"SFMono-Regular",Menlo,monospace;
+  --ease:cubic-bezier(.2,.7,.2,1);
+
+  /* ── layout shell ─────────────────────────────────────────────────────
+     One container every band aligns to. --bleed is the padding that holds it
+     centred: the plain gutter on small screens, growing on large ones. Pad
+     every band to it and the whole site has a single left edge.
+
+     96rem rather than the 80rem this started at: --bleed is whatever is left
+     over, so on a wide display 80rem left a dead margin the full width of the
+     reading column (320px at 1920, 640px at 2560) while the stages carried on
+     bleeding to the viewport edge. A roomier container spends some of that on
+     content instead. Anything that wants the shell width must read this token,
+     not restate it — a hardcoded 1280px would now centre inside the band and
+     fall out of line with the nav. */
+  --shell:96rem;
+  --gutter:clamp(14px,5vw,48px);
+  --bleed:max(var(--gutter), calc((100% - var(--shell))/2));
+  --nav-h:72px;
+  /* The reading column is a SHARE of the viewport, never a fixed minimum, so
+     the copy-beside-the-animation composition survives down to a phone instead
+     of having to stack. Capped at a comfortable measure on desktop. */
+  --copy-w:min(42rem,54vw);
+  --prose-w:42rem;                     /* long-form measure (hamina max-w-2xl) */
+
+  /* ── vertical rhythm ──────────────────────────────────────────────────
+     ONE measure, used symmetrically top and bottom, so every band on every
+     page opens and closes on the same margin. --page-top is that same
+     measure pushed clear of the fixed nav, for the first band on a page.
+     Use these instead of per-section vh values. */
+  --band-y:clamp(72px,11vh,144px);
+  --band-y-sm:clamp(48px,7vh,88px);    /* tighter bands: sub-sections, asides */
+  --page-top:calc(var(--nav-h) + var(--band-y));
+  /* How far above true centre the hero composition sits. Dead space reads worse
+     at the top than the bottom, so the copy and the 3D stage are both lifted by
+     this much — one value, so they stay level with each other. The homepage
+     script reads it off #probe. */
+  --stage-drop:clamp(36px,7vh,96px);
+
+  /* ── type: hamina's scale (Inter, Tailwind steps) ─────────────────── */
+  /* The floors are set by what fits a phone's half-width column, not by the
+     desktop step — a 72px hero in a 226px column would be unreadable. */
+  --t-hero:clamp(1.75rem,5.2vw,4.5rem);  /* 28px → text-7xl */
+  --t-h2:clamp(1.375rem,3vw,2.25rem);    /* 22px → text-4xl */
+  --t-h3:clamp(1.0625rem,1.6vw,1.25rem); /* 17px → text-xl  */
+  --t-lede:clamp(1.0625rem,1.2vw,1.25rem);  /* 17px → text-xl */
+  --t-body:clamp(1rem,1.05vw,1.125rem);  /* 16px → text-lg  */
+  --t-ui:clamp(.9375rem,1vw,1rem);       /* 15px → text-base */
+  --t-micro:.75rem;                      /* text-xs   */
+  --lh-tight:1.1; --lh-snug:1.375; --lh-normal:1.5; --lh-relaxed:1.625;
+  --tr-tight:-.025em;
+
+  /* ── spacing: 4px step, no holes ──────────────────────────────────── */
+  --s1:4px;  --s2:8px;   --s3:12px;  --s4:16px; --s5:20px; --s6:24px;
+  --s8:32px; --s10:40px; --s12:48px; --s16:64px; --s20:80px; --s24:96px;
+}
+
+/* On a phone 54vw leaves the stage barely 120px — too little for the rack or
+   the hall to read. The column gives up some width there; the blocks inside it
+   are tuned to survive the narrower measure. */
+@media (max-width:600px){ :root{ --copy-w:46vw } }
+
+/* ── bands ──────────────────────────────────────────────────────────────
+   Any full-width section. .band-first is the one that sits under the fixed
+   nav. Both close on the same --band-y they open on. */
+.band{padding-block:var(--band-y)}
+.band-first{padding-block:var(--page-top) var(--band-y)}
+.band,.band-first{padding-inline:var(--bleed)}
+
+/* ── type ─────────────────────────────────────────────────────────────── */
+h1,h2,h3{font-family:var(--sans);font-weight:700;letter-spacing:var(--tr-tight);text-wrap:balance;margin:0 0 var(--s5)}
+h1{font-size:var(--t-hero);line-height:var(--lh-tight)}
+h2{font-size:var(--t-h2);line-height:1.15}
+h3{font-size:var(--t-h3);line-height:var(--lh-snug)}
+.lede{font-size:var(--t-lede);line-height:var(--lh-relaxed);color:var(--fg-2);margin:0 0 var(--s8)}
+
+/* ── nav ──────────────────────────────────────────────────────────────── */
+.brand{display:flex;align-items:center;gap:var(--s3);text-decoration:none;font:700 var(--t-body)/1 var(--sans);letter-spacing:var(--tr-tight)}
+.brand img{width:26px;height:26px;border-radius:5px;display:block}
+.btn{display:inline-flex;align-items:center;gap:var(--s2);height:44px;padding:0 var(--s5);border-radius:3px;border:1px solid var(--fg);
+  font:600 var(--t-ui)/1 var(--sans);text-decoration:none;cursor:pointer;background:transparent;color:var(--fg);
+  transition:background .2s,color .2s,border-color .2s}
+.btn.solid{background:var(--fg);color:var(--bg)}
+.btn.solid:hover{background:var(--link-ink);border-color:var(--link-ink);color:#fff}
+.btn:not(.solid){border-color:var(--line)}
+.btn:not(.solid):hover{border-color:var(--fg)}
+.btn .led{width:7px;height:7px;border-radius:50%;background:var(--link);box-shadow:0 0 8px var(--link)}
+
+/* ── mobile sidebar ─────────────────────────────────────────────────────
+   Built at runtime by design-system/nav.js from the page's own <nav>, so the
+   links and the aria-current marker stay in sync with whatever that page has.
+   Below 1024px the inline link list is replaced by this drawer. */
+.nav-burger{display:none;align-items:center;justify-content:center;width:42px;height:42px;flex:none;
+  margin-left:var(--s3);padding:0;border:1px solid var(--line);border-radius:3px;
+  background:transparent;color:var(--fg);cursor:pointer}
+.nav-burger span,.nav-burger span::before,.nav-burger span::after{
+  display:block;width:17px;height:1.5px;background:currentColor;border-radius:1px}
+.nav-burger span{position:relative}
+.nav-burger span::before,.nav-burger span::after{content:"";position:absolute;left:0}
+.nav-burger span::before{top:-5.5px}
+.nav-burger span::after{top:5.5px}
+
+.sb-veil{position:fixed;inset:0;z-index:40;background:rgba(12,17,16,.45);
+  opacity:0;visibility:hidden;transition:opacity .25s,visibility .25s}
+.sb-veil.open{opacity:1;visibility:visible}
+
+/* Full-height sheet rather than a narrow drawer: on a phone a partial panel
+   leaves a useless sliver of page behind it, and the links get more room to
+   breathe as a result. */
+/* inset:0 already sizes it; box-sizing is declared here because base.css has no
+   global reset of its own — without it the padding pushed the sheet 48px wider
+   than the viewport and the close button and chevrons fell off the right edge */
+.sidebar{position:fixed;inset:0;z-index:41;box-sizing:border-box;
+  display:flex;flex-direction:column;overflow-y:auto;overscroll-behavior:contain;
+  background:var(--paper-2);
+  padding:calc(var(--s3) + env(safe-area-inset-top,0px)) var(--s6) calc(var(--s8) + env(safe-area-inset-bottom,0px));
+  transform:translateY(-8px);opacity:0;visibility:hidden;
+  transition:transform .26s var(--ease),opacity .2s,visibility .26s}
+.sidebar.open{transform:none;opacity:1;visibility:visible}
+.sidebar-head{display:flex;align-items:center;justify-content:flex-end;
+  min-height:var(--nav-h);margin-bottom:var(--s5)}
+.sb-close{width:44px;height:44px;display:inline-flex;align-items:center;justify-content:center;
+  border:0;border-radius:50%;background:transparent;color:var(--ink);cursor:pointer;
+  font:300 26px/1 var(--sans)}
+.sb-close:hover{background:color-mix(in oklab,var(--ink) 7%,transparent)}
+
+/* no row rules — spacing separates the items, the way hamina's sheet does */
+.sidebar .sb-links{display:flex;flex-direction:column;gap:var(--s1)}
+.sidebar .sb-links a{padding:var(--s3) 0;text-decoration:none;color:var(--ink);
+  font:500 1.125rem/1.3 var(--sans);letter-spacing:var(--tr-tight)}
+.sidebar .sb-links a:hover{color:var(--link-ink)}
+.sidebar .sb-links a[aria-current="page"]{color:var(--link-ink)}
+
+
+/* secondary actions sit below a rule, after the primary list */
+.sb-tail{margin-top:var(--s6);padding-top:var(--s6);border-top:1px solid var(--rule);
+  display:flex;flex-direction:column;gap:var(--s1)}
+.sidebar .sb-tail a:not(.btn){padding:var(--s3) 0;text-decoration:none;color:var(--ink);
+  font:500 1.125rem/1.3 var(--sans);letter-spacing:var(--tr-tight)}
+.sidebar .btn{margin-top:var(--s4);justify-content:center;height:50px;
+  color:var(--paper-2);background:var(--ink);border-color:var(--ink)}
+body.sb-lock{overflow:hidden}
+
+/* These carry an element qualifier (nav.nav) on purpose: base.css loads BEFORE
+   each page's inline <style>, and a bare .nav ul there would otherwise win the
+   cascade on equal specificity and keep the link list visible with no burger. */
+@media (max-width:1024px){
+  nav.nav>ul{display:none}
+  .nav-burger{display:inline-flex}
+  /* with the list hidden the CTA takes the free space — one auto margin at a
+     time, never two competing ones */
+  nav.nav>.btn{margin-left:auto}
+}
+/* phones: the CTA lives in the drawer, so the bar stays brand + menu */
+@media (max-width:600px){
+  nav.nav>.btn{display:none}
+  .nav-burger{margin-left:auto}
+}
+@media (min-width:1025px){ .sidebar,.sb-veil,.nav-burger{display:none} }
+
+/* ── footer: opens and closes on the same measure as every other band ── */
+.foot{padding:var(--band-y) var(--bleed) calc(var(--s8) + env(safe-area-inset-bottom,0px))}
+
+:focus-visible{outline:2px solid var(--link-ink);outline-offset:3px;border-radius:2px}
+::selection{background:var(--link);color:#06140d}
+
+/* ── phones: copy over a 3D stage ────────────────────────────────────────
+   24 of the 28 pages run the 3D as a FULL-BLEED canvas with the copy laid over
+   it, so on a phone the text genuinely sits on the animation — and no single
+   colour survives pale cable one frame and black chassis the next. Those pages
+   carry a backing plate, tinted from --bg so it follows the page as the hall
+   darkens rather than staying paper-white in a dark chapter.
+
+   Pages that confine the stage to a box of its own — the homepage, which fits
+   the rack into a column beside the copy — opt out with
+   <body class="stage-band"> and read on the page itself, as on desktop. */
+@media (max-width:760px){
+  body:has(#stage):not(.stage-band) :is(.copy,.scopy,.pin .col,article .in){
+    background:color-mix(in oklab,var(--bg) 92%,transparent);
+    -webkit-backdrop-filter:blur(10px);backdrop-filter:blur(10px);
+    padding:16px 18px;border-radius:3px;
+  }
+  /* a panel inside a panel reads as a seam — only the outer one paints */
+  body:has(#stage):not(.stage-band) :is(.copy,.scopy) :is(.copy,.scopy){
+    background:none;-webkit-backdrop-filter:none;backdrop-filter:none;padding:0;
+  }
+}
+/* The tags annotate the stage, not the page, so the page is kept above them.
+   #hud is fixed to the viewport and every page stacks it over main, so a tag
+   that is still lit when a band scrolls up carries on floating over that
+   band's text — "Air gap" hanging beside the next headline. Putting main on
+   top means an opaque band simply covers it, which is right: where a band is
+   opaque the stage behind it is hidden too, so the tag is pointing at
+   something that is no longer on screen. Transparent stage chapters are
+   unaffected — the tag shows through exactly as before. */
+body:has(#stage):not(.stage-band) main{position:relative;z-index:4}
